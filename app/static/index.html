@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Xling 校园心理智能体</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">MB</div>
+      <div>
+        <p class="eyebrow">校园心理健康陪伴</p>
+        <h1>Xling 校园心理智能体</h1>
+      </div>
+    </div>
+    <div class="status-row">
+      <span id="serviceState" class="pill warn">连接中</span>
+      <span id="modelState" class="pill warn">模型读取中</span>
+      <div id="accountBadge" class="account" hidden>
+        <strong id="activeAccount">未登录</strong>
+        <span id="activeRole">访客</span>
+      </div>
+      <button id="switchAccount" class="dark-btn" type="button" hidden>切换</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <form id="loginForm" class="panel">
+        <p class="panel-label">欢迎回来</p>
+        <h2>账号登录</h2>
+        <label>
+          <span>用户名</span>
+          <input id="username" autocomplete="username">
+        </label>
+        <label>
+          <span>密码</span>
+          <input id="password" type="password" autocomplete="current-password">
+        </label>
+        <button class="primary full" type="submit">登录</button>
+        <p id="loginState" class="hint">请输入用户名和密码登录</p>
+        <p class="hint"><a href="/privacy.html" target="_blank" rel="noopener">阅读隐私说明</a>（无需登录）</p>
+      </form>
+
+      <form id="resetForm" class="panel" hidden>
+        <p class="panel-label">账户安全</p>
+        <h2>密码重置</h2>
+        <p class="hint">检测到旧版密码，请设置新密码以继续使用。</p>
+        <label>
+          <span>用户名</span>
+          <input id="resetUsername" autocomplete="username">
+        </label>
+        <label>
+          <span>旧密码</span>
+          <input id="resetOldPassword" type="password" autocomplete="current-password">
+        </label>
+        <label>
+          <span>新密码（至少 6 位）</span>
+          <input id="resetNewPassword" type="password" autocomplete="new-password">
+        </label>
+        <button class="primary full" type="submit">重置密码</button>
+        <p id="resetState" class="hint"></p>
+      </form>
+
+      <section id="profilePanel" class="panel" hidden>
+        <p class="panel-label">我的备考</p>
+        <h2>备考画像</h2>
+        <div id="profileSummary" hidden>
+          <p id="profileSummaryText" class="profile-summary"></p>
+          <button id="profileEdit" class="ghost full" type="button">编辑</button>
+        </div>
+        <div id="profileOnboarding" hidden>
+          <p class="hint">告诉我们你的备考阶段，系统会按阶段调整支持内容。这是可选的，跳过也能正常聊天。</p>
+          <div class="btn-row">
+            <button id="profileFill" class="primary" type="button">填写</button>
+            <button id="profileSkip" class="ghost" type="button">跳过</button>
+          </div>
+        </div>
+        <form id="profileForm" hidden>
+          <label>
+            <span>备考阶段</span>
+            <select id="profileStage">
+              <option value="">未设置</option>
+              <option value="基础">基础</option>
+              <option value="强化">强化</option>
+              <option value="冲刺">冲刺</option>
+              <option value="考前">考前</option>
+              <option value="考后">考后</option>
+            </select>
+          </label>
+          <label>
+            <span>目标考试（可选）</span>
+            <input id="profileTargetExam" placeholder="如：考研">
+          </label>
+          <label>
+            <span>考试日期（可选）</span>
+            <input id="profileExamDate" type="date">
+          </label>
+          <div class="btn-row">
+            <button class="primary" type="submit">保存</button>
+            <button id="profileCancel" class="ghost" type="button">取消</button>
+          </div>
+          <p id="profileState" class="hint"></p>
+        </form>
+     </section>
+
+      <section id="sessionsPanel" class="panel" hidden>
+        <p class="panel-label">对话记录</p>
+        <h2>历史会话</h2>
+        <div id="sessionList" class="session-list"></div>
+      </section>
+
+     <section id="toolsPanel" class="panel" hidden>
+       <p class="panel-label">小工具</p>
+       <button id="openMemoryCards" class="signal" type="button">记忆卡片</button>
+       <button id="openScreening" class="signal" type="button">量表筛查</button>
+     </section>
+
+      <section id="settingsPanel" class="panel" hidden>
+        <p class="panel-label">设置</p>
+        <a class="settings-link" href="/privacy.html" target="_blank" rel="noopener">隐私说明</a>
+        <button id="openDataDelete" class="link-danger" type="button">删除我的全部数据</button>
+      </section>
+
+      <section class="panel">
+        <p class="panel-label">快速开始</p>
+        <button class="signal" type="button" data-quick="我最近压力很大，晚上总是睡不着。">压力失眠</button>
+        <button class="signal" type="button" data-quick="我感觉很焦虑，考试前完全静不下来。">焦虑倾诉</button>
+        <button class="signal" type="button" data-quick="我想问一个普通学习问题，Python 怎么读取 JSON？">普通聊天</button>
+      </section>
+
+      <section class="panel">
+        <p class="panel-label">系统如何工作</p>
+        <ol class="loop-list">
+          <li>MemoryAgent 记忆读取</li>
+          <li>SupervisorAgent 消息分流</li>
+          <li>KnowledgeAgent RAG 检索</li>
+          <li>RiskGuardianAgent 风险守护</li>
+          <li>Companion / Counselor 回复规划</li>
+          <li>SSE 流式输出</li>
+        </ol>
+      </section>
+    </aside>
+
+    <section id="studentView" class="workspace">
+      <section class="chat-panel">
+        <div class="chat-head">
+          <div>
+            <p class="panel-label">对话</p>
+            <h2 id="chatTitle">心理陪伴对话</h2>
+          </div>
+          <div class="chat-head-badges">
+            <span id="noMemoryBadge" class="pill warn" hidden>无记忆模式</span>
+            <span id="sessionBadge" class="pill">READY</span>
+          </div>
+        </div>
+        <div id="cbtTag" class="cbt-tag" hidden></div>
+        <div id="messages" class="messages">
+          <div class="empty">
+            <strong>你好，这里是 Xling</strong>
+            <p>一个可以安心说话的地方。备考的压力、睡不着的夜晚、说不清的烦躁，都可以慢慢写下来。不知道从何说起？点下面任意一句：</p>
+            <div class="starter-row">
+              <button class="starter" type="button" data-quick="我最近压力很大，晚上总是睡不着。">压力大，睡不着</button>
+              <button class="starter" type="button" data-quick="快考试了，我总觉得复习不完，心里很慌。">担心复习不完</button>
+              <button class="starter" type="button" data-quick="我最近学习效率很低，越学越焦虑，还容易拖延。">越学越焦虑</button>
+            </div>
+          </div>
+        </div>
+
+        <section id="planPanel" class="plan-panel" hidden>
+          <div class="plan-head">
+            <div>
+              <p class="panel-label">行动计划</p>
+              <strong>24 小时行动计划</strong>
+            </div>
+            <span id="planProgress" class="pill">0/0 已完成</span>
+          </div>
+          <div class="plan-progress-track"><div id="planProgressBar" class="plan-progress-fill"></div></div>
+          <ul id="planItems" class="plan-items"></ul>
+          <div id="checkinArea">
+            <button id="checkinStart" class="ghost full" type="button" hidden>次日反馈：计划执行得怎么样？</button>
+            <form id="checkinForm" hidden>
+              <p class="hint">和计划前相比，你现在的状态：</p>
+              <div class="checkin-options">
+                <label><input type="radio" name="improvement" value="improved">好转了</label>
+                <label><input type="radio" name="improvement" value="unchanged">差不多</label>
+                <label><input type="radio" name="improvement" value="worsened">更糟了</label>
+              </div>
+              <textarea id="checkinNotes" placeholder="想补充的话（可选）" rows="2"></textarea>
+              <div class="btn-row">
+                <button class="primary" type="submit">提交反馈</button>
+                <button id="checkinCancel" class="ghost" type="button">取消</button>
+              </div>
+              <p id="checkinState" class="hint"></p>
+            </form>
+          </div>
+        </section>
+
+        <form id="chatForm" class="composer">
+          <textarea id="messageInput" placeholder="写下你现在想说的话..." rows="3"></textarea>
+          <div class="composer-actions">
+            <button id="newSession" class="ghost" type="button">新会话</button>
+            <label class="nomemory-check" title="勾选后点击“新会话”，新会话的内容不会写入长期记忆">
+              <input id="noMemoryCheck" type="checkbox">
+              <span>无记忆模式</span>
+            </label>
+            <button id="sendButton" class="primary" type="submit">发送</button>
+          </div>
+        </form>
+      </section>
+    </section>
+
+    <section id="adminView" class="workspace" hidden>
+      <section class="admin-grid">
+        <div class="metric">
+          <span>报告数</span>
+          <strong id="metricReports">0</strong>
+        </div>
+        <div class="metric">
+          <span>高风险</span>
+          <strong id="metricHigh">0</strong>
+        </div>
+        <div class="metric">
+          <span>Excel 台账</span>
+          <strong id="metricExcel">0</strong>
+        </div>
+        <div class="metric">
+          <span>预警记录</span>
+          <strong id="metricAlerts">0</strong>
+        </div>
+      </section>
+
+      <section class="panel" id="reviewPanel">
+        <div class="section-head">
+          <div>
+            <p class="panel-label">人工审核</p>
+            <h2>人工审核队列</h2>
+          </div>
+          <label class="review-filter">
+            <input id="reviewShowAll" type="checkbox">
+            <span>显示已处理</span>
+          </label>
+          <button id="refreshReviews" class="ghost" type="button">刷新</button>
+        </div>
+        <div id="reviews" class="reviews"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <div>
+            <p class="panel-label">知识库</p>
+            <h2>RAG 知识库维护</h2>
+          </div>
+        </div>
+        <form id="knowledgeUploadForm" class="upload-row">
+          <input id="knowledgeFile" type="file" accept=".pdf,.md,.markdown,.txt,application/pdf,text/markdown,text/plain">
+          <button class="primary" type="submit">上传入库</button>
+          <span id="knowledgeUploadState" class="hint">支持 PDF、Markdown、txt 文件</span>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <div>
+            <p class="panel-label">风险报告</p>
+            <h2>心理风险与咨询报告</h2>
+          </div>
+          <button id="refreshAdmin" class="ghost" type="button">刷新</button>
+        </div>
+        <div id="reports" class="reports"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <div>
+            <p class="panel-label">对话记录</p>
+            <h2>完整对话记录</h2>
+          </div>
+          <span id="conversationState" class="hint">选择一条报告查看</span>
+        </div>
+        <div id="conversationDetail" class="conversation-detail">
+          <div class="empty small">
+            <strong>未选择报告</strong>
+            <p>点击上方任意报告后，会在这里显示该会话的完整消息。</p>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="memoryCardsModal" class="modal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>记忆卡片</h2>
+        <button class="modal-close" type="button" data-close="memoryCardsModal">×</button>
+      </div>
+      <p class="hint">系统记住的关于你的信息。你可以查看、修改、删除；系统建议的卡片需要你确认后才会生效。</p>
+      <div id="memoryCardList" class="card-list"></div>
+      <form id="memoryCardCreate" class="card-create">
+        <input id="memoryCardNew" placeholder="新建卡片，如：我习惯晚上复习" maxlength="2000">
+        <button class="primary" type="submit">添加</button>
+      </form>
+      <p id="memoryCardState" class="hint"></p>
+    </div>
+  </div>
+
+  <div id="screeningModal" class="modal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>量表筛查</h2>
+        <button class="modal-close" type="button" data-close="screeningModal">×</button>
+      </div>
+      <div class="tabs">
+        <button id="screenTabBtn" class="tab active" type="button">新的筛查</button>
+        <button id="historyTabBtn" class="tab" type="button">历史记录</button>
+      </div>
+      <div id="screenTab">
+        <div id="scaleSelect">
+          <p class="hint">选择你想做的筛查量表。完全自愿，随时可以取消。</p>
+          <div class="btn-row">
+            <button class="ghost scale-choice" type="button" data-scale="PHQ-9">PHQ-9 抑郁筛查</button>
+            <button class="ghost scale-choice" type="button" data-scale="GAD-7">GAD-7 焦虑筛查</button>
+          </div>
+        </div>
+        <div id="scaleIntro" hidden>
+          <div id="scaleIntroBody"></div>
+          <div class="btn-row">
+            <button id="scaleStart" class="primary" type="button">开始作答</button>
+            <button id="scaleCancel" class="ghost" type="button">取消</button>
+          </div>
+        </div>
+        <form id="scaleQuestions" hidden></form>
+        <div id="scaleResult" hidden></div>
+      </div>
+      <div id="historyTab" hidden>
+        <div id="screeningHistory" class="card-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="dataDeleteModal" class="modal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>删除我的全部数据</h2>
+        <button class="modal-close" type="button" data-close="dataDeleteModal">×</button>
+      </div>
+      <p>删除后，以下内容将被永久移除：</p>
+      <ul class="impact-list">
+        <li>账号与登录信息</li>
+        <li>备考画像（阶段、目标考试、考试日期）</li>
+        <li>全部记忆卡片</li>
+        <li>全部会话与消息记录</li>
+        <li>行动计划与次日反馈记录</li>
+        <li>量表筛查结果</li>
+        <li>风险与人工审核相关记录</li>
+      </ul>
+      <p class="danger-text"><strong>此操作不可撤销，删除后账号立即失效。</strong></p>
+      <div class="btn-row">
+        <button id="confirmDataDelete" class="danger-btn" type="button">确认删除</button>
+        <button class="ghost" type="button" data-close="dataDeleteModal">取消</button>
+      </div>
+      <p id="dataDeleteState" class="hint"></p>
+    </div>
+  </div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

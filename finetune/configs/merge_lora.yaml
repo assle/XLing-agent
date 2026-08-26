@@ -1,0 +1,12 @@
+### model
+model_name_or_path: Qwen/Qwen2.5-3B-Instruct
+adapter_name_or_path: finetune/saves/qwen25-3b-cls
+template: qwen
+finetuning_type: lora
+trust_remote_code: true
+
+### export
+export_dir: finetune/saves/qwen25-3b-cls-merged
+export_size: 2
+export_device: cpu
+export_legacy_format: false

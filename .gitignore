@@ -1,0 +1,26 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+*.gguf
+*.safetensors
+*.incomplete
+models/Models/
+data/*.db
+data/*.sqlite
+data/*.xlsx
+data/chroma/
+data/chroma-snapshots/
+data/chroma-eval/
+data/chroma-eval-snapshots/
+target/
+.DS_Store
+
+# Teaching workspace (learning records, lessons, research — not part of the product)
+learn/
+
+# Local agent settings
+.claude/
+
+# IDE
+.idea/

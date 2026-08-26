@@ -1,0 +1,32 @@
+{
+    email {$CADDY_EMAIL}
+}
+
+{$DOMAIN} {
+    # Privacy notice is publicly accessible
+    handle /api/privacy {
+        reverse_proxy app:8080
+    }
+
+    # Health check is publicly accessible
+    handle /actuator/health {
+        reverse_proxy app:8080
+    }
+
+    # All other API routes require authentication (handled by the app)
+    handle /api/* {
+        reverse_proxy app:8080 {
+            # SSE support: disable buffering, long timeouts
+            flush_interval -1
+            transport http {
+                read_timeout 300s
+                write_timeout 300s
+            }
+        }
+    }
+
+    # Static files (frontend)
+    handle {
+        reverse_proxy app:8080
+    }
+}

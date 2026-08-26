@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>隐私说明 · Xling 校园心理智能体</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="privacy-page">
+    <div class="brand">
+      <div class="logo">MB</div>
+      <div>
+        <p class="eyebrow">校园心理健康陪伴</p>
+        <h1>隐私说明</h1>
+      </div>
+    </div>
+    <article id="privacyContent" class="privacy-card">
+      <p class="hint">正在读取隐私说明...</p>
+    </article>
+    <a class="back-link" href="/">← 返回应用</a>
+  </main>
+
+  <script type="module">
+    // 公开的隐私说明页：无需登录，调用 GET /api/privacy 渲染说明文本。
+    function escapeHtml(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // 服务端返回的是轻量 Markdown（# 标题、- 列表、**加粗**），这里做最小渲染。
+    function renderNotice(markdown) {
+      const sections = [];
+      let current = [];
+      let inList = false;
+      const closeList = () => { if (inList) { current.push("</ul>"); inList = false; } };
+      const closeSection = () => {
+        closeList();
+        if (current.length) sections.push(`<section class="privacy-section">${current.join("")}</section>`);
+        current = [];
+      };
+      for (const rawLine of markdown.split("\n")) {
+        const line = rawLine.trimEnd();
+        if (line.startsWith("## ")) {
+          closeSection();
+          current.push(`<h2>${inline(line.slice(3))}</h2>`);
+          continue;
+        }
+        if (line.startsWith("- ")) {
+          if (!inList) { current.push("<ul>"); inList = true; }
+          current.push(`<li>${inline(line.slice(2))}</li>`);
+          continue;
+        }
+        closeList();
+        if (line.startsWith("# ")) current.push(`<h1>${inline(line.slice(2))}</h1>`);
+        else if (line.trim()) current.push(`<p>${inline(line)}</p>`);
+      }
+      closeSection();
+      return sections.join("");
+    }
+
+    function inline(text) {
+      return escapeHtml(text).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    }
+
+    async function load() {
+      const target = document.querySelector("#privacyContent");
+      try {
+        const response = await fetch("/api/privacy");
+        if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+        const data = await response.json();
+        target.innerHTML = renderNotice(data.notice || "");
+      } catch (error) {
+        target.innerHTML = `<p class="hint">隐私说明读取失败：${escapeHtml(error.message)}</p>`;
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>

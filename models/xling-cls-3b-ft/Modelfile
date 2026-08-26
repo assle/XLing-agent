@@ -1,0 +1,17 @@
+FROM ./xling-cls-3b-ft-q4_k_m.gguf
+
+TEMPLATE """{{ if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ range .Messages }}<|im_start|>{{ .Role }}
+{{ .Content }}<|im_end|>
+{{ end }}<|im_start|>assistant
+"""
+
+SYSTEM """你是校园心理情绪分类器。只输出一个标签词，不要解释、不要标点。可选标签：正常、焦虑、低落、高风险。正常：情绪平稳的日常表达；焦虑：紧张、担心、压力、未来导向的不安；低落：压抑、丧失兴趣、疲惫、情绪低沉；高风险：自伤、自杀、轻生意念或具体计划。"""
+
+PARAMETER temperature 0.1
+PARAMETER top_p 0.9
+PARAMETER repeat_penalty 1.1
+PARAMETER num_predict 16
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|im_end|>"
