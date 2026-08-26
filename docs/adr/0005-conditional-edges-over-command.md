@@ -21,8 +21,8 @@ PRD（`langgraph-deep-upgrade/spec.md`）把 §A.1（Command 路由）列为 **o
 用 `add_conditional_edges`（条件边），不用 Command。
 
 - `risk_guardian_gate` 节点在驳回时设 `context.response_planned = True` 作为信号
-- 条件边 `_route_after_gate`：`response_planned` 为 True -> END（驳回），False -> counselor（批准/正常）
-- 批准路径：gate 不设 flag -> 走 counselor -> AI 生成回复
+- 条件边 `_route_after_gate`：`response_planned` 为 True -> END（驳回）；高风险批准 -> counselor，低/中风险 -> knowledge
+- 高风险批准路径：gate 不设 flag -> 走 counselor -> AI 生成回复；低/中风险路径：gate 后先走知识检索，再进入认知行为四维追问或 counselor
 - 驳回路径：gate 设 flag -> 走 END -> 跳过 counselor -> 兜底回复
 
 ## 后果

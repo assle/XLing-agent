@@ -28,7 +28,8 @@ from sqlalchemy.pool import StaticPool
 from app.core.database import Base
 from app.core.enums import RiskLevel
 from app.models.entities import RiskTrajectoryPoint
-from app.services.risk_trajectory import RiskTrajectoryService
+from app.services.risk_trajectory import RiskTrajectoryHealth, RiskTrajectoryService
+from app.api.routes import health
 
 
 _test_engine = create_engine(
@@ -67,6 +68,28 @@ def test_record_point_creates_entry():
         assert point.id is not None
     finally:
         db.close()
+
+
+def test_trajectory_health_reports_degraded_and_recovered_without_sensitive_data():
+    RiskTrajectoryHealth.record_success()
+    error = RuntimeError("student text must not be exposed")
+    assert RiskTrajectoryHealth.record_failure(error) is True
+    assert RiskTrajectoryHealth.record_failure(error) is False
+    degraded = RiskTrajectoryHealth.snapshot()
+    assert degraded["status"] == "degraded"
+    assert degraded["lastErrorType"] == "RuntimeError"
+    assert "student text" not in str(degraded)
+
+    RiskTrajectoryHealth.record_success()
+    recovered = RiskTrajectoryHealth.snapshot()
+    assert recovered["status"] == "healthy"
+    assert recovered["lastRecoveredAt"] is not None
+
+
+def test_health_endpoint_includes_risk_trajectory_state():
+    body = health()
+    assert body["status"] == "UP"
+    assert body["riskTrajectory"]["status"] in {"unknown", "healthy", "degraded"}
 
 
 # ---------------------------------------------------------------------------

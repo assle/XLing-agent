@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import os
 import sys
+from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -25,7 +26,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.core.config import Settings
 from app.core.database import Base
-from app.models.entities import UserAccount, ChatSession, PsychologicalReport, ReviewRequest
+from app.models.entities import ChatMessage, UserAccount, ChatSession, PsychologicalReport, ReviewRequest
 from app.core.security import hash_password
 from app.services.privacy import PrivacySanitizer
 from app.services.review import ReviewService, HANDOFF_REASONS, REVIEW_DECISIONS
@@ -173,8 +174,23 @@ def test_mark_decision_refer():
     svc = _svc()
     try:
         review = svc.create_with_context(1, 1, "t")
-        result = svc.mark_decision(review.id, "refer", "refer to counselor")
+        result = svc.mark_decision(
+            review.id,
+            "refer",
+            "请尽快联系学校心理中心",
+            "admin",
+            referral_target="学校心理中心",
+            next_step="今天联系值班老师",
+        )
         assert result.status == "referred"
+        assert result.referral_target == "学校心理中心"
+        assert result.next_step == "今天联系值班老师"
+        message = svc.student_message(result)
+        assert "学校心理中心" in message
+        assert "今天联系值班老师" in message
+        persisted = svc.persist_student_message(result)
+        assert persisted == message
+        assert svc.db.query(ChatMessage).filter(ChatMessage.content == message).count() == 1
     finally:
         svc.db.close()
 
@@ -183,8 +199,60 @@ def test_mark_decision_monitor():
     svc = _svc()
     try:
         review = svc.create_with_context(1, 1, "t")
-        result = svc.mark_decision(review.id, "monitor")
+        result = svc.mark_decision(
+            review.id,
+            "monitor",
+            follow_up_owner="辅导员李老师",
+            follow_up_at=datetime(2026, 8, 27, 10, 0),
+        )
         assert result.status == "monitoring"
+        assert result.follow_up_owner == "辅导员李老师"
+        assert result.follow_up_at == datetime(2026, 8, 27, 10, 0)
+        message = svc.student_message(result)
+        assert "辅导员李老师" in message
+        assert "2026-08-27 10:00" in message
+    finally:
+        svc.db.close()
+
+
+def test_refer_requires_target_and_next_step():
+    _clean()
+    svc = _svc()
+    try:
+        review = svc.create_with_context(1, 1, "t")
+        try:
+            svc.mark_decision(review.id, "refer")
+            assert False, "referral details are required"
+        except ValueError as exc:
+            assert "referral_target" in str(exc)
+    finally:
+        svc.db.close()
+
+
+def test_blank_refer_fields_are_rejected():
+    _clean()
+    svc = _svc()
+    try:
+        review = svc.create_with_context(1, 1, "t")
+        try:
+            svc.mark_decision(review.id, "refer", referral_target=" ", next_step="下一步")
+            assert False, "blank referral target is not actionable"
+        except ValueError:
+            pass
+    finally:
+        svc.db.close()
+
+
+def test_monitor_requires_owner_and_follow_up_time():
+    _clean()
+    svc = _svc()
+    try:
+        review = svc.create_with_context(1, 1, "t")
+        try:
+            svc.mark_decision(review.id, "monitor")
+            assert False, "monitoring details are required"
+        except ValueError as exc:
+            assert "follow_up_owner" in str(exc)
     finally:
         svc.db.close()
 

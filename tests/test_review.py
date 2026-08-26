@@ -20,7 +20,7 @@ from app.core.config import Settings
 from app.core.database import Base
 from app.core.enums import MessageRole
 from app.models.entities import ChatMessage, ChatSession, PsychologicalReport, ReviewRequest, UserAccount
-from app.services.review import ReviewService
+from app.services.review import ReviewService, ReviewTimeoutWorker
 
 
 def _make_db():
@@ -201,6 +201,41 @@ def test_escalate_timed_out_marks_escalated():
     review = svc.get_review(review_id)
     assert review.status == "escalated"
     assert review.reviewed_at is not None
+    assert review.reviewer_decision == "timeout"
+    assert review.reviewed_by == "system"
+    assert "超时" in review.reviewer_note
+
+
+def test_timeout_worker_runs_without_admin_list_request():
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    factory = sessionmaker(bind=engine)
+    db = factory()
+    review_id = _seed_review(db, "thread-worker-timeout-001", status="pending", minutes_ago=20)
+    settings = Settings(ai_provider="mock", review_timeout_minutes=15)
+    worker = ReviewTimeoutWorker(settings, session_factory=factory)
+
+    assert worker.run_once() == [review_id]
+    review = ReviewService(db, settings).get_review(review_id)
+    assert review.status == "escalated"
+
+
+def test_timeout_worker_is_idempotent():
+    from app.services.ai import PromptTemplates
+
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    factory = sessionmaker(bind=engine)
+    db = factory()
+    review_id = _seed_review(db, "thread-worker-idempotent-001", status="pending", minutes_ago=20)
+    settings = Settings(ai_provider="mock", review_timeout_minutes=15)
+    worker = ReviewTimeoutWorker(settings, session_factory=factory)
+
+    assert worker.run_once() == [review_id]
+    assert worker.run_once() == []
+    review = ReviewService(db, settings).get_review(review_id)
+    messages = db.query(ChatMessage).filter(ChatMessage.session_id == review.session_id).all()
+    assert sum(m.content == PromptTemplates.fallback_response() for m in messages) == 1
 
 
 def test_escalate_skips_recent_reviews():

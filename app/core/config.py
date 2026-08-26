@@ -64,6 +64,7 @@ class Settings(BaseSettings):
     langgraph_checkpoint_backend: str = "memory"
     langgraph_checkpoint_path: str = "data/langgraph-checkpoints.db"
     review_timeout_minutes: int = 15
+    review_timeout_poll_interval_seconds: float = 30.0
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_username: str = ""

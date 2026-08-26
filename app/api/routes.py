@@ -20,7 +20,8 @@ router = APIRouter()
 
 @router.get("/actuator/health")
 def health():
-    return {"status": "UP"}
+    from app.services.risk_trajectory import RiskTrajectoryHealth
+    return {"status": "UP", "riskTrajectory": RiskTrajectoryHealth.snapshot()}
 
 
 # ---------------------------------------------------------------------------
@@ -268,9 +269,9 @@ def agent_status(user: Annotated[UserAccount, Depends(current_user)]):
         "finetunedModel": finetuned_model_status(settings),
         "agents": [
             {"name": "MemoryAgent", "status": "READY", "description": "短期上下文与长期记忆摘要"},
-            {"name": "SupervisorAgent", "status": "READY", "description": "意图识别与路由"},
-            {"name": "KnowledgeAgent", "status": "READY", "description": "RAG 检索与证据补充"},
-            {"name": "RiskGuardianAgent", "status": "READY", "description": "心理风险识别与分级"},
+            {"name": "SupervisorAgent", "status": "READY", "description": "消息分流"},
+            {"name": "RiskGuardianAgent", "status": "READY", "description": "安全风险评估与分级"},
+            {"name": "KnowledgeAgent", "status": "READY", "description": "相关支持内容检索"},
             {"name": "CompanionAgent", "status": "READY", "description": "普通陪伴式回复"},
             {"name": "CounselorAgent", "status": "READY", "description": "咨询式支持回复"},
         ],
@@ -485,7 +486,6 @@ def list_reviews(
     from app.services.review import ReviewService
 
     svc = ReviewService(db, get_settings())
-    svc.escalate_timed_out()  # auto-fallback for reviews past the 15-min timeout
     if all:
         return svc.list_all()
     return svc.list_pending()
@@ -515,16 +515,29 @@ async def decide_review(
     if review is None or review.status != "pending":
         raise HTTPException(404, f"Review {review_id} not found or not pending")
 
-    if decision in {"approve", "reject"}:
-        try:
-            response_text, degraded = await review_svc.resume_and_respond(review, approved=(decision == "approve"))
-        except ValueError as exc:
-            raise HTTPException(404, str(exc)) from exc
-        if degraded:
-            review_svc.mark_escalated(review_id)
-            return {"status": "escalated", "responsePreview": response_text[:200]}
-        decided = review_svc.mark_decision(review_id, decision, request.note or "", user.username)
-        return {"status": decided.status, "responsePreview": response_text[:200]}
+    decision_details = {
+        "referral_target": request.referralTarget,
+        "next_step": request.nextStep,
+        "follow_up_owner": request.followUpOwner,
+        "follow_up_at": request.followUpAt,
+    }
 
-    decided = review_svc.mark_decision(review_id, decision, request.note or "", user.username)
-    return {"status": decided.status}
+    def record_decision():
+        return review_svc.mark_decision(
+            review_id, decision, request.note or "", user.username, **decision_details
+        )
+
+    try:
+        if decision in {"approve", "reject"}:
+            response_text, degraded = await review_svc.resume_and_respond(review, approved=(decision == "approve"))
+            if degraded:
+                review_svc.mark_escalated(review_id)
+                return {"status": "escalated", "responsePreview": response_text[:200]}
+            decided = record_decision()
+            return {"status": decided.status, "responsePreview": response_text[:200]}
+
+        decided = record_decision()
+        student_message = review_svc.persist_student_message(decided)
+        return {"status": decided.status, "studentMessage": student_message or None}
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc

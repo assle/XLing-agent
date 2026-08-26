@@ -63,8 +63,8 @@ class PromptTemplates:
         """Fixed acknowledgment sent to the student while a high-risk message
         is pending counselor review (NOT an AI-generated reply)."""
         return (
-            "我听到了你，你现在的感受很重要。我已经把你的消息转给了学校的辅导员，"
-            "会有人尽快来支持你。如果你现在处于紧急情况，请立刻联系身边可信任的人、"
+            "我听到了你，你现在的感受很重要。你的消息已进入人工审核流程。"
+            "如果你现在处于紧急情况，请立刻联系身边可信任的人、"
             "学校心理中心，或拨打 24 小时心理援助热线 400-161-9995。你不是一个人。"
         )
 
@@ -73,7 +73,7 @@ class PromptTemplates:
         """Fixed safety response sent when a counselor rejects a high-risk message
         (NOT an AI-generated reply)."""
         return (
-            "经辅导员审核，你的消息已收到并受到重视。如果你现在需要帮助，"
+            "人工审核已收到并重视你的消息。如果你现在需要帮助，"
             "请立刻联系身边可信任的人、学校心理中心，或拨打 24 小时心理援助热线 400-161-9995。"
         )
 

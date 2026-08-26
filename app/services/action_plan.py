@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 from pydantic import BaseModel, Field, ValidationError
@@ -117,11 +117,14 @@ class ActionPlanService:
 
     def to_response(self, plan: ActionPlan) -> dict:
         items = sorted(plan.items, key=lambda i: i.order_index)
+        feedback_due_at = plan.created_at + timedelta(hours=plan.target_window_hours)
         return {
             "id": plan.id,
             "status": plan.status,
             "targetWindowHours": plan.target_window_hours,
             "createdAt": plan.created_at.isoformat(),
+            "feedbackDueAt": feedback_due_at.isoformat(),
+            "feedbackAvailable": plan.status == "active",
             "items": [
                 {
                     "id": item.id,

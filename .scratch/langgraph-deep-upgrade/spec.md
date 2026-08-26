@@ -61,7 +61,7 @@ Xling 是一个面向学生的校园心理关怀多 Agent 系统。当前存在�
 
 23. As a student, when I send a normal CHAT message (not high-risk), I want my experience to be unchanged, so that the review infrastructure does not slow down normal conversations.
 24. As a developer, I want the custom runtime (fallback when LangGraph is unavailable) to also be async, so that the latency improvement applies regardless of framework.
-25. As a developer, I want the custom runtime to retain direct-response behavior for HIGH risk (no interrupt), so that the fallback path degrades gracefully without a checkpointer.
+25. As a developer, I want the custom runtime to return a pending-review result for HIGH risk even without an interrupt, so that the fallback path keeps the same safety boundary without a checkpointer.
 
 ## Implementation Decisions
 
@@ -74,7 +74,7 @@ Xling 是一个面向学生的校园心理关怀多 Agent 系统。当前存在�
 - **待审队列持久化**：新增一个实体记录待审项（关联 session、PsychologicalReport、风险摘要、状态 pending/approved/rejected、时间戳），用于查询和列表。可恢复的图状态本身存在 Checkpointer 里；辅导员批准/驳回后通过 `Command(resume={"approved": bool})` 恢复图执行。
 - **审核 API**：新增 admin 鉴权的端点：列出待审消息、批准、驳回。批准 -> 恢复图，`CounselorAgent` 生成回复并投递给学生；驳回 -> 发送安全兜底回复（含危机资源联系方式）。
 - **CHAT 路径不变**：`IntentType.CHAT` 直接路由到 `CompanionAgent`，不进入 `RiskGuardianAgent`，不触发 interrupt，保持当前快速路径。
-- **Custom runtime 对等**：自研 runtime（LangGraph 不可用时的回退）同样异步化，但没有 Checkpointer / interrupt 能力--HIGH 风险保留当前直接回复行为。这是接受的限制。
+- **Custom runtime 对等**：自研 runtime（LangGraph 不可用时的回退）同样异步化，但没有 Checkpointer / interrupt 能力--HIGH 风险返回待审核状态，由 ChatService 发送固定安全确认并创建人工审核记录。
 - **告警集成**：新的待审项通过现有 tool queue / email alert 机制通知辅导员（复用 `alert_email` 配置或新增 `ToolJobKind`），不另造通知系统。
 - **GraphState 不拆分**：当前 `GraphState` 是单字段 `{"context": AgentContext}`，本 feature 保持不变。细粒度 State + reducer 拆分是 §A.5，out of scope。
 - **LangGraph API 形态**：`Command`、`interrupt`、`Checkpointer` 的 API 形态需对照 LangGraph 0.4.3（`requirements.txt` 已锁定版本）的官方文档核实后再写代码。
@@ -92,7 +92,7 @@ Xling 是一个面向学生的校园心理关怀多 Agent 系统。当前存在�
   - async `run()` 与同步逻辑行为一致（parity）。
   - Checkpointer：相同 `thread_id` 跨两次 `run()` 调用状态延续；模拟"崩溃"（新建 runtime 实例）后能从 checkpoint 恢复。
 - **集成 seam：`ChatService.prepare()` / `stream_chat()`**：端到端验证 DB 持久化与 SSE 行为。HIGH 风险 -> 验证确认消息含危机资源；非 HIGH -> 验证正常流式。同样用 mock AiClient。
-- **Custom runtime**：只测 async parity，不测 interrupt（LangGraph-only 能力）。
+- **Custom runtime**：验证 async parity，并验证 HIGH 风险返回待审核状态（不依赖 interrupt）。
 - **Prior art**：`AiClient._mock` 是现有确定性测试模式；`rag_eval/runner.py` 是现有端到端跑系统的模式（用 dataset 驱动、比对预期）。
 - **不测**：LangGraph 内部、Chroma 向量检索（hybrid 兜底即可）、SSE 传输层字节细节、辅导员前端 UI。
 
@@ -112,10 +112,10 @@ Xling 是一个面向学生的校园心理关怀多 Agent 系统。当前存在�
 
 ## Further Notes
 
-- 本 PRD 对应研究报告 §A.2 + §A.3 + §B，代码事实已于 2026-07-15 逐行核实（`langgraph_runtime.py` 无 checkpointer、`graph.invoke` 阻塞、`chat.py:prepare` 同步、support 路径 4 次同步 LLM 调用、项目已是 git 仓库等均已确认）。
+- 本 PRD 对应研究报告 §A.2 + §A.3 + §B，记录的是 2026-07-15 实施前的代码状态（当时 `langgraph_runtime.py` 尚无 checkpointer、`graph.invoke` 会阻塞、`chat.py:prepare` 为同步流程）。
 - LangGraph 版本 0.4.3 已锁定在 `requirements.txt`。`Command` / `interrupt` / `Checkpointer` 的 API 形态基于 0.4.x 的认知，实现前必须对照官方文档核实。
-- 自研 runtime 回退路径无 Checkpointer，无法支持 interrupt--回退模式下 HIGH 风险走当前直接回复行为，这是接受的限制。
+- 自研 runtime 回退路径无 Checkpointer，无法支持 interrupt--回退模式下 HIGH 风险返回待审核状态，由统一的 ChatService 确认和人工审核队列承接。
 - 这是研究报告中 ROI 最高的升级方向，也是核心"面试爆点"（human-in-the-loop 安全边界）。
 - 现有 `rag_eval` 评测框架（5 个指标）不受本 feature 影响--本 PRD 不改 RAG 检索逻辑。
-- 项目暂无 ADR 和 `CONTEXT.md` glossary；domain 术语（Agent 名、IntentType、RiskLevel、EmotionLabel）取自 codebase。建议本 feature 实现时为"为什么 HIGH 风险需要人审""为什么 Checkpointer 取代手写 Redis 状态"补 ADR。
+- 当前项目已有 `CONTEXT.md` glossary 和相关 ADR；本历史记录中的建议已由 ADR-0003、ADR-0005 和 ADR-0010 覆盖。
 - 工程化补齐（§E）虽 out of scope，但建议在动手本 feature 前先补 `assessment.py` 三层逻辑的单测，作为人审 interrupt 测试的基线（`RiskGuardianAgent` 的 HIGH 判定是人审的触发前提）。

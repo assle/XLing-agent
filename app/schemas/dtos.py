@@ -54,6 +54,7 @@ class ConversationMessageResponse(BaseModel):
 class ConversationResponse(BaseModel):
     sessionId: str
     title: str
+    noMemory: bool = False
     messages: list[ConversationMessageResponse]
 
 
@@ -147,3 +148,7 @@ class CheckInSubmitRequest(BaseModel):
 class ReviewDecisionRequest(BaseModel):
     decision: str = Field(min_length=1)
     note: Optional[str] = ""
+    referralTarget: Optional[str] = Field(default=None, max_length=200)
+    nextStep: Optional[str] = Field(default=None, max_length=500)
+    followUpOwner: Optional[str] = Field(default=None, max_length=128)
+    followUpAt: Optional[datetime] = None

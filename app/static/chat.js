@@ -81,9 +81,9 @@ async function switchSession(publicId) {
     // 加载该会话关联的行动计划
     await loadActionPlans();
     // 同步无记忆模式标记
-    state.noMemory = false;
-    els.noMemoryCheck.checked = false;
-    els.noMemoryBadge.hidden = true;
+    state.noMemory = Boolean(data.noMemory);
+    els.noMemoryCheck.checked = state.noMemory;
+    els.noMemoryBadge.hidden = !state.noMemory;
   } catch (error) {
     els.messages.innerHTML = `<div class="empty"><p>加载会话失败：${error.message}</p></div>`;
   }

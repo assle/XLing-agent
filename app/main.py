@@ -8,6 +8,7 @@ from app.core.bootstrap import create_schema, seed_data
 from app.core.config import get_settings
 from app.core.database import SessionLocal
 from app.services.tool_queue import get_tool_queue_worker
+from app.services.review import get_review_timeout_worker
 
 
 def create_app() -> FastAPI:
@@ -24,12 +25,18 @@ def create_app() -> FastAPI:
         worker = get_tool_queue_worker(get_settings())
         worker.start()
         app.state.tool_queue_worker = worker
+        review_worker = get_review_timeout_worker(get_settings())
+        review_worker.start()
+        app.state.review_timeout_worker = review_worker
 
     @app.on_event("shutdown")
     def shutdown() -> None:
         worker = getattr(app.state, "tool_queue_worker", None)
         if worker is not None:
             worker.stop()
+        review_worker = getattr(app.state, "review_timeout_worker", None)
+        if review_worker is not None:
+            review_worker.stop()
 
     app.include_router(router)
     static_dir = Path(__file__).resolve().parent / "static"

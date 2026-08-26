@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from sqlalchemy.orm import Session
 
@@ -26,12 +26,10 @@ class CheckInService:
             .order_by(ActionPlan.created_at.desc())
             .all()
         )
-        now = datetime.utcnow()
         return [
             plan
             for plan in plans
-            if plan.created_at + timedelta(hours=plan.target_window_hours) <= now
-            and not self._has_checkin(plan.id)
+            if not self._has_checkin(plan.id)
         ]
 
     def submit_checkin(

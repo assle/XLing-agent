@@ -1,10 +1,9 @@
-"""Tests for RiskGuardianAgent intent==RISK override logic.
+"""Tests for independent message type and safety risk assessment.
 
 Issue 01: Assessment 三层风险评估单测基线 (runtime-layer override).
 
-RiskGuardianAgent forces risk=HIGH when intent==RISK and the assessment
-did not already return HIGH. This is the trigger precondition for the
-human-review interrupt (issue 04).
+An explicit high-risk signal still produces HIGH, while the RISK message type
+does not overwrite an independent assessment result.
 
 Run:  python tests/test_risk_guardian.py
 """
@@ -70,17 +69,17 @@ def _make_context(intent: IntentType, text: str = "有点担心") -> AgentContex
 
 
 # ---------------------------------------------------------------------------
-# intent == RISK forces HIGH even when LLM says LOW
+# RISK message type does not overwrite an independent assessment
 # ---------------------------------------------------------------------------
 
-def test_risk_intent_overrides_low_to_high():
+def test_risk_intent_preserves_low_assessment():
     runtime = _make_runtime('{"emotion":"NORMAL","emotionScore":0.0,"risk":"LOW","confidence":0.5,"summary":"ok"}')
     context = _make_context(IntentType.RISK)
     proceeded = asyncio.run(runtime.risk_guardian_agent(4, context))
     assert proceeded is True
-    assert context.assessment.risk == RiskLevel.HIGH
-    assert context.assessment.emotion_score >= 4.0
-    assert context.risk_level == RiskLevel.HIGH
+    assert context.assessment.risk == RiskLevel.LOW
+    assert context.assessment.emotion_score == 0.0
+    assert context.risk_level == RiskLevel.LOW
     assert context.risk_assessed is True
 
 
@@ -91,11 +90,11 @@ def test_risk_intent_keeps_high_when_already_high():
     assert context.assessment.risk == RiskLevel.HIGH
 
 
-def test_risk_intent_overrides_medium_to_high():
+def test_risk_intent_preserves_medium_assessment():
     runtime = _make_runtime('{"emotion":"DEPRESSED","emotionScore":3.0,"risk":"MEDIUM","confidence":0.7,"summary":"low"}')
     context = _make_context(IntentType.RISK, "心情不好")
     asyncio.run(runtime.risk_guardian_agent(4, context))
-    assert context.assessment.risk == RiskLevel.HIGH
+    assert context.assessment.risk == RiskLevel.MEDIUM
 
 
 # ---------------------------------------------------------------------------
@@ -127,6 +126,30 @@ def test_already_assessed_skips():
     context.risk_assessed = True
     proceeded = asyncio.run(runtime.risk_guardian_agent(4, context))
     assert proceeded is False
+
+
+def test_trajectory_failure_rolls_back_before_safe_fallback():
+    class BrokenDb:
+        rollback_called = False
+
+        def add(self, item):  # noqa: ANN001
+            raise RuntimeError("trajectory write failed")
+
+        def rollback(self):
+            self.rollback_called = True
+
+    runtime = _make_runtime('{"emotion":"ANXIETY","emotionScore":2.0,"risk":"LOW","confidence":0.7,"summary":"stress"}')
+    runtime.db = BrokenDb()
+    runtime.settings = type("Settings", (), {
+        "risk_trajectory_session_window": 3,
+        "risk_trajectory_cross_session_days": 7,
+        "risk_trajectory_rising_threshold": 3,
+    })()
+    context = _make_context(IntentType.CONSULT)
+    proceeded = asyncio.run(runtime.risk_guardian_agent(4, context))
+    assert proceeded is True
+    assert runtime.db.rollback_called is True
+    assert context.risk_level == RiskLevel.LOW
 
 
 # ---------------------------------------------------------------------------

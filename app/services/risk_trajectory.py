@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import threading
 from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
@@ -9,6 +10,55 @@ from app.models.entities import RiskTrajectoryPoint
 
 
 _RISK_ORDER = {RiskLevel.LOW: 1, RiskLevel.MEDIUM: 2, RiskLevel.HIGH: 3}
+
+
+class RiskTrajectoryHealth:
+    """Process-local health state for risk trajectory evaluation.
+
+    The snapshot intentionally contains only operational metadata, never
+    student content or risk details.
+    """
+
+    _lock = threading.Lock()
+    _status = "unknown"
+    _failure_count = 0
+    _last_error_type: str | None = None
+    _last_failure_at: str | None = None
+    _last_success_at: str | None = None
+    _last_recovered_at: str | None = None
+
+    @classmethod
+    def record_success(cls) -> None:
+        now = datetime.utcnow().isoformat()
+        with cls._lock:
+            if cls._status == "degraded":
+                cls._last_recovered_at = now
+            cls._status = "healthy"
+            cls._last_success_at = now
+
+    @classmethod
+    def record_failure(cls, error: Exception) -> bool:
+        """Record a failure and return whether this is a new degraded state."""
+        now = datetime.utcnow().isoformat()
+        with cls._lock:
+            changed = cls._status != "degraded"
+            cls._status = "degraded"
+            cls._failure_count += 1
+            cls._last_error_type = type(error).__name__
+            cls._last_failure_at = now
+            return changed
+
+    @classmethod
+    def snapshot(cls) -> dict:
+        with cls._lock:
+            return {
+                "status": cls._status,
+                "failureCount": cls._failure_count,
+                "lastErrorType": cls._last_error_type,
+                "lastFailureAt": cls._last_failure_at,
+                "lastSuccessAt": cls._last_success_at,
+                "lastRecoveredAt": cls._last_recovered_at,
+            }
 
 
 class RiskTrajectoryService:

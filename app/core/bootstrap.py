@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from sqlalchemy import Engine
+from sqlalchemy import Engine, inspect, text
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings, get_settings
@@ -16,7 +16,26 @@ def create_schema(engine: Engine | None = None) -> None:
 
     The eval runner passes its own SQLite engine so it never touches MySQL.
     """
-    Base.metadata.create_all(bind=engine if engine is not None else default_engine)
+    bind = engine if engine is not None else default_engine
+    Base.metadata.create_all(bind=bind)
+    _migrate_review_action_columns(bind)
+
+
+def _migrate_review_action_columns(bind: Engine) -> None:
+    """Add issue-5 review action fields to databases created by older builds."""
+    columns = {
+        "referral_target": "VARCHAR(200)",
+        "next_step": "VARCHAR(500)",
+        "follow_up_owner": "VARCHAR(128)",
+        "follow_up_at": "DATETIME",
+    }
+    existing = {column["name"] for column in inspect(bind).get_columns("review_requests")}
+    missing = [(name, ddl) for name, ddl in columns.items() if name not in existing]
+    if not missing:
+        return
+    with bind.begin() as connection:
+        for name, ddl in missing:
+            connection.execute(text(f"ALTER TABLE review_requests ADD COLUMN {name} {ddl}"))
 
 
 def seed_data(db: Session, settings: Settings | None = None) -> None:

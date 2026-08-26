@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
+from datetime import timedelta
 
 from sqlalchemy.orm import Session
 
@@ -17,6 +19,10 @@ from app.services.cbt import DIMENSION_LABELS
 from app.services.user_profile import UserProfileService
 from app.services.memory_cards import MemoryCardService
 from app.services.risk_trajectory import RiskTrajectoryService
+from app.services.risk_trajectory import RiskTrajectoryHealth
+
+
+logger = logging.getLogger(__name__)
 
 
 GENERAL_TASK_WORDS = [
@@ -60,6 +66,7 @@ class ActionPlanEvent:
     """Freshly generated 24h action plan, constructed where the plan is created."""
     plan_id: int
     items: list[ActionPlanItemEvent]
+    feedback_due_at: str | None = None
 
 
 @dataclass
@@ -69,6 +76,8 @@ class AgentContext:
     original_input: str
     model_input: str
     memory_loaded: bool = False
+    quick_safety_checked: bool = False
+    quick_risk_flagged: bool = False
     intent_routed: bool = False
     knowledge_handled: bool = False
     risk_assessed: bool = False
@@ -95,6 +104,7 @@ class AgentContext:
     trajectory_trend: str = ""
     cbt_event: CbtEvent | None = None
     action_plan_event: ActionPlanEvent | None = None
+    pending_review: bool = False
 
 
 @dataclass
@@ -112,6 +122,8 @@ class AgentRunResult:
     trajectory_trend: str = ""
     cbt_event: CbtEvent | None = None
     action_plan_event: ActionPlanEvent | None = None
+    quick_safety_checked: bool = False
+    quick_risk_flagged: bool = False
 
     @property
     def requires_report(self) -> bool:
@@ -132,10 +144,11 @@ class AgentRuntimeService:
     async def run(self, user: UserAccount, session: ChatSession, original_input: str, model_input: str) -> AgentRunResult:
         context = AgentContext(user=user, session=session, original_input=original_input, model_input=model_input)
         agents = [
+            self.quick_safety_agent,
             self.memory_agent,
             self.supervisor_agent,
-            self.knowledge_agent,
             self.risk_guardian_agent,
+            self.knowledge_agent,
             self.cbt_agent,
             self.companion_agent,
             self.counselor_agent,
@@ -145,6 +158,10 @@ class AgentRuntimeService:
                 break
             for agent in agents:
                 if await agent(step, context):
+                    if context.risk_assessed and context.risk_level == RiskLevel.HIGH:
+                        context.pending_review = True
+                        context.finished = True
+                        context.response_messages = []
                     break
         return AgentRunResult(
             intent=context.intent or IntentType.CHAT,
@@ -157,6 +174,9 @@ class AgentRuntimeService:
             trajectory_trend=context.trajectory_trend,
             cbt_event=context.cbt_event,
             action_plan_event=context.action_plan_event,
+            quick_safety_checked=context.quick_safety_checked,
+            quick_risk_flagged=context.quick_risk_flagged,
+            pending_review=context.pending_review,
         )
 
     async def memory_agent(self, step: int, context: AgentContext) -> bool:
@@ -179,19 +199,34 @@ class AgentRuntimeService:
                 source = "mysql_seeded"
         context.model_history = (history + [AiMessage(role="user", content=context.model_input)])[-self.settings.chat_history_limit * 2:]
         context.memory_brief = await self._summarize_memory(history, context.model_input)
-        # Load exam stage from user profile (issue 03)
-        try:
-            profile_svc = UserProfileService(self.db)
-            context.exam_stage = profile_svc.get_stage_context(context.user.id)
-        except Exception:
-            pass
-        # Load confirmed memory cards (issue 04)
-        try:
-            context.memory_cards_context = MemoryCardService(self.db).get_confirmed_context(context.user.id)
-        except Exception:
-            pass
+        # A no-memory session retains same-session continuity but never reads
+        # or changes the cross-session profile and confirmed memory cards.
+        if not context.session.no_memory:
+            # Load exam stage from user profile (issue 03)
+            try:
+                profile_svc = UserProfileService(self.db)
+                context.exam_stage = profile_svc.get_stage_context(context.user.id)
+            except Exception:
+                pass
+            # Load confirmed memory cards (issue 04)
+            try:
+                context.memory_cards_context = MemoryCardService(self.db).get_confirmed_context(context.user.id)
+            except Exception:
+                pass
         context.memory_loaded = True
         context.steps.append(AgentStep(step, "MemoryAgent", "READ_MEMORY", f"loaded {len(history)} messages from {source}; stage={context.exam_stage or 'none'}"))
+        return True
+
+    async def quick_safety_agent(self, step: int, context: AgentContext) -> bool:
+        """Run the cheap explicit-signal guard before any memory I/O."""
+        if context.quick_safety_checked:
+            return False
+        context.quick_risk_flagged = has_high_risk_signal(context.model_input)
+        context.quick_safety_checked = True
+        context.steps.append(AgentStep(
+            step, "SafetyGuard", "QUICK_SAFETY_CHECK",
+            "explicit high-risk signal detected" if context.quick_risk_flagged else "no explicit high-risk signal",
+        ))
         return True
 
     async def supervisor_agent(self, step: int, context: AgentContext) -> bool:
@@ -201,12 +236,17 @@ class AgentRuntimeService:
         context.intent_routed = True
         if context.intent == IntentType.CHAT:
             context.knowledge_handled = True
-            context.risk_assessed = True
         context.steps.append(AgentStep(step, "SupervisorAgent", "ROUTE_INTENT", f"intent={context.intent.value}"))
         return True
 
     async def knowledge_agent(self, step: int, context: AgentContext) -> bool:
-        if not context.intent_routed or context.knowledge_handled or context.intent == IntentType.CHAT:
+        if (
+            not context.intent_routed
+            or context.knowledge_handled
+            or context.intent == IntentType.CHAT
+            or not context.risk_assessed
+            or context.risk_level == RiskLevel.HIGH
+        ):
             return False
         query = await self._rewrite_query(context)
         retrieved = self.knowledge.retrieve(query, self.settings.knowledge_top_k)
@@ -217,12 +257,9 @@ class AgentRuntimeService:
         return True
 
     async def risk_guardian_agent(self, step: int, context: AgentContext) -> bool:
-        if not context.knowledge_handled or context.risk_assessed or context.intent == IntentType.CHAT:
+        if not context.intent_routed or context.risk_assessed or context.intent == IntentType.CHAT:
             return False
         assessment = await self.assessment.aassess(context.model_input, context.model_history)
-        if context.intent == IntentType.RISK and assessment.risk != RiskLevel.HIGH:
-            assessment.risk = RiskLevel.HIGH
-            assessment.emotion_score = max(assessment.emotion_score, 4.0)
         context.assessment = assessment
         context.risk_level = assessment.risk
         context.risk_assessed = True
@@ -245,8 +282,15 @@ class AgentRuntimeService:
                     f"连续上升（近 {self.settings.risk_trajectory_cross_session_days} 天 "
                     f"{trend.get('totalPoints', 0)} 个记录点，最新风险 {trend.get('currentRisk') or '未知'}）"
                 )
-        except Exception:
-            pass
+            RiskTrajectoryHealth.record_success()
+        except Exception as exc:
+            try:
+                self.db.rollback()
+            except Exception:
+                pass
+            transitioned = RiskTrajectoryHealth.record_failure(exc)
+            log = logger.warning if transitioned else logger.debug
+            log("Risk trajectory evaluation degraded (%s)", type(exc).__name__)
         context.steps.append(AgentStep(step, "RiskGuardianAgent", "ASSESS_RISK", f"risk={assessment.risk.value}, emotion={assessment.emotion.value}; effective={context.risk_level.value}"))
         return True
 
@@ -327,6 +371,7 @@ class AgentRuntimeService:
                 )
                 context.action_plan_event = ActionPlanEvent(
                     plan_id=plan.id,
+                    feedback_due_at=(plan.created_at + timedelta(hours=plan.target_window_hours)).isoformat(),
                     items=[
                         ActionPlanItemEvent(
                             id=item.id,

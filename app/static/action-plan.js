@@ -38,6 +38,8 @@ export function handlePlanEvent(data) {
   state.activePlan = {
     id: data.planId,
     status: "active",
+    feedbackDueAt: data.feedbackDueAt || null,
+    feedbackAvailable: data.feedbackAvailable !== false,
     items: (data.items || []).map((item) => ({
       id: item.id,
       content: item.content,
@@ -45,8 +47,8 @@ export function handlePlanEvent(data) {
       completed: Boolean(item.completed)
     }))
   };
-  // 计划的 24 小时目标窗口结束后，GET /api/check-ins/pending 才会开放反馈入口。
-  state.pendingCheckInPlanId = null;
+  // 反馈入口立即可用；“次日”只是建议时间。
+  state.pendingCheckInPlanId = data.planId;
   render();
 }
 
@@ -107,8 +109,12 @@ function render() {
     els.items.append(li);
   }
 
-  // 次日反馈入口：有计划待反馈时出现
-  els.checkinStart.hidden = state.pendingCheckInPlanId !== plan.id;
+  // 次日反馈入口：当前行动计划可立即反馈，到期前后只改变提示文案
+  const due = !plan.feedbackDueAt || new Date(plan.feedbackDueAt).getTime() <= Date.now();
+  els.checkinStart.hidden = state.pendingCheckInPlanId !== plan.id || plan.feedbackAvailable === false;
+  els.checkinStart.textContent = due
+    ? "次日反馈：计划执行得怎么样？"
+    : "提前反馈：计划执行得怎么样？（次日再反馈也可以）";
   els.checkinState.textContent = "";
 }
 

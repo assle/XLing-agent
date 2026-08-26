@@ -103,7 +103,7 @@ class ChatService:
                 intent=agent_run.intent.value,
                 emotion=agent_run.assessment.emotion.value,
                 emotion_score=agent_run.assessment.emotion_score,
-                risk_level=agent_run.assessment.risk.value,
+                risk_level=agent_run.risk_level.value,
                 confidence=agent_run.assessment.confidence,
                 summary=agent_run.assessment.summary,
             )
@@ -150,9 +150,8 @@ class ChatService:
             session = self.db.query(ChatSession).filter(ChatSession.public_id == public_id, ChatSession.user_id == user.id).first()
             if session is None:
                 raise ValueError("Session not found")
-            if no_memory is not None and session.no_memory != no_memory:
-                session.no_memory = no_memory
-                self.db.commit()
+            # Session privacy mode is immutable after creation. The response
+            # metadata reports the persisted mode back to the client.
             return session
         session = ChatSession(
             public_id=uuid.uuid4().hex, user_id=user.id, title=text[:36], no_memory=bool(no_memory)
@@ -183,6 +182,8 @@ def _action_plan_payload(event: ActionPlanEvent) -> dict:
     """Wire format (camelCase) for the SSE `action_plan` event."""
     return {
         "planId": event.plan_id,
+        "feedbackDueAt": event.feedback_due_at,
+        "feedbackAvailable": True,
         "items": [
             {"id": item.id, "content": item.content, "order": item.order, "completed": item.completed}
             for item in event.items

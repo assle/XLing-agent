@@ -132,12 +132,13 @@ def test_pending_plans_found():
     finally:
         db.close()
 
-def test_new_plan_not_pending_until_target_window_elapsed():
+def test_new_plan_is_available_for_feedback_before_target_window():
     _clean()
-    _make_plan()
+    plan_id = _make_plan()
     db = _TestSession()
     try:
-        assert CheckInService(db).get_pending_plans(1) == []
+        pending = CheckInService(db).get_pending_plans(1)
+        assert [plan.id for plan in pending] == [plan_id]
     finally:
         db.close()
 

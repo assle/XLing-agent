@@ -19,6 +19,8 @@ const DECISION_LABELS = {
   monitor: "持续关注"
 };
 
+const OUTCOME_LABELS = { ...DECISION_LABELS, timeout: "超时自动兜底" };
+
 const STATUS_LABELS = {
   approved: "已放行",
   rejected: "已拒绝",
@@ -255,10 +257,14 @@ function renderReviewItem(item) {
   if (decided) {
     const outcome = document.createElement("p");
     outcome.className = "review-outcome";
-    const decision = item.reviewerDecision ? (DECISION_LABELS[item.reviewerDecision] || item.reviewerDecision) : (STATUS_LABELS[item.status] || item.status);
+    const decision = item.reviewerDecision ? (OUTCOME_LABELS[item.reviewerDecision] || item.reviewerDecision) : (STATUS_LABELS[item.status] || item.status);
     const parts = [`处理结果：${decision}`];
     if (item.reviewedBy) parts.push(`审核人：${item.reviewedBy}`);
     if (item.reviewerNote) parts.push(`备注:${item.reviewerNote}`);
+    if (item.referralTarget) parts.push(`转介对象：${item.referralTarget}`);
+    if (item.nextStep) parts.push(`下一步：${item.nextStep}`);
+    if (item.followUpOwner) parts.push(`跟进负责人：${item.followUpOwner}`);
+    if (item.followUpAt) parts.push(`跟进时间：${displayTime(item.followUpAt)}`);
     outcome.textContent = parts.join(" · ");
     box.append(outcome);
     return box;
@@ -282,8 +288,23 @@ function showNoteRow(box, reviewId, decision, label) {
   box.querySelector(".review-note-row")?.remove();
   const row = document.createElement("div");
   row.className = "review-note-row";
-  const input = document.createElement("input");
-  input.placeholder = `备注（可选），将随「${label}」一起记录`;
+  const fields = {};
+  const addField = (name, placeholder, type = "text") => {
+    const input = document.createElement("input");
+    input.type = type;
+    input.placeholder = placeholder;
+    fields[name] = input;
+    row.append(input);
+  };
+  addField("note", `备注（可选），将随「${label}」一起记录`);
+  if (decision === "refer") {
+    addField("referralTarget", "转介对象（必填）");
+    addField("nextStep", "下一步（必填）");
+  }
+  if (decision === "monitor") {
+    addField("followUpOwner", "跟进负责人（必填）");
+    addField("followUpAt", "跟进时间（必填）", "datetime-local");
+  }
   const confirm = document.createElement("button");
   confirm.type = "button";
   confirm.className = "primary";
@@ -294,16 +315,23 @@ function showNoteRow(box, reviewId, decision, label) {
       await api(`/api/admin/reviews/${reviewId}/decision`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ decision, note: input.value.trim() })
+        body: JSON.stringify({
+          decision,
+          note: fields.note.value.trim(),
+          referralTarget: fields.referralTarget?.value.trim() || null,
+          nextStep: fields.nextStep?.value.trim() || null,
+          followUpOwner: fields.followUpOwner?.value.trim() || null,
+          followUpAt: fields.followUpAt?.value || null,
+        })
       });
       await loadReviews();
     } catch (error) {
       confirm.disabled = false;
-      input.value = "";
+      fields.note.value = "";
       alert(`操作失败：${error.message}`);
     }
   });
-  row.append(input, confirm);
+  row.append(confirm);
   box.append(row);
-  input.focus();
+  fields[decision === "refer" ? "referralTarget" : decision === "monitor" ? "followUpOwner" : "note"].focus();
 }

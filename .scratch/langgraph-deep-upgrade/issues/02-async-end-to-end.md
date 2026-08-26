@@ -8,7 +8,7 @@ Status: ready-for-agent
 
 ## What to build
 
-把从 `ChatService.prepare` 到 agent runtime 到 LLM 调用的全链路异步化，消除 prepare 阶段同步阻塞事件循环的问题。AiClient 新增异步 completion 方法（复用现有 stream 的 `httpx.AsyncClient` 模式）；agent runtime 的 `run` 改为 async，内部 LLM 调用（记忆摘要、意图分类、查询改写、风险评估）用异步接口，LangGraph 用 `ainvoke`；`ChatService.prepare` 改 async，`stream_chat` 用 await。CHAT 和 support 路径都异步化。同步 `complete` 保留供迁移期使用。Custom runtime（LangGraph 不可用回退）同步异步化，但保留 HIGH 直接回复（无 interrupt 能力）。
+把从 `ChatService.prepare` 到 agent runtime 到语言模型调用的全链路异步化，消除 prepare 阶段同步阻塞事件循环的问题。AiClient 新增异步 completion 方法；agent runtime 的 `run` 改为 async，内部模型调用用异步接口，LangGraph 用 `ainvoke`；`ChatService.prepare` 改 async，`stream_chat` 用 await。日常对话和心理支持路径都异步化。同步 `complete` 保留供迁移期使用。Custom runtime（LangGraph 不可用回退）同步异步化，并对 HIGH 风险返回待审核状态。
 
 ## Acceptance criteria
 

@@ -58,6 +58,8 @@ class LangGraphAgentRuntimeService(AgentRuntimeService):
                 trajectory_trend=result_context.trajectory_trend,
                 cbt_event=result_context.cbt_event,
                 action_plan_event=result_context.action_plan_event,
+                quick_safety_checked=result_context.quick_safety_checked,
+                quick_risk_flagged=result_context.quick_risk_flagged,
             )
         return AgentRunResult(
             intent=result_context.intent or IntentType.CHAT,
@@ -70,6 +72,8 @@ class LangGraphAgentRuntimeService(AgentRuntimeService):
             trajectory_trend=result_context.trajectory_trend,
             cbt_event=result_context.cbt_event,
             action_plan_event=result_context.action_plan_event,
+            quick_safety_checked=result_context.quick_safety_checked,
+            quick_risk_flagged=result_context.quick_risk_flagged,
         )
 
     def get_state(self, thread_id: str) -> Any:
@@ -151,6 +155,7 @@ class LangGraphAgentRuntimeService(AgentRuntimeService):
 
         graph = StateGraph(GraphState)
         graph.add_node("memory", self._memory_node)
+        graph.add_node("quick_safety", self._quick_safety_node)
         graph.add_node("supervisor", self._supervisor_node)
         graph.add_node("knowledge", self._knowledge_node)
         graph.add_node("risk_guardian", self._risk_guardian_node)
@@ -159,19 +164,20 @@ class LangGraphAgentRuntimeService(AgentRuntimeService):
         graph.add_node("counselor", self._counselor_node)
         graph.add_node("cbt", self._cbt_node)
 
-        graph.set_entry_point("memory")
+        graph.set_entry_point("quick_safety")
+        graph.add_edge("quick_safety", "memory")
         graph.add_edge("memory", "supervisor")
         graph.add_conditional_edges(
             "supervisor",
             self._route_after_supervisor,
-            {"chat": "companion", "support": "knowledge"},
+            {"chat": "companion", "support": "risk_guardian"},
         )
-        graph.add_edge("knowledge", "risk_guardian")
+        graph.add_edge("knowledge", "cbt")
         graph.add_edge("risk_guardian", "risk_guardian_gate")
         graph.add_conditional_edges(
             "risk_guardian_gate",
             self._route_after_gate,
-            {"approved": "counselor", "rejected": END, "cbt": "cbt"},
+            {"approved": "counselor", "rejected": END, "support": "knowledge"},
         )
         graph.add_conditional_edges(
             "cbt",
@@ -183,15 +189,19 @@ class LangGraphAgentRuntimeService(AgentRuntimeService):
         return graph.compile(checkpointer=self._checkpointer)
 
     async def _memory_node(self, state: GraphState) -> GraphState:
-        await self.memory_agent(1, state["context"])
+        await self.memory_agent(2, state["context"])
+        return state
+
+    async def _quick_safety_node(self, state: GraphState) -> GraphState:
+        await self.quick_safety_agent(1, state["context"])
         return state
 
     async def _supervisor_node(self, state: GraphState) -> GraphState:
-        await self.supervisor_agent(2, state["context"])
+        await self.supervisor_agent(3, state["context"])
         return state
 
     async def _knowledge_node(self, state: GraphState) -> GraphState:
-        await self.knowledge_agent(3, state["context"])
+        await self.knowledge_agent(5, state["context"])
         return state
 
     async def _risk_guardian_node(self, state: GraphState) -> GraphState:
@@ -221,7 +231,7 @@ class LangGraphAgentRuntimeService(AgentRuntimeService):
             return "rejected"
         if ctx.risk_level == RiskLevel.HIGH:
             return "approved"
-        return "cbt"
+        return "support"
 
     def _route_after_cbt(self, state: GraphState) -> str:
         return "handled" if state["context"].response_planned else "skip"

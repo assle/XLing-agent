@@ -194,6 +194,7 @@ def test_action_plan_event_on_cbt_completion():
     assert cbt["complete"] is True and cbt["active"] is False
     plan = next(data for name, data in events if name == "action_plan")
     assert plan["planId"] == 42
+    assert plan["feedbackAvailable"] is True
     assert [item["content"] for item in plan["items"]] == ["出门走 10 分钟", "睡前不看手机"]
     assert all("id" in item and "order" in item for item in plan["items"])
     print("  action_plan event emitted with plan items")
@@ -233,6 +234,23 @@ def test_default_session_not_no_memory():
     finally:
         db.close()
     print("  default session is not no-memory")
+
+
+def test_existing_no_memory_session_cannot_be_reenabled():
+    from app.services.chat import ChatService
+
+    db = _TestSession()
+    try:
+        session = ChatSession(public_id="immutable-no-memory", title="private", user_id=USER_ID, no_memory=True)
+        db.add(session)
+        db.commit()
+        service = ChatService(db, _settings)
+        resolved = service.resolve_session(
+            db.get(UserAccount, USER_ID), session.public_id, "继续说", no_memory=False
+        )
+        assert resolved.no_memory is True
+    finally:
+        db.close()
 
 
 def test_pending_review_has_reason_and_desensitized_summary():

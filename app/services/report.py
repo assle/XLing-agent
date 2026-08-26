@@ -80,6 +80,7 @@ class ReportService:
         return ConversationResponse(
             sessionId=session.public_id,
             title=session.title,
+            noMemory=session.no_memory,
             messages=[ConversationMessageResponse(role=row.role, content=row.content, createdAt=row.created_at) for row in rows],
         )
     def list_sessions(self, user_id: int) -> list[dict]:
@@ -113,6 +114,7 @@ class ReportService:
         return ConversationResponse(
             sessionId=session.public_id,
             title=session.title,
+            noMemory=session.no_memory,
             messages=[ConversationMessageResponse(role=row.role, content=row.content, createdAt=row.created_at) for row in rows],
         )
 

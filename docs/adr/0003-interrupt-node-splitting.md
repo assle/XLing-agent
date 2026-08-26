@@ -23,7 +23,7 @@ Accepted
 - **`risk_guardian`**：执行 `risk_guardian_agent`（评估、设置 risk/assessment），正常 return。其 mutation 被 checkpoint 保存。
 - **`risk_guardian_gate`**：检查 `context.risk_level == HIGH`，是则 `interrupt()`。此时 risk_guardian 的评估变更已经在上一个 checkpoint 里了。
 
-图流程：`knowledge -> risk_guardian -> risk_guardian_gate -> counselor`
+图流程：`risk_guardian -> risk_guardian_gate`；非高风险在 gate 后进入知识检索，高风险批准后进入 CounselorAgent。
 
 gate 节点 interrupt 时，保存的状态来自 risk_guardian 完成后（含评估变更），resume 时能拿到完整的 context。
 

@@ -171,6 +171,18 @@ def test_list_plans():
         db.close()
 
 
+def test_plan_response_exposes_feedback_due_time():
+    _clean()
+    db = _TestSession()
+    try:
+        plan = ActionPlanService(db, ai=None).generate_plan(1, None, "summary")
+        response = ActionPlanService(db).to_response(plan)
+        assert response["feedbackDueAt"] is not None
+        assert response["feedbackAvailable"] is True
+    finally:
+        db.close()
+
+
 # ---------------------------------------------------------------------------
 # Mark completed / replace
 # ---------------------------------------------------------------------------

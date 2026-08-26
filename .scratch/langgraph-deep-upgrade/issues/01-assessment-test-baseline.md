@@ -16,7 +16,7 @@ Status: ready-for-agent
 - [ ] LLM 返回 LOW 但 `emotion_score >= 4` 时，`risk_from_score` 取最高覆写为 HIGH
 - [ ] `emotion == HIGH_RISK` 时强制 risk = HIGH
 - [ ] LLM 调用异常时回退 heuristic
-- [ ] `intent == RISK` 且 assessment 非 HIGH 时，RiskGuardianAgent 强制覆写为 HIGH
+- [ ] `intent == RISK` 且 assessment 非 HIGH 时，保留安全风险评估结果，不由消息类型强制覆写
 - [ ] 全部测试用 mock AiClient，无外部 LLM/DB 依赖
 - [ ] 测试只验证外部行为（输入 -> 输出），不测内部实现细节
 

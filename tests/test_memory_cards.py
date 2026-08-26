@@ -26,8 +26,10 @@ from starlette.testclient import TestClient
 from app.api.routes import router
 from app.core.database import Base, get_db
 from app.core.security import hash_password
-from app.models.entities import UserAccount, MemoryCard
+from app.models.entities import ChatSession, UserAccount, MemoryCard
 from app.services.memory_cards import MemoryCardService
+from app.agents.runtime import AgentContext, AgentRuntimeService
+from app.schemas.dtos import AiMessage
 
 
 _test_engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
@@ -241,6 +243,98 @@ def test_api_user_isolation():
 def test_api_requires_auth():
     r = client.get("/api/memory-cards")
     assert r.status_code == 401
+
+
+def test_no_memory_session_does_not_load_long_term_context(monkeypatch):
+    calls = {"profile": 0, "cards": 0}
+
+    class ProfileSpy:
+        def __init__(self, db):
+            calls["profile"] += 1
+
+        def get_stage_context(self, user_id):  # noqa: ANN001
+            return "冲刺"
+
+    class CardSpy:
+        def __init__(self, db):
+            calls["cards"] += 1
+
+        def get_confirmed_context(self, user_id):  # noqa: ANN001
+            return "secret card"
+
+    class MemorySpy:
+        def load_recent(self, session_id):  # noqa: ANN001
+            return [AiMessage(role="user", content="本次会话内容")]
+
+        def replace(self, session_id, messages):  # noqa: ANN001
+            pass
+
+    runtime = AgentRuntimeService.__new__(AgentRuntimeService)
+    runtime.memory = MemorySpy()
+    runtime.settings = type("Settings", (), {"chat_history_limit": 10, "redis_memory_max_messages": 40})()
+    runtime._summarize_memory = lambda history, current: _async_value("本次会话摘要")
+    monkeypatch.setattr("app.agents.runtime.UserProfileService", ProfileSpy)
+    monkeypatch.setattr("app.agents.runtime.MemoryCardService", CardSpy)
+    context = AgentContext(
+        user=UserAccount(id=1),
+        session=ChatSession(id=1, public_id="no-memory-session", user_id=1, no_memory=True),
+        original_input="本次会话内容",
+        model_input="本次会话内容",
+    )
+
+    import asyncio
+    asyncio.run(runtime.memory_agent(1, context))
+
+    assert calls == {"profile": 0, "cards": 0}
+    assert context.exam_stage == ""
+    assert context.memory_cards_context == ""
+
+
+def test_normal_session_loads_long_term_context(monkeypatch):
+    calls = {"profile": 0, "cards": 0}
+
+    class ProfileSpy:
+        def __init__(self, db):
+            calls["profile"] += 1
+
+        def get_stage_context(self, user_id):  # noqa: ANN001
+            return "冲刺"
+
+    class CardSpy:
+        def __init__(self, db):
+            calls["cards"] += 1
+
+        def get_confirmed_context(self, user_id):  # noqa: ANN001
+            return "known context"
+
+    class MemorySpy:
+        def load_recent(self, session_id):  # noqa: ANN001
+            return [AiMessage(role="user", content="本次会话内容")]
+
+    runtime = AgentRuntimeService.__new__(AgentRuntimeService)
+    runtime.memory = MemorySpy()
+    runtime.settings = type("Settings", (), {"chat_history_limit": 10, "redis_memory_max_messages": 40})()
+    runtime._summarize_memory = lambda history, current: _async_value("本次会话摘要")
+    runtime.db = object()
+    monkeypatch.setattr("app.agents.runtime.UserProfileService", ProfileSpy)
+    monkeypatch.setattr("app.agents.runtime.MemoryCardService", CardSpy)
+    context = AgentContext(
+        user=UserAccount(id=1),
+        session=ChatSession(id=1, public_id="normal-session", user_id=1, no_memory=False),
+        original_input="本次会话内容",
+        model_input="本次会话内容",
+    )
+
+    import asyncio
+    asyncio.run(runtime.memory_agent(1, context))
+
+    assert calls == {"profile": 1, "cards": 1}
+    assert context.exam_stage == "冲刺"
+    assert context.memory_cards_context == "known context"
+
+
+async def _async_value(value):
+    return value
 
 
 # ---------------------------------------------------------------------------

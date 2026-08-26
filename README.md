@@ -68,15 +68,15 @@ scripts/
 
 ## Agent loop
 
-每轮对话进入一个 LangGraph 多 Agent 工作流，防止心理安全场景出现无限自主循环：
+每轮对话进入一个有边界的多智能体工作流，防止心理安全场景出现无限自主循环：
 
 ```text
 MemoryAgent
 -> SupervisorAgent
--> KnowledgeAgent
--> RiskGuardianAgent
--> CompanionAgent / CounselorAgent
--> SSE 流式输出
+-> CHAT -> CompanionAgent -> 流式输出
+-> CONSULT/RISK -> RiskGuardianAgent -> risk_guardian_gate
+                    -> HIGH -> 人工审核
+                    -> LOW/MEDIUM -> KnowledgeAgent -> CBT/CounselorAgent
 ```
 
 各 Agent 分工：
