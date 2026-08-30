@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 from pydantic import BaseModel, Field, ValidationError
 
 from app.schemas.dtos import AiMessage
-from app.services.ai import AiClient, PromptTemplates
+from app.services.ai import AiClient
 
 logger = logging.getLogger(__name__)
 
@@ -136,7 +136,6 @@ class CBTService:
         base_question = DIMENSION_QUESTIONS[dim]
         # Add stage-aware context if available
         if exam_stage:
-            stage_label = DIMENSION_LABELS.get(dim, "")
             return f"{base_question}（结合你目前{exam_stage}阶段的情况）"
         return base_question
 

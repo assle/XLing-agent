@@ -2,23 +2,22 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import httpx
 from pydantic import BaseModel, Field, ValidationError
 from tenacity import (
+    before_sleep_log,
     retry,
     retry_if_exception_type,
     stop_after_attempt,
     wait_exponential,
-    before_sleep_log,
-    RetryError,
 )
 
 from app.core.enums import EmotionLabel, RiskLevel
 from app.schemas.dtos import AiMessage
 from app.services.ai import AiClient, PromptTemplates, has_consult_signal, has_high_risk_signal
-
+from app.services.risk_calibration import CalibratedRiskEngine, RiskPrediction
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +54,12 @@ class PsychologyAssessment:
     risk: RiskLevel
     confidence: float
     summary: str
+    risk_probabilities: dict[str, float] = field(default_factory=dict)
+    prediction_set: tuple[RiskLevel, ...] = ()
+    uncertain: bool = False
+    requires_review: bool = False
+    model_version: str = ""
+    calibration_version: str = ""
 
 
 def safe_fallback_assessment() -> PsychologyAssessment:
@@ -73,11 +78,25 @@ def safe_fallback_assessment() -> PsychologyAssessment:
 # ---------------------------------------------------------------------------
 
 class PsychologicalAssessmentService:
-    def __init__(self, ai: AiClient, max_retries: int = 3):
+    def __init__(
+        self,
+        ai: AiClient,
+        max_retries: int = 3,
+        calibrated_risk: CalibratedRiskEngine | None = None,
+    ):
         self.ai = ai
         self.max_retries = max_retries
+        self.calibrated_risk = calibrated_risk
 
     def assess(self, text: str, history: list[AiMessage] | None = None) -> PsychologyAssessment:
+        if self.calibrated_risk is not None:
+            explicit = has_high_risk_signal(text)
+            label = "高风险" if explicit else self.ai.classify(text)
+            decision = self.calibrated_risk.predict(
+                [0.0, 0.0, 0.0] if explicit else self.ai.risk_logits(text),
+                explicit_high_risk=explicit,
+            )
+            return assessment_from_decision(label, decision)
         # Layer 1: HIGH risk keywords bypass the classifier entirely
         if has_high_risk_signal(text):
             return PsychologyAssessment(EmotionLabel.HIGH_RISK, 4.0, RiskLevel.HIGH, 0.95, "检测到明确高风险表达")
@@ -94,6 +113,14 @@ class PsychologicalAssessmentService:
         return safe_fallback_assessment()
 
     async def aassess(self, text: str, history: list[AiMessage] | None = None) -> PsychologyAssessment:
+        if self.calibrated_risk is not None:
+            explicit = has_high_risk_signal(text)
+            label = "高风险" if explicit else await self.ai.aclassify(text)
+            decision = self.calibrated_risk.predict(
+                [0.0, 0.0, 0.0] if explicit else await self.ai.arisk_logits(text),
+                explicit_high_risk=explicit,
+            )
+            return assessment_from_decision(label, decision)
         # Layer 1: HIGH risk keywords bypass the classifier entirely
         if has_high_risk_signal(text):
             return PsychologyAssessment(EmotionLabel.HIGH_RISK, 4.0, RiskLevel.HIGH, 0.95, "检测到明确高风险表达")
@@ -262,3 +289,24 @@ def assessment_from_label(label: str) -> PsychologyAssessment | None:
     if emotion == EmotionLabel.HIGH_RISK:
         risk = RiskLevel.HIGH
     return PsychologyAssessment(emotion, score, risk, 0.8, f"分类器判定为{label.strip()}")
+
+
+def assessment_from_decision(
+    label: str,
+    decision: RiskPrediction,
+) -> PsychologyAssessment:
+    emotion = label_to_emotion(label) or EmotionLabel.ANXIETY
+    return PsychologyAssessment(
+        emotion=emotion,
+        emotion_score=score_for_emotion(emotion),
+        risk=decision.selected_risk,
+        confidence=max(decision.probabilities.values()),
+        summary=f"分类器判定为{label.strip()}；校准风险集合为"
+        + "/".join(risk.value for risk in decision.prediction_set),
+        risk_probabilities=decision.probabilities,
+        prediction_set=decision.prediction_set,
+        uncertain=decision.uncertain,
+        requires_review=decision.requires_review,
+        model_version=decision.model_version,
+        calibration_version=decision.calibration_version,
+    )

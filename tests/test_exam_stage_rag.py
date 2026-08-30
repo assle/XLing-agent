@@ -6,28 +6,15 @@ Covers:
   - Retrieve with stage filtering (match, no-match, all, none)
   - Backward compatible retrieve without stage
 
-Run:  python tests/test_exam_stage_rag.py
+Run: python -m pytest tests/test_exam_stage_rag.py
 """
 from __future__ import annotations
 
-import os
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-
 from app.core.config import Settings
-from app.core.database import Base
 from app.services.knowledge import KnowledgeService, _matches_stage
+from tests.support import DatabaseHarness
 
-
-_test_engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
-_TestSession = sessionmaker(bind=_test_engine, autoflush=False, autocommit=False)
-Base.metadata.create_all(bind=_test_engine)
+_TestSession = DatabaseHarness().sessions
 
 _settings = Settings(knowledge_vector_enabled=False, knowledge_top_k=4)
 
@@ -142,22 +129,3 @@ def test_retrieve_with_all_stage_matches_everything():
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

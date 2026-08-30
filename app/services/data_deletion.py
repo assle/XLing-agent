@@ -6,14 +6,29 @@ After deletion, the user account and JWT token are immediately invalid.
 from __future__ import annotations
 
 import logging
+import sqlite3
+from pathlib import Path
 
 from sqlalchemy.orm import Session
 
+from app.core.config import Settings, get_settings
 from app.models.entities import (
-    UserAccount, UserProfile, MemoryCard, ScreeningResult,
-    ActionPlan, ActionPlanItem, CheckIn, RiskTrajectoryPoint,
-    ChatMessage, ChatSession, PsychologicalReport,
-    ReviewRequest, AlertRecord, ExcelRecord, ToolJob, DeadLetterRecord,
+    ActionPlan,
+    ActionPlanItem,
+    AlertRecord,
+    ChatMessage,
+    ChatSession,
+    CheckIn,
+    DeadLetterRecord,
+    ExcelRecord,
+    MemoryCard,
+    PsychologicalReport,
+    ReviewRequest,
+    RiskTrajectoryPoint,
+    ScreeningResult,
+    ToolJob,
+    UserAccount,
+    UserProfile,
 )
 
 logger = logging.getLogger(__name__)
@@ -57,8 +72,9 @@ PRIVACY_NOTICE = """# Xling 隐私说明
 class DataDeletionService:
     """Delete all user data in a transaction (issue 13)."""
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, settings: Settings | None = None):
         self.db = db
+        self.settings = settings or get_settings()
 
     def delete_all_user_data(self, user_id: int) -> dict:
         """Delete all data for a user in a single transaction.
@@ -73,10 +89,16 @@ class DataDeletionService:
                 s.id for s in self.db.query(ChatSession)
                 .filter(ChatSession.user_id == user_id).all()
             ]
+            thread_ids = [
+                s.public_id for s in self.db.query(ChatSession)
+                .filter(ChatSession.user_id == user_id).all()
+            ]
             report_ids = [
                 r.id for r in self.db.query(PsychologicalReport)
                 .filter(PsychologicalReport.user_id == user_id).all()
             ]
+
+            self._delete_checkpoints(thread_ids)
 
             # Delete in dependency order (children first)
             counts["memory_cards"] = self._delete(MemoryCard, MemoryCard.user_id == user_id)
@@ -129,3 +151,33 @@ class DataDeletionService:
     def _delete(self, model, filter_clause) -> int:
         result = self.db.query(model).filter(filter_clause).delete(synchronize_session="fetch")
         return result
+
+    def _delete_checkpoints(self, thread_ids: list[str]) -> None:
+        if not thread_ids or self.settings.langgraph_checkpoint_backend.lower() not in {
+            "sqlite",
+            "async_sqlite",
+        }:
+            return
+        path = Path(self.settings.langgraph_checkpoint_path)
+        if not path.is_absolute():
+            path = self.settings.project_root / path
+        if not path.exists():
+            return
+        placeholders = ",".join("?" for _ in thread_ids)
+        connection = sqlite3.connect(path)
+        try:
+            tables = {
+                row[0]
+                for row in connection.execute(
+                    "SELECT name FROM sqlite_master WHERE type = 'table'"
+                )
+            }
+            for table in ("writes", "checkpoints", "xling_checkpoint_activity"):
+                if table in tables:
+                    connection.execute(
+                        f"DELETE FROM {table} WHERE thread_id IN ({placeholders})",
+                        thread_ids,
+                    )
+            connection.commit()
+        finally:
+            connection.close()

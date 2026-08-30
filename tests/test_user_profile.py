@@ -7,51 +7,23 @@ Covers:
   - API endpoints (GET/PUT /api/profile/exam)
   - Stage context retrieval for agent runtime
 
-Run:  python tests/test_user_profile.py
+Run: python -m pytest tests/test_user_profile.py
 """
 from __future__ import annotations
 
-import os
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from fastapi import FastAPI
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from starlette.testclient import TestClient
-
 from app.api.routes import router
-from app.core.database import Base, get_db
 from app.core.security import hash_password
 from app.models.entities import UserAccount, UserProfile
 from app.services.user_profile import UserProfileService
-
+from tests.support import ApiHarness
 
 # ---------------------------------------------------------------------------
 # Test setup
 # ---------------------------------------------------------------------------
 
-_test_engine = create_engine(
-    "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
-)
-_TestSession = sessionmaker(bind=_test_engine, autoflush=False, autocommit=False)
-
-
-def _test_get_db():
-    db = _TestSession()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-app = FastAPI()
-app.include_router(router)
-app.dependency_overrides[get_db] = _test_get_db
-Base.metadata.create_all(bind=_test_engine)
+_harness = ApiHarness(router)
+_TestSession = _harness.sessions
+client = _harness.client
 
 
 def _seed():
@@ -78,7 +50,6 @@ def _seed():
 
 
 _seed()
-client = TestClient(app)
 
 
 def _token(username="student", password="student123"):
@@ -308,22 +279,3 @@ def test_api_profile_requires_auth():
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

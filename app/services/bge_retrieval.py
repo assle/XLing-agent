@@ -1,0 +1,188 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Protocol
+
+from app.core.config import Settings
+from app.models.entities import KnowledgeChunk
+
+
+class BgeRetrieverUnavailable(RuntimeError):
+    pass
+
+
+class BgeBackend(Protocol):
+    model_name: str
+    reranker_name: str
+
+    def score(self, query: str, documents: list[str]) -> list[float]: ...
+
+    def rerank(self, query: str, documents: list[str]) -> list[float]: ...
+
+
+@dataclass(frozen=True)
+class RankedKnowledgeChunk:
+    chunk: KnowledgeChunk
+    score: float
+
+
+class BgeM3Retriever:
+    def __init__(
+        self,
+        backend: BgeBackend,
+        *,
+        candidate_pool: int = 20,
+        rerank: bool = True,
+    ) -> None:
+        self.backend = backend
+        self.candidate_pool = max(1, candidate_pool)
+        self.rerank_enabled = rerank
+        self.index_size_bytes = 0
+
+    @classmethod
+    def from_settings(cls, settings: Settings) -> BgeM3Retriever:
+        return cls(
+            FlagEmbeddingBackend(
+                settings.bge_embedding_model,
+                settings.bge_reranker_model,
+                use_fp16=settings.bge_use_fp16,
+                device=settings.bge_device,
+            ),
+            candidate_pool=settings.bge_candidate_pool,
+            rerank=settings.bge_rerank_enabled,
+        )
+
+    @property
+    def embedding_model(self) -> str:
+        return self.backend.model_name
+
+    @property
+    def reranker_model(self) -> str:
+        return self.backend.reranker_name if self.rerank_enabled else ""
+
+    def retrieve(
+        self,
+        query: str,
+        chunks: list[KnowledgeChunk],
+        top_k: int,
+    ) -> list[RankedKnowledgeChunk]:
+        rows = [chunk for chunk in chunks if chunk.content.strip()]
+        if not rows:
+            return []
+        self.index_size_bytes = sum(len(chunk.content.encode("utf-8")) for chunk in rows)
+        scores = self.backend.score(query, [chunk.content for chunk in rows])
+        if len(scores) != len(rows):
+            raise BgeRetrieverUnavailable("BGE-M3 返回的候选分数数量不匹配")
+        candidates = sorted(
+            zip(rows, scores, strict=True),
+            key=lambda item: item[1],
+            reverse=True,
+        )[: max(top_k, self.candidate_pool)]
+        if self.rerank_enabled and candidates:
+            rerank_scores = self.backend.rerank(
+                query,
+                [chunk.content for chunk, _ in candidates],
+            )
+            if len(rerank_scores) != len(candidates):
+                raise BgeRetrieverUnavailable("BGE 重排分数数量不匹配")
+            candidates = [
+                (chunk, score)
+                for (chunk, _), score in zip(candidates, rerank_scores, strict=True)
+            ]
+            candidates.sort(key=lambda item: item[1], reverse=True)
+        return [
+            RankedKnowledgeChunk(chunk=chunk, score=float(score))
+            for chunk, score in candidates[:top_k]
+        ]
+
+
+class FlagEmbeddingBackend:
+    """Lazy official FlagEmbedding adapter so the default app stays lightweight."""
+
+    def __init__(
+        self,
+        model_name: str,
+        reranker_name: str,
+        *,
+        use_fp16: bool,
+        device: str,
+    ) -> None:
+        self.model_name = model_name
+        self.reranker_name = reranker_name
+        self.use_fp16 = use_fp16
+        self.device = device
+        self._model = None
+        self._reranker = None
+        self._document_cache: tuple[tuple[str, ...], Any, Any] | None = None
+
+    def score(self, query: str, documents: list[str]) -> list[float]:
+        model = self._embedding_model()
+        query_encoded = model.encode(
+            [query],
+            return_dense=True,
+            return_sparse=True,
+            return_colbert_vecs=False,
+        )
+        document_key = tuple(documents)
+        if self._document_cache is None or self._document_cache[0] != document_key:
+            document_encoded = model.encode(
+                documents,
+                return_dense=True,
+                return_sparse=True,
+                return_colbert_vecs=False,
+            )
+            self._document_cache = (
+                document_key,
+                document_encoded["dense_vecs"],
+                document_encoded["lexical_weights"],
+            )
+        assert self._document_cache is not None
+        _, dense_vectors, lexical_weights = self._document_cache
+        query_dense = query_encoded["dense_vecs"][0]
+        query_sparse = query_encoded["lexical_weights"][0]
+        scores = []
+        for dense, sparse in zip(dense_vectors, lexical_weights, strict=True):
+            dense_score = float(query_dense @ dense)
+            sparse_score = float(model.compute_lexical_matching_score(query_sparse, sparse))
+            scores.append(dense_score + sparse_score)
+        return scores
+
+    def rerank(self, query: str, documents: list[str]) -> list[float]:
+        reranker = self._reranker_model()
+        scores = reranker.compute_score(
+            [[query, document] for document in documents],
+            normalize=True,
+        )
+        if isinstance(scores, (int, float)):
+            return [float(scores)]
+        return [float(score) for score in scores]
+
+    def _embedding_model(self):
+        if self._model is None:
+            try:
+                from FlagEmbedding import BGEM3FlagModel
+            except ImportError as exc:
+                raise BgeRetrieverUnavailable(
+                    "缺少 FlagEmbedding；请安装 requirements-bge.txt"
+                ) from exc
+            self._model = BGEM3FlagModel(
+                self.model_name,
+                use_fp16=self.use_fp16,
+                devices=self.device,
+            )
+        return self._model
+
+    def _reranker_model(self):
+        if self._reranker is None:
+            try:
+                from FlagEmbedding import FlagReranker
+            except ImportError as exc:
+                raise BgeRetrieverUnavailable(
+                    "缺少 FlagEmbedding；请安装 requirements-bge.txt"
+                ) from exc
+            self._reranker = FlagReranker(
+                self.reranker_name,
+                use_fp16=self.use_fp16,
+                devices=self.device,
+            )
+        return self._reranker

@@ -7,27 +7,22 @@ Covers:
   - Quality summary computation (mean, std, unstable flag)
   - End-to-end mock mode (no API key needed, verifies report structure)
 
-Run:  python tests/test_quality_eval.py
+Run: python -m pytest tests/test_quality_eval.py
 """
 from __future__ import annotations
 
 import json
-import os
-import sys
 import tempfile
 from pathlib import Path
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from app.core.config import Settings
-from app.quality_eval.judge_prompt import parse_judge_response, build_judge_messages
-from app.quality_eval.runner import (
+from evals.config import EvalSettings
+from evals.quality.judge_prompt import build_judge_messages, parse_judge_response
+from evals.quality.runner import (
     QUALITY_DIMENSIONS,
     build_summary,
     compute_quality_summary,
     evaluate,
 )
-
 
 # ---------------------------------------------------------------------------
 # parse_judge_response
@@ -170,7 +165,7 @@ def test_evaluate_mock_mode_structure():
         dataset_path = tmp_path / "dataset.json"
         dataset_path.write_text(json.dumps(cases, ensure_ascii=False), encoding="utf-8")
 
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "quality_eval_dataset": str(dataset_path),
             "quality_eval_output": str(tmp_path / "report.json"),
             "quality_eval_summary_output": str(tmp_path / "summary.json"),
@@ -182,6 +177,7 @@ def test_evaluate_mock_mode_structure():
         report = evaluate(settings, provider="mock")
 
     assert report["totalCases"] == 2
+    assert report["artifactVersion"]["datasetVersion"]
     assert report["genProvider"] == "mock"
     assert report["judgeProvider"] == "mock"
     assert report["judgeRuns"] == 3
@@ -208,7 +204,7 @@ def test_evaluate_mock_mode_writes_files():
 
         report_path = tmp_path / "report.json"
         summary_path = tmp_path / "summary.json"
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "quality_eval_dataset": str(dataset_path),
             "quality_eval_output": str(report_path),
             "quality_eval_summary_output": str(summary_path),
@@ -236,7 +232,7 @@ def test_evaluate_mock_mode_stable_scores():
         dataset_path = tmp_path / "dataset.json"
         dataset_path.write_text(json.dumps(cases, ensure_ascii=False), encoding="utf-8")
 
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "quality_eval_dataset": str(dataset_path),
             "quality_eval_output": str(tmp_path / "report.json"),
             "quality_eval_summary_output": str(tmp_path / "summary.json"),
@@ -251,27 +247,3 @@ def test_evaluate_mock_mode_stable_scores():
     for dim in QUALITY_DIMENSIONS:
         assert case["dimensionStats"][dim]["std"] == 0.0
     assert report["perDimension"]["empathy"]["unstable"] is False
-
-
-# ---------------------------------------------------------------------------
-# Runner
-# ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

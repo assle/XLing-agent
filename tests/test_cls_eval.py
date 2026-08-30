@@ -1,17 +1,20 @@
 """Tests for the classifier evaluation runner.
 
 Ticket 03: verifies normalize_label, classify_mock and compute_metrics.
-Run:  python tests/test_cls_eval.py
+Run: python -m pytest tests/test_cls_eval.py
 """
 from __future__ import annotations
 
-import os
-import sys
+import json
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from app.cls_eval.runner import CLASSES, classify_mock, compute_metrics, normalize_label
-
+from evals.classifier.runner import (
+    CLASSES,
+    classify_mock,
+    compute_metrics,
+    evaluate,
+    normalize_label,
+)
+from evals.config import EvalSettings
 
 # ---------------------------------------------------------------------------
 # normalize_label
@@ -97,25 +100,20 @@ def test_compute_metrics_total_cases():
     assert m["totalCases"] == 4
 
 
-# ---------------------------------------------------------------------------
-# Runner
-# ---------------------------------------------------------------------------
+def test_classifier_eval_report_contains_artifact_version(tmp_path):
+    dataset = tmp_path / "classifier.jsonl"
+    dataset.write_text(
+        json.dumps({"input": "最近很焦虑", "output": "焦虑"}, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    settings = EvalSettings(
+        cls_eval_dataset=str(dataset),
+        cls_eval_output=str(tmp_path / "report.json"),
+        cls_eval_summary_output=str(tmp_path / "summary.json"),
+        cls_eval_ai_provider="mock",
+    )
 
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
+    report = evaluate(settings)
 
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)
+    assert report["artifactVersion"]["datasetVersion"]
+    assert report["artifactVersion"]["classifierModel"]

@@ -5,19 +5,14 @@ outputs only a Chinese emotion label; the service maps it to EmotionLabel and
 fills score/risk/confidence/summary via rules. Keyword short-circuit (layer 1)
 and conservative fallback (layer 3) remain unchanged.
 
-Run:  python tests/test_classifier_assessment.py
+Run: python -m pytest tests/test_classifier_assessment.py
 """
 from __future__ import annotations
 
 import asyncio
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.core.enums import EmotionLabel, RiskLevel
 from app.services.assessment import (
-    PsychologyAssessment,
     PsychologicalAssessmentService,
     assessment_from_label,
     label_to_emotion,
@@ -216,22 +211,3 @@ def test_legacy_complete_still_callable():
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

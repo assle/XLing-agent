@@ -5,7 +5,7 @@ from app.models.entities import PsychologicalReport
 from app.services.tools import ToolOrchestrationService
 
 try:
-    from mcp.server.fastmcp import FastMCP
+    from mcp.server.fastmcp import FastMCP  # type: ignore[attr-defined]
 except Exception as exc:  # pragma: no cover
     raise RuntimeError("请先安装 requirements.txt 中的 mcp 依赖") from exc
 

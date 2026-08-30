@@ -11,8 +11,8 @@ from sqlalchemy.orm import Session
 
 from app.core.config import Settings
 from app.models.entities import KnowledgeChunk
+from app.services.bge_retrieval import BgeM3Retriever, BgeRetrieverUnavailable
 from app.services.vector_store import FALLBACK_RETRIEVAL_LABEL, PRIMARY_RETRIEVAL_LABEL, ChromaKnowledgeStore
-
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +26,14 @@ class SearchResult:
 
 
 class KnowledgeService:
-    def __init__(self, db: Session, settings: Settings, ai_client=None):
+    def __init__(self, db: Session, settings: Settings, ai_client=None, retriever=None):
         self.db = db
         self.settings = settings
         self.vector_store = ChromaKnowledgeStore(settings)
         self.ai_client = ai_client
+        self.retriever = retriever
+        if self.retriever is None and settings.knowledge_retriever == "bge_m3":
+            self.retriever = BgeM3Retriever.from_settings(settings)
         self._bm25 = None
 
     def count(self) -> int:
@@ -116,6 +119,27 @@ class KnowledgeService:
 
     def retrieve(self, query: str, top_k: int | None = None) -> list[SearchResult]:
         top_k = top_k or self.settings.knowledge_top_k
+        if self.retriever is not None:
+            try:
+                chunks = self.db.query(KnowledgeChunk).order_by(
+                    KnowledgeChunk.source.asc(),
+                    KnowledgeChunk.source_index.asc(),
+                ).all()
+                ranked = self.retriever.retrieve(query, chunks, top_k)
+                results = [
+                    SearchResult(
+                        chunk_id=item.chunk.id,
+                        source=item.chunk.source,
+                        content=item.chunk.content,
+                        score=item.score,
+                    )
+                    for item in ranked
+                ]
+                return self._expand_best(results, top_k)
+            except BgeRetrieverUnavailable:
+                if self.settings.bge_required:
+                    raise
+                logger.warning("BGE-M3 检索不可用，回退到当前检索", exc_info=True)
         # Primary retrieval: embed the rewritten query with text-embedding-3-small,
         # then run Chroma nearest-neighbor search. Fallback happens only when
         # OPENAI_API_KEY/chromadb/vector calls are unavailable or fail.

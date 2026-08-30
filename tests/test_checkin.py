@@ -8,45 +8,31 @@ Covers:
   - User isolation
   - API endpoints
 
-Run:  python tests/test_checkin.py
+Run: python -m pytest tests/test_checkin.py
 """
 from __future__ import annotations
 
-import os
-import sys
-from datetime import datetime, timedelta
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from fastapi import FastAPI
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from starlette.testclient import TestClient
+from datetime import timedelta
 
 from app.api.routes import router
-from app.core.database import Base, get_db
 from app.core.security import hash_password
-from app.models.entities import ChatSession, PsychologicalReport, ReviewRequest, UserAccount, ActionPlan, ActionPlanItem, CheckIn
+from app.core.time import utc_now
+from app.models.entities import (
+    ActionPlan,
+    ActionPlanItem,
+    ChatSession,
+    CheckIn,
+    PsychologicalReport,
+    ReviewRequest,
+    UserAccount,
+)
 from app.services.action_plan import ActionPlanService
 from app.services.checkin import CheckInService
+from tests.support import ApiHarness
 
-
-_test_engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
-_TestSession = sessionmaker(bind=_test_engine, autoflush=False, autocommit=False)
-
-def _test_get_db():
-    db = _TestSession()
-    try:
-        yield db
-    finally:
-        db.close()
-
-app = FastAPI()
-app.include_router(router)
-app.dependency_overrides[get_db] = _test_get_db
-Base.metadata.create_all(bind=_test_engine)
+_harness = ApiHarness(router)
+_TestSession = _harness.sessions
+client = _harness.client
 
 def _seed():
     db = _TestSession()
@@ -61,7 +47,6 @@ def _seed():
         db.close()
 
 _seed()
-client = TestClient(app)
 
 def _token(u="student", p="student123"):
     r = client.post("/api/auth/login", json={"username": u, "password": p})
@@ -89,7 +74,7 @@ def _make_plan(user_id=1, age_hours=0):
         svc = ActionPlanService(db, ai=None)
         plan = svc.generate_plan(user_id, None, "summary")
         if age_hours:
-            plan.created_at = datetime.utcnow() - timedelta(hours=age_hours)
+            plan.created_at = utc_now() - timedelta(hours=age_hours)
             db.commit()
         return plan.id
     finally:
@@ -378,22 +363,3 @@ def test_api_checkin_without_session_escalates_without_review():
 
 # Runner
 # ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

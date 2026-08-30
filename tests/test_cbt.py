@@ -9,21 +9,13 @@ Covers:
   - Schema validation failure -> heuristic fallback
   - Completion state
 
-Run:  python tests/test_cbt.py
+Run: python -m pytest tests/test_cbt.py
 """
 from __future__ import annotations
 
 import json
-import os
-import sys
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from app.services.ai import AiClient
-from app.services.cbt import CBTService, CBTState, DIMENSIONS
-from app.core.config import Settings
-
+from app.services.cbt import CBTService, CBTState
 
 # ---------------------------------------------------------------------------
 # CBTState properties
@@ -242,22 +234,3 @@ def test_sequential_flow_completes():
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

@@ -10,31 +10,18 @@ Covers:
   - All escalations have desensitized summary + safety message
   - Screening suggestion is voluntary (not forced)
 
-Run:  python tests/test_escalation.py
+Run: python -m pytest tests/test_escalation.py
 """
 from __future__ import annotations
 
-import os
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-
 from app.core.config import Settings
-from app.core.database import Base
 from app.core.enums import RiskLevel
 from app.core.security import hash_password
-from app.models.entities import UserAccount, ChatSession, PsychologicalReport, ReviewRequest
-from app.services.escalation import EscalationService, SAFETY_MESSAGE, SCREENING_SUGGESTION
+from app.models.entities import ChatSession, PsychologicalReport, ReviewRequest, UserAccount
+from app.services.escalation import SAFETY_MESSAGE, SCREENING_SUGGESTION, EscalationService
+from tests.support import DatabaseHarness
 
-
-_test_engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
-_TestSession = sessionmaker(bind=_test_engine, autoflush=False, autocommit=False)
-Base.metadata.create_all(bind=_test_engine)
+_TestSession = DatabaseHarness().sessions
 _settings = Settings()
 
 
@@ -289,22 +276,3 @@ def test_checkin_summary_uses_chinese_status():
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
 from importlib import import_module
 
 from app.core.config import Settings
+from app.core.time import utc_now
 from app.models.entities import ChatMessage
 from app.schemas.dtos import AiMessage
 from app.services.privacy import PrivacySanitizer
@@ -86,7 +86,7 @@ class RedisShortTermMemoryStore:
             {
                 "role": role.lower(),
                 "content": content,
-                "createdAt": datetime.utcnow().isoformat(),
+                "createdAt": utc_now().isoformat(),
             },
             ensure_ascii=False,
         )

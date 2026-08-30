@@ -1,6 +1,6 @@
-# 4. Resume 检测 Checkpoint 丢失时自动降级
+# 4. 人工审核恢复缺少检查点时自动安全降级
 
-日期：2026-07-15
+日期：2026-08-30
 
 ## 状态
 
@@ -8,43 +8,42 @@ Accepted
 
 ## 背景
 
-[ADR-0002](0002-checkpointer-memorysaver.md) 选择 MemorySaver（内存）做 checkpointer。MemorySaver 不持久化跨重启--服务重启后 checkpoint 丢失。
+人工审核请求保存在业务数据库中，图检查点保存在独立持久化存储中。即使默认检查点已从内存升级为异步 SQLite，下面情况仍可能导致审核请求存在而检查点不可用：
 
-但 ReviewRequest 存在 DB 里（持久化），重启后 DB 仍显示 `status=pending`。断裂点：
-- DB 说"有 pending 审核"（持久化，重启不丢）
-- MemorySaver 丢了 checkpoint（内存，重启清空）
-- 辅导员点批准/驳回，`resume(thread_id)` 去 MemorySaver 找不到 checkpoint，图从入口节点空跑，`KeyError: 'context'` 崩溃
+- 检查点超过保留期限；
+- 检查点文件损坏或被清理；
+- 状态版本不兼容；
+- 持久化连接失败；
+- 旧数据来自未启用持久化的版本。
 
-pending 审核卡死，辅导员无法处理。
+若恢复逻辑假设检查点必然存在，管理员批准或拒绝时可能抛出异常，导致待审核流程卡死。
 
 ## 决策
 
-在 `resume()` 开头检查 checkpoint 是否存在：`get_state(thread_id).values` 为空即代表无 checkpoint（有 checkpoint 时 `.values` 含 `{"context": AgentContext}`）。
+在 `resume()` 调用图恢复前检查线程状态。没有可用状态时不继续执行图，而是：
 
-无 checkpoint 时**自动降级**，不调 ainvoke：
-- 返回 `AgentRunResult(degraded=True, fallback_response=固定兜底回复)`
-- 调用方（API 端点）检测 `degraded` -> 把 ReviewRequest 标记为 `escalated` + 发兜底回复给学生
-- 对 approve 和 reject 都生效（无论辅导员点什么，无 checkpoint 都走兜底）
+- 返回 `AgentRunResult(degraded=True)`；
+- 使用固定安全回复，不调用生成模型；
+- 将人工审核请求标记为已安全升级；
+- 批准和拒绝都使用同一保守降级路径；
+- 记录检查点不可用的操作错误类型，但不记录学生正文。
 
 ## 后果
 
 正面：
-- pending 审核不卡死，学生能收到兜底回复
-- 不抛未处理异常，优雅降级
-- 面试可讲健壮性设计："我考虑了服务重启时的降级策略--检测 checkpoint 丢失就安全降级到兜底，而不是让审核卡死"
+
+- 持久化检查点是增强能力，不会成为新的单点故障；
+- 过期或损坏状态不会让人工审核卡死；
+- 学生始终能收到确定的安全回复。
 
 负面：
-- 重启后的 pending 审核拿不到原 context（intent/risk/knowledge），只能发兜底回复，无法走正常的 AI 回复或驳回路径
-- 降级结果的 `intent` 等字段是占位符（原值随 checkpoint 丢了），但调用方只用 `degraded` + `fallback_response`，无影响
 
-## 考虑过的替代方案
-
-- **option a（接受、文档记录）**：pending 审核卡死，辅导员无法处理。不够健壮。
-- **option c（AsyncSqliteSaver 懒初始化）**：真正的持久化，但需把 checkpointer 创建从 `__init__` 移到 async `run()` 首次调用，设计改动大。单进程学习项目的边缘场景不值得。
-- **option b（本决策）**：降级而非持久化。简单、健壮、够用。
+- 缺少检查点时无法恢复原来的检索结果和回复计划；
+- 管理员选择不会改变固定降级回复；
+- 降级结果中的部分字段只能使用安全占位值。
 
 ## 相关
 
-- [ADR-0002](0002-checkpointer-memorysaver.md)（MemorySaver 不持久化是本 ADR 的起因）
-- Issue 08（resume auto-degrade）
-- Grilling session 决策：单进程 + 保持 async + option b 降级
+- [ADR-0002](0002-checkpointer-memorysaver.md)
+- [ADR-0003](0003-interrupt-node-splitting.md)
+- GitHub Issue #13

@@ -3,21 +3,25 @@ from __future__ import annotations
 import json
 import uuid
 from dataclasses import dataclass
+from typing import Callable
 
 from sqlalchemy.orm import Session
 
 from app.agents.factory import create_agent_runtime
-from app.agents.runtime import ActionPlanEvent, CbtEvent
+from app.agents.runtime import ActionPlanEvent, AgentRuntimeService, CbtEvent
 from app.core.config import Settings
 from app.core.enums import MessageRole
-from app.models.entities import ChatMessage, ChatSession, PsychologicalReport, UserAccount
+from app.models.entities import ChatMessage, ChatSession, UserAccount
 from app.schemas.dtos import AiMessage, ChatRequest, ChatStreamEvent
 from app.services.ai import AiClient, PromptTemplates
 from app.services.memory import RedisShortTermMemoryStore
-from app.services.mcp_client import McpToolError, XlingMcpToolClient
 from app.services.privacy import PrivacySanitizer
-from app.services.review import ReviewService
-from app.services.tool_queue import ToolQueueService
+from app.services.report_dispatch import (
+    ReportDispatcher,
+    ReportDispatchError,
+    create_report_dispatcher,
+)
+from app.services.support_turn import SupportTurnTransaction
 
 
 @dataclass
@@ -32,13 +36,46 @@ class PreparedChat:
     action_plan_event: dict | None
 
 
+RuntimeFactory = Callable[[Session, Settings], AgentRuntimeService]
+
+
+@dataclass(frozen=True)
+class ChatDependencies:
+    """Internal collaborators behind the chat interface."""
+
+    ai: AiClient
+    memory: RedisShortTermMemoryStore
+    privacy: PrivacySanitizer
+    runtime_factory: RuntimeFactory
+    report_dispatcher: ReportDispatcher
+
+    @classmethod
+    def create(cls, db: Session, settings: Settings) -> ChatDependencies:
+        return cls(
+            ai=AiClient(settings),
+            memory=RedisShortTermMemoryStore(settings),
+            privacy=PrivacySanitizer(),
+            runtime_factory=create_agent_runtime,
+            report_dispatcher=create_report_dispatcher(db, settings),
+        )
+
+
 class ChatService:
-    def __init__(self, db: Session, settings: Settings):
+    def __init__(
+        self,
+        db: Session,
+        settings: Settings,
+        dependencies: ChatDependencies | None = None,
+    ):
         self.db = db
         self.settings = settings
-        self.privacy = PrivacySanitizer()
-        self.memory = RedisShortTermMemoryStore(settings)
-        self.ai = AiClient(settings)
+        dependencies = dependencies or ChatDependencies.create(db, settings)
+        self.privacy = dependencies.privacy
+        self.memory = dependencies.memory
+        self.ai = dependencies.ai
+        self.runtime_factory = dependencies.runtime_factory
+        self.report_dispatcher = dependencies.report_dispatcher
+        self.turns = SupportTurnTransaction(db, settings)
 
     async def stream_chat(self, user: UserAccount, request: ChatRequest):
         prepared = await self.prepare(user, request)
@@ -52,12 +89,17 @@ class ChatService:
         if prepared.pending_review:
             ack = PromptTemplates.crisis_acknowledgment()
             self.save_message(user, prepared.session, MessageRole.ASSISTANT, ack)
-            if prepared.report_id is not None and self.settings.tool_queue_enabled:
-                ToolQueueService(self.db, self.settings).enqueue_report(prepared.report_id, prepared.risk_level)
             yield sse(
                 "pending_review",
                 ChatStreamEvent(type="pending_review", sessionId=session_id, content=ack).model_dump(),
             )
+            if prepared.report_id is not None:
+                error = await self._dispatch_report(prepared.report_id, prepared.risk_level)
+                if error:
+                    yield sse(
+                        "error",
+                        ChatStreamEvent(type="error", sessionId=session_id, message=error).model_dump(),
+                    )
             yield sse("done", ChatStreamEvent(type="done", sessionId=session_id).model_dump())
             return
         if prepared.cbt_event is not None:
@@ -71,66 +113,46 @@ class ChatService:
         if assistant:
             self.save_message(user, prepared.session, MessageRole.ASSISTANT, "".join(assistant))
         if prepared.report_id is not None:
-            if self.settings.tool_queue_enabled:
-                ToolQueueService(self.db, self.settings).enqueue_report(prepared.report_id, prepared.risk_level)
-            else:
-                try:
-                    await XlingMcpToolClient(self.settings).handle_report(prepared.report_id, prepared.risk_level)
-                except McpToolError as exc:
-                    yield sse(
-                        "error",
-                        ChatStreamEvent(
-                            type="error",
-                            sessionId=session_id,
-                            message=f"MCP 工具调用失败：{exc}",
-                        ).model_dump(),
-                    )
-                    return
+            error = await self._dispatch_report(prepared.report_id, prepared.risk_level)
+            if error:
+                yield sse(
+                    "error",
+                    ChatStreamEvent(type="error", sessionId=session_id, message=error).model_dump(),
+                )
+                return
         yield sse("done", ChatStreamEvent(type="done", sessionId=session_id).model_dump())
 
     async def prepare(self, user: UserAccount, request: ChatRequest) -> PreparedChat:
         text = request.message.strip()
         model_input = self.privacy.sanitize(text)
         session = self.resolve_session(user, request.sessionId, text, request.noMemory)
-        agent_run = await create_agent_runtime(self.db, self.settings).run(user, session, text, model_input)
-        self.save_message(user, session, MessageRole.USER, text)
-        report_id = None
-        if agent_run.requires_report and agent_run.assessment is not None:
-            report = PsychologicalReport(
-                user_id=user.id,
-                session_id=session.id,
-                content=text,
-                intent=agent_run.intent.value,
-                emotion=agent_run.assessment.emotion.value,
-                emotion_score=agent_run.assessment.emotion_score,
-                risk_level=agent_run.risk_level.value,
-                confidence=agent_run.assessment.confidence,
-                summary=agent_run.assessment.summary,
-            )
-            self.db.add(report)
-            self.db.commit()
-            report_id = report.id
-            risk_level = report.risk_level
-            if agent_run.pending_review:
-                if agent_run.trajectory_rising:
-                    handoff_reason = "RISK_TRAJECTORY_RISING"
-                    risk_trend = agent_run.trajectory_trend or "风险轨迹连续上升"
-                else:
-                    handoff_reason = "HIGH_RISK_KEYWORD"
-                    risk_trend = "单条消息达到高风险"
-                ReviewService(self.db, self.settings).create_with_context(
-                    session_id=session.id,
-                    report_id=report_id,
-                    thread_id=session.public_id,
-                    risk_summary=agent_run.assessment.summary,
-                    handoff_reason=handoff_reason,
-                    desensitized_summary=self.privacy.build_review_summary(
-                        current_difficulty=text,
-                        risk_trend=risk_trend,
-                    ),
-                )
+        runtime = self.runtime_factory(self.db, self.settings)
+        try:
+            agent_run = await runtime.run(user, session, text, model_input)
+        finally:
+            close = getattr(runtime, "aclose", None)
+            if close is not None:
+                await close()
+        if agent_run.trajectory_rising:
+            handoff_reason = "RISK_TRAJECTORY_RISING"
+            risk_trend = agent_run.trajectory_trend or "风险轨迹连续上升"
         else:
-            risk_level = None
+            handoff_reason = "HIGH_RISK_KEYWORD"
+            risk_trend = "单条消息达到高风险"
+        persisted = self.turns.save_support_turn(
+            user=user,
+            session=session,
+            content=text,
+            run=agent_run,
+            handoff_reason=handoff_reason,
+            desensitized_summary=self.privacy.build_review_summary(
+                current_difficulty=text,
+                risk_trend=risk_trend,
+            ),
+        )
+        self.memory.append(session.public_id, MessageRole.USER.value, text)
+        report_id = persisted.report.id if persisted.report else None
+        risk_level = persisted.report.risk_level if persisted.report else None
         return PreparedChat(
             session=session,
             messages=agent_run.response_messages,
@@ -142,6 +164,13 @@ class ChatService:
                 _action_plan_payload(agent_run.action_plan_event) if agent_run.action_plan_event else None
             ),
         )
+
+    async def _dispatch_report(self, report_id: int, risk_level: str | None) -> str | None:
+        try:
+            await self.report_dispatcher.dispatch(report_id, risk_level)
+        except ReportDispatchError as exc:
+            return f"报告后处理失败：{exc}"
+        return None
 
     def resolve_session(
         self, user: UserAccount, public_id: str | None, text: str, no_memory: bool | None = None

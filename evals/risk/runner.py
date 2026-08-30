@@ -6,10 +6,10 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
-from app.core.config import Settings, get_settings
+from app.core.versioning import ArtifactVersionResolver
 from app.services.ai import AiClient
 from app.services.assessment import PsychologicalAssessmentService
-
+from evals.config import EvalSettings, get_eval_settings
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,7 @@ async def _run_cases(
 
 
 def evaluate(
-    settings: Settings | None = None, provider: str | None = None
+    settings: EvalSettings | None = None, provider: str | None = None
 ) -> dict:
     """Run risk evaluation against the labeled dataset.
 
@@ -88,7 +88,7 @@ def evaluate(
     ``PsychologicalAssessmentService.aassess()`` for each, computes metrics,
     and writes full report + compact summary to disk.
     """
-    settings = settings or get_settings()
+    settings = settings or get_eval_settings()
     provider = provider or settings.risk_eval_ai_provider
 
     dataset_path = Path(settings.risk_eval_dataset)
@@ -113,6 +113,7 @@ def evaluate(
         "createdAt": datetime.now(timezone.utc).isoformat(),
         "provider": provider,
         "dataset": str(dataset_path),
+        "artifactVersion": ArtifactVersionResolver(ai_settings).current(dataset_path).to_dict(),
         **metrics,
         "results": results,
     }
@@ -157,4 +158,4 @@ if __name__ == "__main__":
     for cls in RISK_CLASSES:
         m = report["perClass"][cls]
         print(f"  {cls}: precision={m['precision']:.4f} recall={m['recall']:.4f} f1={m['f1']:.4f}")
-    print(f"summary={get_settings().risk_eval_summary_output}")
+    print(f"summary={get_eval_settings().risk_eval_summary_output}")

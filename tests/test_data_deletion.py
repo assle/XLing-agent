@@ -7,50 +7,37 @@ Covers:
   - After deletion, user account and JWT are invalid
   - Data deletion requires authentication
 
-Run:  python tests/test_data_deletion.py
+Run: python -m pytest tests/test_data_deletion.py
 """
 from __future__ import annotations
 
-import os
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from fastapi import FastAPI
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from starlette.testclient import TestClient
+import sqlite3
 
 from app.api.routes import router
-from app.core.database import Base, get_db
+from app.core.config import Settings
 from app.core.security import hash_password
 from app.models.entities import (
-    UserAccount, UserProfile, MemoryCard, ScreeningResult,
-    ActionPlan, ActionPlanItem, CheckIn, RiskTrajectoryPoint,
-    ChatMessage, ChatSession, PsychologicalReport,
+    ActionPlan,
+    ActionPlanItem,
+    ChatMessage,
+    ChatSession,
+    CheckIn,
+    MemoryCard,
+    PsychologicalReport,
+    RiskTrajectoryPoint,
+    ScreeningResult,
+    UserAccount,
+    UserProfile,
 )
-from app.services.data_deletion import DataDeletionService, PRIVACY_NOTICE
-from app.services.user_profile import UserProfileService
-from app.services.memory_cards import MemoryCardService
 from app.services.action_plan import ActionPlanService
+from app.services.data_deletion import DataDeletionService
+from app.services.memory_cards import MemoryCardService
+from app.services.user_profile import UserProfileService
+from tests.support import ApiHarness
 
-
-_test_engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
-_TestSession = sessionmaker(bind=_test_engine, autoflush=False, autocommit=False)
-
-def _test_get_db():
-    db = _TestSession()
-    try:
-        yield db
-    finally:
-        db.close()
-
-app = FastAPI()
-app.include_router(router)
-app.dependency_overrides[get_db] = _test_get_db
-Base.metadata.create_all(bind=_test_engine)
+_harness = ApiHarness(router)
+_TestSession = _harness.sessions
+client = _harness.client
 
 def _seed():
     db = _TestSession()
@@ -65,7 +52,6 @@ def _seed():
         db.close()
 
 _seed()
-client = TestClient(app)
 
 def _token(u="student", p="student123"):
     r = client.post("/api/auth/login", json={"username": u, "password": p})
@@ -86,10 +72,10 @@ def _setup_user_data(user_id=1):
         from app.services.screening import ScreeningService
         ScreeningService(db).submit_screening(user_id, "PHQ-9", [0]*9)
         # Action plan
-        plan = ActionPlanService(db, ai=None).generate_plan(user_id, None, "summary")
+        ActionPlanService(db, ai=None).generate_plan(user_id, None, "summary")
         # Risk trajectory
-        from app.services.risk_trajectory import RiskTrajectoryService
         from app.core.enums import RiskLevel
+        from app.services.risk_trajectory import RiskTrajectoryService
         RiskTrajectoryService(db).record_point(user_id, None, RiskLevel.LOW, 1.0)
         # Chat session + message
         session = ChatSession(public_id=f"test-sess-{user_id}", title="test", user_id=user_id)
@@ -213,25 +199,48 @@ def test_api_delete_account():
     assert "details" in data
 
 
-# ---------------------------------------------------------------------------
-# Runner
-# ---------------------------------------------------------------------------
+def test_data_deletion_removes_persistent_checkpoints(tmp_path):
+    _reset_db()
+    _setup_user_data(1)
+    db = _TestSession()
+    checkpoint_path = tmp_path / "checkpoints.db"
+    try:
+        thread_id = db.query(ChatSession).filter(ChatSession.user_id == 1).one().public_id
+        connection = sqlite3.connect(checkpoint_path)
+        connection.executescript(
+            """
+            CREATE TABLE checkpoints (
+                thread_id TEXT, checkpoint_ns TEXT, checkpoint_id TEXT,
+                parent_checkpoint_id TEXT, type TEXT, checkpoint BLOB, metadata BLOB
+            );
+            CREATE TABLE writes (
+                thread_id TEXT, checkpoint_ns TEXT, checkpoint_id TEXT,
+                task_id TEXT, idx INTEGER, channel TEXT, type TEXT, value BLOB
+            );
+            """
+        )
+        connection.execute(
+            "INSERT INTO checkpoints(thread_id, checkpoint_id) VALUES (?, ?)",
+            (thread_id, "checkpoint-1"),
+        )
+        connection.execute(
+            "INSERT INTO writes(thread_id, checkpoint_id) VALUES (?, ?)",
+            (thread_id, "checkpoint-1"),
+        )
+        connection.commit()
+        connection.close()
 
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
+        DataDeletionService(
+            db,
+            Settings(
+                langgraph_checkpoint_backend="async_sqlite",
+                langgraph_checkpoint_path=str(checkpoint_path),
+            ),
+        ).delete_all_user_data(1)
 
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)
+        connection = sqlite3.connect(checkpoint_path)
+        assert connection.execute("SELECT COUNT(*) FROM checkpoints").fetchone()[0] == 0
+        assert connection.execute("SELECT COUNT(*) FROM writes").fetchone()[0] == 0
+        connection.close()
+    finally:
+        db.close()

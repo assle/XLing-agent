@@ -7,45 +7,22 @@ Covers:
   - API endpoints (GET/POST/PUT/DELETE/confirm)
   - Confirmed context for agent runtime
 
-Run:  python tests/test_memory_cards.py
+Run: python -m pytest tests/test_memory_cards.py
 """
 from __future__ import annotations
 
-import os
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from fastapi import FastAPI
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from starlette.testclient import TestClient
-
-from app.api.routes import router
-from app.core.database import Base, get_db
-from app.core.security import hash_password
-from app.models.entities import ChatSession, UserAccount, MemoryCard
-from app.services.memory_cards import MemoryCardService
 from app.agents.runtime import AgentContext, AgentRuntimeService
+from app.api.routes import router
+from app.core.config import Settings
+from app.core.security import hash_password
+from app.models.entities import ChatSession, MemoryCard, UserAccount
 from app.schemas.dtos import AiMessage
+from app.services.memory_cards import MemoryCardService
+from tests.support import ApiHarness, build_runtime
 
-
-_test_engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
-_TestSession = sessionmaker(bind=_test_engine, autoflush=False, autocommit=False)
-
-def _test_get_db():
-    db = _TestSession()
-    try:
-        yield db
-    finally:
-        db.close()
-
-app = FastAPI()
-app.include_router(router)
-app.dependency_overrides[get_db] = _test_get_db
-Base.metadata.create_all(bind=_test_engine)
+_harness = ApiHarness(router)
+_TestSession = _harness.sessions
+client = _harness.client
 
 def _seed():
     db = _TestSession()
@@ -60,7 +37,6 @@ def _seed():
         db.close()
 
 _seed()
-client = TestClient(app)
 
 def _token(u="student", p="student123"):
     r = client.post("/api/auth/login", json={"username": u, "password": p})
@@ -269,9 +245,12 @@ def test_no_memory_session_does_not_load_long_term_context(monkeypatch):
         def replace(self, session_id, messages):  # noqa: ANN001
             pass
 
-    runtime = AgentRuntimeService.__new__(AgentRuntimeService)
-    runtime.memory = MemorySpy()
-    runtime.settings = type("Settings", (), {"chat_history_limit": 10, "redis_memory_max_messages": 40})()
+    runtime = build_runtime(
+        AgentRuntimeService,
+        db=object(),
+        settings=Settings(ai_provider="mock", knowledge_vector_enabled=False),
+        memory=MemorySpy(),
+    )
     runtime._summarize_memory = lambda history, current: _async_value("本次会话摘要")
     monkeypatch.setattr("app.agents.runtime.UserProfileService", ProfileSpy)
     monkeypatch.setattr("app.agents.runtime.MemoryCardService", CardSpy)
@@ -311,11 +290,13 @@ def test_normal_session_loads_long_term_context(monkeypatch):
         def load_recent(self, session_id):  # noqa: ANN001
             return [AiMessage(role="user", content="本次会话内容")]
 
-    runtime = AgentRuntimeService.__new__(AgentRuntimeService)
-    runtime.memory = MemorySpy()
-    runtime.settings = type("Settings", (), {"chat_history_limit": 10, "redis_memory_max_messages": 40})()
+    runtime = build_runtime(
+        AgentRuntimeService,
+        db=object(),
+        settings=Settings(ai_provider="mock", knowledge_vector_enabled=False),
+        memory=MemorySpy(),
+    )
     runtime._summarize_memory = lambda history, current: _async_value("本次会话摘要")
-    runtime.db = object()
     monkeypatch.setattr("app.agents.runtime.UserProfileService", ProfileSpy)
     monkeypatch.setattr("app.agents.runtime.MemoryCardService", CardSpy)
     context = AgentContext(
@@ -335,27 +316,3 @@ def test_normal_session_loads_long_term_context(monkeypatch):
 
 async def _async_value(value):
     return value
-
-
-# ---------------------------------------------------------------------------
-# Runner
-# ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

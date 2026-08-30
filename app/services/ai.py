@@ -146,6 +146,12 @@ class AiClient:
             return self._mock_classify(text)
         return await self._ollama_classify_async(PromptTemplates.classifier_prompt(text))
 
+    def risk_logits(self, text: str) -> list[float]:
+        return _risk_logits_for_label(self.classify(text))
+
+    async def arisk_logits(self, text: str) -> list[float]:
+        return _risk_logits_for_label(await self.aclassify(text))
+
     def generate_sub_queries(self, query: str, n: int = 3) -> list[str]:
         """Use LLM to rewrite a student question into n sub-queries for multi-query retrieval."""
         messages = PromptTemplates.sub_query_prompt(query, n)
@@ -373,8 +379,16 @@ def format_history(history: list[AiMessage]) -> str:
     return "\n".join(f"{m.role}: {m.content}" for m in history[-20:])
 
 
-HIGH_RISK_WORDS = ["自杀", "自残", "不想活", "结束生命", "伤害自己", "轻生", "suicide", "kill myself", "self harm"]
-CONSULT_WORDS = ["焦虑", "抑郁", "压力", "失眠", "难过", "崩溃", "痛苦", "无助", "心理", "咨询", "担心", "害怕", "逃避", "anxious", "depress", "stress"]
+HIGH_RISK_WORDS = [
+    "自杀", "自残", "不想活", "结束生命", "伤害自己", "伤害别人", "伤害他人",
+    "轻生", "准备去死", "suicide", "kill myself", "self harm", "hurt others",
+]
+CONSULT_WORDS = [
+    "焦虑", "抑郁", "低落", "压抑", "低沉", "提不起兴趣", "压力", "失眠",
+    "睡不着", "心跳", "胸闷", "胃不舒服", "难过", "崩溃", "痛苦", "无助",
+    "心理", "咨询", "担心", "害怕", "逃避", "拖延", "刷手机", "放弃复习",
+    "anxious", "depress", "stress",
+]
 
 DEPRESSED_WORDS = ["抑郁", "低落", "崩溃", "难过", "丧失", "提不起", "行尸", "压抑", "无意义", "累赘", "想哭", "发呆", "机械", "低沉", "提不起兴趣"]
 
@@ -392,6 +406,15 @@ def has_consult_signal(text: str) -> bool:
 def split_text(text: str, size: int) -> Iterable[str]:
     for index in range(0, len(text), size):
         yield text[index:index + size]
+
+
+def _risk_logits_for_label(label: str) -> list[float]:
+    return {
+        "正常": [4.0, 0.0, -4.0],
+        "焦虑": [3.0, 1.0, -4.0],
+        "低落": [0.0, 4.0, -2.0],
+        "高风险": [-4.0, 0.0, 5.0],
+    }.get(label.strip(), [0.0, 0.0, 0.0])
 
 
 _SYNONYM_PAIRS = [

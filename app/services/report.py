@@ -2,8 +2,24 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session
 
-from app.models.entities import AlertRecord, ChatMessage, ChatSession, DeadLetterRecord, ExcelRecord, PsychologicalReport, ToolJob, UserAccount
-from app.schemas.dtos import ConversationMessageResponse, ConversationResponse, DeadLetterResponse, ReportResponse, ToolJobResponse, ToolRecordResponse
+from app.models.entities import (
+    AlertRecord,
+    ChatMessage,
+    ChatSession,
+    DeadLetterRecord,
+    ExcelRecord,
+    PsychologicalReport,
+    ToolJob,
+    UserAccount,
+)
+from app.schemas.dtos import (
+    ConversationMessageResponse,
+    ConversationResponse,
+    DeadLetterResponse,
+    ReportResponse,
+    ToolJobResponse,
+    ToolRecordResponse,
+)
 
 
 class ReportService:

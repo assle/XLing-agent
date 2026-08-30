@@ -7,21 +7,16 @@ Covers:
   - End-to-end mock mode (no API key needed, verifies report structure)
   - Summary generation (compact, no per-case detail)
 
-Run:  python tests/test_risk_eval.py
+Run: python -m pytest tests/test_risk_eval.py
 """
 from __future__ import annotations
 
 import json
-import os
-import sys
 import tempfile
 from pathlib import Path
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from app.core.config import Settings
-from app.risk_eval.runner import build_summary, compute_metrics, evaluate
-
+from evals.config import EvalSettings
+from evals.risk.runner import build_summary, compute_metrics, evaluate
 
 # ---------------------------------------------------------------------------
 # Pure metrics: compute_metrics
@@ -129,7 +124,7 @@ def test_evaluate_mock_mode_structure():
         dataset_path = tmp_path / "dataset.json"
         dataset_path.write_text(json.dumps(cases, ensure_ascii=False), encoding="utf-8")
 
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "risk_eval_dataset": str(dataset_path),
             "risk_eval_output": str(tmp_path / "report.json"),
             "risk_eval_summary_output": str(tmp_path / "summary.json"),
@@ -140,6 +135,9 @@ def test_evaluate_mock_mode_structure():
 
     assert report["totalCases"] == 3
     assert report["provider"] == "mock"
+    assert report["artifactVersion"]["datasetVersion"]
+    assert report["artifactVersion"]["promptVersion"]
+    assert report["artifactVersion"]["indexVersion"]
     assert "perClass" in report
     assert "confusionMatrix" in report
     assert "macroF1" in report
@@ -164,7 +162,7 @@ def test_evaluate_mock_mode_writes_files():
 
         report_path = tmp_path / "report.json"
         summary_path = tmp_path / "summary.json"
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "risk_eval_dataset": str(dataset_path),
             "risk_eval_output": str(report_path),
             "risk_eval_summary_output": str(summary_path),
@@ -191,7 +189,7 @@ def test_evaluate_mock_mode_keyword_high():
         dataset_path = tmp_path / "dataset.json"
         dataset_path.write_text(json.dumps(cases, ensure_ascii=False), encoding="utf-8")
 
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "risk_eval_dataset": str(dataset_path),
             "risk_eval_output": str(tmp_path / "report.json"),
             "risk_eval_summary_output": str(tmp_path / "summary.json"),
@@ -215,7 +213,7 @@ def test_evaluate_mock_mode_false_positive_trap():
         dataset_path = tmp_path / "dataset.json"
         dataset_path.write_text(json.dumps(cases, ensure_ascii=False), encoding="utf-8")
 
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "risk_eval_dataset": str(dataset_path),
             "risk_eval_output": str(tmp_path / "report.json"),
             "risk_eval_summary_output": str(tmp_path / "summary.json"),
@@ -227,27 +225,3 @@ def test_evaluate_mock_mode_false_positive_trap():
     assert report["results"][0]["hit"] is False
     assert report["accuracy"] == 0.0
     assert report["perClass"]["LOW"]["recall"] == 0.0
-
-
-# ---------------------------------------------------------------------------
-# Runner
-# ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

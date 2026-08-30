@@ -50,10 +50,11 @@ app/
 ├── knowledge/       # 内置校园心理知识库
 ├── mcp_tools/       # MCP 工具服务
 ├── models/          # SQLAlchemy 实体
-├── rag_eval/        # RAG 评测脚本和数据集
 ├── schemas/         # Pydantic DTO
 ├── services/        # AI、聊天、知识库、评估、报告、工具服务
 └── static/          # 原生前端页面
+
+evals/               # 检索、风险、回复质量和分类器离线评测
 
 models/xling-qwen2.5-7b-ft/
 ├── Modelfile        # Ollama 模型定义
@@ -106,6 +107,19 @@ redis
 
 如果交付环境暂时无法安装 LangGraph，系统仍会自动回退到自研 runtime，不影响 Mock 演示和基本功能。
 
+开发和测试使用单独的依赖清单，避免把测试工具装进生产镜像：
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest
+```
+
+BGE-M3 中文检索与专用重排使用独立依赖，默认生产安装不加载约 4GB 的模型运行栈：
+
+```bash
+pip install -r requirements-bge.txt
+```
+
 ## MySQL 和 Redis 配置
 
 系统默认使用 MySQL 保存完整业务数据和完整聊天消息，使用 Redis 保存短期对话记忆。启动服务前先创建数据库：
@@ -116,6 +130,18 @@ CREATE USER 'xling'@'%' IDENTIFIED BY 'xling';
 GRANT ALL PRIVILEGES ON xling.* TO 'xling'@'%';
 FLUSH PRIVILEGES;
 ```
+
+## 人工审核检查点
+
+LangGraph 默认使用官方 `AsyncSqliteSaver` 保存人工审核中断状态，服务重启后仍可批准或拒绝。检查点只保存纯数据，不使用 pickle；默认保留 30 天，学生删除账号时同步清理。
+
+```env
+LANGGRAPH_CHECKPOINT_BACKEND=async_sqlite
+LANGGRAPH_CHECKPOINT_PATH=data/langgraph-checkpoints.db
+LANGGRAPH_CHECKPOINT_RETENTION_DAYS=30
+```
+
+`memory` 后端只用于测试和显式本地演示。检查点缺失、过期或损坏时仍执行固定安全降级。
 
 `.env` 中配置连接：
 
@@ -208,6 +234,8 @@ EXCEL_REPORT -> RISK_ALERT
 
 Excel 写入使用进程内锁串行化，邮件预警使用独立线程池并支持每分钟限流。失败任务会按延迟重试，超过 `TOOL_QUEUE_MAX_ATTEMPTS` 后进入 `dead_letter_records`。
 
+一轮支持过程中的学生消息、心理报告、人工审核请求和工具任务使用一次数据库提交；任一步骤失败都会一起回滚。`tool_jobs` 对“报告编号 + 任务类型”设置唯一约束，worker 使用条件更新原子抢占任务。
+
 ```env
 TOOL_QUEUE_ENABLED=true
 TOOL_QUEUE_EXCEL_WORKERS=1
@@ -220,7 +248,7 @@ ALERT_EMAIL_DELIVERY_MODE=log
 
 ## 邮件预警配置
 
-高风险消息会触发心理报告，并由后端通过 MCP 工具调用完成 Excel 台账写入和邮件预警。发送邮件前需要在 `.env` 中配置 SMTP：
+高风险消息会触发心理报告，默认由持久化工具队列完成 Excel 台账和邮件预警；关闭工具队列时才通过 MCP 调用。发送邮件前需要在 `.env` 中配置 SMTP：
 
 ```env
 SMTP_HOST=smtp.example.com
@@ -411,13 +439,40 @@ curl -u admin:admin123 \
 ## RAG 评测
 
 ```bash
-AI_PROVIDER=mock python -m app.rag_eval.runner
+AI_PROVIDER=mock python -m evals.rag.runner baseline
+pip install -r requirements-bge.txt
+BGE_DEVICE=cpu python -m evals.rag.runner bge-m3
+BGE_DEVICE=mps python -m evals.rag.runner bge-m3-rerank
+python -m evals.rag.runner comparison
 ```
 
-评测报告输出到：
+报告包含模型、提示词、索引、数据和代码版本，以及 Recall@K、MRR、NDCG、95 分位延迟、安全关键片段漏检率和索引大小。候选检索只有同时通过质量、安全和延迟门槛才会建议替换当前默认实现。
+
+## 轻量端到端评测
+
+40 条案例直接经过生产聊天模块，覆盖日常对话、低中风险支持、明确高风险、知识不足和行动计划：
+
+```bash
+python -m evals.e2e.runner
+```
+
+## 风险概率校准与共形预测
+
+先按冻结清单收集校准集和最终测试集的风险分数，再运行温度缩放和类别条件共形预测：
+
+```bash
+RISK_EVAL_AI_PROVIDER=mock python -c "from evals.risk.calibration_runner import collect_calibration_inputs; collect_calibration_inputs()"
+python -m evals.risk.calibration_runner
+```
+
+报告比较原始概率和校准概率的高风险召回、Brier 分数与期望校准误差，并记录覆盖率、平均预测集合大小和人工审核率。只有达到预设门槛才允许配置 `RISK_CALIBRATION_ARTIFACT`；否则默认安全风险评估保持不变。
+
+主要评测产物输出到：
 
 ```text
 target/rag-eval-report.json
+target/e2e-eval-report.json
+target/risk-calibration-report.json
 ```
 
 ## MCP 工具服务
@@ -428,7 +483,7 @@ MCP Python 包建议使用 Python 3.10 或 3.11 安装运行。
 python -m app.mcp_tools.server
 ```
 
-业务后端触发报告后处理时，会作为 MCP client 通过 stdio 启动同一个 MCP server，并调用下列工具；不会直接调用工具实现方法。
+业务后端默认通过持久化工具队列执行报告后处理。关闭工具队列时，会改用 MCP client 通过 stdio 启动同一个 MCP server；外部工具客户端也可以单独启动这个服务。
 
 暴露工具：
 

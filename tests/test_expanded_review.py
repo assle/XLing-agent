@@ -9,32 +9,20 @@ Covers:
   - Already reviewed can't be re-decided
   - _to_dict includes new fields
 
-Run:  python tests/test_expanded_review.py
+Run: python -m pytest tests/test_expanded_review.py
 """
 from __future__ import annotations
 
-import os
-import sys
 from datetime import datetime
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
 
 from app.core.config import Settings
-from app.core.database import Base
-from app.models.entities import ChatMessage, UserAccount, ChatSession, PsychologicalReport, ReviewRequest
 from app.core.security import hash_password
+from app.models.entities import ChatMessage, ChatSession, PsychologicalReport, ReviewRequest, UserAccount
 from app.services.privacy import PrivacySanitizer
-from app.services.review import ReviewService, HANDOFF_REASONS, REVIEW_DECISIONS
+from app.services.review import HANDOFF_REASONS, ReviewService
+from tests.support import DatabaseHarness
 
-
-_test_engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
-_TestSession = sessionmaker(bind=_test_engine, autoflush=False, autocommit=False)
-Base.metadata.create_all(bind=_test_engine)
+_TestSession = DatabaseHarness().sessions
 _settings = Settings()
 
 
@@ -322,22 +310,3 @@ def test_all_handoff_reasons_accepted():
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

@@ -6,16 +6,16 @@ import threading
 import time
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
 from app.core.database import SessionLocal
 from app.core.enums import RiskLevel, ToolJobKind, ToolJobStatus, ToolStatus
+from app.core.time import utc_now
 from app.models.entities import DeadLetterRecord, ExcelRecord, PsychologicalReport, ToolJob
 from app.services.tools import ToolOrchestrationService
-
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +34,25 @@ class ToolQueueService:
         self.db.commit()
         return jobs
 
+    def claim_job(self, job_id: int) -> bool:
+        claimed = (
+            self.db.query(ToolJob)
+            .filter(
+                ToolJob.id == job_id,
+                ToolJob.status == ToolJobStatus.PENDING.value,
+                ToolJob.run_after <= utc_now(),
+            )
+            .update(
+                {
+                    ToolJob.status: ToolJobStatus.RUNNING.value,
+                    ToolJob.updated_at: utc_now(),
+                },
+                synchronize_session=False,
+            )
+        )
+        self.db.commit()
+        return claimed == 1
+
     def _find_or_create(self, kind: str, report_id: int, depends_on_job_id: int | None = None) -> ToolJob:
         existing = (
             self.db.query(ToolJob)
@@ -50,7 +69,7 @@ class ToolQueueService:
             attempts=0,
             max_attempts=self.settings.tool_queue_max_attempts,
             depends_on_job_id=depends_on_job_id,
-            run_after=datetime.utcnow(),
+            run_after=utc_now(),
             last_error="",
         )
         self.db.add(job)
@@ -118,7 +137,7 @@ class ToolQueueWorker:
     def _dispatch_once(self) -> None:
         db = SessionLocal()
         try:
-            now = datetime.utcnow()
+            now = utc_now()
             jobs = (
                 db.query(ToolJob)
                 .filter(ToolJob.status == ToolJobStatus.PENDING.value, ToolJob.run_after <= now)
@@ -127,10 +146,8 @@ class ToolQueueWorker:
                 .all()
             )
             for job in jobs:
-                job.status = ToolJobStatus.RUNNING.value
-                job.updated_at = datetime.utcnow()
-                db.add(job)
-                db.commit()
+                if not ToolQueueService(db, self.settings).claim_job(job.id):
+                    continue
                 executor = self.excel_executor if job.kind == ToolJobKind.EXCEL_REPORT.value else self.email_executor
                 executor.submit(self._run_job, job.id)
         finally:
@@ -151,13 +168,13 @@ class ToolQueueWorker:
                     self._requeue(db, job, "邮件预警限流中，稍后重试", retry_after)
                     return
             job.attempts += 1
-            job.updated_at = datetime.utcnow()
+            job.updated_at = utc_now()
             db.add(job)
             db.commit()
             self._execute(db, job)
             job.status = ToolJobStatus.SUCCESS.value
             job.last_error = ""
-            job.updated_at = datetime.utcnow()
+            job.updated_at = utc_now()
             db.add(job)
             db.commit()
         except Exception as exc:
@@ -174,14 +191,14 @@ class ToolQueueWorker:
             raise RuntimeError(f"report {job.report_id} not found")
         tools = ToolOrchestrationService(db, self.settings)
         if job.kind == ToolJobKind.EXCEL_REPORT.value:
-            record = tools.write_excel(report)
-            if record.status != ToolStatus.SUCCESS.value:
-                raise RuntimeError(record.message)
+            excel_record = tools.write_excel(report)
+            if excel_record.status != ToolStatus.SUCCESS.value:
+                raise RuntimeError(excel_record.message)
             return
         if job.kind == ToolJobKind.RISK_ALERT.value:
-            record = tools.notify(report)
-            if record.status != ToolStatus.SUCCESS.value:
-                raise RuntimeError(record.message)
+            alert_record = tools.notify(report)
+            if alert_record.status != ToolStatus.SUCCESS.value:
+                raise RuntimeError(alert_record.message)
             return
         raise RuntimeError(f"unknown tool job kind: {job.kind}")
 
@@ -201,8 +218,8 @@ class ToolQueueWorker:
     def _requeue(self, db: Session, job: ToolJob, reason: str, delay_seconds: float) -> None:
         job.status = ToolJobStatus.PENDING.value
         job.last_error = reason
-        job.run_after = datetime.utcnow() + timedelta(seconds=max(1.0, delay_seconds))
-        job.updated_at = datetime.utcnow()
+        job.run_after = utc_now() + timedelta(seconds=max(1.0, delay_seconds))
+        job.updated_at = utc_now()
         db.add(job)
         db.commit()
 
@@ -212,7 +229,7 @@ class ToolQueueWorker:
             return
         message = f"{type(exc).__name__}: {exc}"
         job.last_error = message
-        job.updated_at = datetime.utcnow()
+        job.updated_at = utc_now()
         if job.attempts >= job.max_attempts:
             job.status = ToolJobStatus.DEAD.value
             db.add(
@@ -229,7 +246,7 @@ class ToolQueueWorker:
             )
         else:
             job.status = ToolJobStatus.PENDING.value
-            job.run_after = datetime.utcnow() + timedelta(seconds=self.settings.tool_queue_retry_delay_seconds * max(1, job.attempts))
+            job.run_after = utc_now() + timedelta(seconds=self.settings.tool_queue_retry_delay_seconds * max(1, job.attempts))
         db.add(job)
         db.commit()
 
@@ -240,8 +257,8 @@ class ToolQueueWorker:
             for job in rows:
                 job.status = ToolJobStatus.PENDING.value
                 job.last_error = "服务重启后恢复未完成任务"
-                job.run_after = datetime.utcnow()
-                job.updated_at = datetime.utcnow()
+                job.run_after = utc_now()
+                job.updated_at = utc_now()
                 db.add(job)
             db.commit()
         finally:

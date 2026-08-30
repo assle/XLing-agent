@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import threading
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from sqlalchemy.orm import Session
 
 from app.core.enums import RiskLevel
+from app.core.time import utc_now
 from app.models.entities import RiskTrajectoryPoint
-
 
 _RISK_ORDER = {RiskLevel.LOW: 1, RiskLevel.MEDIUM: 2, RiskLevel.HIGH: 3}
 
@@ -29,7 +29,7 @@ class RiskTrajectoryHealth:
 
     @classmethod
     def record_success(cls) -> None:
-        now = datetime.utcnow().isoformat()
+        now = utc_now().isoformat()
         with cls._lock:
             if cls._status == "degraded":
                 cls._last_recovered_at = now
@@ -39,7 +39,7 @@ class RiskTrajectoryHealth:
     @classmethod
     def record_failure(cls, error: Exception) -> bool:
         """Record a failure and return whether this is a new degraded state."""
-        now = datetime.utcnow().isoformat()
+        now = utc_now().isoformat()
         with cls._lock:
             changed = cls._status != "degraded"
             cls._status = "degraded"
@@ -99,7 +99,7 @@ class RiskTrajectoryService:
 
     def get_cross_session_points(self, user_id: int) -> list[RiskTrajectoryPoint]:
         """All trajectory points in the last N days for this user."""
-        cutoff = datetime.utcnow() - timedelta(days=self.cross_session_days)
+        cutoff = utc_now() - timedelta(days=self.cross_session_days)
         return (
             self.db.query(RiskTrajectoryPoint)
             .filter(RiskTrajectoryPoint.user_id == user_id)

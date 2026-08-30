@@ -41,4 +41,4 @@ Accepted
 
 - 研究报告 §B（异步化与首 token 延迟）
 - Issue 02（async end-to-end）
-- 衍生约束：SqliteSaver（sync）不支持 ainvoke -> 见 [ADR-0002](0002-checkpointer-memorysaver.md)
+- 衍生约束：同步 SqliteSaver 不支持 `ainvoke`；当前使用官方 AsyncSqliteSaver，见 [ADR-0002](0002-checkpointer-memorysaver.md)

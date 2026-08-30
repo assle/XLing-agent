@@ -10,30 +10,18 @@ Two scenarios:
 Uses mock AI + stateful fake memory (persists CBT state) + real SQLite DB.
 No external services (Redis, MySQL, Ollama, OpenAI) required.
 
-Run:  python tests/test_tracer_bullet.py
+Run: python -m pytest tests/test_tracer_bullet.py
 """
 from __future__ import annotations
 
 import asyncio
-import os
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
 
 from app.agents.runtime import AgentRuntimeService
 from app.core.config import Settings
-from app.core.database import Base
 from app.core.security import hash_password
-from app.models.entities import UserAccount, ChatSession, ActionPlan
+from app.models.entities import ActionPlan, ChatSession, UserAccount
 from app.schemas.dtos import AiMessage
-from app.services.ai import AiClient
-from app.services.assessment import PsychologicalAssessmentService
-
+from tests.support import DatabaseHarness, build_runtime
 
 # ---------------------------------------------------------------------------
 # Test doubles
@@ -70,9 +58,7 @@ class FakeKnowledge:
 # Setup
 # ---------------------------------------------------------------------------
 
-_test_engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
-_TestSession = sessionmaker(bind=_test_engine, autoflush=False, autocommit=False)
-Base.metadata.create_all(bind=_test_engine)
+_TestSession = DatabaseHarness().sessions
 
 _settings = Settings(ai_provider="mock", langgraph_checkpoint_backend="memory", knowledge_vector_enabled=False)
 
@@ -97,14 +83,13 @@ _seed()
 
 def _make_runtime(db):
     """Create a custom runtime with fake deps but real DB for CBT/action plan."""
-    runtime = AgentRuntimeService.__new__(AgentRuntimeService)
-    runtime.db = db
-    runtime.settings = _settings
-    runtime.ai = AiClient(_settings)
-    runtime.memory = StatefulFakeMemory()
-    runtime.knowledge = FakeKnowledge()
-    runtime.assessment = PsychologicalAssessmentService(runtime.ai)
-    return runtime
+    return build_runtime(
+        AgentRuntimeService,
+        db=db,
+        settings=_settings,
+        memory=StatefulFakeMemory(),
+        knowledge=FakeKnowledge(),
+    )
 
 
 async def _run_message(runtime, message: str):
@@ -259,27 +244,3 @@ def test_chat_path_skips_cbt():
     assert len(result.response_messages) > 0
     # CBT state should be empty (never entered)
     assert runtime.memory.load_cbt_state("tracer-session") == {}
-
-
-# ---------------------------------------------------------------------------
-# Runner
-# ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

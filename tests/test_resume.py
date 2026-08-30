@@ -5,53 +5,27 @@ Verifies that:
 - reject -> fixed fallback response (fallback_response set, counselor skipped)
 - both clear pending_review after resume
 
-Run:  python tests/test_resume.py
+Run: python -m pytest tests/test_resume.py
 """
 from __future__ import annotations
 
 import asyncio
-import os
-import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from app.core.config import Settings
-from app.core.enums import IntentType, RiskLevel
+from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
 from app.models.entities import ChatSession, UserAccount
 from app.schemas.dtos import AiMessage
-from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
-from app.services.ai import AiClient, PromptTemplates
-from app.services.assessment import PsychologicalAssessmentService
-
-
-class FakeMemoryStore:
-    def load_recent(self, session_public_id: str) -> list[AiMessage]:
-        return [AiMessage(role="user", content="你好"), AiMessage(role="assistant", content="你好呀")]
-
-    def messages_from_rows(self, rows):  # noqa: ANN001
-        return []
-
-    def replace(self, session_public_id: str, messages: list[AiMessage]) -> None:
-        pass
-
-
-class FakeKnowledgeService:
-    def retrieve(self, query: str, top_k: int | None = None):  # noqa: ANN001
-        return []
+from app.services.ai import PromptTemplates
+from tests.support import FakeMemoryStore, build_runtime
 
 
 def _make_runtime() -> LangGraphAgentRuntimeService:
-    runtime = LangGraphAgentRuntimeService.__new__(LangGraphAgentRuntimeService)
-    runtime.db = None
-    runtime.settings = Settings(ai_provider="mock", langgraph_checkpoint_backend="memory")
-    runtime.ai = AiClient(runtime.settings)
-    runtime.memory = FakeMemoryStore()
-    runtime.knowledge = FakeKnowledgeService()
-    runtime.assessment = PsychologicalAssessmentService(runtime.ai)
-    runtime._sqlite_conn = None
-    runtime._checkpointer = runtime._make_checkpointer()
-    runtime.graph = runtime._build_graph()
-    return runtime
+    return build_runtime(
+        LangGraphAgentRuntimeService,
+        memory=FakeMemoryStore([
+            AiMessage(role="user", content="你好"),
+            AiMessage(role="assistant", content="你好呀"),
+        ]),
+    )
 
 
 def _user_session(public_id: str):
@@ -180,27 +154,3 @@ def test_resume_normal_still_works_after_degrade_logic():
     result = asyncio.run(runtime.resume("degrade-normal-001", approved=True))
     assert result.degraded is False
     assert len(result.response_messages) > 0  # counselor generated response
-
-
-# ---------------------------------------------------------------------------
-# Runner
-# ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

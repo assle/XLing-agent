@@ -1,28 +1,43 @@
 from __future__ import annotations
 
+import json
 import logging
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field, fields, is_dataclass
 from datetime import timedelta
+from enum import Enum
+from pathlib import Path
 
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
-from app.core.enums import IntentType, MessageRole, RiskLevel
+from app.core.enums import EmotionLabel, IntentType, RiskLevel
 from app.models.entities import ChatMessage, ChatSession, UserAccount
 from app.schemas.dtos import AiMessage
 from app.services.ai import AiClient, PromptTemplates, has_consult_signal, has_high_risk_signal
 from app.services.assessment import PsychologicalAssessmentService, PsychologyAssessment
+from app.services.cbt import DIMENSION_LABELS, CBTService, CBTState
 from app.services.knowledge import KnowledgeService, SearchResult
 from app.services.memory import RedisShortTermMemoryStore
-from app.services.cbt import CBTService, CBTState
-from app.services.cbt import DIMENSION_LABELS
-from app.services.user_profile import UserProfileService
 from app.services.memory_cards import MemoryCardService
-from app.services.risk_trajectory import RiskTrajectoryService
-from app.services.risk_trajectory import RiskTrajectoryHealth
-
+from app.services.risk_calibration import load_calibrated_risk_engine
+from app.services.risk_trajectory import RiskTrajectoryHealth, RiskTrajectoryService
+from app.services.user_profile import UserProfileService
 
 logger = logging.getLogger(__name__)
+
+
+def _json_value(value):
+    if isinstance(value, Enum):
+        return value.value
+    if hasattr(value, "model_dump"):
+        return _json_value(value.model_dump())
+    if is_dataclass(value):
+        return _json_value(asdict(value))
+    if isinstance(value, dict):
+        return {str(key): _json_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_value(item) for item in value]
+    return value
 
 
 GENERAL_TASK_WORDS = [
@@ -106,6 +121,91 @@ class AgentContext:
     action_plan_event: ActionPlanEvent | None = None
     pending_review: bool = False
 
+    def to_checkpoint(self) -> dict:
+        payload = {
+            key: _json_value(value)
+            for key, value in vars(self).items()
+            if key not in {"user", "session"}
+        }
+        payload["user"] = {
+            "id": self.user.id,
+            "username": self.user.username,
+            "display_name": self.user.display_name,
+            "roles_csv": self.user.roles_csv,
+        }
+        payload["session"] = {
+            "id": self.session.id,
+            "public_id": self.session.public_id,
+            "user_id": self.session.user_id,
+            "title": self.session.title,
+            "no_memory": self.session.no_memory,
+        }
+        return payload
+
+    @classmethod
+    def from_checkpoint(
+        cls,
+        payload: dict,
+        db: Session | None = None,
+    ) -> AgentContext:
+        user_data = payload["user"]
+        session_data = payload["session"]
+        user = db.get(UserAccount, user_data["id"]) if db is not None else None
+        session = db.get(ChatSession, session_data["id"]) if db is not None else None
+        user = user or UserAccount(**user_data)
+        session = session or ChatSession(**session_data)
+
+        values = {
+            key: value
+            for key, value in payload.items()
+            if key not in {"user", "session"}
+        }
+        if values.get("intent"):
+            values["intent"] = IntentType(values["intent"])
+        values["risk_level"] = RiskLevel(values.get("risk_level", RiskLevel.LOW.value))
+        if values.get("assessment"):
+            assessment = values["assessment"]
+            values["assessment"] = PsychologyAssessment(
+                emotion=EmotionLabel(assessment["emotion"]),
+                emotion_score=float(assessment["emotion_score"]),
+                risk=RiskLevel(assessment["risk"]),
+                confidence=float(assessment["confidence"]),
+                summary=assessment["summary"],
+                risk_probabilities=assessment.get("risk_probabilities", {}),
+                prediction_set=tuple(
+                    RiskLevel(risk) for risk in assessment.get("prediction_set", [])
+                ),
+                uncertain=bool(assessment.get("uncertain", False)),
+                requires_review=bool(assessment.get("requires_review", False)),
+                model_version=assessment.get("model_version", ""),
+                calibration_version=assessment.get("calibration_version", ""),
+            )
+        values["retrieved_knowledge"] = [
+            SearchResult(**item) for item in values.get("retrieved_knowledge", [])
+        ]
+        values["model_history"] = [
+            AiMessage(**item) for item in values.get("model_history", [])
+        ]
+        values["response_messages"] = [
+            AiMessage(**item) for item in values.get("response_messages", [])
+        ]
+        values["steps"] = [AgentStep(**item) for item in values.get("steps", [])]
+        if values.get("cbt_event"):
+            values["cbt_event"] = CbtEvent(**values["cbt_event"])
+        if values.get("action_plan_event"):
+            action_plan = values["action_plan_event"]
+            values["action_plan_event"] = ActionPlanEvent(
+                plan_id=action_plan["plan_id"],
+                items=[ActionPlanItemEvent(**item) for item in action_plan["items"]],
+                feedback_due_at=action_plan.get("feedback_due_at"),
+            )
+        allowed = {item.name for item in fields(cls)} - {"user", "session"}
+        return cls(
+            user=user,
+            session=session,
+            **{key: value for key, value in values.items() if key in allowed},
+        )
+
 
 @dataclass
 class AgentRunResult:
@@ -130,16 +230,56 @@ class AgentRunResult:
         return self.intent != IntentType.CHAT
 
 
+@dataclass(frozen=True)
+class AgentRuntimeDependencies:
+    """Internal collaborators used by either runtime adapter."""
+
+    ai: AiClient
+    knowledge: KnowledgeService
+    memory: RedisShortTermMemoryStore
+    assessment: PsychologicalAssessmentService
+
+    @classmethod
+    def create(cls, db: Session, settings: Settings) -> AgentRuntimeDependencies:
+        ai = AiClient(settings)
+        calibrated_risk = None
+        if settings.risk_calibration_artifact:
+            artifact_path = Path(settings.risk_calibration_artifact)
+            if not artifact_path.is_absolute():
+                artifact_path = settings.project_root / artifact_path
+            try:
+                calibrated_risk = load_calibrated_risk_engine(artifact_path)
+            except (OSError, ValueError, KeyError, json.JSONDecodeError):
+                if settings.risk_calibration_required:
+                    raise
+                logger.warning("风险校准产物不可用，继续使用当前安全风险评估")
+        return cls(
+            ai=ai,
+            knowledge=KnowledgeService(db, settings),
+            memory=RedisShortTermMemoryStore(settings),
+            assessment=PsychologicalAssessmentService(
+                ai,
+                calibrated_risk=calibrated_risk,
+            ),
+        )
+
+
 class AgentRuntimeService:
     max_steps = 8
 
-    def __init__(self, db: Session, settings: Settings):
+    def __init__(
+        self,
+        db: Session,
+        settings: Settings,
+        dependencies: AgentRuntimeDependencies | None = None,
+    ):
         self.db = db
         self.settings = settings
-        self.ai = AiClient(settings)
-        self.knowledge = KnowledgeService(db, settings)
-        self.memory = RedisShortTermMemoryStore(settings)
-        self.assessment = PsychologicalAssessmentService(self.ai)
+        dependencies = dependencies or AgentRuntimeDependencies.create(db, settings)
+        self.ai = dependencies.ai
+        self.knowledge = dependencies.knowledge
+        self.memory = dependencies.memory
+        self.assessment = dependencies.assessment
 
     async def run(self, user: UserAccount, session: ChatSession, original_input: str, model_input: str) -> AgentRunResult:
         context = AgentContext(user=user, session=session, original_input=original_input, model_input=model_input)
@@ -419,6 +559,7 @@ class AgentRuntimeService:
             context.cbt_active = True
             self.memory.save_cbt_state(context.session.public_id, current_state.to_dict())
             next_q = cbt_svc.get_next_question(current_state, context.exam_stage)
+            next_dimension = current_state.next_dimension or ""
             context.response_agent = "CBTAgent"
             context.response_plan = "four-part cognitive-behavioral questioning"
             knowledge_context = "\n\n".join(f"- [{item.source}] {item.content}" for item in context.retrieved_knowledge)
@@ -426,7 +567,7 @@ class AgentRuntimeService:
                 PromptTemplates.answer_system_prompt(context.intent or IntentType.CONSULT, context.risk_level, knowledge_context, context.user.display_name),
                 AiMessage(role="system", content=(
                     f"当前由 CBTAgent 负责回复。\n记忆摘要：\n{context.memory_brief}\n"
-                    f"认知行为四维追问策略：需要了解学生的「{DIMENSION_LABELS.get(current_state.next_dimension, current_state.next_dimension or '')}」方面。\n"
+                    f"认知行为四维追问策略：需要了解学生的「{DIMENSION_LABELS.get(next_dimension, next_dimension)}」方面。\n"
                     f"参考问题：{next_q}\n"
                     "请以共情、自然的方式引导学生回答这个问题，不要直接暴露四个方面的内部名称，也不要机械提问。"
                 )),

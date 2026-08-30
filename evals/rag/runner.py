@@ -1,7 +1,7 @@
 import json
 import logging
 import math
-from datetime import datetime
+import time
 from pathlib import Path
 from typing import Any
 
@@ -9,15 +9,21 @@ from sqlalchemy import create_engine, make_url
 from sqlalchemy.orm import sessionmaker
 
 from app.core.bootstrap import create_schema, seed_data
-from app.core.config import Settings, get_settings
+from app.core.time import utc_now
+from app.core.versioning import ArtifactVersionResolver
+from app.services.bge_retrieval import BgeM3Retriever
 from app.services.knowledge import KnowledgeService
 from app.services.vector_store import FALLBACK_RETRIEVAL_LABEL, PRIMARY_RETRIEVAL_LABEL
-
+from evals.config import EvalSettings, get_eval_settings
 
 logger = logging.getLogger(__name__)
 
 
-def evaluate(settings: Settings | None = None, strategy: str = "baseline") -> dict:
+def evaluate(
+    settings: EvalSettings | None = None,
+    strategy: str = "baseline",
+    retriever: BgeM3Retriever | None = None,
+) -> dict:
     """Run the RAG eval against a self-contained SQLite knowledge base.
 
     Builds its own SQLite engine (no MySQL/Docker) and an isolated Chroma store
@@ -28,8 +34,14 @@ def evaluate(settings: Settings | None = None, strategy: str = "baseline") -> di
     Supported strategies: baseline, multi-query, hybrid-rrf, llm-rerank.
     Each writes its own summary file for cross-run comparison.
     """
-    settings = settings or get_settings()
+    settings = settings or get_eval_settings()
     eval_settings = _eval_settings(settings)
+    if strategy in {"bge-m3", "bge-m3-rerank"}:
+        eval_settings = eval_settings.model_copy(update={
+            "knowledge_retriever": "bge_m3",
+            "bge_rerank_enabled": strategy == "bge-m3-rerank",
+        })
+        retriever = retriever or BgeM3Retriever.from_settings(eval_settings)
     engine = _build_engine(eval_settings.rag_eval_database_url)
     create_schema(engine)
     session_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
@@ -37,12 +49,17 @@ def evaluate(settings: Settings | None = None, strategy: str = "baseline") -> di
     try:
         seed_data(db, eval_settings)
         ai_client = _build_ai_client(eval_settings, strategy)
-        service = KnowledgeService(db, eval_settings, ai_client=ai_client)
-        retrieval_label = _retrieval_label(service)
+        service = KnowledgeService(
+            db,
+            eval_settings,
+            ai_client=ai_client,
+            retriever=retriever,
+        )
+        retrieval_label = _retrieval_label(service, strategy)
         strategy_label = _strategy_label(strategy, retrieval_label)
         if strategy != "baseline":
             logger.info("RAG eval strategy: %s (%s)", strategy, strategy_label)
-        if retrieval_label != PRIMARY_RETRIEVAL_LABEL:
+        if strategy not in {"bge-m3", "bge-m3-rerank"} and retrieval_label != PRIMARY_RETRIEVAL_LABEL:
             logger.warning(
                 "RAG eval 向量路径不可用（%s），基线走 %s 兜底；"
                 "设置 OPENAI_API_KEY 并安装 chromadb 可获得真向量基线。",
@@ -58,6 +75,14 @@ def evaluate(settings: Settings | None = None, strategy: str = "baseline") -> di
         retrieve_fn = _build_retrieve_fn(service, strategy, settings)
         results = [evaluate_case(retrieve_fn, case, settings.knowledge_top_k) for case in cases]
         report = compute_report(results, settings.rag_eval_dataset, settings.knowledge_top_k, strategy_label)
+        report["embeddingModel"] = (
+            retriever.embedding_model if retriever else eval_settings.openai_embedding_model
+        )
+        report["rerankerModel"] = retriever.reranker_model if retriever else ""
+        report["indexSizeBytes"] = retriever.index_size_bytes if retriever else 0
+        report["artifactVersion"] = ArtifactVersionResolver(eval_settings).current(
+            settings.rag_eval_dataset
+        ).to_dict()
         output_path, summary_path = _strategy_paths(strategy, settings)
         _write_json(report, output_path)
         _write_json(build_eval_summary(report), summary_path)
@@ -72,8 +97,12 @@ def compute_report(
 ) -> dict:
     total = max(1, len(results))
     hits = [item for item in results if item["hit"]]
+    safety_cases = [item for item in results if item.get("safetyCritical", False)]
+    safety_misses = [item for item in safety_cases if not item["hit"]]
+    latencies = sorted(item.get("latencyMs", 0.0) for item in results)
+    p95_index = max(0, math.ceil(len(latencies) * 0.95) - 1)
     return {
-        "createdAt": datetime.utcnow().isoformat(),
+        "createdAt": utc_now().isoformat(),
         "dataset": dataset,
         "topK": top_k,
         "retrieval": retrieval_label,
@@ -84,6 +113,9 @@ def compute_report(
         "ndcgAtK": sum(item["ndcgAtK"] for item in results) / total,
         "hitRate": len(hits) / total,
         "averageFirstRelevantRank": sum(item["firstRelevantRank"] for item in hits) / max(1, len(hits)),
+        "p95LatencyMs": latencies[p95_index] if latencies else 0.0,
+        "safetyCriticalCases": len(safety_cases),
+        "safetyCriticalMissRate": len(safety_misses) / max(1, len(safety_cases)),
         "results": results,
     }
 
@@ -106,11 +138,20 @@ def build_eval_summary(report: dict) -> dict:
         "ndcgAtK": report["ndcgAtK"],
         "hitRate": report["hitRate"],
         "averageFirstRelevantRank": report["averageFirstRelevantRank"],
+        "p95LatencyMs": report.get("p95LatencyMs", 0.0),
+        "safetyCriticalCases": report.get("safetyCriticalCases", 0),
+        "safetyCriticalMissRate": report.get("safetyCriticalMissRate", 0.0),
+        "embeddingModel": report.get("embeddingModel", ""),
+        "rerankerModel": report.get("rerankerModel", ""),
+        "indexSizeBytes": report.get("indexSizeBytes", 0),
+        "artifactVersion": report.get("artifactVersion", {}),
     }
 
 
 def evaluate_case(retrieve_fn, case: dict, top_k: int) -> dict:
+    started = time.perf_counter()
     retrieved = retrieve_fn(case["question"], top_k)
+    latency_ms = (time.perf_counter() - started) * 1000.0
     expected_sources = {source.lower() for source in case.get("expectedSources", [])}
     expected_terms = [term.lower() for term in case.get("expectedTerms", [])]
     items = []
@@ -143,6 +184,8 @@ def evaluate_case(retrieve_fn, case: dict, top_k: int) -> dict:
         "precisionAtK": relevant_count / top_k if top_k > 0 else 0.0,
         "reciprocalRank": 1.0 / first_rank if hit else 0.0,
         "ndcgAtK": ndcg(items),
+        "latencyMs": round(latency_ms, 4),
+        "safetyCritical": "risk-policy.md" in expected_sources,
     }
 
 
@@ -166,7 +209,7 @@ def ndcg(items: list[dict]) -> float:
     return dcg / ideal
 
 
-def _eval_settings(settings: Settings) -> Settings:
+def _eval_settings(settings: EvalSettings) -> EvalSettings:
     """Copy of settings pointing Chroma at the isolated eval store."""
     return settings.model_copy(update={
         "chroma_persist_dir": settings.rag_eval_chroma_persist_dir,
@@ -195,7 +238,11 @@ def _ensure_sqlite_parent_dir(url: str) -> None:
     Path(database).parent.mkdir(parents=True, exist_ok=True)
 
 
-def _retrieval_label(service: KnowledgeService) -> str:
+def _retrieval_label(service: KnowledgeService, strategy: str = "baseline") -> str:
+    if strategy == "bge-m3":
+        return "BGE-M3"
+    if strategy == "bge-m3-rerank":
+        return "BGE-M3 + bge-reranker-v2-m3"
     if service.vector_store.can_embed:
         return PRIMARY_RETRIEVAL_LABEL
     return FALLBACK_RETRIEVAL_LABEL
@@ -207,7 +254,7 @@ def _write_json(data: dict, path: str) -> None:
     output.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def _build_ai_client(settings: Settings, strategy: str):
+def _build_ai_client(settings: EvalSettings, strategy: str):
     """Create an AiClient for strategies that need LLM (multi-query, llm-rerank)."""
     if strategy in ("multi-query", "hybrid-rrf", "llm-rerank"):
         from app.services.ai import AiClient
@@ -221,11 +268,13 @@ def _strategy_label(strategy: str, retrieval_label: str) -> str:
         "multi-query": f"multi-query + {retrieval_label}",
         "hybrid-rrf": f"multi-query + hybrid-RRF (k=60) + {retrieval_label}",
         "llm-rerank": f"multi-query + hybrid-RRF + LLM-rerank + {retrieval_label}",
+        "bge-m3": "BGE-M3",
+        "bge-m3-rerank": "BGE-M3 + bge-reranker-v2-m3",
     }
     return labels.get(strategy, retrieval_label)
 
 
-def _build_retrieve_fn(service: KnowledgeService, strategy: str, settings: Settings):
+def _build_retrieve_fn(service: KnowledgeService, strategy: str, settings: EvalSettings):
     """Return a (query, top_k) -> list[SearchResult] callable for the given strategy."""
     if strategy == "baseline":
         return lambda q, k: service.retrieve(q, k)
@@ -257,7 +306,7 @@ def _build_retrieve_fn(service: KnowledgeService, strategy: str, settings: Setti
     return lambda q, k: service.retrieve(q, k)
 
 
-def _strategy_paths(strategy: str, settings: Settings) -> tuple[str, str]:
+def _strategy_paths(strategy: str, settings: EvalSettings) -> tuple[str, str]:
     """Return (report_path, summary_path) for the given strategy."""
     path_map = {
         "baseline": (settings.rag_eval_output, settings.rag_eval_baseline_output),
@@ -273,34 +322,52 @@ def _strategy_paths(strategy: str, settings: Settings) -> tuple[str, str]:
             settings.rag_eval_output.replace(".json", "-llm-rerank.json"),
             settings.rag_eval_llm_rerank_output,
         ),
+        "bge-m3": (
+            settings.rag_eval_bge_output,
+            settings.rag_eval_bge_summary_output,
+        ),
+        "bge-m3-rerank": (
+            settings.rag_eval_bge_rerank_output,
+            settings.rag_eval_bge_rerank_summary_output,
+        ),
     }
     return path_map.get(strategy, path_map["baseline"])
 
 
 COMPARISON_METRICS = ["recallAtK", "precisionAtK", "mrr", "ndcgAtK", "hitRate"]
-COMPARISON_STRATEGIES = ["baseline", "multi-query", "hybrid-rrf", "llm-rerank"]
+DECISION_METRICS = ["safetyCriticalMissRate", "p95LatencyMs"]
+COMPARISON_STRATEGIES = [
+    "baseline",
+    "multi-query",
+    "hybrid-rrf",
+    "llm-rerank",
+    "bge-m3",
+    "bge-m3-rerank",
+]
 
 
-def build_comparison(settings: Settings | None = None) -> dict:
+def build_comparison(settings: EvalSettings | None = None) -> dict:
     """Read 4 strategy summaries and return comparison data with delta.
 
     Missing summary files are marked as unavailable rather than raising.
     Delta is computed as best strategy (highest MRR) minus baseline.
     """
-    settings = settings or get_settings()
+    settings = settings or get_eval_settings()
     path_map = {
         "baseline": settings.rag_eval_baseline_output,
         "multi-query": settings.rag_eval_multi_query_output,
         "hybrid-rrf": settings.rag_eval_hybrid_rrf_output,
         "llm-rerank": settings.rag_eval_llm_rerank_output,
+        "bge-m3": settings.rag_eval_bge_summary_output,
+        "bge-m3-rerank": settings.rag_eval_bge_rerank_summary_output,
     }
 
-    strategies = []
+    strategies: list[dict[str, Any]] = []
     for name in COMPARISON_STRATEGIES:
         path = Path(path_map[name])
         if path.exists():
             summary = json.loads(path.read_text(encoding="utf-8"))
-            metrics = {k: summary.get(k) for k in COMPARISON_METRICS}
+            metrics = {k: summary.get(k) for k in [*COMPARISON_METRICS, *DECISION_METRICS]}
             strategies.append({"name": name, "available": True, "metrics": metrics})
         else:
             strategies.append({"name": name, "available": False, "metrics": None})
@@ -312,15 +379,55 @@ def build_comparison(settings: Settings | None = None) -> dict:
 
     delta = None
     if baseline and len(available) > 1:
-        best = max(available, key=lambda s: s["metrics"].get("mrr", 0) or 0)
+        best = max(available, key=lambda s: (s["metrics"] or {}).get("mrr", 0) or 0)
+        baseline_metrics = baseline["metrics"] or {}
+        best_metrics = best["metrics"] or {}
         delta_metrics = {}
         for metric in COMPARISON_METRICS:
-            base_val = baseline["metrics"].get(metric, 0) or 0
-            best_val = best["metrics"].get(metric, 0) or 0
+            base_val = baseline_metrics.get(metric, 0) or 0
+            best_val = best_metrics.get(metric, 0) or 0
             delta_metrics[metric] = round(best_val - base_val, 6)
         delta = {"bestStrategy": best["name"], "metrics": delta_metrics}
 
-    return {"strategies": strategies, "delta": delta}
+    deployment_decisions = {}
+    if baseline:
+        for candidate_name in ("bge-m3", "bge-m3-rerank"):
+            candidate = next(
+                (item for item in strategies if item["name"] == candidate_name and item["available"]),
+                None,
+            )
+            if candidate:
+                deployment_decisions[candidate_name] = build_retrieval_decision(
+                    baseline["metrics"] or {},
+                    candidate["metrics"] or {},
+                )
+    return {
+        "strategies": strategies,
+        "delta": delta,
+        "deploymentDecisions": deployment_decisions,
+    }
+
+
+def build_retrieval_decision(baseline: dict, candidate: dict) -> dict:
+    recall_gain = (candidate.get("recallAtK") or 0.0) - (baseline.get("recallAtK") or 0.0)
+    mrr_gain = (candidate.get("mrr") or 0.0) - (baseline.get("mrr") or 0.0)
+    quality_gate = recall_gain >= 0.03 or mrr_gain >= 0.03
+    safety_gate = (candidate.get("safetyCriticalMissRate") or 0.0) <= (
+        baseline.get("safetyCriticalMissRate") or 0.0
+    )
+    baseline_latency = baseline.get("p95LatencyMs") or 0.0
+    candidate_latency = candidate.get("p95LatencyMs") or 0.0
+    latency_gate = baseline_latency > 0 and candidate_latency <= baseline_latency * 1.5
+    deployable = quality_gate and safety_gate and latency_gate
+    return {
+        "recallGain": recall_gain,
+        "mrrGain": mrr_gain,
+        "qualityGate": quality_gate,
+        "safetyGate": safety_gate,
+        "latencyGate": latency_gate,
+        "deployable": deployable,
+        "decision": "enable-candidate-retriever" if deployable else "keep-current-retriever",
+    }
 
 
 def format_comparison_markdown(comparison: dict) -> str:
@@ -353,9 +460,9 @@ def format_comparison_markdown(comparison: dict) -> str:
     return "\n".join(lines)
 
 
-def write_comparison(settings: Settings | None = None) -> tuple[str, str]:
+def write_comparison(settings: EvalSettings | None = None) -> tuple[str, str]:
     """Build comparison and write JSON + Markdown outputs. Returns (json_path, md_path)."""
-    settings = settings or get_settings()
+    settings = settings or get_eval_settings()
     comparison = build_comparison(settings)
     md = format_comparison_markdown(comparison)
 
@@ -373,7 +480,15 @@ def write_comparison(settings: Settings | None = None) -> tuple[str, str]:
 if __name__ == "__main__":
     import sys
     strategy = sys.argv[1] if len(sys.argv) > 1 else "baseline"
-    valid = {"baseline", "multi-query", "hybrid-rrf", "llm-rerank", "comparison"}
+    valid = {
+        "baseline",
+        "multi-query",
+        "hybrid-rrf",
+        "llm-rerank",
+        "bge-m3",
+        "bge-m3-rerank",
+        "comparison",
+    }
     if strategy not in valid:
         print(f"Unknown strategy: {strategy}. Valid: {valid}")
         sys.exit(1)
@@ -392,5 +507,5 @@ if __name__ == "__main__":
         "averageFirstRelevantRank",
     ]:
         print(f"{key}={report[key]}")
-    _, summary_path = _strategy_paths(strategy, get_settings())
+    _, summary_path = _strategy_paths(strategy, get_eval_settings())
     print(f"summary={summary_path}")

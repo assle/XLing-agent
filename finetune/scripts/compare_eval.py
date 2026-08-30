@@ -1,8 +1,8 @@
 """对比微调前后的分类器评估报告，产出 before/after 提升数字。
 
 前置：已用 cls_eval runner 跑过两轮：
-  - baseline: CLS_EVAL_OUTPUT=target/cls-eval-baseline.json python -m app.cls_eval.runner --provider ollama --model qwen2.5:3b
-  - after:    python -m app.cls_eval.runner --provider ollama --model xling-cls-3b-ft:latest
+  - baseline: CLS_EVAL_OUTPUT=target/cls-eval-baseline.json python -m evals.classifier.runner --provider ollama --model qwen2.5:3b
+  - after:    python -m evals.classifier.runner --provider ollama --model xling-cls-3b-ft:latest
 
 用法：
     python finetune/scripts/compare_eval.py

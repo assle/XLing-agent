@@ -5,20 +5,17 @@ Issue 01: Assessment 三层风险评估单测基线 (runtime-layer override).
 An explicit high-risk signal still produces HIGH, while the RISK message type
 does not overwrite an independent assessment result.
 
-Run:  python tests/test_risk_guardian.py
+Run: python -m pytest tests/test_risk_guardian.py
 """
 from __future__ import annotations
 
 import asyncio
-import os
-import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+from app.agents.runtime import AgentContext, AgentRuntimeService
 from app.core.enums import IntentType, RiskLevel
 from app.models.entities import ChatSession, UserAccount
-from app.agents.runtime import AgentContext, AgentRuntimeService
 from app.services.assessment import PsychologicalAssessmentService
+from tests.support import build_runtime
 
 
 class FakeAiClient:
@@ -48,10 +45,11 @@ class FakeAiClient:
 
 
 def _make_runtime(llm_response: str) -> AgentRuntimeService:
-    """Bypass __init__ to avoid db/redis/chromadb -- only self.assessment is needed."""
-    runtime = AgentRuntimeService.__new__(AgentRuntimeService)
-    runtime.assessment = PsychologicalAssessmentService(FakeAiClient(llm_response))
-    return runtime
+    """Build through the runtime dependency seam with a canned assessment."""
+    return build_runtime(
+        AgentRuntimeService,
+        assessment=PsychologicalAssessmentService(FakeAiClient(llm_response)),
+    )
 
 
 def _make_context(intent: IntentType, text: str = "有点担心") -> AgentContext:
@@ -150,27 +148,3 @@ def test_trajectory_failure_rolls_back_before_safe_fallback():
     assert proceeded is True
     assert runtime.db.rollback_called is True
     assert context.risk_level == RiskLevel.LOW
-
-
-# ---------------------------------------------------------------------------
-# Runner
-# ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

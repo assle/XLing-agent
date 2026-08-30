@@ -4,16 +4,20 @@ from importlib.util import find_spec
 
 from sqlalchemy.orm import Session
 
-from app.agents.runtime import AgentRuntimeService
+from app.agents.runtime import AgentRuntimeDependencies, AgentRuntimeService
 from app.core.config import Settings
 
 
-def create_agent_runtime(db: Session, settings: Settings) -> AgentRuntimeService:
+def create_agent_runtime(
+    db: Session,
+    settings: Settings,
+    dependencies: AgentRuntimeDependencies | None = None,
+) -> AgentRuntimeService:
     if wants_langgraph(settings) and langgraph_available():
         from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
 
-        return LangGraphAgentRuntimeService(db, settings)
-    return AgentRuntimeService(db, settings)
+        return LangGraphAgentRuntimeService(db, settings, dependencies)
+    return AgentRuntimeService(db, settings, dependencies)
 
 
 def agent_framework_status(settings: Settings) -> dict:

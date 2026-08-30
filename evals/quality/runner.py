@@ -7,12 +7,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from statistics import mean, stdev
 
-from app.core.config import Settings, get_settings
 from app.core.enums import IntentType, RiskLevel
+from app.core.versioning import ArtifactVersionResolver
 from app.schemas.dtos import AiMessage
 from app.services.ai import AiClient, PromptTemplates
-from app.quality_eval.judge_prompt import build_judge_messages, parse_judge_response
-
+from evals.config import EvalSettings, get_eval_settings
+from evals.quality.judge_prompt import build_judge_messages, parse_judge_response
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ async def _judge_reply(
     return parse_judge_response(raw)
 
 
-async def _evaluate_async(settings: Settings, provider: str) -> list[dict]:
+async def _evaluate_async(settings: EvalSettings, provider: str) -> list[dict]:
     dataset_path = Path(settings.quality_eval_dataset)
     cases = json.loads(dataset_path.read_text(encoding="utf-8"))
 
@@ -126,10 +126,10 @@ def build_summary(report: dict) -> dict:
 
 
 def evaluate(
-    settings: Settings | None = None, provider: str | None = None
+    settings: EvalSettings | None = None, provider: str | None = None
 ) -> dict:
     """Run quality evaluation: generate replies, judge them, compute stats."""
-    settings = settings or get_settings()
+    settings = settings or get_eval_settings()
     provider = provider or settings.quality_eval_gen_provider
 
     results = asyncio.run(_evaluate_async(settings, provider))
@@ -141,6 +141,9 @@ def evaluate(
         "judgeProvider": "mock" if provider == "mock" else settings.quality_eval_judge_provider,
         "judgeModel": settings.quality_eval_judge_model,
         "judgeRuns": settings.quality_eval_judge_runs,
+        "artifactVersion": ArtifactVersionResolver(
+            settings.model_copy(update={"ai_provider": provider})
+        ).current(settings.quality_eval_dataset).to_dict(),
         **summary,
         "results": results,
     }
@@ -183,4 +186,4 @@ if __name__ == "__main__":
         d = report["perDimension"][dim]
         unstable = " [UNSTABLE]" if d["unstable"] else ""
         print(f"  {dim}: mean={d['mean']:.4f} std={d['std']:.4f}{unstable}")
-    print(f"summary={get_settings().quality_eval_summary_output}")
+    print(f"summary={get_eval_settings().quality_eval_summary_output}")

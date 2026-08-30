@@ -1,37 +1,15 @@
 """API behavior for executable human-review outcomes (issue 5)."""
 from __future__ import annotations
 
-from datetime import datetime
-
-from fastapi import FastAPI
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from starlette.testclient import TestClient
-
 from app.api.routes import router
-from app.core.database import Base, get_db
 from app.core.security import hash_password
+from app.core.time import utc_now
 from app.models.entities import ChatMessage, ChatSession, PsychologicalReport, ReviewRequest, UserAccount
+from tests.support import ApiHarness
 
-
-engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
-Session = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-Base.metadata.create_all(bind=engine)
-
-
-def get_test_db():
-    db = Session()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-app = FastAPI()
-app.include_router(router)
-app.dependency_overrides[get_db] = get_test_db
-client = TestClient(app)
+_harness = ApiHarness(router)
+Session = _harness.sessions
+client = _harness.client
 
 
 def _seed_review() -> int:
@@ -71,7 +49,7 @@ def _seed_review() -> int:
         handoff_reason="USER_REQUEST",
         desensitized_summary="当前困境：需要更多支持",
         status="pending",
-        created_at=datetime.utcnow(),
+        created_at=utc_now(),
     )
     db.add(review)
     db.commit()

@@ -3,14 +3,15 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.core.time import utc_now
 
 
 def now() -> datetime:
-    return datetime.utcnow()
+    return utc_now()
 
 
 class UserAccount(Base):
@@ -237,6 +238,9 @@ class ExcelRecord(Base):
 
 class ToolJob(Base):
     __tablename__ = "tool_jobs"
+    __table_args__ = (
+        UniqueConstraint("report_id", "kind", name="uq_tool_jobs_report_kind"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     report_id: Mapped[int] = mapped_column(Integer, index=True)

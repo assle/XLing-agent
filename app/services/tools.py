@@ -11,7 +11,6 @@ from app.core.config import Settings
 from app.core.enums import ToolStatus
 from app.models.entities import AlertRecord, ExcelRecord, PsychologicalReport, UserAccount
 
-
 EXCEL_WRITE_LOCK = threading.Lock()
 
 

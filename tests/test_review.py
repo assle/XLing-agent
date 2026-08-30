@@ -3,15 +3,11 @@
 Uses an in-memory SQLite database to test the review queue logic without
 MySQL/Redis. The resume/AI-streaming integration is tested in test_resume.py.
 
-Run:  python tests/test_review.py
+Run: python -m pytest tests/test_review.py
 """
 from __future__ import annotations
 
-import os
-import sys
-from datetime import datetime, timedelta
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from datetime import timedelta
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -19,8 +15,10 @@ from sqlalchemy.orm import sessionmaker
 from app.core.config import Settings
 from app.core.database import Base
 from app.core.enums import MessageRole
+from app.core.time import utc_now
 from app.models.entities import ChatMessage, ChatSession, PsychologicalReport, ReviewRequest, UserAccount
 from app.services.review import ReviewService, ReviewTimeoutWorker
+from tests.support import FakeMemoryStore, build_runtime
 
 
 def _make_db():
@@ -51,7 +49,7 @@ def _seed_review(db, thread_id: str, status: str = "pending", minutes_ago: int =
     review = ReviewRequest(
         session_id=session.id, report_id=report.id, thread_id=thread_id,
         risk_summary="检测到明确高风险表达", status=status,
-        created_at=datetime.utcnow() - timedelta(minutes=minutes_ago),
+        created_at=utc_now() - timedelta(minutes=minutes_ago),
     )
     db.add(review)
     db.commit()
@@ -79,7 +77,7 @@ def test_list_pending_returns_only_pending():
 
 def test_list_pending_includes_context():
     db = _make_db()
-    review_id = _seed_review(db, "thread-ctx-001", status="pending")
+    _seed_review(db, "thread-ctx-001", status="pending")
     svc = ReviewService(db, Settings(ai_provider="mock"))
     pending = svc.list_pending()
     assert len(pending) == 1
@@ -281,7 +279,6 @@ def test_escalated_removed_from_pending():
 # Runner
 # ---------------------------------------------------------------------------
 
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
 
 # ---------------------------------------------------------------------------
 # resume_and_respond: approve / reject / degraded paths
@@ -293,33 +290,15 @@ def _interrupted_runtime(thread_id: str):
 
     from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
     from app.schemas.dtos import AiMessage
-    from app.services.ai import AiClient
-    from app.services.assessment import PsychologicalAssessmentService
-
-    class _Mem:
-        def load_recent(self, session_public_id: str):
-            return [AiMessage(role="user", content="你好")]
-
-        def messages_from_rows(self, rows):
-            return []
-
-        def replace(self, session_public_id: str, messages) -> None:
-            pass
-
-    class _Knowledge:
-        def retrieve(self, query, top_k=None):
-            return []
-
-    runtime = LangGraphAgentRuntimeService.__new__(LangGraphAgentRuntimeService)
-    runtime.db = None
-    runtime.settings = Settings(ai_provider="mock", langgraph_checkpoint_backend="memory", knowledge_vector_enabled=False)
-    runtime.ai = AiClient(runtime.settings)
-    runtime.memory = _Mem()
-    runtime.knowledge = _Knowledge()
-    runtime.assessment = PsychologicalAssessmentService(runtime.ai)
-    runtime._sqlite_conn = None
-    runtime._checkpointer = runtime._make_checkpointer()
-    runtime.graph = runtime._build_graph()
+    runtime = build_runtime(
+        LangGraphAgentRuntimeService,
+        settings=Settings(
+            ai_provider="mock",
+            langgraph_checkpoint_backend="memory",
+            knowledge_vector_enabled=False,
+        ),
+        memory=FakeMemoryStore([AiMessage(role="user", content="你好")]),
+    )
 
     user = UserAccount(id=1, display_name="测试学生", roles_csv="ROLE_USER")
     session = ChatSession(id=1, public_id=thread_id, user_id=1)
@@ -333,7 +312,11 @@ def test_resume_and_respond_approve_persists_ai_message():
     db = _make_db()
     review_id = _seed_review(db, "svc-resume-approve-001")
     _interrupted_runtime("svc-resume-approve-001")
-    svc = ReviewService(db, Settings(ai_provider="mock", knowledge_vector_enabled=False))
+    svc = ReviewService(db, Settings(
+        ai_provider="mock",
+        knowledge_vector_enabled=False,
+        langgraph_checkpoint_backend="memory",
+    ))
     review = svc.get_review(review_id)
     response_text, degraded = asyncio.run(svc.resume_and_respond(review, approved=True))
     assert degraded is False
@@ -350,7 +333,11 @@ def test_resume_and_respond_reject_persists_fallback():
     db = _make_db()
     review_id = _seed_review(db, "svc-resume-reject-001")
     _interrupted_runtime("svc-resume-reject-001")
-    svc = ReviewService(db, Settings(ai_provider="mock", knowledge_vector_enabled=False))
+    svc = ReviewService(db, Settings(
+        ai_provider="mock",
+        knowledge_vector_enabled=False,
+        langgraph_checkpoint_backend="memory",
+    ))
     review = svc.get_review(review_id)
     response_text, degraded = asyncio.run(svc.resume_and_respond(review, approved=False))
     assert degraded is False
@@ -371,21 +358,3 @@ def test_resume_and_respond_degraded_when_checkpoint_lost():
     response_text, degraded = asyncio.run(svc.resume_and_respond(review, approved=True))
     assert degraded is True
     assert response_text == PromptTemplates.fallback_response()
-
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

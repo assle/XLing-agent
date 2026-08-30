@@ -10,33 +10,20 @@ Covers:
   - User/session isolation
   - Trajectory summary for admin (no sensitive content)
 
-Run:  python tests/test_risk_trajectory.py
+Run: python -m pytest tests/test_risk_trajectory.py
 """
 from __future__ import annotations
 
-import os
-import sys
-from datetime import datetime, timedelta
-from pathlib import Path
+from datetime import timedelta
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-
-from app.core.database import Base
+from app.api.routes import health
 from app.core.enums import RiskLevel
+from app.core.time import utc_now
 from app.models.entities import RiskTrajectoryPoint
 from app.services.risk_trajectory import RiskTrajectoryHealth, RiskTrajectoryService
-from app.api.routes import health
+from tests.support import DatabaseHarness
 
-
-_test_engine = create_engine(
-    "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
-)
-_TestSession = sessionmaker(bind=_test_engine, autoflush=False, autocommit=False)
-Base.metadata.create_all(bind=_test_engine)
+_TestSession = DatabaseHarness().sessions
 
 
 def _svc(**kwargs):
@@ -139,7 +126,7 @@ def test_cross_session_window_7_days():
         # Old point (8 days ago) - insert manually
         old = RiskTrajectoryPoint(
             user_id=1, session_id=100, risk_level="LOW", risk_score=0.5,
-            created_at=datetime.utcnow() - timedelta(days=8),
+        created_at=utc_now() - timedelta(days=8),
         )
         db.add(old)
         db.commit()
@@ -313,22 +300,3 @@ def test_summary_with_data():
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

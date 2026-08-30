@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
 
 from sqlalchemy.orm import Session
 
-from app.models.entities import ActionPlan, ActionPlanItem, CheckIn
-
+from app.core.time import utc_now
+from app.models.entities import ActionPlan, CheckIn
 
 VALID_STATUSES = {"improved", "unchanged", "worsened"}
 
@@ -63,7 +62,7 @@ class CheckInService:
             existing.items_snapshot_json = snapshot
             existing.improvement_status = improvement_status
             existing.notes = notes
-            existing.submitted_at = datetime.utcnow()
+            existing.submitted_at = utc_now()
             self.db.commit()
             self.db.refresh(existing)
             self._update_plan_status(plan, improvement_status)

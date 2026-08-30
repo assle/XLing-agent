@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 
 from app.models.entities import ScreeningResult
 
-
 # ---------------------------------------------------------------------------
 # Question definitions (standard Chinese versions)
 # ---------------------------------------------------------------------------

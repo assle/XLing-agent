@@ -1,0 +1,18 @@
+{
+  "calibration": [
+    "risk-high-01", "risk-high-03", "risk-high-05", "risk-high-07", "risk-high-09",
+    "risk-high-11", "risk-high-13", "risk-high-15", "risk-high-17",
+    "risk-mid-01", "risk-mid-03", "risk-mid-05", "risk-mid-07",
+    "risk-mid-09", "risk-mid-11", "risk-mid-13", "risk-mid-15",
+    "risk-low-01", "risk-low-03", "risk-low-05", "risk-low-07",
+    "risk-low-09", "risk-low-11", "risk-low-13", "risk-low-15"
+  ],
+  "test": [
+    "risk-high-02", "risk-high-04", "risk-high-06", "risk-high-08", "risk-high-10",
+    "risk-high-12", "risk-high-14", "risk-high-16", "risk-high-18",
+    "risk-mid-02", "risk-mid-04", "risk-mid-06", "risk-mid-08",
+    "risk-mid-10", "risk-mid-12", "risk-mid-14", "risk-mid-16",
+    "risk-low-02", "risk-low-04", "risk-low-06", "risk-low-08",
+    "risk-low-10", "risk-low-12", "risk-low-14", "risk-low-16"
+  ]
+}

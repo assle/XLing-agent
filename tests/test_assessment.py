@@ -12,29 +12,22 @@ Covers:
   7. JSON parse error -> retry -> safe fallback
   8. Safe fallback is conservative (MEDIUM risk)
 
-Run:  python tests/test_assessment.py
+Run: python -m pytest tests/test_assessment.py
 """
 from __future__ import annotations
-
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import httpx
 
 from app.core.enums import EmotionLabel, RiskLevel
 from app.services.assessment import (
-    PsychologyAssessment,
+    PermanentAssessmentError,
     PsychologicalAssessmentService,
     RiskAssessmentSchema,
-    safe_fallback_assessment,
     heuristic,
     risk_from_score,
     risk_order,
+    safe_fallback_assessment,
     score_for_emotion,
-    TransientAssessmentError,
-    PermanentAssessmentError,
 )
 
 
@@ -333,22 +326,3 @@ def test_heuristic_normal():
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

@@ -20,10 +20,8 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.core.enums import RiskLevel
-from app.models.entities import ReviewRequest
 from app.services.privacy import PrivacySanitizer
 from app.services.review import ReviewService
-
 
 logger = logging.getLogger(__name__)
 

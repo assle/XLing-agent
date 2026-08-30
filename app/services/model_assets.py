@@ -17,7 +17,7 @@ def finetuned_model_status(settings: Settings) -> dict:
         "ggufExists": gguf_path.exists(),
         "ggufSizeBytes": gguf_path.stat().st_size if gguf_path.exists() else 0,
         "modelfileExists": modelfile_path.exists(),
-        "ollamaCreateCommand": f"scripts/create-finetuned-model.sh",
+        "ollamaCreateCommand": "scripts/create-finetuned-model.sh",
     }
 
 

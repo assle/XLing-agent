@@ -12,28 +12,27 @@ The true OpenAI vector baseline requires OPENAI_API_KEY + chromadb; the hybrid
 end-to-end test here proves the SQLite wiring, seeding, retrieval and metric
 pipeline produce meaningful (non-zero) numbers.
 
-Run:  python tests/test_rag_eval.py
+Run: python -m pytest tests/test_rag_eval.py
 """
 from __future__ import annotations
 
 import json
-import os
-import sys
 import tempfile
 from pathlib import Path
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from app.core.config import Settings
-from app.rag_eval.runner import (
+from app.services.bge_retrieval import BgeM3Retriever
+from app.services.knowledge import SearchResult
+from app.services.vector_store import FALLBACK_RETRIEVAL_LABEL, PRIMARY_RETRIEVAL_LABEL
+from evals.config import EvalSettings
+from evals.rag.runner import (
     _build_engine,
-    _build_retrieve_fn,
-    _strategy_label,
-    _strategy_paths,
     _eval_settings,
     _retrieval_label,
+    _strategy_label,
+    _strategy_paths,
     build_comparison,
     build_eval_summary,
+    build_retrieval_decision,
     compute_report,
     evaluate,
     evaluate_case,
@@ -41,12 +40,9 @@ from app.rag_eval.runner import (
     is_relevant,
     ndcg,
 )
-from app.services.knowledge import SearchResult
-from app.services.vector_store import FALLBACK_RETRIEVAL_LABEL, PRIMARY_RETRIEVAL_LABEL
-
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DATASET = REPO_ROOT / "app" / "rag_eval" / "xling-rag-eval.jsonl"
+DATASET = REPO_ROOT / "evals" / "rag" / "xling-rag-eval.jsonl"
 
 
 class FakeKnowledgeService:
@@ -206,7 +202,7 @@ def test_build_engine_creates_parent_dir_for_file_sqlite():
 
 
 def test_eval_settings_swaps_chroma_dirs_to_eval():
-    base = Settings()
+    base = EvalSettings()
     eval_settings = _eval_settings(base)
     assert eval_settings.chroma_persist_dir == base.rag_eval_chroma_persist_dir
     assert eval_settings.chroma_collection_name == base.rag_eval_chroma_collection_name
@@ -240,7 +236,7 @@ def test_retrieval_label_fallback_when_disabled():
 def test_evaluate_end_to_end_hybrid_fallback():
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,  # no chromadb / key needed
@@ -250,6 +246,7 @@ def test_evaluate_end_to_end_hybrid_fallback():
         report = evaluate(settings)
 
     assert report["totalCases"] == 100
+    assert report["artifactVersion"]["datasetVersion"]
     assert report["retrieval"] == FALLBACK_RETRIEVAL_LABEL
     # meaningful numbers: not all zero, cases have hits
     assert report["hitRate"] > 0.0
@@ -264,7 +261,7 @@ def test_evaluate_writes_baseline_file():
         tmp_path = Path(tmp)
         baseline_path = tmp_path / "baseline.json"
         report_path = tmp_path / "report.json"
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -308,25 +305,25 @@ def test_strategy_label_llm_rerank():
 
 
 def test_strategy_paths_baseline():
-    s = Settings()
+    s = EvalSettings()
     report, summary = _strategy_paths("baseline", s)
     assert summary == s.rag_eval_baseline_output
 
 
 def test_strategy_paths_multi_query():
-    s = Settings()
+    s = EvalSettings()
     _, summary = _strategy_paths("multi-query", s)
     assert summary == s.rag_eval_multi_query_output
 
 
 def test_strategy_paths_hybrid_rrf():
-    s = Settings()
+    s = EvalSettings()
     _, summary = _strategy_paths("hybrid-rrf", s)
     assert summary == s.rag_eval_hybrid_rrf_output
 
 
 def test_strategy_paths_llm_rerank():
-    s = Settings()
+    s = EvalSettings()
     _, summary = _strategy_paths("llm-rerank", s)
     assert summary == s.rag_eval_llm_rerank_output
 
@@ -365,7 +362,7 @@ def test_rrf_fuse_single_list():
 def test_evaluate_multi_query_end_to_end():
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -387,7 +384,7 @@ def test_evaluate_multi_query_writes_summary_file():
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
         summary_path = tmp_path / "multi-query.json"
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -413,7 +410,7 @@ def test_evaluate_multi_query_writes_summary_file():
 def test_evaluate_hybrid_rrf_end_to_end():
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -434,7 +431,7 @@ def test_evaluate_hybrid_rrf_writes_summary_file():
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
         summary_path = tmp_path / "hybrid-rrf.json"
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -457,7 +454,7 @@ def test_evaluate_hybrid_rrf_writes_summary_file():
 def test_evaluate_llm_rerank_end_to_end():
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -474,11 +471,45 @@ def test_evaluate_llm_rerank_end_to_end():
     assert report["hitRate"] > 0.0
 
 
+class _FakeBgeEvalBackend:
+    model_name = "fake-bge-m3"
+    reranker_name = "fake-bge-reranker"
+
+    def score(self, query: str, documents: list[str]) -> list[float]:
+        query_terms = set(query)
+        return [float(len(query_terms.intersection(document))) for document in documents]
+
+    def rerank(self, query: str, documents: list[str]) -> list[float]:
+        return self.score(query, documents)
+
+
+def test_evaluate_bge_strategy_reports_models_latency_and_safety_misses():
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        settings = EvalSettings().model_copy(update={
+            "rag_eval_dataset": str(DATASET),
+            "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
+            "knowledge_vector_enabled": False,
+            "rag_eval_bge_output": str(tmp_path / "bge-report.json"),
+            "rag_eval_bge_summary_output": str(tmp_path / "bge-summary.json"),
+        })
+        retriever = BgeM3Retriever(_FakeBgeEvalBackend(), candidate_pool=12, rerank=True)
+
+        report = evaluate(settings, strategy="bge-m3-rerank", retriever=retriever)
+
+    assert report["retrieval"] == "BGE-M3 + bge-reranker-v2-m3"
+    assert report["embeddingModel"] == "fake-bge-m3"
+    assert report["rerankerModel"] == "fake-bge-reranker"
+    assert report["p95LatencyMs"] >= 0.0
+    assert 0.0 <= report["safetyCriticalMissRate"] <= 1.0
+    assert report["indexSizeBytes"] > 0
+
+
 def test_evaluate_llm_rerank_writes_summary_file():
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
         summary_path = tmp_path / "llm-rerank.json"
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -518,22 +549,26 @@ def test_build_comparison_all_strategies_present():
         _write_fake_summary(tmp_path / "multi-query.json", {"recallAtK": 0.85, "precisionAtK": 0.55, "mrr": 0.75, "ndcgAtK": 0.65, "hitRate": 0.92})
         _write_fake_summary(tmp_path / "hybrid-rrf.json", {"recallAtK": 0.82, "precisionAtK": 0.52, "mrr": 0.72, "ndcgAtK": 0.62, "hitRate": 0.88})
         _write_fake_summary(tmp_path / "llm-rerank.json", {"recallAtK": 0.90, "precisionAtK": 0.60, "mrr": 0.80, "ndcgAtK": 0.70, "hitRate": 0.95})
+        _write_fake_summary(tmp_path / "bge.json", {"recallAtK": 0.88, "precisionAtK": 0.58, "mrr": 0.78, "ndcgAtK": 0.68, "hitRate": 0.94})
+        _write_fake_summary(tmp_path / "bge-rerank.json", {"recallAtK": 0.92, "precisionAtK": 0.62, "mrr": 0.82, "ndcgAtK": 0.72, "hitRate": 0.96})
 
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "rag_eval_baseline_output": str(tmp_path / "baseline.json"),
             "rag_eval_multi_query_output": str(tmp_path / "multi-query.json"),
             "rag_eval_hybrid_rrf_output": str(tmp_path / "hybrid-rrf.json"),
             "rag_eval_llm_rerank_output": str(tmp_path / "llm-rerank.json"),
+            "rag_eval_bge_summary_output": str(tmp_path / "bge.json"),
+            "rag_eval_bge_rerank_summary_output": str(tmp_path / "bge-rerank.json"),
         })
 
         comparison = build_comparison(settings)
 
-        assert len(comparison["strategies"]) == 4
+        assert len(comparison["strategies"]) == 6
         assert all(s["available"] for s in comparison["strategies"])
         assert comparison["strategies"][0]["name"] == "baseline"
         assert comparison["strategies"][0]["metrics"]["mrr"] == 0.70
-        assert comparison["delta"]["bestStrategy"] == "llm-rerank"
-        assert abs(comparison["delta"]["metrics"]["mrr"] - 0.10) < 1e-6
+        assert comparison["delta"]["bestStrategy"] == "bge-m3-rerank"
+        assert abs(comparison["delta"]["metrics"]["mrr"] - 0.12) < 1e-6
 
 
 def test_build_comparison_missing_strategy():
@@ -541,11 +576,13 @@ def test_build_comparison_missing_strategy():
         tmp_path = Path(tmp)
         _write_fake_summary(tmp_path / "baseline.json", {"recallAtK": 0.80, "precisionAtK": 0.50, "mrr": 0.70, "ndcgAtK": 0.60, "hitRate": 0.90})
 
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "rag_eval_baseline_output": str(tmp_path / "baseline.json"),
             "rag_eval_multi_query_output": str(tmp_path / "missing-mq.json"),
             "rag_eval_hybrid_rrf_output": str(tmp_path / "missing-rrf.json"),
             "rag_eval_llm_rerank_output": str(tmp_path / "missing-rerank.json"),
+            "rag_eval_bge_summary_output": str(tmp_path / "missing-bge.json"),
+            "rag_eval_bge_rerank_summary_output": str(tmp_path / "missing-bge-rerank.json"),
         })
 
         comparison = build_comparison(settings)
@@ -563,11 +600,13 @@ def test_build_comparison_only_baseline_no_delta():
         _write_fake_summary(tmp_path / "baseline.json", {"recallAtK": 0.80, "precisionAtK": 0.50, "mrr": 0.70, "ndcgAtK": 0.60, "hitRate": 0.90})
         _write_fake_summary(tmp_path / "multi-query.json", {"recallAtK": 0.85, "precisionAtK": 0.55, "mrr": 0.75, "ndcgAtK": 0.65, "hitRate": 0.92})
 
-        settings = Settings().model_copy(update={
+        settings = EvalSettings().model_copy(update={
             "rag_eval_baseline_output": str(tmp_path / "baseline.json"),
             "rag_eval_multi_query_output": str(tmp_path / "multi-query.json"),
             "rag_eval_hybrid_rrf_output": str(tmp_path / "missing.json"),
             "rag_eval_llm_rerank_output": str(tmp_path / "missing2.json"),
+            "rag_eval_bge_summary_output": str(tmp_path / "missing-bge.json"),
+            "rag_eval_bge_rerank_summary_output": str(tmp_path / "missing-bge-rerank.json"),
         })
 
         comparison = build_comparison(settings)
@@ -602,6 +641,29 @@ def test_format_comparison_markdown_has_table():
     assert "Δ" in md
 
 
+def test_retrieval_decision_rejects_quality_gain_that_breaks_latency_budget():
+    baseline = {
+        "recallAtK": 0.95,
+        "mrr": 0.86,
+        "safetyCriticalMissRate": 0.03,
+        "p95LatencyMs": 4.0,
+    }
+    candidate = {
+        "recallAtK": 0.99,
+        "mrr": 0.92,
+        "safetyCriticalMissRate": 0.03,
+        "p95LatencyMs": 120.0,
+    }
+
+    decision = build_retrieval_decision(baseline, candidate)
+
+    assert decision["qualityGate"] is True
+    assert decision["safetyGate"] is True
+    assert decision["latencyGate"] is False
+    assert decision["deployable"] is False
+    assert decision["decision"] == "keep-current-retriever"
+
+
 def test_format_comparison_markdown_no_delta():
     comparison = {
         "strategies": [
@@ -618,27 +680,3 @@ def test_format_comparison_markdown_no_delta():
     assert "baseline" in md
     assert "未运行" in md
     assert "Δ" not in md
-
-
-# ---------------------------------------------------------------------------
-# Runner
-# ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

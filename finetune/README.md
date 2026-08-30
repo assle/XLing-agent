@@ -29,7 +29,7 @@ python finetune/scripts/split_data.py
 
 ```bash
 # Ollama 已拉取 qwen2.5:3b
-python -m app.cls_eval.runner --provider ollama --model qwen2.5:3b
+python -m evals.classifier.runner --provider ollama --model qwen2.5:3b
 ```
 
 报告输出到 `target/cls-eval-report.json`。记下 accuracy、macroF1、高风险 recall 作为 before 基准。
@@ -75,7 +75,7 @@ LLAMA_CPP_DIR=/path/to/llama.cpp ./finetune/scripts/quantize.sh
 用同一个评估脚本跑微调后模型：
 
 ```bash
-python -m app.cls_eval.runner --provider ollama --model xling-cls-3b-ft:latest
+python -m evals.classifier.runner --provider ollama --model xling-cls-3b-ft:latest
 ```
 
 对比步骤 2 的 before 数字，得到整体 F1 和高风险 recall 的提升。
@@ -83,7 +83,7 @@ python -m app.cls_eval.runner --provider ollama --model xling-cls-3b-ft:latest
 另可用现有风险评测跑整个 assess 链路（含关键词短路 + 分类器 + 兜底），在 50 个真实 case 上对比：
 
 ```bash
-python -m app.risk_eval.runner --provider ollama
+python -m evals.risk.runner --provider ollama
 ```
 
 ## 配置说明
@@ -111,6 +111,6 @@ finetune/
 models/xling-cls-3b-ft/
 └── Modelfile                 # Ollama 分类器模型定义
 
-app/cls_eval/
+evals/classifier/
 └── runner.py                 # 分类器评估脚本
 ```

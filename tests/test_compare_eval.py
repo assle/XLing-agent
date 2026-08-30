@@ -1,13 +1,8 @@
 """Tests for the before/after comparison script.
 
-Run:  python tests/test_compare_eval.py
+Run: python -m pytest tests/test_compare_eval.py
 """
 from __future__ import annotations
-
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from finetune.scripts.compare_eval import compare
 
@@ -52,23 +47,3 @@ def test_compare_preserves_per_class():
     result = compare(before, after)
     assert result["beforePerClass"]["焦虑"]["f1"] == 0.7
     assert result["afterPerClass"]["焦虑"]["f1"] == 0.9
-
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

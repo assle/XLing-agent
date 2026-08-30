@@ -11,39 +11,29 @@ Verifies the external behaviour of ChatService.stream_chat:
 Uses a stub agent runtime + fake memory + real SQLite DB.
 No external services (Redis, MySQL, Ollama, OpenAI) required.
 
-Run:  python tests/test_sse_events.py
+Run: python -m pytest tests/test_sse_events.py
 """
 from __future__ import annotations
 
 import asyncio
 import json
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
+from dataclasses import replace
 
 import app.services.chat as chat_module
 from app.agents.runtime import ActionPlanEvent, ActionPlanItemEvent, AgentRunResult, AgentStep, CbtEvent
 from app.core.config import Settings
-from app.core.database import Base
 from app.core.enums import EmotionLabel, IntentType, RiskLevel
 from app.core.security import hash_password
 from app.models.entities import ChatSession, ReviewRequest, UserAccount
 from app.schemas.dtos import AiMessage, ChatRequest
 from app.services.assessment import PsychologyAssessment
-
+from tests.support import DatabaseHarness
 
 # ---------------------------------------------------------------------------
 # Setup
 # ---------------------------------------------------------------------------
 
-_test_engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
-_TestSession = sessionmaker(bind=_test_engine, autoflush=False, autocommit=False)
-Base.metadata.create_all(bind=_test_engine)
+_TestSession = DatabaseHarness().sessions
 
 _settings = Settings(ai_provider="mock", langgraph_checkpoint_backend="memory", knowledge_vector_enabled=False)
 
@@ -113,6 +103,11 @@ class _StubRuntime:
         )
 
 
+class _NoopReportDispatcher:
+    async def dispatch(self, report_id: int, risk_level: str | None) -> None:
+        pass
+
+
 def _run_stream(
     steps,
     message="我最近压力很大",
@@ -125,13 +120,18 @@ def _run_stream(
     action_plan_event=None,
 ):
     """Drive ChatService.stream_chat with a stub runtime, return parsed SSE events."""
-    chat_module.create_agent_runtime = lambda db, settings: _StubRuntime(
+    runtime = _StubRuntime(
         steps, intent, pending_review, trajectory_rising, trajectory_trend, cbt_event, action_plan_event
     )
     db = _TestSession()
     try:
-        service = chat_module.ChatService(db, _settings)
-        service.memory = _FakeMemory()
+        dependencies = replace(
+            chat_module.ChatDependencies.create(db, _settings),
+            memory=_FakeMemory(),
+            runtime_factory=lambda db, settings: runtime,
+            report_dispatcher=_NoopReportDispatcher(),
+        )
+        service = chat_module.ChatService(db, _settings, dependencies)
         request = ChatRequest(message=message, noMemory=no_memory)
         raw_events = []
 
@@ -146,8 +146,8 @@ def _run_stream(
     events = []
     for chunk in raw_events:
         lines = [line for line in chunk.strip().split("\n") if line]
-        event_name = next((l[7:] for l in lines if l.startswith("event: ")), None)
-        data_line = next((l for l in lines if l.startswith("data: ")), None)
+        event_name = next((line[7:] for line in lines if line.startswith("event: ")), None)
+        data_line = next((line for line in lines if line.startswith("data: ")), None)
         events.append((event_name, json.loads(data_line[6:]) if data_line else {}))
     return events
 
@@ -323,22 +323,3 @@ def test_pending_review_trajectory_reason_when_rising():
 
 # Runner
 # ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

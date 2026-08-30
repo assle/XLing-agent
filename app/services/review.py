@@ -11,8 +11,8 @@ from sqlalchemy.orm import Session
 from app.core.config import Settings
 from app.core.database import SessionLocal
 from app.core.enums import MessageRole
+from app.core.time import utc_now
 from app.models.entities import ChatMessage, ChatSession, PsychologicalReport, ReviewRequest
-
 
 _RISK_PRIORITY = {"HIGH": 3, "MEDIUM": 2, "LOW": 1}
 
@@ -67,7 +67,7 @@ class ReviewService:
         Returns the list of escalated review IDs."""
         from app.services.ai import PromptTemplates
 
-        cutoff = datetime.utcnow() - timedelta(minutes=self.settings.review_timeout_minutes)
+        cutoff = utc_now() - timedelta(minutes=self.settings.review_timeout_minutes)
         timed_out_ids = (
             self.db.query(ReviewRequest)
             .filter(ReviewRequest.status == "pending")
@@ -103,7 +103,7 @@ class ReviewService:
             review.reviewer_decision = "timeout"
             review.reviewer_note = "系统自动处理：人工审核等待超时"
             review.reviewed_by = "system"
-            review.reviewed_at = datetime.utcnow()
+            review.reviewed_at = utc_now()
             escalated.append(review.id)
             self.db.commit()
         return escalated
@@ -123,7 +123,10 @@ class ReviewService:
         try:
             from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
             runtime = LangGraphAgentRuntimeService(self.db, self.settings)
-            result = await runtime.resume(review.thread_id, approved=approved)
+            try:
+                result = await runtime.resume(review.thread_id, approved=approved)
+            finally:
+                await runtime.aclose()
         except ModuleNotFoundError:
             # Custom-runtime deployments cannot resume a checkpoint. Keep the
             # safety boundary by sending only the fixed fallback response.
@@ -154,7 +157,7 @@ class ReviewService:
         """Mark a review as auto-escalated (e.g. checkpoint lost after restart)."""
         review = self._get_pending(review_id)
         review.status = "escalated"
-        review.reviewed_at = datetime.utcnow()
+        review.reviewed_at = utc_now()
         self.db.commit()
         return review
 
@@ -214,7 +217,7 @@ class ReviewService:
         review.next_step = next_step
         review.follow_up_owner = follow_up_owner
         review.follow_up_at = follow_up_at
-        review.reviewed_at = datetime.utcnow()
+        review.reviewed_at = utc_now()
         # Map decision to status
         status_map = {"approve": "approved", "reject": "rejected", "refer": "referred", "monitor": "monitoring"}
         review.status = status_map[decision]
@@ -272,7 +275,7 @@ class ReviewService:
             .all()
         )
         messages.reverse()
-        now = datetime.utcnow()
+        now = utc_now()
         return {
             "reviewId": review.id,
             "threadId": review.thread_id,

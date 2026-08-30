@@ -9,7 +9,7 @@ class Base(DeclarativeBase):
 
 
 settings = get_settings()
-engine_kwargs = {
+engine_kwargs: dict[str, object] = {
     "pool_pre_ping": True,
     "pool_recycle": 3600,
 }

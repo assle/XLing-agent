@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timedelta
-from typing import Optional
+from datetime import timedelta
 
 from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy.orm import Session
 
+from app.core.time import utc_now
 from app.models.entities import ActionPlan, ActionPlanItem
 from app.schemas.dtos import AiMessage
 from app.services.ai import AiClient
@@ -100,7 +100,7 @@ class ActionPlanService:
         if item is None:
             return None
         item.completed = True
-        item.completed_at = datetime.utcnow()
+        item.completed_at = utc_now()
         self.db.commit()
         self.db.refresh(item)
         return item

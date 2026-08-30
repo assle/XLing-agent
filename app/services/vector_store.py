@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import shutil
 from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
 
 import httpx
 
 from app.core.config import Settings
+from app.core.time import utc_now
 from app.models.entities import KnowledgeChunk
-
 
 PRIMARY_RETRIEVAL_LABEL = "Chroma + OpenAI text-embedding-3-small"
 FALLBACK_RETRIEVAL_LABEL = "local hybrid_score"
@@ -73,7 +72,12 @@ class ChromaKnowledgeStore:
             {"db_id": int(chunk.id), "source": chunk.source, "source_index": int(chunk.source_index)}
             for chunk in rows
         ]
-        self.collection.upsert(ids=ids, documents=documents, metadatas=metadatas, embeddings=embeddings)
+        self.collection.upsert(
+            ids=ids,
+            documents=documents,
+            metadatas=metadatas,  # type: ignore[arg-type]
+            embeddings=embeddings,  # type: ignore[arg-type]
+        )
         self.snapshot()
         return len(rows)
 
@@ -97,9 +101,9 @@ class ChromaKnowledgeStore:
 
     def query(self, query_embedding: list[float], top_k: int) -> list[VectorSearchHit]:
         result = self.collection.query(
-            query_embeddings=[query_embedding],
+            query_embeddings=[query_embedding],  # type: ignore[arg-type]
             n_results=top_k,
-            include=["documents", "metadatas", "distances"],
+            include=["documents", "metadatas", "distances"],  # type: ignore[list-item]
         )
         documents = (result.get("documents") or [[]])[0]
         metadatas = (result.get("metadatas") or [[]])[0]
@@ -131,7 +135,7 @@ class ChromaKnowledgeStore:
             return None
         snapshot_root = self._resolve_path(self.settings.chroma_snapshot_dir)
         snapshot_root.mkdir(parents=True, exist_ok=True)
-        destination = snapshot_root / datetime.utcnow().strftime("%Y%m%d-%H%M%S-%f")
+        destination = snapshot_root / utc_now().strftime("%Y%m%d-%H%M%S-%f")
         shutil.copytree(self.persist_dir, destination)
         self._prune_snapshots(snapshot_root)
         return str(destination)

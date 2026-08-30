@@ -5,24 +5,22 @@ validation set. Supports baseline (base model zero-shot) and fine-tuned model
 runs via provider/model switches, so before/after comparison is apples-to-apples.
 
 Run:
-    python -m app.cls_eval.runner                          # mock provider
-    python -m app.cls_eval.runner --provider ollama --model qwen2.5:3b
-    python -m app.cls_eval.runner --provider openai --model gpt-4o-mini
+    python -m evals.classifier.runner
+    python -m evals.classifier.runner --provider ollama --model qwen2.5:3b
+    python -m evals.classifier.runner --provider openai --model gpt-4o-mini
 """
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
-import os
 import sys
-from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
 import httpx
 
-from app.core.config import Settings, get_settings
+from app.core.versioning import ArtifactVersionResolver
+from evals.config import EvalSettings, get_eval_settings
 
 logger = logging.getLogger(__name__)
 
@@ -138,9 +136,9 @@ def compute_metrics(results: list[dict]) -> dict:
     }
 
 
-def evaluate(settings: Settings | None = None, provider: str | None = None, model: str | None = None) -> dict:
+def evaluate(settings: EvalSettings | None = None, provider: str | None = None, model: str | None = None) -> dict:
     """Run classifier evaluation on the held-out validation set."""
-    settings = settings or get_settings()
+    settings = settings or get_eval_settings()
     provider = provider or settings.cls_eval_ai_provider
 
     dataset_path = Path(settings.cls_eval_dataset)
@@ -180,6 +178,9 @@ def evaluate(settings: Settings | None = None, provider: str | None = None, mode
         "provider": provider,
         "model": resolved_model,
         "dataset": str(dataset_path),
+        "artifactVersion": ArtifactVersionResolver(
+            settings.model_copy(update={"ai_provider": provider})
+        ).current(dataset_path).to_dict(),
         **metrics,
         "cases": results,
     }
@@ -221,4 +222,4 @@ if __name__ == "__main__":
         m = report["perClass"][cls]
         print(f"  {cls}: precision={m['precision']:.4f} recall={m['recall']:.4f} f1={m['f1']:.4f}")
     print(f"highRiskRecall={report['highRiskRecall']:.4f}")
-    print(f"report={get_settings().cls_eval_output}")
+    print(f"report={get_eval_settings().cls_eval_output}")

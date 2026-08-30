@@ -11,27 +11,16 @@ Covers:
   - Basic Auth no longer works
   - Role isolation (student can't access admin, admin can't chat)
 
-Run:  python tests/test_security.py
+Run: python -m pytest tests/test_security.py
 """
 from __future__ import annotations
 
 import hashlib
-import os
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import jwt as pyjwt
-from fastapi import FastAPI
-from sqlalchemy import create_engine
-from sqlalchemy.pool import StaticPool
-from sqlalchemy.orm import sessionmaker
-from starlette.testclient import TestClient
 
 from app.api.routes import router
 from app.core.config import get_settings
-from app.core.database import Base, get_db
 from app.core.security import (
     create_access_token,
     decode_access_token,
@@ -41,28 +30,15 @@ from app.core.security import (
     verify_password,
 )
 from app.models.entities import UserAccount
-
+from tests.support import ApiHarness
 
 # ---------------------------------------------------------------------------
 # Test database + app setup
 # ---------------------------------------------------------------------------
 
-_test_engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
-_TestSession = sessionmaker(bind=_test_engine, autoflush=False, autocommit=False)
-
-
-def _test_get_db():
-    db = _TestSession()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-app = FastAPI()
-app.include_router(router)
-app.dependency_overrides[get_db] = _test_get_db
-Base.metadata.create_all(bind=_test_engine)
+_harness = ApiHarness(router)
+_TestSession = _harness.sessions
+client = _harness.client
 
 
 def _seed_users():
@@ -89,7 +65,6 @@ def _seed_users():
 
 
 _seed_users()
-client = TestClient(app)
 
 
 def _reset_db():
@@ -198,7 +173,7 @@ def test_jwt_wrong_secret_rejected():
     wrong_token = pyjwt.encode(
         {"sub": "1", "username": "student", "roles": ["ROLE_USER"],
          "exp": 9999999999, "iat": 1},
-        "wrong-secret", algorithm="HS256",
+        "wrong-secret-that-is-at-least-32-bytes", algorithm="HS256",
     )
     try:
         decode_access_token(wrong_token)
@@ -342,22 +317,3 @@ def test_admin_cannot_chat():
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
-
-_TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-
-if __name__ == "__main__":
-    passed = 0
-    failed = 0
-    for test in _TESTS:
-        try:
-            test()
-            print(f"  PASS  {test.__name__}")
-            passed += 1
-        except AssertionError as exc:
-            print(f"  FAIL  {test.__name__}: {exc}")
-            failed += 1
-        except Exception as exc:
-            print(f"  ERROR {test.__name__}: {type(exc).__name__}: {exc}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed, {len(_TESTS)} total")
-    sys.exit(1 if failed else 0)

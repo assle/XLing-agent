@@ -5,8 +5,8 @@ from datetime import date, datetime
 from sqlalchemy.orm import Session
 
 from app.core.enums import ExamStage
+from app.core.time import utc_now
 from app.models.entities import UserProfile
-
 
 VALID_STAGES = {stage.value for stage in ExamStage}
 
@@ -53,7 +53,7 @@ class UserProfileService:
         if exam_date is not None:
             profile.exam_date = self._parse_date(exam_date) if exam_date.strip() else None
 
-        profile.updated_at = datetime.utcnow()
+        profile.updated_at = utc_now()
         self.db.commit()
         self.db.refresh(profile)
         return profile
