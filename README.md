@@ -1,21 +1,34 @@
 # Xling
 
+Xling 是一个面向备考学生的心理支持与日常陪伴项目，也是用于展示人工智能应用、后端系统设计和算法评测能力的面试项目。它提供支持性沟通、校园知识检索、行动计划和高风险人工审核，但不进行医学诊断，也不能替代心理咨询师、医生或紧急救援服务。
+
+## 面试展示重点
+
+- 人工智能应用可复现：每份评测记录模型、分类器、提示词、嵌入模型、重排模型、索引、数据、校准产物和代码版本。
+- 安全链路有硬边界：明确高风险规则优先于模型判断和知识检索，高风险流程必须进入人工审核。
+- 算法结论可验证：提供 40 条端到端案例、100 条中文检索难例、风险概率校准和共形预测实验；未达门槛的 BGE 与校准结果不会被包装成上线成功。
+- 后端状态可恢复：一轮支持过程使用单事务保存，工具任务支持唯一约束、原子抢占和租约恢复，人工审核检查点可以跨服务重启恢复。
+- 失败路径可解释：Redis、向量服务、检查点和模型不可用时均有明确回退或安全降级策略。
+
 ## 核心能力
 
-- 学生端 SSE 流式聊天，前端可展示打字机式输出。
+- 学生端 SSE（服务器主动推送事件）流式聊天，前端可展示打字机式输出。
 - 会话历史回溯：侧边栏"历史会话"面板可查看、切换回任意旧对话；切换新会话时自动清空行动计划面板。
 - 行动计划与回复同步：认知行为四维追问完成后生成的 24 小时行动计划条目会注入聊天回复的系统提示，确保回复内容与计划条目一致。
-- Basic Auth 登录，支持学生和管理员角色隔离。
-- LangGraph 多 Agent 工作流：Memory、Supervisor、Knowledge、RiskGuardian、Companion、Counselor，未安装 LangGraph 时自动回退到自研有限循环 runtime。
+- 使用 bcrypt 保存密码，并通过 JWT（带签名的登录令牌）实现学生与管理员角色隔离。
+- LangGraph 多智能体工作流：Memory、Supervisor、Knowledge、RiskGuardian、Companion、Counselor；未安装 LangGraph 时自动回退到自研有限循环运行时。
 - 消息分流：先区分日常对话、心理支持和明确风险；日常问题不查知识库，后两类才进入知识检索和安全风险评估。
-- Chroma 向量 RAG 知识库：支持 Markdown、txt、PDF 文件上传，自动切块，使用 `text-embedding-3-small` 写入向量库并执行 Top-K 相似度检索，同时保留本地 hybrid 检索兜底。
-- 安全风险评估：高风险词典优先、模型结构化评估、关键词兜底。
+- Chroma 向量 RAG（检索增强生成，即先查资料再回答）知识库：支持 Markdown、txt、PDF 文件上传和自动切块，同时保留本地混合检索兜底。
+- 可选 BGE-M3 中文检索和专用重排模型；只有质量、安全和延迟同时达标时才允许替换默认检索。
+- 安全风险评估：高风险词典优先、分类器评估和保守兜底；可选温度缩放与共形预测表达不确定性。
 - 后台报告：记录情绪标签、情绪分数、风险等级、置信度和摘要，但学生端不展示后台评估结果。
-- 数据闭环：咨询/风险消息完整写入 MySQL，短期上下文写入 Redis，高风险消息写入 Excel 台账并通过邮件发送预警。
+- 数据闭环：咨询或风险消息完整写入 MySQL，短期上下文写入 Redis，高风险消息通过持久化任务队列写入 Excel 台账并发送邮件预警。
+- 人工审核恢复：高风险中断状态默认持久化到异步 SQLite，服务重启后仍可批准或拒绝；状态丢失或损坏时发送固定安全回复。
+- 事务一致性：会话变化、学生消息、心理报告、人工审核请求和工具任务一次提交，任一步骤失败都会一起回滚。
 - 本地微调模型接入：支持通过 Ollama 加载 `xling-qwen2.5-7b-ft-q4_k_m.gguf`。
 - OpenAI-compatible API 接入：也可切换到云端模型。
-- MCP 工具服务：暴露 Excel 报告写入和风险通知工具，后端高风险后处理通过 MCP client 调用这些工具。
-- RAG 评测：Recall@K、Precision@K、MRR、NDCG@K、HitRate。
+- MCP（模型上下文协议）工具服务：暴露 Excel 报告写入和风险通知工具；关闭持久化工具队列时可改用 MCP 调用。
+- 评测闭环：覆盖端到端、知识检索、安全风险、回复质量和分类器，并统一记录产物版本。
 
 ## 技术栈
 
@@ -28,13 +41,15 @@ Web 框架：FastAPI
 配置管理：pydantic-settings，.env
 AI 接入：Ollama，本地微调 GGUF 模型，OpenAI-compatible API，Mock Provider
 Agent 编排：LangGraph，多 Agent 图工作流，自研 runtime 兜底
-RAG：本地知识库切块、OpenAI Embeddings、Chroma 向量库、Top-K、上下文扩展、本地 hybrid 兜底
+RAG：本地知识库切块、OpenAI Embeddings、Chroma、BGE-M3、专用重排、本地混合检索兜底
 流式输出：Server-Sent Events
+检查点：LangGraph AsyncSqliteSaver，纯数据状态，30 天保留期限
+评测：端到端、检索、安全风险、概率校准、回复质量、分类器
 文档解析：pypdf
 Excel 台账：openpyxl
 邮件预警：SMTP / smtplib
 前端：原生 HTML / CSS / JavaScript
-认证：Basic Auth
+认证：bcrypt + JWT Bearer Token
 工具协议：MCP
 ```
 
@@ -44,17 +59,24 @@ Excel 台账：openpyxl
 
 ```text
 app/
-├── agents/          # LangGraph 多 Agent 编排和自研 runtime 兜底
-├── api/             # FastAPI 路由
-├── core/            # 配置、数据库、安全、启动初始化
+├── agents/          # LangGraph 多智能体编排、纯数据检查点和自研运行时兜底
+├── api/             # 账号、学生支持、管理端和系统状态路由
+├── core/            # 配置、数据库、安全、版本清单和启动初始化
 ├── knowledge/       # 内置校园心理知识库
 ├── mcp_tools/       # MCP 工具服务
 ├── models/          # SQLAlchemy 实体
 ├── schemas/         # Pydantic DTO
-├── services/        # AI、聊天、知识库、评估、报告、工具服务
+├── services/        # AI、聊天、检索、风险校准、事务、报告和工具服务
 └── static/          # 原生前端页面
 
-evals/               # 检索、风险、回复质量和分类器离线评测
+evals/
+├── e2e/             # 40 条生产聊天闭环评测
+├── rag/             # 100 条中文检索难例与多方案对照
+├── risk/            # 风险基线、概率校准和共形预测
+├── quality/         # 回复质量评测
+└── classifier/      # 分类器评测
+
+docs/adr/             # 当前有效的关键架构决策
 
 models/xling-qwen2.5-7b-ft/
 ├── Modelfile        # Ollama 模型定义
@@ -120,6 +142,23 @@ BGE-M3 中文检索与专用重排使用独立依赖，默认生产安装不加�
 pip install -r requirements-bge.txt
 ```
 
+## 质量验证
+
+```bash
+python -m pytest -q
+ruff check app evals tests
+mypy --ignore-missing-imports app evals
+```
+
+当前完整测试结果为 436 项通过。另有 4 项真实 MySQL 事务故障注入测试，只有显式提供名称以 `_test` 结尾的隔离数据库时才运行：
+
+```bash
+MYSQL_TEST_DATABASE_URL='mysql+pymysql://root:root@127.0.0.1:3306/xling_issue8_test?charset=utf8mb4' \
+  python -m pytest -q tests/test_support_turn_mysql.py
+```
+
+这 4 项测试已在临时 MySQL 8.0 环境中验证通过，覆盖消息、报告、人工审核请求和工具任务写入后的整体回滚。
+
 ## MySQL 和 Redis 配置
 
 系统默认使用 MySQL 保存完整业务数据和完整聊天消息，使用 Redis 保存短期对话记忆。启动服务前先创建数据库：
@@ -179,6 +218,22 @@ student / student123
 admin / admin123
 ```
 
+接口使用 Bearer Token（放在请求头中的登录令牌）。先登录并保存学生、管理员令牌，后面的命令都会复用它们：
+
+```bash
+STUDENT_TOKEN=$(curl -s \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"student","password":"student123"}' \
+  http://127.0.0.1:8080/api/auth/login \
+  | python -c 'import json,sys; print(json.load(sys.stdin)["accessToken"])')
+
+ADMIN_TOKEN=$(curl -s \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"admin123"}' \
+  http://127.0.0.1:8080/api/auth/login \
+  | python -c 'import json,sys; print(json.load(sys.stdin)["accessToken"])')
+```
+
 ## Docker Compose 一键启动
 
 仓库提供 `Dockerfile` 和 `docker-compose.yml`，会启动：
@@ -217,9 +272,9 @@ CHROMA_SNAPSHOT_DIR=data/chroma-snapshots
 管理员接口：
 
 ```bash
-curl -u admin:admin123 http://127.0.0.1:8080/api/admin/knowledge/status
-curl -u admin:admin123 -X POST http://127.0.0.1:8080/api/admin/knowledge/rebuild-vector
-curl -u admin:admin123 -X POST http://127.0.0.1:8080/api/admin/knowledge/backup
+curl -H "Authorization: Bearer $ADMIN_TOKEN" http://127.0.0.1:8080/api/admin/knowledge/status
+curl -H "Authorization: Bearer $ADMIN_TOKEN" -X POST http://127.0.0.1:8080/api/admin/knowledge/rebuild-vector
+curl -H "Authorization: Bearer $ADMIN_TOKEN" -X POST http://127.0.0.1:8080/api/admin/knowledge/backup
 ```
 
 当 `KNOWLEDGE_VECTOR_REQUIRED=false` 时，如果 Chroma 或 embedding 服务不可用，系统会降级到本地混合检索；设为 `true` 则启动或检索失败时直接暴露错误。
@@ -311,7 +366,7 @@ AI_PROVIDER=ollama ./scripts/run-dev.sh
 查看模型接入状态：
 
 ```bash
-curl -u student:student123 http://127.0.0.1:8080/api/agent/status
+curl -H "Authorization: Bearer $STUDENT_TOKEN" http://127.0.0.1:8080/api/agent/status
 ```
 
 返回结果中的 `finetunedModel.ggufExists` 和 `finetunedModel.modelfileExists` 会显示模型资产是否就绪。
@@ -356,6 +411,9 @@ OPENAI_BASE_URL=https://api.deepseek.com/v1
 OPENAI_API_KEY=你的_DeepSeek_API_Key
 OPENAI_MODEL=deepseek-chat
 KNOWLEDGE_VECTOR_REQUIRED=false
+# 可选：为知识检索单独配置支持 embeddings 的服务
+EMBEDDING_BASE_URL=https://api.openai.com/v1
+EMBEDDING_API_KEY=你的_Embedding_API_Key
 ```
 
 或通过环境变量启动：
@@ -375,14 +433,14 @@ uvicorn app.main:app --host 127.0.0.1 --port 8080
 
 注意事项：
 
-- DeepSeek 不提供 embeddings（向量嵌入）接口，因此知识库向量检索会自动降级到本地 `hybrid_score` 混合检索。保持 `KNOWLEDGE_VECTOR_REQUIRED=false` 即可，不影响正常对话和风险检测。
-- 如果同时需要 Chroma 向量检索，可以另外配置一个 OpenAI API Key 专门用于 embeddings（此时 `OPENAI_BASE_URL` 仍指向 DeepSeek，embeddings 调用会失败并降级；若要同时使用两者，需将 embeddings 的 base_url 与聊天 base_url 分离，这需要少量代码改造）。
+- DeepSeek 不提供 embeddings（向量嵌入）接口。未单独配置嵌入服务时，知识检索会降级到本地混合检索；保持 `KNOWLEDGE_VECTOR_REQUIRED=false` 即可，不影响正常对话和风险检测。
+- 如果同时需要 Chroma 向量检索，使用 `EMBEDDING_BASE_URL` 和 `EMBEDDING_API_KEY` 配置独立嵌入服务即可，聊天仍走 DeepSeek，不需要修改代码。
 - DeepSeek API Key 在 [DeepSeek 开放平台](https://platform.deepseek.com/) 的「API Keys」页面创建。
 
 验证接入状态：
 
 ```bash
-curl -u student:student123 http://127.0.0.1:8080/api/agent/status
+curl -H "Authorization: Bearer $STUDENT_TOKEN" http://127.0.0.1:8080/api/agent/status
 ```
 
 返回结果中的 `aiProvider` 应为 `openai`，`agentFramework.active` 应为 `langgraph`。
@@ -392,16 +450,16 @@ curl -u student:student123 http://127.0.0.1:8080/api/agent/status
 学生流式聊天：
 
 ```bash
-curl -N -u student:student123 \
+curl -N -H "Authorization: Bearer $STUDENT_TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{"message":"我最近很焦虑，晚上总是睡不着"}' \
   http://127.0.0.1:8080/api/chat/stream
 ```
 
-高风险示例，会触发心理报告，并通过 MCP 工具写入 Excel 和发送邮件预警：
+高风险示例，会触发心理报告和人工审核，并通过默认持久化任务队列写入 Excel、发送邮件预警：
 
 ```bash
-curl -N -u student:student123 \
+curl -N -H "Authorization: Bearer $STUDENT_TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{"message":"我不想活了，感觉撑不下去了"}' \
   http://127.0.0.1:8080/api/chat/stream
@@ -410,25 +468,25 @@ curl -N -u student:student123 \
 管理员查看报告：
 
 ```bash
-curl -u admin:admin123 http://127.0.0.1:8080/api/admin/reports
+curl -H "Authorization: Bearer $ADMIN_TOKEN" http://127.0.0.1:8080/api/admin/reports
 ```
 
 学生查看会话历史列表：
 
 ```bash
-curl -u student:student123 http://127.0.0.1:8080/api/sessions
+curl -H "Authorization: Bearer $STUDENT_TOKEN" http://127.0.0.1:8080/api/sessions
 ```
 
 学生加载某个会话的完整消息：
 
 ```bash
-curl -u student:student123 http://127.0.0.1:8080/api/sessions/{sessionId}
+curl -H "Authorization: Bearer $STUDENT_TOKEN" http://127.0.0.1:8080/api/sessions/{sessionId}
 ```
 
 管理员追加知识库：
 
 ```bash
-curl -u admin:admin123 \
+curl -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{"source":"sleep-guide","content":"失眠时可先固定起床时间，减少睡前屏幕刺激，必要时联系校心理中心。"}' \
   http://127.0.0.1:8080/api/admin/knowledge
@@ -439,7 +497,7 @@ curl -u admin:admin123 \
 ## RAG 评测
 
 ```bash
-AI_PROVIDER=mock python -m evals.rag.runner baseline
+KNOWLEDGE_VECTOR_REQUIRED=true AI_PROVIDER=mock python -m evals.rag.runner hybrid-rrf
 pip install -r requirements-bge.txt
 BGE_DEVICE=cpu python -m evals.rag.runner bge-m3
 BGE_DEVICE=mps python -m evals.rag.runner bge-m3-rerank
@@ -491,7 +549,10 @@ RISK_SCORE_API_KEY=
 主要评测产物输出到：
 
 ```text
-target/rag-eval-report.json
+target/rag-eval-report-hybrid-rrf.json
+target/rag-eval-bge-m3.json
+target/rag-eval-bge-m3-rerank.json
+target/rag-eval-comparison.json
 target/e2e-eval-report.json
 target/risk-calibration-report.json
 ```
