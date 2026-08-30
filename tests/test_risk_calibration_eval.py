@@ -37,12 +37,36 @@ def test_calibration_eval_writes_model_artifact_and_uncertainty_metrics(tmp_path
 
     assert report["calibrationCases"] == 6
     assert report["testCases"] == 4
-    assert set(report["raw"]) >= {"accuracy", "highRiskRecall", "ece", "brier"}
-    assert set(report["calibrated"]) >= {"accuracy", "highRiskRecall", "ece", "brier"}
+    expected_probability_metrics = {
+        "accuracy",
+        "macroF1",
+        "highRiskRecall",
+        "ece",
+        "brier",
+    }
+    assert set(report["fixedConfidence"]) >= expected_probability_metrics
+    assert set(report["raw"]) >= expected_probability_metrics
+    assert set(report["calibrated"]) >= expected_probability_metrics
     assert set(report["conformal"]) >= {"coverage", "averageSetSize", "reviewRate"}
     assert 0.0 <= report["conformal"]["coverage"] <= 1.0
     assert isinstance(report["deployable"], bool)
     assert report["decision"] in {"enable-calibrated-risk", "keep-current-risk-path"}
+    assert report["exploratory"] is True
+    assert report["coverageGuarantee"] is False
+    assert report["deployable"] is False
+    assert set(report["dataSplits"]) == {
+        "training",
+        "validation",
+        "calibration",
+        "test",
+        "exactTextOverlap",
+        "sourceGroupsVerified",
+    }
+    assert set(report["cases"][0]) >= {
+        "rawProbabilities",
+        "calibratedProbabilities",
+        "predictionSet",
+    }
     artifact = json.loads((tmp_path / "artifact.json").read_text(encoding="utf-8"))
     assert artifact["calibrationVersion"] == report["calibrationVersion"]
     assert (tmp_path / "report.json").exists()

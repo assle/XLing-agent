@@ -8,7 +8,7 @@ from typing import Callable
 from sqlalchemy.orm import Session
 
 from app.agents.factory import create_agent_runtime
-from app.agents.runtime import ActionPlanEvent, AgentRuntimeService, CbtEvent
+from app.agents.runtime import ActionPlanEvent, AgentRunResult, AgentRuntimeService, CbtEvent
 from app.core.config import Settings
 from app.core.enums import MessageRole
 from app.models.entities import ChatMessage, ChatSession, UserAccount
@@ -48,6 +48,7 @@ class ChatDependencies:
     privacy: PrivacySanitizer
     runtime_factory: RuntimeFactory
     report_dispatcher: ReportDispatcher
+    observe_run: Callable[[AgentRunResult], None]
 
     @classmethod
     def create(cls, db: Session, settings: Settings) -> ChatDependencies:
@@ -57,6 +58,7 @@ class ChatDependencies:
             privacy=PrivacySanitizer(),
             runtime_factory=create_agent_runtime,
             report_dispatcher=create_report_dispatcher(db, settings),
+            observe_run=lambda run: None,
         )
 
 
@@ -75,6 +77,7 @@ class ChatService:
         self.ai = dependencies.ai
         self.runtime_factory = dependencies.runtime_factory
         self.report_dispatcher = dependencies.report_dispatcher
+        self.observe_run = dependencies.observe_run
         self.turns = SupportTurnTransaction(db, settings)
 
     async def stream_chat(self, user: UserAccount, request: ChatRequest):
@@ -133,6 +136,7 @@ class ChatService:
             close = getattr(runtime, "aclose", None)
             if close is not None:
                 await close()
+        self.observe_run(agent_run)
         if agent_run.trajectory_rising:
             handoff_reason = "RISK_TRAJECTORY_RISING"
             risk_trend = agent_run.trajectory_trend or "风险轨迹连续上升"
@@ -186,8 +190,7 @@ class ChatService:
             public_id=uuid.uuid4().hex, user_id=user.id, title=text[:36], no_memory=bool(no_memory)
         )
         self.db.add(session)
-        self.db.commit()
-        self.db.refresh(session)
+        self.db.flush()
         return session
 
     def save_message(self, user: UserAccount, session: ChatSession, role: MessageRole, content: str) -> None:

@@ -82,7 +82,7 @@ class RiskTrajectoryService:
             risk_score=score,
         )
         self.db.add(point)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(point)
         return point
 

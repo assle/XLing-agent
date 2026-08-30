@@ -67,6 +67,7 @@ def test_agent_context_checkpoint_payload_is_json_safe_and_round_trips():
             0.7,
             "压力表达",
             risk_probabilities={"LOW": 0.2, "MEDIUM": 0.7, "HIGH": 0.1},
+            raw_risk_probabilities={"LOW": 0.1, "MEDIUM": 0.8, "HIGH": 0.1},
             prediction_set=(RiskLevel.MEDIUM,),
             model_version="risk-v1",
             calibration_version="cal-v1",
@@ -88,6 +89,11 @@ def test_agent_context_checkpoint_payload_is_json_safe_and_round_trips():
     assert restored.session.public_id == session.public_id
     assert restored.intent == IntentType.CONSULT
     assert restored.assessment.calibration_version == "cal-v1"
+    assert restored.assessment.raw_risk_probabilities == {
+        "LOW": 0.1,
+        "MEDIUM": 0.8,
+        "HIGH": 0.1,
+    }
     assert restored.retrieved_knowledge[0].source == "guide.md"
     assert restored.action_plan_event.items[0].content == "先休息十分钟"
 
@@ -117,7 +123,7 @@ def test_crash_recovery_shared_checkpointer():
     from langgraph.checkpoint.memory import MemorySaver
     from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 
-    shared_saver = MemorySaver(serde=JsonPlusSerializer(pickle_fallback=True))
+    shared_saver = MemorySaver(serde=JsonPlusSerializer())
 
     runtime_a = _make_runtime("memory", checkpointer=shared_saver)
     user, session = _user_session("session-crash-001")

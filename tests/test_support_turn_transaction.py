@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import asyncio
+
 import pytest
 
-from app.agents.runtime import AgentRunResult
+from app.agents.runtime import AgentContext, AgentRunResult, AgentRuntimeService
 from app.core.config import Settings
 from app.core.enums import EmotionLabel, IntentType, RiskLevel
 from app.models.entities import (
@@ -13,9 +15,11 @@ from app.models.entities import (
     ToolJob,
     UserAccount,
 )
+from app.schemas.dtos import AiMessage
 from app.services.assessment import PsychologyAssessment
+from app.services.chat import ChatService
 from app.services.support_turn import SupportTurnTransaction
-from tests.support import DatabaseHarness
+from tests.support import DatabaseHarness, build_runtime
 
 
 def _seed(db):
@@ -67,6 +71,86 @@ def test_support_turn_persists_message_report_review_and_jobs_atomically():
         assert db.query(PsychologicalReport).count() == 1
         assert db.query(ReviewRequest).count() == 1
         assert db.query(ToolJob).count() == 2
+    finally:
+        db.close()
+        harness.close()
+
+
+def test_new_session_is_not_committed_before_the_support_turn():
+    harness = DatabaseHarness()
+    db = harness.sessions()
+    try:
+        user = UserAccount(username="student", display_name="学生", password_hash="hash")
+        db.add(user)
+        db.commit()
+        service = object.__new__(ChatService)
+        service.db = db
+
+        session = service.resolve_session(user, None, "最近压力很大", None)
+        assert session.id is not None
+        db.rollback()
+
+        assert db.query(ChatSession).count() == 0
+    finally:
+        db.close()
+        harness.close()
+
+
+def test_empty_redis_memory_is_rebuilt_from_committed_database_messages():
+    class FailedRedisMemory:
+        def __init__(self):
+            self.replaced = []
+
+        def load_recent(self, session_public_id: str):
+            return []
+
+        def messages_from_rows(self, rows):
+            return [AiMessage(role=row.role.lower(), content=row.content) for row in rows]
+
+        def replace(self, session_public_id: str, messages):
+            self.replaced = list(messages)
+
+    harness = DatabaseHarness()
+    db = harness.sessions()
+    try:
+        user, session = _seed(db)
+        SupportTurnTransaction(db, Settings(tool_queue_enabled=False)).save_support_turn(
+            user=user,
+            session=session,
+            content="最近压力很大",
+            run=AgentRunResult(
+                intent=IntentType.CONSULT,
+                risk_level=RiskLevel.LOW,
+                assessment=PsychologyAssessment(
+                    EmotionLabel.ANXIETY,
+                    2.0,
+                    RiskLevel.LOW,
+                    0.8,
+                    "压力表达",
+                ),
+                retrieved_knowledge=[],
+                response_messages=[],
+                steps=[],
+            ),
+        )
+        memory = FailedRedisMemory()
+        runtime = build_runtime(
+            AgentRuntimeService,
+            db=db,
+            memory=memory,
+            settings=Settings(ai_provider="mock", knowledge_vector_enabled=False),
+        )
+        context = AgentContext(
+            user=user,
+            session=session,
+            original_input="下一轮",
+            model_input="下一轮",
+        )
+
+        asyncio.run(runtime.memory_agent(1, context))
+
+        assert [message.content for message in memory.replaced] == ["最近压力很大"]
+        assert context.model_history[0].content == "最近压力很大"
     finally:
         db.close()
         harness.close()

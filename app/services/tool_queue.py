@@ -53,6 +53,29 @@ class ToolQueueService:
         self.db.commit()
         return claimed == 1
 
+    def recover_expired_jobs(self) -> int:
+        cutoff = utc_now() - timedelta(
+            seconds=max(1.0, self.settings.tool_queue_lease_seconds)
+        )
+        recovered = (
+            self.db.query(ToolJob)
+            .filter(
+                ToolJob.status == ToolJobStatus.RUNNING.value,
+                ToolJob.updated_at < cutoff,
+            )
+            .update(
+                {
+                    ToolJob.status: ToolJobStatus.PENDING.value,
+                    ToolJob.last_error: "任务租约过期，已重新排队",
+                    ToolJob.run_after: utc_now(),
+                    ToolJob.updated_at: utc_now(),
+                },
+                synchronize_session=False,
+            )
+        )
+        self.db.commit()
+        return recovered
+
     def _find_or_create(self, kind: str, report_id: int, depends_on_job_id: int | None = None) -> ToolJob:
         existing = (
             self.db.query(ToolJob)
@@ -253,14 +276,7 @@ class ToolQueueWorker:
     def _recover_running_jobs(self) -> None:
         db = SessionLocal()
         try:
-            rows = db.query(ToolJob).filter(ToolJob.status == ToolJobStatus.RUNNING.value).all()
-            for job in rows:
-                job.status = ToolJobStatus.PENDING.value
-                job.last_error = "服务重启后恢复未完成任务"
-                job.run_after = utc_now()
-                job.updated_at = utc_now()
-                db.add(job)
-            db.commit()
+            ToolQueueService(db, self.settings).recover_expired_jobs()
         finally:
             db.close()
 

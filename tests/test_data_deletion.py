@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import sqlite3
 
+import pytest
+
 from app.api.routes import router
 from app.core.config import Settings
 from app.core.security import hash_password
@@ -242,5 +244,50 @@ def test_data_deletion_removes_persistent_checkpoints(tmp_path):
         assert connection.execute("SELECT COUNT(*) FROM checkpoints").fetchone()[0] == 0
         assert connection.execute("SELECT COUNT(*) FROM writes").fetchone()[0] == 0
         connection.close()
+    finally:
+        db.close()
+
+
+def test_business_rollback_does_not_delete_checkpoints(tmp_path, monkeypatch):
+    _reset_db()
+    _setup_user_data(1)
+    db = _TestSession()
+    checkpoint_path = tmp_path / "checkpoints.db"
+    try:
+        thread_id = (
+            db.query(ChatSession)
+            .filter(ChatSession.user_id == 1)
+            .one()
+            .public_id
+        )
+        connection = sqlite3.connect(checkpoint_path)
+        connection.execute(
+            "CREATE TABLE checkpoints (thread_id TEXT, checkpoint_id TEXT)"
+        )
+        connection.execute(
+            "INSERT INTO checkpoints(thread_id, checkpoint_id) VALUES (?, ?)",
+            (thread_id, "checkpoint-1"),
+        )
+        connection.commit()
+        connection.close()
+
+        def fail_commit():
+            raise RuntimeError("business commit failed")
+
+        monkeypatch.setattr(db, "commit", fail_commit)
+
+        with pytest.raises(RuntimeError, match="business commit failed"):
+            DataDeletionService(
+                db,
+                Settings(
+                    langgraph_checkpoint_backend="async_sqlite",
+                    langgraph_checkpoint_path=str(checkpoint_path),
+                ),
+            ).delete_all_user_data(1)
+
+        connection = sqlite3.connect(checkpoint_path)
+        assert connection.execute("SELECT COUNT(*) FROM checkpoints").fetchone()[0] == 1
+        connection.close()
+        assert db.get(UserAccount, 1) is not None
     finally:
         db.close()

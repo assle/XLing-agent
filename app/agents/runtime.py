@@ -171,6 +171,7 @@ class AgentContext:
                 risk=RiskLevel(assessment["risk"]),
                 confidence=float(assessment["confidence"]),
                 summary=assessment["summary"],
+                raw_risk_probabilities=assessment.get("raw_risk_probabilities", {}),
                 risk_probabilities=assessment.get("risk_probabilities", {}),
                 prediction_set=tuple(
                     RiskLevel(risk) for risk in assessment.get("prediction_set", [])
@@ -389,7 +390,11 @@ class AgentRuntimeService:
         ):
             return False
         query = await self._rewrite_query(context)
-        retrieved = self.knowledge.retrieve(query, self.settings.knowledge_top_k)
+        async_retrieve = getattr(self.knowledge, "aretrieve", None)
+        if async_retrieve is None:
+            retrieved = self.knowledge.retrieve(query, self.settings.knowledge_top_k)
+        else:
+            retrieved = await async_retrieve(query, self.settings.knowledge_top_k)
         context.knowledge_query = query
         context.retrieved_knowledge = retrieved
         context.knowledge_handled = True
@@ -500,7 +505,11 @@ class AgentRuntimeService:
                 )
                 plan_svc = ActionPlanService(self.db, self.ai)
                 plan = plan_svc.generate_plan(
-                    context.user.id, context.session.id, cbt_summary, context.exam_stage
+                    context.user.id,
+                    context.session.id,
+                    cbt_summary,
+                    context.exam_stage,
+                    commit=False,
                 )
                 context.action_plan_created = True
                 context.cbt_event = CbtEvent(

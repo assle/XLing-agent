@@ -54,6 +54,7 @@ class PsychologyAssessment:
     risk: RiskLevel
     confidence: float
     summary: str
+    raw_risk_probabilities: dict[str, float] = field(default_factory=dict)
     risk_probabilities: dict[str, float] = field(default_factory=dict)
     prediction_set: tuple[RiskLevel, ...] = ()
     uncertain: bool = False
@@ -91,12 +92,21 @@ class PsychologicalAssessmentService:
     def assess(self, text: str, history: list[AiMessage] | None = None) -> PsychologyAssessment:
         if self.calibrated_risk is not None:
             explicit = has_high_risk_signal(text)
-            label = "高风险" if explicit else self.ai.classify(text)
-            decision = self.calibrated_risk.predict(
-                [0.0, 0.0, 0.0] if explicit else self.ai.risk_logits(text),
-                explicit_high_risk=explicit,
-            )
-            return assessment_from_decision(label, decision)
+            if explicit:
+                return assessment_from_decision(
+                    "高风险",
+                    self.calibrated_risk.predict(
+                        [0.0, 0.0, 0.0],
+                        explicit_high_risk=True,
+                    ),
+                )
+            try:
+                label, logits = self.ai.classify_with_logits(text)
+                decision = self.calibrated_risk.predict(logits)
+                return assessment_from_decision(label, decision)
+            except Exception:
+                logger.warning("校准风险评估失败，使用保守 fallback（不记录敏感正文）")
+                return safe_fallback_assessment()
         # Layer 1: HIGH risk keywords bypass the classifier entirely
         if has_high_risk_signal(text):
             return PsychologyAssessment(EmotionLabel.HIGH_RISK, 4.0, RiskLevel.HIGH, 0.95, "检测到明确高风险表达")
@@ -115,12 +125,21 @@ class PsychologicalAssessmentService:
     async def aassess(self, text: str, history: list[AiMessage] | None = None) -> PsychologyAssessment:
         if self.calibrated_risk is not None:
             explicit = has_high_risk_signal(text)
-            label = "高风险" if explicit else await self.ai.aclassify(text)
-            decision = self.calibrated_risk.predict(
-                [0.0, 0.0, 0.0] if explicit else await self.ai.arisk_logits(text),
-                explicit_high_risk=explicit,
-            )
-            return assessment_from_decision(label, decision)
+            if explicit:
+                return assessment_from_decision(
+                    "高风险",
+                    self.calibrated_risk.predict(
+                        [0.0, 0.0, 0.0],
+                        explicit_high_risk=True,
+                    ),
+                )
+            try:
+                label, logits = await self.ai.aclassify_with_logits(text)
+                decision = self.calibrated_risk.predict(logits)
+                return assessment_from_decision(label, decision)
+            except Exception:
+                logger.warning("校准风险评估失败，使用保守 fallback（不记录敏感正文）")
+                return safe_fallback_assessment()
         # Layer 1: HIGH risk keywords bypass the classifier entirely
         if has_high_risk_signal(text):
             return PsychologyAssessment(EmotionLabel.HIGH_RISK, 4.0, RiskLevel.HIGH, 0.95, "检测到明确高风险表达")
@@ -303,6 +322,7 @@ def assessment_from_decision(
         confidence=max(decision.probabilities.values()),
         summary=f"分类器判定为{label.strip()}；校准风险集合为"
         + "/".join(risk.value for risk in decision.prediction_set),
+        raw_risk_probabilities=decision.raw_probabilities,
         risk_probabilities=decision.probabilities,
         prediction_set=decision.prediction_set,
         uncertain=decision.uncertain,

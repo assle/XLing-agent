@@ -53,6 +53,7 @@ class LangGraphAgentRuntimeService(AgentRuntimeService):
     ):
         super().__init__(db, settings, dependencies)
         self._sqlite_conn = None
+        self._sqlite_conn_started = False
         self._checkpointer_ready = False
         self._checkpointer = self._make_checkpointer()
         self.graph = self._build_graph()
@@ -193,14 +194,16 @@ class LangGraphAgentRuntimeService(AgentRuntimeService):
             return
         if self._sqlite_conn is not None:
             await self._sqlite_conn
+            self._sqlite_conn_started = True
             await self._checkpointer.setup()
             await self._setup_checkpoint_retention()
         self._checkpointer_ready = True
 
     async def aclose(self) -> None:
-        if self._sqlite_conn is not None and self._checkpointer_ready:
+        if self._sqlite_conn is not None and self._sqlite_conn_started:
             await self._sqlite_conn.close()
             self._checkpointer_ready = False
+            self._sqlite_conn_started = False
 
     async def _setup_checkpoint_retention(self) -> None:
         connection = self._sqlite_conn

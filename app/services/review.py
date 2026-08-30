@@ -14,6 +14,8 @@ from app.core.enums import MessageRole
 from app.core.time import utc_now
 from app.models.entities import ChatMessage, ChatSession, PsychologicalReport, ReviewRequest
 
+logger = logging.getLogger(__name__)
+
 _RISK_PRIORITY = {"HIGH": 3, "MEDIUM": 2, "LOW": 1}
 
 HANDOFF_REASONS = {
@@ -127,9 +129,13 @@ class ReviewService:
                 result = await runtime.resume(review.thread_id, approved=approved)
             finally:
                 await runtime.aclose()
-        except ModuleNotFoundError:
-            # Custom-runtime deployments cannot resume a checkpoint. Keep the
-            # safety boundary by sending only the fixed fallback response.
+        except Exception as exc:
+            # Missing dependencies and unavailable/corrupt checkpoint stores
+            # share the same safety boundary: send only the fixed response.
+            logger.warning(
+                "人工审核检查点不可用，采用安全降级：%s",
+                type(exc).__name__,
+            )
             response_text = PromptTemplates.fallback_response()
             self.db.add(ChatMessage(
                 user_id=session.user_id,

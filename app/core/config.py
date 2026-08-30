@@ -67,6 +67,7 @@ class Settings(BaseSettings):
     tool_queue_batch_size: int = 10
     tool_queue_max_attempts: int = 3
     tool_queue_retry_delay_seconds: float = 15.0
+    tool_queue_lease_seconds: float = 300.0
     tool_queue_excel_workers: int = 1
     tool_queue_email_workers: int = 2
     alert_email_rate_limit_per_minute: int = 30
@@ -81,6 +82,8 @@ class Settings(BaseSettings):
     risk_trajectory_rising_threshold: int = 3
     risk_calibration_artifact: str = ""
     risk_calibration_required: bool = False
+    risk_score_endpoint: str = ""
+    risk_score_api_key: str = ""
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     @property

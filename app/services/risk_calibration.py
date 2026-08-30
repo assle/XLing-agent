@@ -93,6 +93,7 @@ class ClassConditionalConformalPredictor:
 
 @dataclass(frozen=True)
 class RiskPrediction:
+    raw_probabilities: dict[str, float]
     probabilities: dict[str, float]
     prediction_set: tuple[RiskLevel, ...]
     selected_risk: RiskLevel
@@ -123,14 +124,20 @@ class CalibratedRiskEngine:
     ) -> RiskPrediction:
         prediction_set: tuple[RiskLevel, ...]
         if explicit_high_risk:
+            raw_probabilities = [0.0, 0.0, 1.0]
             probabilities = [0.0, 0.0, 1.0]
             prediction_set = (RiskLevel.HIGH,)
         else:
+            raw_probabilities = TemperatureScaler(1.0).probabilities(logits)
             probabilities = self.scaler.probabilities(logits)
             prediction_set = self.conformal.predict_set(probabilities)
         selected_risk = max(prediction_set, key=RISK_LEVELS.index)
         uncertain = len(prediction_set) != 1
         return RiskPrediction(
+            raw_probabilities={
+                risk.value: raw_probabilities[index]
+                for index, risk in enumerate(RISK_LEVELS)
+            },
             probabilities={
                 risk.value: probabilities[index]
                 for index, risk in enumerate(RISK_LEVELS)

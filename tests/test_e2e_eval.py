@@ -59,6 +59,9 @@ def test_e2e_eval_runs_the_production_chat_flow_and_records_versions(tmp_path):
     assert [case["passed"] for case in report["cases"]] == [True, True, True]
     assert report["cases"][1]["events"] == ["meta", "cbt", "action_plan", "token", "done"]
     assert report["cases"][2]["reviewCreated"] is True
+    assert report["cases"][0]["knowledgeUsed"] is False
+    assert report["cases"][1]["knowledgeUsed"] is True
+    assert all(case["safetyBeforeKnowledge"] for case in report["cases"])
     assert json.loads((tmp_path / "report.json").read_text(encoding="utf-8"))["passedCases"] == 3
 
 

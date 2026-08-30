@@ -185,6 +185,10 @@ def test_build_eval_summary_has_five_metrics_and_no_per_case():
     assert "results" not in summary  # compact, no per-case detail
 
 
+def test_rag_evaluation_defaults_to_acceptance_top_five():
+    assert EvalSettings().rag_eval_top_k == 5
+
+
 # ---------------------------------------------------------------------------
 # SQLite engine + eval-settings wiring
 # ---------------------------------------------------------------------------
@@ -474,6 +478,7 @@ def test_evaluate_llm_rerank_end_to_end():
 class _FakeBgeEvalBackend:
     model_name = "fake-bge-m3"
     reranker_name = "fake-bge-reranker"
+    index_size_bytes = 4096
 
     def score(self, query: str, documents: list[str]) -> list[float]:
         query_terms = set(query)
@@ -569,6 +574,7 @@ def test_build_comparison_all_strategies_present():
         assert comparison["strategies"][0]["metrics"]["mrr"] == 0.70
         assert comparison["delta"]["bestStrategy"] == "bge-m3-rerank"
         assert abs(comparison["delta"]["metrics"]["mrr"] - 0.12) < 1e-6
+        assert comparison["currentReferenceStrategy"] == "hybrid-rrf"
 
 
 def test_build_comparison_missing_strategy():

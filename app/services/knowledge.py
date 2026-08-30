@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import math
@@ -32,6 +33,7 @@ class KnowledgeService:
         self.vector_store = ChromaKnowledgeStore(settings)
         self.ai_client = ai_client
         self.retriever = retriever
+        self.vector_fallback_used = False
         if self.retriever is None and settings.knowledge_retriever == "bge_m3":
             self.retriever = BgeM3Retriever.from_settings(settings)
         self._bm25 = None
@@ -140,6 +142,9 @@ class KnowledgeService:
                 if self.settings.bge_required:
                     raise
                 logger.warning("BGE-M3 检索不可用，回退到当前检索", exc_info=True)
+        return self._retrieve_current(query, top_k)
+
+    def _retrieve_current(self, query: str, top_k: int) -> list[SearchResult]:
         # Primary retrieval: embed the rewritten query with text-embedding-3-small,
         # then run Chroma nearest-neighbor search. Fallback happens only when
         # OPENAI_API_KEY/chromadb/vector calls are unavailable or fail.
@@ -147,6 +152,41 @@ class KnowledgeService:
         if vector_results:
             return self._expand_best(vector_results, top_k)
         return self._retrieve_hybrid(query, top_k)
+
+    async def aretrieve(
+        self,
+        query: str,
+        top_k: int | None = None,
+    ) -> list[SearchResult]:
+        if self.retriever is None:
+            return self.retrieve(query, top_k)
+        top_k = top_k or self.settings.knowledge_top_k
+        chunks = self.db.query(KnowledgeChunk).order_by(
+            KnowledgeChunk.source.asc(),
+            KnowledgeChunk.source_index.asc(),
+        ).all()
+        try:
+            ranked = await asyncio.to_thread(
+                self.retriever.retrieve,
+                query,
+                chunks,
+                top_k,
+            )
+            results = [
+                SearchResult(
+                    chunk_id=item.chunk.id,
+                    source=item.chunk.source,
+                    content=item.chunk.content,
+                    score=item.score,
+                )
+                for item in ranked
+            ]
+            return self._expand_best(results, top_k)
+        except BgeRetrieverUnavailable:
+            if self.settings.bge_required:
+                raise
+            logger.warning("BGE-M3 检索不可用，回退到当前检索", exc_info=True)
+            return self._retrieve_current(query, top_k)
 
     def retrieve_multi_query(self, query: str, top_k: int | None = None, base_retrieve=None) -> list[SearchResult]:
         """Multi-query retrieval: generate 3 sub-queries, retrieve top-K for each,
@@ -371,6 +411,7 @@ class KnowledgeService:
     def _handle_vector_error(self, action: str, exc: Exception) -> None:
         if self.settings.knowledge_vector_required:
             raise exc
+        self.vector_fallback_used = True
         logger.warning(
             "%s %s failed; falling back to %s: %s",
             PRIMARY_RETRIEVAL_LABEL,

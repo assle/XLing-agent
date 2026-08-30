@@ -56,6 +56,8 @@ class ActionPlanService:
         session_id: int | None,
         cbt_summary: str = "",
         exam_stage: str = "",
+        *,
+        commit: bool = True,
     ) -> ActionPlan:
         """Generate a 24h action plan after four-part questioning.
 
@@ -77,7 +79,10 @@ class ActionPlanService:
                 content=content,
                 order_index=index,
             ))
-        self.db.commit()
+        if commit:
+            self.db.commit()
+        else:
+            self.db.flush()
         self.db.refresh(plan)
         return plan
 

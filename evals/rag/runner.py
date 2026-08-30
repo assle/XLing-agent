@@ -73,13 +73,29 @@ def evaluate(
         except json.JSONDecodeError:
             cases = [json.loads(line) for line in raw.splitlines() if line.strip()]
         retrieve_fn = _build_retrieve_fn(service, strategy, settings)
-        results = [evaluate_case(retrieve_fn, case, settings.knowledge_top_k) for case in cases]
-        report = compute_report(results, settings.rag_eval_dataset, settings.knowledge_top_k, strategy_label)
+        results = [evaluate_case(retrieve_fn, case, settings.rag_eval_top_k) for case in cases]
+        retrieval_label = _retrieval_label(service, strategy)
+        strategy_label = _strategy_label(strategy, retrieval_label)
+        report = compute_report(
+            results,
+            settings.rag_eval_dataset,
+            settings.rag_eval_top_k,
+            strategy_label,
+        )
         report["embeddingModel"] = (
             retriever.embedding_model if retriever else eval_settings.openai_embedding_model
         )
         report["rerankerModel"] = retriever.reranker_model if retriever else ""
         report["indexSizeBytes"] = retriever.index_size_bytes if retriever else 0
+        report["corpusSizeBytes"] = retriever.corpus_size_bytes if retriever else 0
+        report["comparisonEligible"] = (
+            strategy in {"bge-m3", "bge-m3-rerank"}
+            or (
+                strategy == "hybrid-rrf"
+                and service.vector_store.can_embed
+                and not service.vector_fallback_used
+            )
+        )
         report["artifactVersion"] = ArtifactVersionResolver(eval_settings).current(
             settings.rag_eval_dataset
         ).to_dict()
@@ -144,6 +160,8 @@ def build_eval_summary(report: dict) -> dict:
         "embeddingModel": report.get("embeddingModel", ""),
         "rerankerModel": report.get("rerankerModel", ""),
         "indexSizeBytes": report.get("indexSizeBytes", 0),
+        "corpusSizeBytes": report.get("corpusSizeBytes", 0),
+        "comparisonEligible": report.get("comparisonEligible", False),
         "artifactVersion": report.get("artifactVersion", {}),
     }
 
@@ -243,7 +261,11 @@ def _retrieval_label(service: KnowledgeService, strategy: str = "baseline") -> s
         return "BGE-M3"
     if strategy == "bge-m3-rerank":
         return "BGE-M3 + bge-reranker-v2-m3"
-    if service.vector_store.can_embed:
+    if service.vector_store.can_embed and not getattr(
+        service,
+        "vector_fallback_used",
+        False,
+    ):
         return PRIMARY_RETRIEVAL_LABEL
     return FALLBACK_RETRIEVAL_LABEL
 
@@ -368,13 +390,27 @@ def build_comparison(settings: EvalSettings | None = None) -> dict:
         if path.exists():
             summary = json.loads(path.read_text(encoding="utf-8"))
             metrics = {k: summary.get(k) for k in [*COMPARISON_METRICS, *DECISION_METRICS]}
-            strategies.append({"name": name, "available": True, "metrics": metrics})
+            strategies.append({
+                "name": name,
+                "available": True,
+                "comparisonEligible": summary.get("comparisonEligible", True),
+                "metrics": metrics,
+            })
         else:
-            strategies.append({"name": name, "available": False, "metrics": None})
+            strategies.append({
+                "name": name,
+                "available": False,
+                "comparisonEligible": False,
+                "metrics": None,
+            })
 
     available = [s for s in strategies if s["available"]]
     baseline = next(
         (s for s in strategies if s["name"] == "baseline" and s["available"]), None
+    )
+    current_reference = next(
+        (s for s in strategies if s["name"] == "hybrid-rrf" and s["available"]),
+        baseline,
     )
 
     delta = None
@@ -390,7 +426,7 @@ def build_comparison(settings: EvalSettings | None = None) -> dict:
         delta = {"bestStrategy": best["name"], "metrics": delta_metrics}
 
     deployment_decisions = {}
-    if baseline:
+    if current_reference:
         for candidate_name in ("bge-m3", "bge-m3-rerank"):
             candidate = next(
                 (item for item in strategies if item["name"] == candidate_name and item["available"]),
@@ -398,17 +434,29 @@ def build_comparison(settings: EvalSettings | None = None) -> dict:
             )
             if candidate:
                 deployment_decisions[candidate_name] = build_retrieval_decision(
-                    baseline["metrics"] or {},
+                    current_reference["metrics"] or {},
                     candidate["metrics"] or {},
+                    fair_comparison=bool(current_reference["comparisonEligible"]),
                 )
     return {
         "strategies": strategies,
         "delta": delta,
+        "currentReferenceStrategy": (
+            current_reference["name"] if current_reference else None
+        ),
+        "currentReferenceEligible": (
+            bool(current_reference["comparisonEligible"]) if current_reference else False
+        ),
         "deploymentDecisions": deployment_decisions,
     }
 
 
-def build_retrieval_decision(baseline: dict, candidate: dict) -> dict:
+def build_retrieval_decision(
+    baseline: dict,
+    candidate: dict,
+    *,
+    fair_comparison: bool = True,
+) -> dict:
     recall_gain = (candidate.get("recallAtK") or 0.0) - (baseline.get("recallAtK") or 0.0)
     mrr_gain = (candidate.get("mrr") or 0.0) - (baseline.get("mrr") or 0.0)
     quality_gate = recall_gain >= 0.03 or mrr_gain >= 0.03
@@ -418,15 +466,22 @@ def build_retrieval_decision(baseline: dict, candidate: dict) -> dict:
     baseline_latency = baseline.get("p95LatencyMs") or 0.0
     candidate_latency = candidate.get("p95LatencyMs") or 0.0
     latency_gate = baseline_latency > 0 and candidate_latency <= baseline_latency * 1.5
-    deployable = quality_gate and safety_gate and latency_gate
+    deployable = fair_comparison and quality_gate and safety_gate and latency_gate
     return {
         "recallGain": recall_gain,
         "mrrGain": mrr_gain,
         "qualityGate": quality_gate,
         "safetyGate": safety_gate,
         "latencyGate": latency_gate,
+        "fairComparisonGate": fair_comparison,
         "deployable": deployable,
-        "decision": "enable-candidate-retriever" if deployable else "keep-current-retriever",
+        "decision": (
+            "enable-candidate-retriever"
+            if deployable
+            else "keep-current-retriever"
+            if fair_comparison
+            else "rerun-current-reference-with-required-vector-dependencies"
+        ),
     }
 
 

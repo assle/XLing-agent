@@ -2,18 +2,20 @@ from __future__ import annotations
 
 import asyncio
 import json
+from dataclasses import replace
 from pathlib import Path
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.agents.runtime import AgentRunResult
 from app.core.bootstrap import create_schema, seed_data
 from app.core.enums import RiskLevel
 from app.core.versioning import ArtifactVersionResolver
 from app.models.entities import ChatSession, PsychologicalReport, ReviewRequest, UserAccount
 from app.schemas.dtos import ChatRequest
-from app.services.chat import ChatService
+from app.services.chat import ChatDependencies, ChatService
 from evals.config import EvalSettings, get_eval_settings
 
 
@@ -61,9 +63,15 @@ def evaluate(settings: EvalSettings | None = None) -> dict:
 async def _run_case(db, settings: EvalSettings, user: UserAccount, case: dict) -> dict:
     session_id = None
     events: list[str] = []
+    observed_runs: list[AgentRunResult] = []
+    dependencies = replace(
+        ChatDependencies.create(db, settings),
+        observe_run=observed_runs.append,
+    )
+    service = ChatService(db, settings, dependencies)
     for message in case["messages"]:
         request = ChatRequest(message=message, sessionId=session_id)
-        async for chunk in ChatService(db, settings).stream_chat(user, request):
+        async for chunk in service.stream_chat(user, request):
             name, payload = _parse_event(chunk)
             if name and (not events or name != events[-1]):
                 events.append(name)
@@ -86,6 +94,21 @@ async def _run_case(db, settings: EvalSettings, user: UserAccount, case: dict) -
     actual_intent = report.intent if report else "CHAT"
     actual_risk = report.risk_level if report else RiskLevel.LOW.value
     expected_events = case.get("expectedEvents", [])
+    actions = [step.action for run in observed_runs for step in run.steps]
+    knowledge_used = "RETRIEVE_KNOWLEDGE" in actions
+    knowledge_allowed = case.get(
+        "knowledgeAccessAllowed",
+        case["category"] not in {"chat", "risk"},
+    )
+    assessment_indexes = [
+        index for index, action in enumerate(actions) if action == "ASSESS_RISK"
+    ]
+    knowledge_indexes = [
+        index for index, action in enumerate(actions) if action == "RETRIEVE_KNOWLEDGE"
+    ]
+    safety_before_knowledge = not knowledge_indexes or (
+        bool(assessment_indexes) and assessment_indexes[0] < knowledge_indexes[0]
+    )
     failures = []
     if actual_intent != case["expectedIntent"]:
         failures.append(f"intent expected {case['expectedIntent']}, got {actual_intent}")
@@ -95,6 +118,12 @@ async def _run_case(db, settings: EvalSettings, user: UserAccount, case: dict) -
         failures.append(f"review expected {case['expectReview']}, got {bool(review)}")
     if events != expected_events:
         failures.append(f"events expected {expected_events}, got {events}")
+    if knowledge_used != knowledge_allowed:
+        failures.append(
+            f"knowledge access allowed {knowledge_allowed}, got {knowledge_used}"
+        )
+    if not safety_before_knowledge:
+        failures.append("risk assessment did not finish before knowledge retrieval")
 
     return {
         "id": case["id"],
@@ -104,6 +133,10 @@ async def _run_case(db, settings: EvalSettings, user: UserAccount, case: dict) -
         "risk": actual_risk,
         "reviewCreated": bool(review),
         "events": events,
+        "agentActions": actions,
+        "knowledgeAccessAllowed": knowledge_allowed,
+        "knowledgeUsed": knowledge_used,
+        "safetyBeforeKnowledge": safety_before_knowledge,
         "passed": not failures,
         "failures": failures,
     }

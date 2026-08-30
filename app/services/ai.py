@@ -146,11 +146,50 @@ class AiClient:
             return self._mock_classify(text)
         return await self._ollama_classify_async(PromptTemplates.classifier_prompt(text))
 
+    def classify_with_logits(self, text: str) -> tuple[str, list[float]]:
+        if self.settings.ai_provider.lower() != "mock":
+            if not self.settings.risk_score_endpoint:
+                raise RuntimeError(
+                    "启用概率校准需要配置可返回真实 logits 的 RISK_SCORE_ENDPOINT"
+                )
+            response = httpx.post(
+                self.settings.risk_score_endpoint,
+                headers=self._risk_score_headers(),
+                json={"text": text},
+                timeout=30,
+            )
+            response.raise_for_status()
+            return _parse_risk_scores(response.json())
+        label = self.classify(text)
+        return label, _risk_logits_for_label(label)
+
+    async def aclassify_with_logits(self, text: str) -> tuple[str, list[float]]:
+        if self.settings.ai_provider.lower() != "mock":
+            if not self.settings.risk_score_endpoint:
+                raise RuntimeError(
+                    "启用概率校准需要配置可返回真实 logits 的 RISK_SCORE_ENDPOINT"
+                )
+            async with httpx.AsyncClient(timeout=30) as client:
+                response = await client.post(
+                    self.settings.risk_score_endpoint,
+                    headers=self._risk_score_headers(),
+                    json={"text": text},
+                )
+            response.raise_for_status()
+            return _parse_risk_scores(response.json())
+        label = await self.aclassify(text)
+        return label, _risk_logits_for_label(label)
+
     def risk_logits(self, text: str) -> list[float]:
-        return _risk_logits_for_label(self.classify(text))
+        return self.classify_with_logits(text)[1]
 
     async def arisk_logits(self, text: str) -> list[float]:
-        return _risk_logits_for_label(await self.aclassify(text))
+        return (await self.aclassify_with_logits(text))[1]
+
+    def _risk_score_headers(self) -> dict[str, str]:
+        if not self.settings.risk_score_api_key:
+            return {}
+        return {"Authorization": f"Bearer {self.settings.risk_score_api_key}"}
 
     def generate_sub_queries(self, query: str, n: int = 3) -> list[str]:
         """Use LLM to rewrite a student question into n sub-queries for multi-query retrieval."""
@@ -415,6 +454,20 @@ def _risk_logits_for_label(label: str) -> list[float]:
         "低落": [0.0, 4.0, -2.0],
         "高风险": [-4.0, 0.0, 5.0],
     }.get(label.strip(), [0.0, 0.0, 0.0])
+
+
+def _parse_risk_scores(data: dict) -> tuple[str, list[float]]:
+    label = data.get("label")
+    logits = data.get("logits")
+    if not isinstance(label, str) or label.strip() not in {"正常", "焦虑", "低落", "高风险"}:
+        raise ValueError("风险分数接口缺少有效 label")
+    if (
+        not isinstance(logits, list)
+        or len(logits) != 3
+        or any(isinstance(value, bool) or not isinstance(value, (int, float)) for value in logits)
+    ):
+        raise ValueError("风险分数接口必须返回 LOW/MEDIUM/HIGH 三个 logits")
+    return label.strip(), [float(value) for value in logits]
 
 
 _SYNONYM_PAIRS = [

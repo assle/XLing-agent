@@ -7,8 +7,11 @@ import subprocess
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from app.agents.runtime import AgentRuntimeService
 from app.core.config import Settings
+from app.services.action_plan import ActionPlanService
 from app.services.ai import PromptTemplates
+from app.services.cbt import CBTService
 
 
 @dataclass(frozen=True)
@@ -86,7 +89,14 @@ class ArtifactVersionResolver:
         return "mock"
 
     def _prompt_version(self) -> str:
-        source = inspect.getsource(PromptTemplates)
+        prompt_sources = (
+            PromptTemplates,
+            AgentRuntimeService._rewrite_query,
+            AgentRuntimeService._summarize_memory,
+            ActionPlanService._generation_prompt,
+            CBTService._extraction_prompt,
+        )
+        source = "\n".join(inspect.getsource(item) for item in prompt_sources)
         return hashlib.sha256(source.encode("utf-8")).hexdigest()
 
     def _index_version(self) -> str:

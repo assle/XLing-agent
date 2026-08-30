@@ -358,3 +358,59 @@ def test_resume_and_respond_degraded_when_checkpoint_lost():
     response_text, degraded = asyncio.run(svc.resume_and_respond(review, approved=True))
     assert degraded is True
     assert response_text == PromptTemplates.fallback_response()
+
+
+def test_resume_and_respond_degrades_when_checkpoint_store_is_unavailable(monkeypatch):
+    import asyncio
+
+    from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
+    from app.services.ai import PromptTemplates
+
+    async def unavailable(self, thread_id: str, approved: bool):
+        raise OSError("checkpoint store unavailable")
+
+    monkeypatch.setattr(LangGraphAgentRuntimeService, "resume", unavailable)
+    db = _make_db()
+    review_id = _seed_review(db, "svc-resume-unavailable-001")
+    svc = ReviewService(
+        db,
+        Settings(
+            ai_provider="mock",
+            knowledge_vector_enabled=False,
+            langgraph_checkpoint_backend="memory",
+        ),
+    )
+
+    response_text, degraded = asyncio.run(
+        svc.resume_and_respond(svc.get_review(review_id), approved=True)
+    )
+
+    assert degraded is True
+    assert response_text == PromptTemplates.fallback_response()
+
+
+def test_resume_and_respond_degrades_when_checkpoint_database_is_corrupt(tmp_path):
+    import asyncio
+
+    from app.services.ai import PromptTemplates
+
+    checkpoint_path = tmp_path / "corrupt-checkpoint.db"
+    checkpoint_path.write_bytes(b"not a sqlite database")
+    db = _make_db()
+    review_id = _seed_review(db, "svc-resume-corrupt-001")
+    svc = ReviewService(
+        db,
+        Settings(
+            ai_provider="mock",
+            knowledge_vector_enabled=False,
+            langgraph_checkpoint_backend="async_sqlite",
+            langgraph_checkpoint_path=str(checkpoint_path),
+        ),
+    )
+
+    response_text, degraded = asyncio.run(
+        svc.resume_and_respond(svc.get_review(review_id), approved=False)
+    )
+
+    assert degraded is True
+    assert response_text == PromptTemplates.fallback_response()

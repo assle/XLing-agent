@@ -1,7 +1,8 @@
 """User data deletion service (issue 13).
 
-Deletes all user-related data in a single transaction with rollback on failure.
-After deletion, the user account and JWT token are immediately invalid.
+Deletes business data in one database transaction. Persistent graph checkpoints
+are cleaned only after that commit, so a business rollback cannot orphan the
+still-existing account from its interrupted review state.
 """
 from __future__ import annotations
 
@@ -98,8 +99,6 @@ class DataDeletionService:
                 .filter(PsychologicalReport.user_id == user_id).all()
             ]
 
-            self._delete_checkpoints(thread_ids)
-
             # Delete in dependency order (children first)
             counts["memory_cards"] = self._delete(MemoryCard, MemoryCard.user_id == user_id)
             counts["screening_results"] = self._delete(ScreeningResult, ScreeningResult.user_id == user_id)
@@ -142,11 +141,21 @@ class DataDeletionService:
 
             self.db.commit()
             logger.info("User %s data deleted: %s", user_id, counts)
-            return counts
         except Exception as exc:
             self.db.rollback()
             logger.error("User %s data deletion failed, rolled back: %s", user_id, exc)
             raise
+        try:
+            self._delete_checkpoints(thread_ids)
+            counts["checkpoint_cleanup_pending"] = 0
+        except Exception as exc:
+            counts["checkpoint_cleanup_pending"] = len(thread_ids)
+            logger.error(
+                "User %s business data deleted but checkpoint cleanup needs retry: %s",
+                user_id,
+                type(exc).__name__,
+            )
+        return counts
 
     def _delete(self, model, filter_clause) -> int:
         result = self.db.query(model).filter(filter_clause).delete(synchronize_session="fetch")

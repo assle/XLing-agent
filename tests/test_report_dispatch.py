@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import timedelta
 
 import pytest
 
 from app.core.config import Settings
+from app.core.enums import ToolJobStatus
+from app.core.time import utc_now
 from app.models.entities import ToolJob
 from app.services.mcp_client import McpToolError
 from app.services.report_dispatch import (
@@ -74,3 +77,25 @@ def test_only_one_worker_can_atomically_claim_a_pending_job(database_harness):
     finally:
         first.close()
         second.close()
+
+
+def test_worker_recovery_only_requeues_expired_running_jobs(database_harness):
+    db = database_harness.sessions()
+    try:
+        settings = Settings(tool_queue_enabled=True, tool_queue_lease_seconds=60)
+        service = ToolQueueService(db, settings)
+        current, stale = service.enqueue_report(100, "HIGH")
+        current.status = ToolJobStatus.RUNNING.value
+        current.updated_at = utc_now()
+        stale.status = ToolJobStatus.RUNNING.value
+        stale.updated_at = utc_now() - timedelta(minutes=2)
+        db.commit()
+
+        recovered = service.recover_expired_jobs()
+        db.expire_all()
+
+        assert recovered == 1
+        assert db.get(ToolJob, current.id).status == ToolJobStatus.RUNNING.value
+        assert db.get(ToolJob, stale.id).status == ToolJobStatus.PENDING.value
+    finally:
+        db.close()

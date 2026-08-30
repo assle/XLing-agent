@@ -9,6 +9,7 @@ class EvalSettings(Settings):
     e2e_eval_ai_provider: str = "mock"
 
     rag_eval_dataset: str = "evals/rag/xling-rag-eval.jsonl"
+    rag_eval_top_k: int = 5
     rag_eval_output: str = "target/rag-eval-report.json"
     rag_eval_baseline_output: str = "target/rag-eval-baseline.json"
     rag_eval_database_url: str = "sqlite:///data/rag-eval.db"
@@ -48,6 +49,9 @@ class EvalSettings(Settings):
     risk_calibration_output: str = "target/risk-calibration-report.json"
     risk_calibration_artifact_output: str = "target/risk-calibration-artifact.json"
     risk_conformal_alpha: float = 0.1
+    risk_calibration_min_cases_per_class: int = 30
+    risk_training_dataset: str = "finetune/data/train.jsonl"
+    risk_validation_dataset: str = "finetune/data/val.jsonl"
 
     quality_eval_dataset: str = "evals/quality/xling-quality-eval.json"
     quality_eval_output: str = "target/quality-eval-report.json"
