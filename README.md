@@ -133,7 +133,7 @@ FLUSH PRIVILEGES;
 
 ## 人工审核检查点
 
-LangGraph 默认使用官方 `AsyncSqliteSaver` 保存人工审核中断状态，服务重启后仍可批准或拒绝。检查点只保存纯数据，不使用 pickle；默认保留 30 天，学生删除账号时同步清理。
+LangGraph 默认使用官方 `AsyncSqliteSaver` 保存人工审核中断状态，服务重启后仍可批准或拒绝。检查点只保存纯数据，不使用 pickle；默认保留 30 天。学生删除账号时，业务数据库先提交删除，再清理对应检查点；清理失败会留下可重试任务，并在应用下次启动时继续处理，接口不会在清理完成前宣称全部删除。
 
 ```env
 LANGGRAPH_CHECKPOINT_BACKEND=async_sqlite
@@ -234,7 +234,7 @@ EXCEL_REPORT -> RISK_ALERT
 
 Excel 写入使用进程内锁串行化，邮件预警使用独立线程池并支持每分钟限流。失败任务会按延迟重试，超过 `TOOL_QUEUE_MAX_ATTEMPTS` 后进入 `dead_letter_records`。
 
-一轮支持过程中的学生消息、心理报告、人工审核请求和工具任务使用一次数据库提交；任一步骤失败都会一起回滚。`tool_jobs` 对“报告编号 + 任务类型”设置唯一约束，worker 使用条件更新原子抢占任务。
+一轮支持过程中的会话变化、学生消息、心理报告、人工审核请求和工具任务使用一次数据库提交；任一步骤失败都会一起回滚。`tool_jobs` 对“报告编号 + 任务类型”设置唯一约束，worker 使用条件更新原子抢占任务。运行中任务带 5 分钟租约，调度循环只回收已过期任务，避免另一 worker 正在执行时被重复派发。
 
 ```env
 TOOL_QUEUE_ENABLED=true

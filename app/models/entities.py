@@ -255,6 +255,21 @@ class ToolJob(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=now)
 
 
+class CheckpointDeletionTask(Base):
+    """Durable compensation task for checkpoint cleanup after account deletion."""
+
+    __tablename__ = "checkpoint_deletion_tasks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    checkpoint_path: Mapped[str] = mapped_column(String(1000))
+    thread_ids_json: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(32), index=True, default="pending")
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    last_error: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+
+
 class DeadLetterRecord(Base):
     __tablename__ = "dead_letter_records"
 

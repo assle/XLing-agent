@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import numpy as np
+
 from app.core.config import Settings
 from app.models.entities import KnowledgeChunk
-from app.services.bge_retrieval import BgeM3Retriever
+from app.services.bge_retrieval import BgeM3Retriever, FlagEmbeddingBackend
 from app.services.knowledge import KnowledgeService
 from tests.support import DatabaseHarness
 
@@ -75,3 +77,46 @@ def test_optional_bge_runtime_error_falls_back_to_current_retriever():
     finally:
         db.close()
         harness.close()
+
+
+def test_bge_document_encoding_is_shared_across_request_scoped_backends():
+    class Model:
+        def __init__(self):
+            self.batch_sizes = []
+
+        def encode(self, texts, **kwargs):
+            self.batch_sizes.append(len(texts))
+            return {
+                "dense_vecs": np.ones((len(texts), 2), dtype=np.float32),
+                "lexical_weights": [{"token": 1.0} for _ in texts],
+            }
+
+        def compute_lexical_matching_score(self, query, document):
+            return 1.0
+
+    key = ("cache-test-model", False, "cpu")
+    model = Model()
+    FlagEmbeddingBackend._model_cache[key] = model
+    FlagEmbeddingBackend._document_cache_by_model.pop(key, None)
+    try:
+        first = FlagEmbeddingBackend(
+            "cache-test-model",
+            "unused-reranker",
+            use_fp16=False,
+            device="cpu",
+        )
+        second = FlagEmbeddingBackend(
+            "cache-test-model",
+            "unused-reranker",
+            use_fp16=False,
+            device="cpu",
+        )
+
+        first.score("query one", ["doc one", "doc two"])
+        second.score("query two", ["doc one", "doc two"])
+
+        assert model.batch_sizes == [1, 2, 1]
+        assert second.index_size_bytes > 0
+    finally:
+        FlagEmbeddingBackend._model_cache.pop(key, None)
+        FlagEmbeddingBackend._document_cache_by_model.pop(key, None)

@@ -6,6 +6,7 @@ still-existing account from its interrupted review state.
 """
 from __future__ import annotations
 
+import json
 import logging
 import sqlite3
 from pathlib import Path
@@ -13,6 +14,7 @@ from pathlib import Path
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings, get_settings
+from app.core.time import utc_now
 from app.models.entities import (
     ActionPlan,
     ActionPlanItem,
@@ -20,6 +22,7 @@ from app.models.entities import (
     ChatMessage,
     ChatSession,
     CheckIn,
+    CheckpointDeletionTask,
     DeadLetterRecord,
     ExcelRecord,
     MemoryCard,
@@ -94,6 +97,7 @@ class DataDeletionService:
                 s.public_id for s in self.db.query(ChatSession)
                 .filter(ChatSession.user_id == user_id).all()
             ]
+            checkpoint_task = self._create_checkpoint_deletion_task(thread_ids)
             report_ids = [
                 r.id for r in self.db.query(PsychologicalReport)
                 .filter(PsychologicalReport.user_id == user_id).all()
@@ -146,31 +150,81 @@ class DataDeletionService:
             logger.error("User %s data deletion failed, rolled back: %s", user_id, exc)
             raise
         try:
-            self._delete_checkpoints(thread_ids)
-            counts["checkpoint_cleanup_pending"] = 0
-        except Exception as exc:
-            counts["checkpoint_cleanup_pending"] = len(thread_ids)
-            logger.error(
-                "User %s business data deleted but checkpoint cleanup needs retry: %s",
-                user_id,
-                type(exc).__name__,
+            pending = bool(
+                checkpoint_task
+                and not self._process_checkpoint_deletion_task(checkpoint_task.id)
             )
+        except Exception:
+            pending = bool(checkpoint_task)
+        counts["checkpoint_cleanup_pending"] = int(pending)
         return counts
 
     def _delete(self, model, filter_clause) -> int:
         result = self.db.query(model).filter(filter_clause).delete(synchronize_session="fetch")
         return result
 
-    def _delete_checkpoints(self, thread_ids: list[str]) -> None:
+    def _create_checkpoint_deletion_task(
+        self,
+        thread_ids: list[str],
+    ) -> CheckpointDeletionTask | None:
         if not thread_ids or self.settings.langgraph_checkpoint_backend.lower() not in {
             "sqlite",
             "async_sqlite",
         }:
-            return
+            return None
         path = Path(self.settings.langgraph_checkpoint_path)
         if not path.is_absolute():
             path = self.settings.project_root / path
         if not path.exists():
+            return None
+        task = CheckpointDeletionTask(
+            checkpoint_path=str(path),
+            thread_ids_json=json.dumps(thread_ids),
+            status="pending",
+        )
+        self.db.add(task)
+        self.db.flush()
+        return task
+
+    def retry_pending_checkpoint_deletions(self) -> int:
+        task_ids = [
+            row.id
+            for row in self.db.query(CheckpointDeletionTask)
+            .filter(CheckpointDeletionTask.status == "pending")
+            .all()
+        ]
+        return sum(self._process_checkpoint_deletion_task(task_id) for task_id in task_ids)
+
+    def _process_checkpoint_deletion_task(self, task_id: int) -> bool:
+        task = self.db.get(CheckpointDeletionTask, task_id)
+        if task is None:
+            return True
+        try:
+            thread_ids = [str(item) for item in json.loads(task.thread_ids_json)]
+            self._delete_checkpoint_rows(thread_ids, Path(task.checkpoint_path))
+            self.db.delete(task)
+            self.db.commit()
+            return True
+        except Exception as exc:
+            self.db.rollback()
+            task = self.db.get(CheckpointDeletionTask, task_id)
+            if task is not None:
+                task.status = "pending"
+                task.attempts += 1
+                task.last_error = type(exc).__name__
+                task.updated_at = utc_now()
+                self.db.add(task)
+                self.db.commit()
+            logger.error(
+                "Checkpoint deletion task %s needs retry: %s",
+                task_id,
+                type(exc).__name__,
+            )
+            return False
+
+    @staticmethod
+    def _delete_checkpoint_rows(thread_ids: list[str], path: Path) -> None:
+        if not thread_ids or not path.exists():
             return
         placeholders = ",".join("?" for _ in thread_ids)
         connection = sqlite3.connect(path)

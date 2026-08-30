@@ -24,6 +24,7 @@ from app.models.entities import (
     ChatMessage,
     ChatSession,
     CheckIn,
+    CheckpointDeletionTask,
     MemoryCard,
     PsychologicalReport,
     RiskTrajectoryPoint,
@@ -289,5 +290,58 @@ def test_business_rollback_does_not_delete_checkpoints(tmp_path, monkeypatch):
         assert connection.execute("SELECT COUNT(*) FROM checkpoints").fetchone()[0] == 1
         connection.close()
         assert db.get(UserAccount, 1) is not None
+    finally:
+        db.close()
+
+
+def test_failed_checkpoint_cleanup_is_persisted_and_retried(tmp_path, monkeypatch):
+    _reset_db()
+    _setup_user_data(1)
+    db = _TestSession()
+    checkpoint_path = tmp_path / "checkpoints.db"
+    try:
+        thread_id = (
+            db.query(ChatSession)
+            .filter(ChatSession.user_id == 1)
+            .one()
+            .public_id
+        )
+        connection = sqlite3.connect(checkpoint_path)
+        connection.execute(
+            "CREATE TABLE checkpoints (thread_id TEXT, checkpoint_id TEXT)"
+        )
+        connection.execute(
+            "INSERT INTO checkpoints(thread_id, checkpoint_id) VALUES (?, ?)",
+            (thread_id, "checkpoint-1"),
+        )
+        connection.commit()
+        connection.close()
+        service = DataDeletionService(
+            db,
+            Settings(
+                langgraph_checkpoint_backend="async_sqlite",
+                langgraph_checkpoint_path=str(checkpoint_path),
+            ),
+        )
+        original_delete = service._delete_checkpoint_rows
+
+        def fail_cleanup(thread_ids, path):
+            raise sqlite3.OperationalError("database busy")
+
+        monkeypatch.setattr(service, "_delete_checkpoint_rows", fail_cleanup)
+
+        counts = service.delete_all_user_data(1)
+
+        assert counts["checkpoint_cleanup_pending"] == 1
+        task = db.query(CheckpointDeletionTask).one()
+        assert task.attempts == 1
+        assert db.get(UserAccount, 1) is None
+
+        monkeypatch.setattr(service, "_delete_checkpoint_rows", original_delete)
+        assert service.retry_pending_checkpoint_deletions() == 1
+        assert db.query(CheckpointDeletionTask).count() == 0
+        connection = sqlite3.connect(checkpoint_path)
+        assert connection.execute("SELECT COUNT(*) FROM checkpoints").fetchone()[0] == 0
+        connection.close()
     finally:
         db.close()

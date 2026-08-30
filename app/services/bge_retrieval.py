@@ -119,6 +119,9 @@ class FlagEmbeddingBackend:
 
     _model_cache: ClassVar[dict[tuple[str, bool, str], Any]] = {}
     _reranker_cache: ClassVar[dict[tuple[str, bool, str], Any]] = {}
+    _document_cache_by_model: ClassVar[
+        dict[tuple[str, bool, str], tuple[tuple[str, ...], Any, Any, int]]
+    ] = {}
     _inference_lock: ClassVar[threading.RLock] = threading.RLock()
 
     def __init__(
@@ -134,7 +137,6 @@ class FlagEmbeddingBackend:
         self.use_fp16 = use_fp16
         self.device = device
         self.index_size_bytes = 0
-        self._document_cache: tuple[tuple[str, ...], Any, Any] | None = None
 
     def score(self, query: str, documents: list[str]) -> list[float]:
         with self._inference_lock:
@@ -146,24 +148,28 @@ class FlagEmbeddingBackend:
                 return_colbert_vecs=False,
             )
             document_key = tuple(documents)
-            if self._document_cache is None or self._document_cache[0] != document_key:
+            model_key = (self.model_name, self.use_fp16, self.device)
+            cached = self._document_cache_by_model.get(model_key)
+            if cached is None or cached[0] != document_key:
                 document_encoded = model.encode(
                     documents,
                     return_dense=True,
                     return_sparse=True,
                     return_colbert_vecs=False,
                 )
-                self._document_cache = (
+                index_size = _encoded_index_size(
+                    document_encoded["dense_vecs"],
+                    document_encoded["lexical_weights"],
+                )
+                cached = (
                     document_key,
                     document_encoded["dense_vecs"],
                     document_encoded["lexical_weights"],
+                    index_size,
                 )
-                self.index_size_bytes = _encoded_index_size(
-                    document_encoded["dense_vecs"],
-                    document_encoded["lexical_weights"],
-                )
-            assert self._document_cache is not None
-            _, dense_vectors, lexical_weights = self._document_cache
+                self._document_cache_by_model[model_key] = cached
+            _, dense_vectors, lexical_weights, index_size = cached
+            self.index_size_bytes = index_size
             query_dense = query_encoded["dense_vecs"][0]
             query_sparse = query_encoded["lexical_weights"][0]
             scores = []

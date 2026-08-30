@@ -160,6 +160,7 @@ class ToolQueueWorker:
     def _dispatch_once(self) -> None:
         db = SessionLocal()
         try:
+            ToolQueueService(db, self.settings).recover_expired_jobs()
             now = utc_now()
             jobs = (
                 db.query(ToolJob)

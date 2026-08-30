@@ -100,6 +100,8 @@ async def _run_message(runtime, message: str):
         user = db.get(UserAccount, 1)
         session = db.query(ChatSession).filter(ChatSession.public_id == "tracer-session").first()
         result = await runtime.run(user, session, message, message)
+        # Production ChatService commits runtime writes together with the turn.
+        db.commit()
         return result
     finally:
         db.close()

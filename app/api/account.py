@@ -60,7 +60,13 @@ def delete_account(
 ):
     try:
         counts = DataDeletionService(db).delete_all_user_data(user.id)
-        return {"deleted": True, "details": counts}
+        cleanup_pending = bool(counts.get("checkpoint_cleanup_pending", 0))
+        return {
+            "deleted": not cleanup_pending,
+            "businessDataDeleted": True,
+            "checkpointCleanupPending": cleanup_pending,
+            "details": counts,
+        }
     except Exception as exc:
         raise HTTPException(500, f"Deletion failed, data rolled back: {exc}") from exc
 

@@ -7,6 +7,7 @@ from app.api.routes import router
 from app.core.bootstrap import create_schema, seed_data
 from app.core.config import get_settings
 from app.core.database import SessionLocal
+from app.services.data_deletion import DataDeletionService
 from app.services.review import get_review_timeout_worker
 from app.services.tool_queue import get_tool_queue_worker
 
@@ -20,6 +21,7 @@ def create_app() -> FastAPI:
         db = SessionLocal()
         try:
             seed_data(db)
+            DataDeletionService(db).retry_pending_checkpoint_deletions()
         finally:
             db.close()
         worker = get_tool_queue_worker(get_settings())
