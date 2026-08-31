@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import logging
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -27,7 +28,7 @@ logger = logging.getLogger(__name__)
 CLASSES = ["正常", "焦虑", "低落", "高风险"]
 
 CLASSIFIER_SYSTEM = (
-    "你是校园心理情绪分类器。只输出一个标签词，不要解释、不要标点。"
+    "你是心理健康支持消息分类器。只输出一个标签词，不要解释、不要标点。"
     "可选标签：正常、焦虑、低落、高风险。"
     "正常：情绪平稳的日常表达；"
     "焦虑：紧张、担心、压力、未来导向的不安；"
@@ -150,9 +151,11 @@ def evaluate(settings: EvalSettings | None = None, provider: str | None = None, 
     api_key = settings.cls_eval_api_key or settings.openai_api_key
 
     results: list[dict] = []
+    started = time.perf_counter()
     for row in rows:
         text = row["input"]
         expected = row["output"]
+        raw = ""
         try:
             if provider == "mock":
                 raw = classify_mock(text)
@@ -168,10 +171,13 @@ def evaluate(settings: EvalSettings | None = None, provider: str | None = None, 
             "input": text,
             "expected": expected,
             "predicted": predicted,
+            "rawOutput": raw,
+            "validOutput": raw.strip() in CLASSES,
             "hit": expected == predicted,
         })
 
     metrics = compute_metrics(results)
+    elapsed = time.perf_counter() - started
 
     report = {
         "createdAt": datetime.now(timezone.utc).isoformat(),
@@ -182,6 +188,8 @@ def evaluate(settings: EvalSettings | None = None, provider: str | None = None, 
             settings.model_copy(update={"ai_provider": provider})
         ).current(dataset_path).to_dict(),
         **metrics,
+        "outputValidity": sum(result["validOutput"] for result in results) / max(1, len(results)),
+        "latencyMsPerCase": elapsed * 1000 / max(1, len(results)),
         "cases": results,
     }
 

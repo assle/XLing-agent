@@ -1,0 +1,40 @@
+{
+  "audit_skill": "experiment-audit",
+  "verdict": "WARN",
+  "reason_code": "synthetic_single_seed_scope",
+  "summary": "结果真实可复算，但仅覆盖单种子、单配置、未人工复核的合成模板数据。",
+  "audited_input_hashes": {
+    "target/general-classifier-results.json": "sha256:9d480f936a838d7ff0e421fd7918e70eb013e1809a43fd83d3fbf7e4a4b873ad",
+    "target/general-classifier-data-report.json": "sha256:cb59a758537c1d287b4b95b1c97c3a9a6c12616d8e4620f385763696e43dd38c",
+    "target/general-classifier-sanity.json": "sha256:50092756a100d066a0c4bfb256461e35f38130d45014b388bf524a01f286490f",
+    "finetune/data/general-test.jsonl": "sha256:2a07585749a0676e78db8690c41363c2473217f3fb6b853fe0cf5e00d76f89f0"
+  },
+  "trace_path": ".aris/traces/experiment-audit/2026-09-01_run01/",
+  "agent_id": "/root/experiment_integrity_audit",
+  "verdict_id": "/root/experiment_integrity_audit",
+  "executor_model": "codex-gpt-5",
+  "executor_family": "openai",
+  "reviewer_model": "gpt-5.6-sol",
+  "reviewer_family": "openai",
+  "reviewer_reasoning": "ultra",
+  "review_independence": "same-family",
+  "acceptance_status": "provisional",
+  "generated_at": "2026-09-01T00:14:18+08:00",
+  "date": "2026-09-01",
+  "auditor": "gpt-5.6-sol-ultra",
+  "overall_verdict": "warn",
+  "integrity_status": "warn",
+  "checks": {
+    "gt_provenance": {"status": "pass", "details": "Dataset output labels are template-assigned, not model-generated."},
+    "score_normalization": {"status": "pass", "details": "Metrics derive directly from confusion counts."},
+    "result_existence": {"status": "pass", "details": "Current data, logs, IDs, predictions and metrics align."},
+    "dead_code": {"status": "pass", "details": "All metric functions are called."},
+    "scope": {"status": "warn", "details": "One seed, one config, synthetic templates, no human review."},
+    "eval_type": "synthetic_proxy"
+  },
+  "claims": [
+    {"id": "C1", "impact": "supported_with_synthetic_scope"},
+    {"id": "C2", "impact": "needs_qualifier"},
+    {"id": "C3", "impact": "unsupported"}
+  ]
+}

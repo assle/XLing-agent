@@ -17,6 +17,9 @@ data/chroma-snapshots/
 data/chroma-eval/
 data/chroma-eval-snapshots/
 target/
+data/huggingface/
+finetune/saves/
+.aris/
 .DS_Store
 
 # Teaching workspace (learning records, lessons, research — not part of the product)

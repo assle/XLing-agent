@@ -1,0 +1,15 @@
+FROM ./xling-general-cls-05b-q4_k_m.gguf
+
+TEMPLATE """{{ if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ range .Messages }}<|im_start|>{{ .Role }}
+{{ .Content }}<|im_end|>
+{{ end }}<|im_start|>assistant
+"""
+
+SYSTEM """你是心理健康支持消息分类器。只输出一个标签：正常、焦虑、低落、高风险。分类只用于分流和安全信号，不作诊断。"""
+
+PARAMETER temperature 0
+PARAMETER num_predict 6
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|im_end|>"
