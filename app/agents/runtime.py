@@ -111,6 +111,7 @@ class AgentContext:
     steps: list[AgentStep] = field(default_factory=list)
     # Exam-anxiety closed-loop context (issues 03, 04, 07, 08, 09)
     exam_stage: str = ""
+    support_background_context: str = ""
     memory_cards_context: str = ""
     cbt_active: bool = False
     cbt_complete: bool = False
@@ -343,10 +344,10 @@ class AgentRuntimeService:
         # A no-memory session retains same-session continuity but never reads
         # or changes the cross-session profile and confirmed memory cards.
         if not context.session.no_memory:
-            # Load exam stage from user profile (issue 03)
+            # Load the user-controlled support background.
             try:
                 profile_svc = UserProfileService(self.db)
-                context.exam_stage = profile_svc.get_stage_context(context.user.id)
+                context.support_background_context = profile_svc.get_support_context(context.user.id)
             except Exception:
                 pass
             # Load confirmed memory cards (issue 04)
@@ -355,7 +356,7 @@ class AgentRuntimeService:
             except Exception:
                 pass
         context.memory_loaded = True
-        context.steps.append(AgentStep(step, "MemoryAgent", "READ_MEMORY", f"loaded {len(history)} messages from {source}; stage={context.exam_stage or 'none'}"))
+        context.steps.append(AgentStep(step, "MemoryAgent", "READ_MEMORY", f"loaded {len(history)} messages from {source}; support_background={'yes' if context.support_background_context else 'none'}"))
         return True
 
     async def quick_safety_agent(self, step: int, context: AgentContext) -> bool:
@@ -447,7 +448,7 @@ class AgentRuntimeService:
         context.response_plan = "围绕用户当前问题直接、自然地回答。"
         context.response_messages = [
             PromptTemplates.answer_system_prompt(IntentType.CHAT, RiskLevel.LOW, "", context.user.display_name),
-            AiMessage(role="system", content=f"当前由 CompanionAgent 负责回复。\n记忆摘要：\n{context.memory_brief}\n回复策略：\n{context.response_plan}"),
+            AiMessage(role="system", content=f"当前由 CompanionAgent 负责回复。\n记忆摘要：\n{context.memory_brief}\n支持背景：\n{context.support_background_context or '无'}\n已确认记忆：\n{context.memory_cards_context or '无'}\n回复策略：\n{context.response_plan}"),
             *context.model_history,
         ]
         context.response_planned = True
@@ -465,6 +466,7 @@ class AgentRuntimeService:
             PromptTemplates.answer_system_prompt(context.intent or IntentType.CONSULT, context.risk_level, knowledge_context, context.user.display_name),
             AiMessage(role="system", content=(
                 f"当前由 CounselorAgent 负责回复。\n记忆摘要：\n{context.memory_brief}\n"
+                f"支持背景：\n{context.support_background_context or '无'}\n已确认记忆：\n{context.memory_cards_context or '无'}\n"
                 f"KnowledgeAgent 检索 query：\n{context.knowledge_query}\n回复策略：\n{context.response_plan}"
             )),
             *context.model_history,
@@ -548,6 +550,8 @@ class AgentRuntimeService:
                     AiMessage(role="system", content=(
                         "CounselorAgent responding. All four aspects are complete.\n"
                         f"Memory brief: {context.memory_brief}\n"
+                        f"Support background: {context.support_background_context or '无'}\n"
+                        f"Confirmed memory: {context.memory_cards_context or '无'}\n"
                         f"Action plan generated ({len(plan.items)} items). "
                         "Summarize the four-part findings and introduce the plan.\n"
                         f"以下是系统已生成的行动计划条目，请在回复中逐一介绍，确保内容与这些条目完全一致：\n{plan_items_text}\n"
@@ -576,7 +580,8 @@ class AgentRuntimeService:
                 PromptTemplates.answer_system_prompt(context.intent or IntentType.CONSULT, context.risk_level, knowledge_context, context.user.display_name),
                 AiMessage(role="system", content=(
                     f"当前由 CBTAgent 负责回复。\n记忆摘要：\n{context.memory_brief}\n"
-                    f"认知行为四维追问策略：需要了解学生的「{DIMENSION_LABELS.get(next_dimension, next_dimension)}」方面。\n"
+                    f"支持背景：\n{context.support_background_context or '无'}\n已确认记忆：\n{context.memory_cards_context or '无'}\n"
+                    f"认知行为四维追问策略：需要了解用户的「{DIMENSION_LABELS.get(next_dimension, next_dimension)}」方面。\n"
                     f"参考问题：{next_q}\n"
                     "请以共情、自然的方式引导学生回答这个问题，不要直接暴露四个方面的内部名称，也不要机械提问。"
                 )),

@@ -228,8 +228,8 @@ def test_no_memory_session_does_not_load_long_term_context(monkeypatch):
         def __init__(self, db):
             calls["profile"] += 1
 
-        def get_stage_context(self, user_id):  # noqa: ANN001
-            return "冲刺"
+        def get_support_context(self, user_id):  # noqa: ANN001
+            return "当前关注：工作压力"
 
     class CardSpy:
         def __init__(self, db):
@@ -265,7 +265,7 @@ def test_no_memory_session_does_not_load_long_term_context(monkeypatch):
     asyncio.run(runtime.memory_agent(1, context))
 
     assert calls == {"profile": 0, "cards": 0}
-    assert context.exam_stage == ""
+    assert context.support_background_context == ""
     assert context.memory_cards_context == ""
 
 
@@ -276,8 +276,8 @@ def test_normal_session_loads_long_term_context(monkeypatch):
         def __init__(self, db):
             calls["profile"] += 1
 
-        def get_stage_context(self, user_id):  # noqa: ANN001
-            return "冲刺"
+        def get_support_context(self, user_id):  # noqa: ANN001
+            return "当前关注：工作压力"
 
     class CardSpy:
         def __init__(self, db):
@@ -310,7 +310,7 @@ def test_normal_session_loads_long_term_context(monkeypatch):
     asyncio.run(runtime.memory_agent(1, context))
 
     assert calls == {"profile": 1, "cards": 1}
-    assert context.exam_stage == "冲刺"
+    assert context.support_background_context == "当前关注：工作压力"
     assert context.memory_cards_context == "known context"
 
 

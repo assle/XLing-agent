@@ -84,6 +84,17 @@ class UserProfileService:
             return ""
         return profile.exam_stage
 
+    def get_support_context(self, user_id: int) -> str:
+        profile = self.get_profile(user_id)
+        if profile is None:
+            return ""
+        fields = [
+            ("当前关注", profile.current_concern),
+            ("支持目标", profile.support_goal),
+            ("偏好方式", profile.preferred_support_style),
+        ]
+        return "\n".join(f"{label}：{value}" for label, value in fields if value)
+
     @staticmethod
     def _parse_date(date_str: str) -> date:
         for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%Y%m%d"):
