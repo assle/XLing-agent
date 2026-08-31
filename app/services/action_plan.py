@@ -164,10 +164,10 @@ class ActionPlanService:
         stage_context = f"备考阶段：{exam_stage}\n" if exam_stage else ""
         return [
             AiMessage(role="system", content=(
-                "你是一个心理行动规划助手。基于学生的认知行为四维追问摘要，生成 3-5 个小而具体、"
+                "你是一个心理行动规划助手。基于用户的认知行为四维追问摘要，生成 3-5 个小而具体、"
                 "安全、可操作的 24 小时行动计划条目。只返回严格 JSON："
                 '{"items":[{"content":"具体行动描述","order":0}]}'
-                "\n每个条目应小而具体、安全，并与备考阶段和四维追问摘要相关。"
+                "\n每个条目应小而具体、安全，并与用户当前处境和四维追问摘要相关。"
             )),
             AiMessage(role="user", content=(
                 f"{stage_context}认知行为四维追问摘要：\n{cbt_summary}"

@@ -143,7 +143,7 @@ class CBTService:
         covered = {dim: getattr(current_state, dim) for dim in DIMENSIONS if getattr(current_state, dim)}
         return [
             AiMessage(role="system", content=(
-                "你是一个认知行为四维追问助手。从学生的回答中提取四个方面的信息。"
+        "你是一个认知行为四维追问助手。从用户的回答中提取四个方面的信息。"
                 "只返回严格 JSON："
                 '{"trigger_event":"触发事件描述或null","thoughts":"想法描述或null",'
                 '"body_reactions":"身体反应描述或null","behavior":"行为描述或null"}'
@@ -151,7 +151,7 @@ class CBTService:
             )),
             AiMessage(role="user", content=(
                 f"已覆盖维度：{json.dumps(covered, ensure_ascii=False)}\n"
-                f"学生回答：{user_input}"
+                f"用户回答：{user_input}"
             )),
         ]
 
@@ -186,7 +186,7 @@ class CBTService:
             paused=current.paused,
         )
         if not result.trigger_event:
-            event_keywords = ["考试", "复习", "面试", "作业", "deadline", "考研", "考公", "成绩"]
+            event_keywords = ["考试", "复习", "面试", "作业", "deadline", "考研", "考公", "成绩", "工作", "加班", "家庭", "关系", "失业"]
             if any(kw in text for kw in event_keywords):
                 result.trigger_event = user_input[:100]
         if not result.thoughts:
