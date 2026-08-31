@@ -38,7 +38,7 @@ class UserAccount(Base):
 
 
 class UserProfile(Base):
-    """Structured user profile for exam-prep anxiety support (issue 03)."""
+    """Structured user background for support conversations."""
 
     __tablename__ = "user_profiles"
 
@@ -47,6 +47,9 @@ class UserProfile(Base):
     exam_stage: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
     target_exam: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
     exam_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    current_concern: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    support_goal: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    preferred_support_style: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=now, onupdate=now)
 
@@ -197,6 +200,10 @@ class PsychologicalReport(Base):
     confidence: Mapped[float] = mapped_column(Float)
     summary: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+
+
+# Compatibility name used while callers migrate away from diagnostic-sounding terminology.
+SafetyAssessmentRecord = PsychologicalReport
 
 
 

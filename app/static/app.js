@@ -13,7 +13,7 @@ import { initAdmin } from "/admin.js";
 export const state = {
   auth: { token: null },
   profile: null,
-  examProfile: null,
+  supportProfile: null,
   sessionId: null,
   sending: false,
   modelName: "mock",

@@ -1,4 +1,4 @@
-// 备考画像面板（阶段 / 目标考试 / 考试日期）+ 数据删除入口。
+// 支持背景面板（当前关注问题 / 支持目标 / 偏好方式）+ 数据删除入口。
 
 import { state, api, openModal, closeModal } from "/app.js";
 
@@ -12,9 +12,9 @@ export function initProfile() {
   els.fill = document.querySelector("#profileFill");
   els.skip = document.querySelector("#profileSkip");
   els.form = document.querySelector("#profileForm");
-  els.stage = document.querySelector("#profileStage");
-  els.targetExam = document.querySelector("#profileTargetExam");
-  els.examDate = document.querySelector("#profileExamDate");
+  els.currentConcern = document.querySelector("#profileCurrentConcern");
+  els.supportGoal = document.querySelector("#profileSupportGoal");
+  els.supportStyle = document.querySelector("#profileSupportStyle");
   els.cancel = document.querySelector("#profileCancel");
   els.state = document.querySelector("#profileState");
   els.openDataDelete = document.querySelector("#openDataDelete");
@@ -27,7 +27,7 @@ export function initProfile() {
     els.onboarding.hidden = true;
     els.state.textContent = "已跳过，可随时点击“编辑”补充。";
     els.summary.hidden = false;
-    els.summaryText.textContent = "未设置画像";
+    els.summaryText.textContent = "未设置支持背景";
   });
   els.cancel.addEventListener("click", () => render());
   els.form.addEventListener("submit", saveProfile);
@@ -40,19 +40,19 @@ export function initProfile() {
   els.confirmDataDelete.addEventListener("click", deleteAccount);
 }
 
-export async function loadExamProfile() {
+export async function loadSupportProfile() {
   try {
-    const response = await api("/api/profile/exam");
-    state.examProfile = await response.json();
+    const response = await api("/api/profile/support");
+    state.supportProfile = await response.json();
   } catch {
-    state.examProfile = null;
+    state.supportProfile = null;
   }
   render();
 }
 
 function hasProfile() {
-  const p = state.examProfile;
-  return Boolean(p && (p.examStage || p.targetExam || p.examDate));
+  const p = state.supportProfile;
+  return Boolean(p && (p.currentConcern || p.supportGoal || p.preferredSupportStyle));
 }
 
 function render() {
@@ -65,19 +65,19 @@ function render() {
   }
   els.summary.hidden = false;
   const parts = [];
-  if (state.examProfile.examStage) parts.push(`${state.examProfile.examStage}阶段`);
-  if (state.examProfile.targetExam) parts.push(state.examProfile.targetExam);
-  if (state.examProfile.examDate) parts.push(state.examProfile.examDate);
-  els.summaryText.textContent = parts.join(" · ") || "未设置画像";
+  if (state.supportProfile.currentConcern) parts.push(state.supportProfile.currentConcern);
+  if (state.supportProfile.supportGoal) parts.push(`目标：${state.supportProfile.supportGoal}`);
+  if (state.supportProfile.preferredSupportStyle) parts.push(`方式：${styleLabel(state.supportProfile.preferredSupportStyle)}`);
+  els.summaryText.textContent = parts.join(" · ") || "未设置支持背景";
 }
 
 function showForm() {
   els.onboarding.hidden = true;
   els.summary.hidden = true;
   els.form.hidden = false;
-  els.stage.value = state.examProfile?.examStage || "";
-  els.targetExam.value = state.examProfile?.targetExam || "";
-  els.examDate.value = state.examProfile?.examDate || "";
+  els.currentConcern.value = state.supportProfile?.currentConcern || "";
+  els.supportGoal.value = state.supportProfile?.supportGoal || "";
+  els.supportStyle.value = state.supportProfile?.preferredSupportStyle || "";
   els.state.textContent = "";
 }
 
@@ -85,20 +85,28 @@ async function saveProfile(event) {
   event.preventDefault();
   els.state.textContent = "保存中...";
   try {
-    const response = await api("/api/profile/exam", {
+    const response = await api("/api/profile/support", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        examStage: els.stage.value,
-        targetExam: els.targetExam.value.trim(),
-        examDate: els.examDate.value || ""
+        currentConcern: els.currentConcern.value.trim(),
+        supportGoal: els.supportGoal.value.trim(),
+        preferredSupportStyle: els.supportStyle.value
       })
     });
-    state.examProfile = await response.json();
+    state.supportProfile = await response.json();
     render();
   } catch (error) {
     els.state.textContent = `保存失败：${error.message}`;
   }
+}
+
+function styleLabel(value) {
+  return {
+    listening: "先倾听和梳理",
+    small_steps: "小步行动建议",
+    structured: "结构化整理"
+  }[value] || value;
 }
 
 async function deleteAccount() {

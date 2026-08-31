@@ -44,35 +44,15 @@
         <p class="hint"><a href="/privacy.html" target="_blank" rel="noopener">阅读隐私说明</a>（无需登录）</p>
       </form>
 
-      <form id="resetForm" class="panel" hidden>
-        <p class="panel-label">账户安全</p>
-        <h2>密码重置</h2>
-        <p class="hint">检测到旧版密码，请设置新密码以继续使用。</p>
-        <label>
-          <span>用户名</span>
-          <input id="resetUsername" autocomplete="username">
-        </label>
-        <label>
-          <span>旧密码</span>
-          <input id="resetOldPassword" type="password" autocomplete="current-password">
-        </label>
-        <label>
-          <span>新密码（至少 6 位）</span>
-          <input id="resetNewPassword" type="password" autocomplete="new-password">
-        </label>
-        <button class="primary full" type="submit">重置密码</button>
-        <p id="resetState" class="hint"></p>
-      </form>
-
       <section id="profilePanel" class="panel" hidden>
-        <p class="panel-label">我的备考</p>
-        <h2>备考画像</h2>
+        <p class="panel-label">支持背景</p>
+        <h2>让我更好地支持你</h2>
         <div id="profileSummary" hidden>
           <p id="profileSummaryText" class="profile-summary"></p>
           <button id="profileEdit" class="ghost full" type="button">编辑</button>
         </div>
         <div id="profileOnboarding" hidden>
-          <p class="hint">告诉我们你的备考阶段，系统会按阶段调整支持内容。这是可选的，跳过也能正常聊天。</p>
+          <p class="hint">可选填写当前关注的问题、希望获得的支持和偏好的交流方式。你也可以直接开始聊天。</p>
           <div class="btn-row">
             <button id="profileFill" class="primary" type="button">填写</button>
             <button id="profileSkip" class="ghost" type="button">跳过</button>
@@ -80,23 +60,21 @@
         </div>
         <form id="profileForm" hidden>
           <label>
-            <span>备考阶段</span>
-            <select id="profileStage">
+            <span>当前关注的问题（可选）</span>
+            <textarea id="profileCurrentConcern" rows="3" placeholder="如：最近工作压力大、睡眠受影响"></textarea>
+          </label>
+          <label>
+            <span>希望获得的支持（可选）</span>
+            <textarea id="profileSupportGoal" rows="2" placeholder="如：先把压力稳定下来，找到一个可执行的小步骤"></textarea>
+          </label>
+          <label>
+            <span>偏好的支持方式（可选）</span>
+            <select id="profileSupportStyle">
               <option value="">未设置</option>
-              <option value="基础">基础</option>
-              <option value="强化">强化</option>
-              <option value="冲刺">冲刺</option>
-              <option value="考前">考前</option>
-              <option value="考后">考后</option>
+              <option value="listening">先倾听和梳理</option>
+              <option value="small_steps">给我小步行动建议</option>
+              <option value="structured">用结构化问题帮助我整理</option>
             </select>
-          </label>
-          <label>
-            <span>目标考试（可选）</span>
-            <input id="profileTargetExam" placeholder="如：考研">
-          </label>
-          <label>
-            <span>考试日期（可选）</span>
-            <input id="profileExamDate" type="date">
           </label>
           <div class="btn-row">
             <button class="primary" type="submit">保存</button>

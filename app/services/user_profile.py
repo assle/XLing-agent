@@ -58,6 +58,25 @@ class UserProfileService:
         self.db.refresh(profile)
         return profile
 
+    def update_support_background(
+        self,
+        user_id: int,
+        current_concern: str | None = None,
+        support_goal: str | None = None,
+        preferred_support_style: str | None = None,
+    ) -> UserProfile:
+        profile = self.get_or_create(user_id)
+        if current_concern is not None:
+            profile.current_concern = current_concern.strip() or None
+        if support_goal is not None:
+            profile.support_goal = support_goal.strip() or None
+        if preferred_support_style is not None:
+            profile.preferred_support_style = preferred_support_style.strip() or None
+        profile.updated_at = utc_now()
+        self.db.commit()
+        self.db.refresh(profile)
+        return profile
+
     def get_stage_context(self, user_id: int) -> str:
         """Return the user's exam stage for agent runtime context."""
         profile = self.get_profile(user_id)

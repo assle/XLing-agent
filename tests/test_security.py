@@ -1,12 +1,9 @@
-"""Tests for issue 01: bcrypt + 24h JWT login migration.
+"""Tests for bcrypt + 24h JWT login.
 
 Covers:
   - bcrypt password hashing and verification
-  - Legacy SHA-256 hash detection and verification
   - JWT creation, decoding, expiry, tampering
   - Login endpoint (bcrypt credentials -> JWT)
-  - Login endpoint (legacy credentials -> reset required)
-  - Reset endpoint (migrate SHA-256 -> bcrypt)
   - Protected endpoints reject missing/tampered/expired tokens
   - Basic Auth no longer works
   - Role isolation (student can't access admin, admin can't chat)
@@ -14,8 +11,6 @@ Covers:
 Run: python -m pytest tests/test_security.py
 """
 from __future__ import annotations
-
-import hashlib
 
 import jwt as pyjwt
 
@@ -25,8 +20,6 @@ from app.core.security import (
     create_access_token,
     decode_access_token,
     hash_password,
-    is_legacy_hash,
-    verify_legacy_password,
     verify_password,
 )
 from app.models.entities import UserAccount
@@ -54,7 +47,7 @@ def _seed_users():
         admin = UserAccount(
             username="admin",
             display_name="Test Admin",
-            password_hash=hashlib.sha256("admin123".encode("utf-8")).hexdigest(),
+            password_hash=hash_password("admin123"),
         )
         admin.roles = {"ROLE_ADMIN", "ROLE_USER"}
 
@@ -99,26 +92,6 @@ def test_bcrypt_hash_is_different_each_time():
     assert h1 != h2
     assert verify_password("same", h1)
     assert verify_password("same", h2)
-
-
-# ---------------------------------------------------------------------------
-# Unit: legacy SHA-256 detection
-# ---------------------------------------------------------------------------
-
-def test_is_legacy_hash_detects_sha256():
-    sha = hashlib.sha256("test".encode()).hexdigest()
-    assert is_legacy_hash(sha) is True
-
-
-def test_is_legacy_hash_recognizes_bcrypt():
-    bcrypt_hash = hash_password("test")
-    assert is_legacy_hash(bcrypt_hash) is False
-
-
-def test_verify_legacy_password():
-    sha = hashlib.sha256("admin123".encode()).hexdigest()
-    assert verify_legacy_password("admin123", sha) is True
-    assert verify_legacy_password("wrong", sha) is False
 
 
 # ---------------------------------------------------------------------------
@@ -195,12 +168,11 @@ def test_login_bcrypt_returns_jwt():
     assert data["expiresIn"] == 86400
 
 
-def test_login_legacy_returns_reset_required():
+def test_login_admin_returns_jwt():
     response = client.post("/api/auth/login", json={"username": "admin", "password": "admin123"})
     assert response.status_code == 200
     data = response.json()
-    assert data["resetRequired"] is True
-    assert data["username"] == "admin"
+    assert data["accessToken"]
 
 
 def test_login_wrong_password_401():
@@ -211,56 +183,6 @@ def test_login_wrong_password_401():
 def test_login_nonexistent_user_401():
     response = client.post("/api/auth/login", json={"username": "nobody", "password": "x"})
     assert response.status_code == 401
-
-
-# ---------------------------------------------------------------------------
-# API: reset endpoint
-# ---------------------------------------------------------------------------
-
-def test_reset_migrates_legacy_to_bcrypt():
-    db = _TestSession()
-    try:
-        admin = db.query(UserAccount).filter(UserAccount.username == "admin").first()
-        assert is_legacy_hash(admin.password_hash) is True
-    finally:
-        db.close()
-
-    response = client.post("/api/auth/reset", json={
-        "username": "admin", "oldPassword": "admin123", "newPassword": "newadmin456"
-    })
-    assert response.status_code == 200
-    data = response.json()
-    assert "accessToken" in data
-
-    # Verify hash is now bcrypt
-    db = _TestSession()
-    try:
-        admin = db.query(UserAccount).filter(UserAccount.username == "admin").first()
-        assert is_legacy_hash(admin.password_hash) is False
-        assert verify_password("newadmin456", admin.password_hash)
-    finally:
-        db.close()
-    _reset_db()
-
-
-def test_reset_wrong_old_password_401():
-    response = client.post("/api/auth/reset", json={
-        "username": "admin", "oldPassword": "wrong", "newPassword": "newadmin456"
-    })
-    assert response.status_code == 401
-
-
-def test_reset_old_hash_invalidated_after_reset():
-    client.post("/api/auth/reset", json={
-        "username": "admin", "oldPassword": "admin123", "newPassword": "newadmin456"
-    })
-    # Old password should no longer work for login
-    response = client.post("/api/auth/login", json={"username": "admin", "password": "admin123"})
-    assert response.status_code == 401
-    # New password should work
-    response = client.post("/api/auth/login", json={"username": "admin", "password": "newadmin456"})
-    assert response.status_code == 200
-    _reset_db()
 
 
 # ---------------------------------------------------------------------------
@@ -303,15 +225,10 @@ def test_student_cannot_access_admin():
 
 
 def test_admin_cannot_chat():
-    # First reset admin password
-    client.post("/api/auth/reset", json={
-        "username": "admin", "oldPassword": "admin123", "newPassword": "newadmin456"
-    })
-    response = client.post("/api/auth/login", json={"username": "admin", "password": "newadmin456"})
+    response = client.post("/api/auth/login", json={"username": "admin", "password": "admin123"})
     admin_token = response.json()["accessToken"]
     response = client.post("/api/chat/stream", json={"message": "hello"}, headers={"Authorization": f"Bearer {admin_token}"})
     assert response.status_code == 403
-    _reset_db()
 
 
 # ---------------------------------------------------------------------------

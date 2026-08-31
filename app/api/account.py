@@ -7,18 +7,16 @@ from app.core.database import get_db
 from app.core.security import (
     create_access_token,
     current_user,
-    hash_password,
-    is_legacy_hash,
-    verify_legacy_password,
     verify_password,
 )
 from app.models.entities import UserAccount
 from app.schemas.dtos import (
     CreateMemoryCardRequest,
     LoginRequest,
-    ResetPasswordRequest,
     ScreeningSubmitRequest,
+    SupportProfileResponse,
     UpdateMemoryCardRequest,
+    UpdateSupportProfileRequest,
     UpdateUserProfileRequest,
     UserProfileResponse,
     authority,
@@ -29,12 +27,6 @@ from app.services.screening import ScreeningService
 from app.services.user_profile import UserProfileService
 
 router = APIRouter()
-
-
-def _password_matches(user: UserAccount, password: str) -> bool:
-    if is_legacy_hash(user.password_hash):
-        return verify_legacy_password(password, user.password_hash)
-    return verify_password(password, user.password_hash)
 
 
 def _memory_card_response(card) -> dict:
@@ -74,21 +66,8 @@ def delete_account(
 @router.post("/api/auth/login")
 def login(request: LoginRequest, db: Annotated[Session, Depends(get_db)]):
     user = db.query(UserAccount).filter(UserAccount.username == request.username).first()
-    if user is None or not _password_matches(user, request.password):
+    if user is None or not verify_password(request.password, user.password_hash):
         raise HTTPException(401, "Bad credentials")
-    if is_legacy_hash(user.password_hash):
-        return {"resetRequired": True, "username": user.username}
-    token = create_access_token(user)
-    return {"accessToken": token, "tokenType": "Bearer", "expiresIn": 86400}
-
-
-@router.post("/api/auth/reset")
-def reset_password(request: ResetPasswordRequest, db: Annotated[Session, Depends(get_db)]):
-    user = db.query(UserAccount).filter(UserAccount.username == request.username).first()
-    if user is None or not _password_matches(user, request.oldPassword):
-        raise HTTPException(401, "Bad credentials")
-    user.password_hash = hash_password(request.newPassword)
-    db.commit()
     token = create_access_token(user)
     return {"accessToken": token, "tokenType": "Bearer", "expiresIn": 86400}
 
@@ -137,6 +116,40 @@ def update_exam_profile(
         examStage=profile.exam_stage,
         targetExam=profile.target_exam,
         examDate=profile.exam_date.isoformat() if profile.exam_date else None,
+    )
+
+
+@router.get("/api/profile/support")
+def get_support_profile(
+    user: Annotated[UserAccount, Depends(current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    profile = UserProfileService(db).get_profile(user.id)
+    if profile is None:
+        return SupportProfileResponse()
+    return SupportProfileResponse(
+        currentConcern=profile.current_concern,
+        supportGoal=profile.support_goal,
+        preferredSupportStyle=profile.preferred_support_style,
+    )
+
+
+@router.put("/api/profile/support")
+def update_support_profile(
+    request: UpdateSupportProfileRequest,
+    user: Annotated[UserAccount, Depends(current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    profile = UserProfileService(db).update_support_background(
+        user.id,
+        current_concern=request.currentConcern,
+        support_goal=request.supportGoal,
+        preferred_support_style=request.preferredSupportStyle,
+    )
+    return SupportProfileResponse(
+        currentConcern=profile.current_concern,
+        supportGoal=profile.support_goal,
+        preferredSupportStyle=profile.preferred_support_style,
     )
 
 

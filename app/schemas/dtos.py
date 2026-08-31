@@ -107,12 +107,6 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1)
 
 
-class ResetPasswordRequest(BaseModel):
-    username: str = Field(min_length=1)
-    oldPassword: str = Field(min_length=1)
-    newPassword: str = Field(min_length=6)
-
-
 class UpdateUserProfileRequest(BaseModel):
     examStage: Optional[str] = None
     targetExam: Optional[str] = None
@@ -123,6 +117,18 @@ class UserProfileResponse(BaseModel):
     examStage: Optional[str] = None
     targetExam: Optional[str] = None
     examDate: Optional[str] = None
+
+
+class UpdateSupportProfileRequest(BaseModel):
+    currentConcern: Optional[str] = Field(default=None, max_length=1000)
+    supportGoal: Optional[str] = Field(default=None, max_length=1000)
+    preferredSupportStyle: Optional[str] = Field(default=None, max_length=32)
+
+
+class SupportProfileResponse(BaseModel):
+    currentConcern: Optional[str] = None
+    supportGoal: Optional[str] = None
+    preferredSupportStyle: Optional[str] = None
 
 
 class CreateMemoryCardRequest(BaseModel):

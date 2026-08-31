@@ -1,5 +1,3 @@
-import hashlib
-import hmac
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
@@ -28,18 +26,6 @@ def verify_password(password: str, hashed: str) -> bool:
         return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
     except (ValueError, TypeError):
         return False
-
-
-def is_legacy_hash(hashed: str) -> bool:
-    """Check if a hash is a legacy SHA-256 hash (not bcrypt)."""
-    return not hashed.startswith("$2")
-
-
-def verify_legacy_password(password: str, hashed: str) -> bool:
-    """Verify a password against a legacy SHA-256 hash."""
-    return hmac.compare_digest(
-        hashlib.sha256(password.encode("utf-8")).hexdigest(), hashed
-    )
 
 
 def create_access_token(user: UserAccount) -> str:
