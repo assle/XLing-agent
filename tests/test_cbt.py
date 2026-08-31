@@ -137,13 +137,6 @@ def test_next_question_complete():
     assert "行动计划" in q
 
 
-def test_next_question_with_stage():
-    svc = CBTService()
-    state = CBTState()
-    q = svc.get_next_question(state, exam_stage="冲刺")
-    assert "冲刺" in q
-
-
 # ---------------------------------------------------------------------------
 # LLM extraction with mock
 # ---------------------------------------------------------------------------

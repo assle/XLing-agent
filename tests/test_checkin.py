@@ -22,8 +22,8 @@ from app.models.entities import (
     ActionPlanItem,
     ChatSession,
     CheckIn,
-    PsychologicalReport,
     ReviewRequest,
+    SafetyAssessmentRecord,
     UserAccount,
 )
 from app.services.action_plan import ActionPlanService
@@ -59,7 +59,7 @@ def _clean():
     db = _TestSession()
     try:
         db.query(ReviewRequest).delete()
-        db.query(PsychologicalReport).delete()
+        db.query(SafetyAssessmentRecord).delete()
         db.query(CheckIn).delete()
         db.query(ActionPlanItem).delete()
         db.query(ActionPlan).delete()
@@ -294,7 +294,7 @@ def test_api_checkin_worsened_creates_review():
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["escalated"] is True
-    assert "400-161-9995" in body["safetyMessage"]
+    assert "当地紧急服务" in body["safetyMessage"]
     db = _TestSession()
     try:
         reviews = db.query(ReviewRequest).all()

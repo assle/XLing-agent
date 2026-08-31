@@ -71,9 +71,6 @@ def _seed():
         session = ChatSession(public_id="tracer-session", title="tracer bullet", user_id=1)
         db.add_all([user, session])
         db.commit()
-        # Add user profile with exam stage
-        from app.services.user_profile import UserProfileService
-        UserProfileService(db).update_profile(1, exam_stage="冲刺", target_exam="考研")
     finally:
         db.close()
 
@@ -226,7 +223,7 @@ def test_tracer_bullet_escalation_worsened():
         assert result.should_escalate is True
         assert result.handoff_reason == "SUSTAINED_NO_IMPROVEMENT"
         assert result.review_id is not None
-        assert "400-161-9995" in result.user_message  # safety message with hotline
+        assert "当地紧急服务" in result.user_message
     finally:
         db.close()
 

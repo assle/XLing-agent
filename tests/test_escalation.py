@@ -17,7 +17,7 @@ from __future__ import annotations
 from app.core.config import Settings
 from app.core.enums import RiskLevel
 from app.core.security import hash_password
-from app.models.entities import ChatSession, PsychologicalReport, ReviewRequest, UserAccount
+from app.models.entities import ChatSession, ReviewRequest, SafetyAssessmentRecord, UserAccount
 from app.services.escalation import SAFETY_MESSAGE, SCREENING_SUGGESTION, EscalationService
 from tests.support import DatabaseHarness
 
@@ -31,7 +31,7 @@ def _seed():
         s = UserAccount(username="student", display_name="S", password_hash=hash_password("s"))
         s.roles = {"ROLE_USER"}
         session = ChatSession(public_id="sess-1", title="test", user_id=1)
-        report = PsychologicalReport(
+        report = SafetyAssessmentRecord(
             user_id=1, session_id=1, content="test",
             intent="CONSULT", emotion="ANXIETY", emotion_score=2.5,
             risk_level="MEDIUM", confidence=0.8, summary="anxiety",
@@ -220,8 +220,8 @@ def test_screening_suggestion_is_message():
     assert "自愿" in suggestion
     assert SCREENING_SUGGESTION == suggestion
 
-def test_safety_message_has_hotline():
-    assert "400-161-9995" in SAFETY_MESSAGE
+def test_safety_message_uses_configurable_resource_category():
+    assert "当地紧急服务" in SAFETY_MESSAGE
 
 
 # ---------------------------------------------------------------------------
@@ -242,7 +242,7 @@ def test_checkin_escalation_creates_labeled_report_when_missing():
         assert result.review_id is not None
         review = db.get(ReviewRequest, result.review_id)
         assert review.handoff_reason == "SUSTAINED_NO_IMPROVEMENT"
-        report = db.get(PsychologicalReport, review.report_id)
+        report = db.get(SafetyAssessmentRecord, review.report_id)
         assert report is not None
         assert "次日反馈" in report.summary
         assert report.confidence == 0.0

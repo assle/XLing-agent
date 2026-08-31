@@ -107,18 +107,6 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1)
 
 
-class UpdateUserProfileRequest(BaseModel):
-    examStage: Optional[str] = None
-    targetExam: Optional[str] = None
-    examDate: Optional[str] = None
-
-
-class UserProfileResponse(BaseModel):
-    examStage: Optional[str] = None
-    targetExam: Optional[str] = None
-    examDate: Optional[str] = None
-
-
 class UpdateSupportProfileRequest(BaseModel):
     currentConcern: Optional[str] = Field(default=None, max_length=1000)
     supportGoal: Optional[str] = Field(default=None, max_length=1000)

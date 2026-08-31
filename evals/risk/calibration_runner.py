@@ -7,7 +7,6 @@ from pathlib import Path
 
 from app.core.enums import RiskLevel
 from app.core.versioning import ArtifactVersionResolver
-from app.services.ai import AiClient
 from app.services.risk_calibration import (
     RISK_LEVELS,
     CalibratedRiskEngine,
@@ -33,16 +32,13 @@ def collect_calibration_inputs(
     missing = calibration_ids.union(test_ids) - rows_by_id.keys()
     if missing:
         raise ValueError(f"切分清单包含未知案例：{sorted(missing)}")
-    ai_settings = settings.model_copy(update={"ai_provider": settings.risk_eval_ai_provider})
-    ai = AiClient(ai_settings)
-
     def collect(ids: set[str]) -> list[dict]:
         return [
             {
                 "id": row_id,
                 "text": rows_by_id[row_id]["text"],
                 "expectedRisk": rows_by_id[row_id]["expected_risk"],
-                "logits": ai.risk_logits(rows_by_id[row_id]["text"]),
+                "logits": _offline_logits(rows_by_id[row_id]["text"]),
             }
             for row_id in sorted(ids)
         ]
@@ -56,6 +52,21 @@ def collect_calibration_inputs(
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
     return calibration, test
+
+
+def _offline_logits(text: str) -> list[float]:
+    """Deterministic offline-only proxy for calibration experiments.
+
+    It deliberately does not call the online classifier or any remote score API.
+    """
+    normalized = text.lower()
+    if any(term in normalized for term in ("自杀", "自残", "不想活", "轻生")):
+        return [-4.0, 0.0, 5.0]
+    if any(term in normalized for term in ("低落", "抑郁", "无意义", "难过")):
+        return [0.0, 4.0, -2.0]
+    if any(term in normalized for term in ("焦虑", "压力", "担心", "失眠")):
+        return [3.0, 1.0, -4.0]
+    return [4.0, 0.0, -4.0]
 
 
 def evaluate_calibration(settings: EvalSettings | None = None) -> dict:

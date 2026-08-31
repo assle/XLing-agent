@@ -77,7 +77,7 @@ def test_generate_plan_with_llm():
     db = _TestSession()
     try:
         svc = ActionPlanService(db, MockAi(response))
-        plan = svc.generate_plan(1, None, "CBT summary", "冲刺")
+        plan = svc.generate_plan(1, None, "CBT summary")
         assert plan.status == "active"
         assert plan.target_window_hours == 24
         assert len(plan.items) == 3

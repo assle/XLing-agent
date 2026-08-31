@@ -76,15 +76,6 @@ def rebuild_knowledge_vector(_: Annotated[UserAccount, Depends(require_admin)], 
     return {"indexedChunks": indexed}
 
 
-@router.post("/api/admin/knowledge/backup")
-def backup_knowledge_vector(_: Annotated[UserAccount, Depends(require_admin)], db: Annotated[Session, Depends(get_db)]):
-    try:
-        snapshot = KnowledgeService(db, get_settings()).backup_vector_index()
-    except RuntimeError as exc:
-        raise HTTPException(503, str(exc)) from exc
-    return {"snapshot": snapshot}
-
-
 @router.post("/api/admin/knowledge/file")
 async def ingest_file(
     _: Annotated[UserAccount, Depends(require_admin)],

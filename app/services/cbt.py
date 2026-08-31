@@ -124,7 +124,7 @@ class CBTService:
             logger.warning("four-part extraction error, using heuristic: %s", exc)
             return self._heuristic_extract(user_input, current_state)
 
-    def get_next_question(self, state: CBTState, exam_stage: str = "") -> str:
+    def get_next_question(self, state: CBTState) -> str:
         """Generate the next question for the missing dimension.
 
         Uses the standard question template for each dimension.
@@ -135,8 +135,6 @@ class CBTService:
 
         base_question = DIMENSION_QUESTIONS[dim]
         # Add stage-aware context if available
-        if exam_stage:
-            return f"{base_question}（结合你目前{exam_stage}阶段的情况）"
         return base_question
 
     def _extraction_prompt(self, user_input: str, current_state: CBTState) -> list[AiMessage]:

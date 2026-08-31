@@ -15,7 +15,6 @@ class EvalSettings(Settings):
     rag_eval_database_url: str = "sqlite:///data/rag-eval.db"
     rag_eval_chroma_persist_dir: str = "data/chroma-eval"
     rag_eval_chroma_collection_name: str = "xling_knowledge_eval"
-    rag_eval_chroma_snapshot_dir: str = "data/chroma-eval-snapshots"
     rag_eval_enabled: bool = False
     rag_eval_exit_after_run: bool = False
     rag_eval_multi_query_output: str = "target/rag-eval-multi-query.json"

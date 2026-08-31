@@ -57,14 +57,6 @@ def get_session(
     return conversation
 
 
-@router.get("/api/reports/me")
-def my_reports(
-    user: Annotated[UserAccount, Depends(current_user)],
-    db: Annotated[Session, Depends(get_db)],
-):
-    return ReportService(db).latest_reports(user.id)
-
-
 @router.get("/api/check-ins/pending")
 def get_pending_checkins(
     user: Annotated[UserAccount, Depends(current_user)],

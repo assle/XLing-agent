@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import json
 import logging
 from dataclasses import asdict, dataclass, field, fields, is_dataclass
 from datetime import timedelta
 from enum import Enum
-from pathlib import Path
 
 from sqlalchemy.orm import Session
 
@@ -19,7 +17,6 @@ from app.services.cbt import DIMENSION_LABELS, CBTService, CBTState
 from app.services.knowledge import KnowledgeService, SearchResult
 from app.services.memory import RedisShortTermMemoryStore
 from app.services.memory_cards import MemoryCardService
-from app.services.risk_calibration import load_calibrated_risk_engine
 from app.services.risk_trajectory import RiskTrajectoryHealth, RiskTrajectoryService
 from app.services.user_profile import UserProfileService
 
@@ -109,8 +106,6 @@ class AgentContext:
     response_agent: str = ""
     response_plan: str = ""
     steps: list[AgentStep] = field(default_factory=list)
-    # Exam-anxiety closed-loop context (issues 03, 04, 07, 08, 09)
-    exam_stage: str = ""
     support_background_context: str = ""
     memory_cards_context: str = ""
     cbt_active: bool = False
@@ -172,15 +167,7 @@ class AgentContext:
                 risk=RiskLevel(assessment["risk"]),
                 confidence=float(assessment["confidence"]),
                 summary=assessment["summary"],
-                raw_risk_probabilities=assessment.get("raw_risk_probabilities", {}),
-                risk_probabilities=assessment.get("risk_probabilities", {}),
-                prediction_set=tuple(
-                    RiskLevel(risk) for risk in assessment.get("prediction_set", [])
-                ),
-                uncertain=bool(assessment.get("uncertain", False)),
-                requires_review=bool(assessment.get("requires_review", False)),
                 model_version=assessment.get("model_version", ""),
-                calibration_version=assessment.get("calibration_version", ""),
             )
         values["retrieved_knowledge"] = [
             SearchResult(**item) for item in values.get("retrieved_knowledge", [])
@@ -244,25 +231,11 @@ class AgentRuntimeDependencies:
     @classmethod
     def create(cls, db: Session, settings: Settings) -> AgentRuntimeDependencies:
         ai = AiClient(settings)
-        calibrated_risk = None
-        if settings.risk_calibration_artifact:
-            artifact_path = Path(settings.risk_calibration_artifact)
-            if not artifact_path.is_absolute():
-                artifact_path = settings.project_root / artifact_path
-            try:
-                calibrated_risk = load_calibrated_risk_engine(artifact_path)
-            except (OSError, ValueError, KeyError, json.JSONDecodeError):
-                if settings.risk_calibration_required:
-                    raise
-                logger.warning("风险校准产物不可用，继续使用当前安全风险评估")
         return cls(
             ai=ai,
             knowledge=KnowledgeService(db, settings),
             memory=RedisShortTermMemoryStore(settings),
-            assessment=PsychologicalAssessmentService(
-                ai,
-                calibrated_risk=calibrated_risk,
-            ),
+            assessment=PsychologicalAssessmentService(ai),
         )
 
 
@@ -480,7 +453,7 @@ class AgentRuntimeService:
     async def cbt_agent(self, step: int, context: AgentContext) -> bool:
         """Four-part cognitive-behavioral questioning for non-high-risk support.
 
-        Extracts four aspects from student input and asks about one missing aspect at a time.
+        Extracts four aspects from user input and asks about one missing aspect at a time.
         When all 4 dimensions are complete, generates a 24h action plan (issue 09).
         """
         if not context.risk_assessed or context.intent == IntentType.CHAT or context.response_planned:
@@ -510,7 +483,6 @@ class AgentRuntimeService:
                     context.user.id,
                     context.session.id,
                     cbt_summary,
-                    context.exam_stage,
                     commit=False,
                 )
                 context.action_plan_created = True
@@ -571,7 +543,7 @@ class AgentRuntimeService:
         else:
             context.cbt_active = True
             self.memory.save_cbt_state(context.session.public_id, current_state.to_dict())
-            next_q = cbt_svc.get_next_question(current_state, context.exam_stage)
+            next_q = cbt_svc.get_next_question(current_state)
             next_dimension = current_state.next_dimension or ""
             context.response_agent = "CBTAgent"
             context.response_plan = "four-part cognitive-behavioral questioning"
@@ -583,7 +555,7 @@ class AgentRuntimeService:
                     f"支持背景：\n{context.support_background_context or '无'}\n已确认记忆：\n{context.memory_cards_context or '无'}\n"
                     f"认知行为四维追问策略：需要了解用户的「{DIMENSION_LABELS.get(next_dimension, next_dimension)}」方面。\n"
                     f"参考问题：{next_q}\n"
-                    "请以共情、自然的方式引导学生回答这个问题，不要直接暴露四个方面的内部名称，也不要机械提问。"
+                    "请以共情、自然的方式引导用户回答这个问题，不要直接暴露四个方面的内部名称，也不要机械提问。"
                 )),
                 *context.model_history,
             ]
@@ -623,7 +595,7 @@ class AgentRuntimeService:
     async def _rewrite_query(self, context: AgentContext) -> str:
         try:
             query = (await self.ai.acomplete([
-                AiMessage(role="system", content="你是 Xling 的 KnowledgeAgent。把学生输入改写成适合检索校园心理知识库的中文查询词，只输出查询词。"),
+                AiMessage(role="system", content="你是 Xling 的 KnowledgeAgent。把用户输入改写成适合检索通用心理健康支持知识库的中文查询词，只输出查询词。"),
                 AiMessage(role="user", content=f"记忆摘要：\n{context.memory_brief}\n\n当前输入：\n{context.model_input}"),
             ])).strip()
             return (query or context.model_input)[:60]

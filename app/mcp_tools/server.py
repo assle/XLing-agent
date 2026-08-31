@@ -1,7 +1,7 @@
 from app.core.bootstrap import create_schema
 from app.core.config import get_settings
 from app.core.database import SessionLocal
-from app.models.entities import PsychologicalReport
+from app.models.entities import SafetyAssessmentRecord
 from app.services.tools import ToolOrchestrationService
 
 try:
@@ -19,7 +19,7 @@ def xling_excel_report(report_id: int) -> str:
     create_schema()
     db = SessionLocal()
     try:
-        report = db.get(PsychologicalReport, report_id)
+        report = db.get(SafetyAssessmentRecord, report_id)
         if report is None:
             return f"report {report_id} not found"
         record = ToolOrchestrationService(db, get_settings()).write_excel(report)
@@ -34,7 +34,7 @@ def xling_alert_notify(report_id: int) -> str:
     create_schema()
     db = SessionLocal()
     try:
-        report = db.get(PsychologicalReport, report_id)
+        report = db.get(SafetyAssessmentRecord, report_id)
         if report is None:
             return f"report {report_id} not found"
         record = ToolOrchestrationService(db, get_settings()).notify(report)

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import hashlib
 import inspect
-import json
 import subprocess
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -58,22 +57,12 @@ class ArtifactVersionResolver:
         self.code_revision = code_revision
 
     def current(self, dataset_path: str | Path | None = None) -> ArtifactVersion:
-        embedding_model = (
-            self.settings.bge_embedding_model
-            if self.settings.knowledge_retriever == "bge_m3"
-            else self.settings.openai_embedding_model
-        )
         return ArtifactVersion(
             chat_model=self._chat_model(),
             classifier_model=self.settings.ollama_classifier_model,
             prompt_version=self._prompt_version(),
-            embedding_model=embedding_model,
-            reranker_model=(
-                self.settings.bge_reranker_model
-                if self.settings.knowledge_retriever == "bge_m3"
-                and self.settings.bge_rerank_enabled
-                else ""
-            ),
+            embedding_model=self.settings.openai_embedding_model,
+            reranker_model="",
             index_version=self._index_version(),
             dataset_version=self._dataset_version(dataset_path),
             calibration_version=self._calibration_version(),
@@ -101,12 +90,7 @@ class ArtifactVersionResolver:
 
     def _index_version(self) -> str:
         digest = hashlib.sha256()
-        embedding_model = (
-            self.settings.bge_embedding_model
-            if self.settings.knowledge_retriever == "bge_m3"
-            else self.settings.openai_embedding_model
-        )
-        digest.update(embedding_model.encode("utf-8"))
+        digest.update(self.settings.openai_embedding_model.encode("utf-8"))
         digest.update(str(self.settings.knowledge_chunk_size).encode("ascii"))
         digest.update(str(self.settings.knowledge_chunk_overlap).encode("ascii"))
         for path in sorted(self.knowledge_paths, key=lambda item: item.name):
@@ -122,19 +106,7 @@ class ArtifactVersionResolver:
         return hashlib.sha256(path.read_bytes()).hexdigest()
 
     def _calibration_version(self) -> str:
-        value = self.settings.risk_calibration_artifact
-        if not value:
-            return ""
-        path = Path(value)
-        if not path.is_absolute():
-            path = self.settings.project_root / path
-        if not path.exists():
-            return "missing"
-        try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError):
-            return "invalid"
-        return str(data.get("calibrationVersion", "unknown"))
+        return ""
 
 
 def _git_revision(project_root: Path) -> str:

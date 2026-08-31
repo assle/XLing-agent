@@ -40,7 +40,7 @@ class EscalationResult:
 SAFETY_MESSAGE = (
     "我注意到你可能需要更多支持。你的情况已进入人工审核流程。"
     "如果你现在处于紧急情况，请立刻联系身边可信任的人、"
-    "学校心理中心，或拨打 24 小时心理援助热线 400-161-9995。"
+    "当地紧急服务或部署方提供的专业支持与当地紧急资源。"
 )
 
 # Screening suggestion message (not forced)
@@ -61,7 +61,7 @@ class EscalationService:
         self,
         user_id: int,
         session_id: int | None,
-        report_id: int,
+        report_id: int | None,
         thread_id: str,
         current_risk: RiskLevel,
         trajectory_rising: bool,
@@ -125,7 +125,7 @@ class EscalationService:
         self,
         user_id: int,
         session_id: int | None,
-        report_id: int,
+        report_id: int | None,
         thread_id: str,
         high_risk_flagged: bool,
         current_difficulty: str = "",
@@ -155,7 +155,7 @@ class EscalationService:
         """User explicitly requests human support -> USER_REQUEST review."""
         summary = PrivacySanitizer.build_review_summary(
             current_difficulty=current_difficulty,
-            risk_trend="学生主动请求人工支持",
+        risk_trend="用户主动请求人工支持",
         )
         return self._create_escalation(
             user_id, session_id, report_id, thread_id,
@@ -228,15 +228,15 @@ class EscalationService:
         )
 
     def _ensure_report(self, user_id: int, session_id: int, handoff_reason: str, report_kind: str) -> int:
-        """Create a minimal PsychologicalReport for non-conversation triggers.
+        """Create a minimal safety assessment record for non-conversation triggers.
 
         The review queue renders studentMessage/riskLevel from the linked report,
         so safety escalations that did not originate from a chat message
         need one. It is labeled honestly: not an assessment, confidence 0.
         """
-        from app.models.entities import PsychologicalReport
+        from app.models.entities import SafetyAssessmentRecord
 
-        report = PsychologicalReport(
+        report = SafetyAssessmentRecord(
             user_id=user_id,
             session_id=session_id,
             content=handoff_reason,

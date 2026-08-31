@@ -8,7 +8,7 @@ from app.models.entities import (
     ChatSession,
     DeadLetterRecord,
     ExcelRecord,
-    PsychologicalReport,
+    SafetyAssessmentRecord,
     ToolJob,
     UserAccount,
 )
@@ -27,9 +27,9 @@ class ReportService:
         self.db = db
 
     def latest_reports(self, user_id: int | None = None) -> list[ReportResponse]:
-        query = self.db.query(PsychologicalReport).order_by(PsychologicalReport.created_at.desc())
+        query = self.db.query(SafetyAssessmentRecord).order_by(SafetyAssessmentRecord.created_at.desc())
         if user_id is not None:
-            query = query.filter(PsychologicalReport.user_id == user_id)
+            query = query.filter(SafetyAssessmentRecord.user_id == user_id)
         return [self._report_response(item) for item in query.limit(100).all()]
 
     def excel_records(self) -> list[ToolRecordResponse]:
@@ -134,7 +134,7 @@ class ReportService:
             messages=[ConversationMessageResponse(role=row.role, content=row.content, createdAt=row.created_at) for row in rows],
         )
 
-    def _report_response(self, report: PsychologicalReport) -> ReportResponse:
+    def _report_response(self, report: SafetyAssessmentRecord) -> ReportResponse:
         user = self.db.get(UserAccount, report.user_id)
         session = self.db.get(ChatSession, report.session_id)
         return ReportResponse(

@@ -26,8 +26,8 @@ from app.models.entities import (
     CheckIn,
     CheckpointDeletionTask,
     MemoryCard,
-    PsychologicalReport,
     RiskTrajectoryPoint,
+    SafetyAssessmentRecord,
     ScreeningResult,
     UserAccount,
     UserProfile,
@@ -68,7 +68,7 @@ def _setup_user_data(user_id=1):
     db = _TestSession()
     try:
         # Profile
-        UserProfileService(db).update_profile(user_id, exam_stage="冲刺", target_exam="考研")
+        UserProfileService(db).update_support_background(user_id, current_concern="近期压力较大")
         # Memory cards
         MemoryCardService(db).create_card(user_id, "important memory")
         # Screening result
@@ -85,7 +85,7 @@ def _setup_user_data(user_id=1):
         db.add(session)
         db.flush()
         db.add(ChatMessage(user_id=user_id, session_id=session.id, role="USER", content="test"))
-        db.add(PsychologicalReport(
+        db.add(SafetyAssessmentRecord(
             user_id=user_id, session_id=session.id, content="test",
             intent="CONSULT", emotion="ANXIETY", emotion_score=2.0,
             risk_level="LOW", confidence=0.7, summary="test",
@@ -99,7 +99,7 @@ def _reset_db():
     db = _TestSession()
     try:
         for model in [CheckIn, ActionPlanItem, ActionPlan, RiskTrajectoryPoint, ChatMessage, 
-                      PsychologicalReport, ChatSession, ScreeningResult, MemoryCard, UserProfile, UserAccount]:
+                      SafetyAssessmentRecord, ChatSession, ScreeningResult, MemoryCard, UserProfile, UserAccount]:
             db.query(model).delete()
         db.commit()
     finally:
@@ -112,7 +112,7 @@ def _reset_db():
     db = _TestSession()
     try:
         for model in [CheckIn, ActionPlanItem, ActionPlan, RiskTrajectoryPoint, ChatMessage,
-                      PsychologicalReport, ChatSession, ScreeningResult, MemoryCard, UserProfile, UserAccount]:
+                      SafetyAssessmentRecord, ChatSession, ScreeningResult, MemoryCard, UserProfile, UserAccount]:
             db.query(model).delete()
         db.commit()
     finally:
@@ -153,7 +153,7 @@ def test_delete_removes_all_user_data():
         assert counts["action_plans"] >= 1
         assert counts["risk_trajectory"] >= 1
         assert counts["chat_messages"] >= 1
-        assert counts["psychological_reports"] >= 1
+        assert counts["safety_assessment_records"] >= 1
         # User is gone
         assert db.get(UserAccount, 1) is None
     finally:

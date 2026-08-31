@@ -157,7 +157,7 @@ def test_crisis_acknowledgment_is_fixed_message():
     ack = PromptTemplates.crisis_acknowledgment()
     assert isinstance(ack, str)
     assert len(ack) > 20
-    assert "辅导员" in ack or "心理" in ack  # contains crisis resource info
+    assert "专业支持" in ack
 
 
 # ---------------------------------------------------------------------------

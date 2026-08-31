@@ -168,7 +168,7 @@ function renderResult(result) {
   if (result.highRiskFlagged) {
     const safety = document.createElement("p");
     safety.className = "danger-text";
-    safety.textContent = "你的回答提示你可能需要立即获得更多支持。请现在联系身边可信任的人、学校心理中心，或拨打 24 小时心理援助热线 400-161-9995；如有紧急危险，请立即联系当地急救或报警服务。";
+    safety.textContent = "你的回答提示你可能需要立即获得更多支持。请现在联系身边可信任的人、部署方提供的专业支持资源；如有紧急危险，请立即联系当地紧急服务。";
     box.append(score, safety, disclaimer);
   } else {
     box.append(score, disclaimer);

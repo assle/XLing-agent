@@ -17,7 +17,7 @@ from datetime import datetime
 
 from app.core.config import Settings
 from app.core.security import hash_password
-from app.models.entities import ChatMessage, ChatSession, PsychologicalReport, ReviewRequest, UserAccount
+from app.models.entities import ChatMessage, ChatSession, ReviewRequest, SafetyAssessmentRecord, UserAccount
 from app.services.privacy import PrivacySanitizer
 from app.services.review import HANDOFF_REASONS, ReviewService
 from tests.support import DatabaseHarness
@@ -34,7 +34,7 @@ def _seed():
         s = UserAccount(username="student", display_name="Student", password_hash=hash_password("s"))
         s.roles = {"ROLE_USER"}
         session = ChatSession(public_id="sess-1", title="test", user_id=2)
-        report = PsychologicalReport(
+        report = SafetyAssessmentRecord(
             user_id=2, session_id=1, content="test content",
             intent="CONSULT", emotion="ANXIETY", emotion_score=2.5,
             risk_level="HIGH", confidence=0.9, summary="risk",

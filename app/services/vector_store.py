@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
 import httpx
 
 from app.core.config import Settings
-from app.core.time import utc_now
 from app.models.entities import KnowledgeChunk
 
 PRIMARY_RETRIEVAL_LABEL = "Chroma + OpenAI text-embedding-3-small"
@@ -78,7 +76,6 @@ class ChromaKnowledgeStore:
             metadatas=metadatas,  # type: ignore[arg-type]
             embeddings=embeddings,  # type: ignore[arg-type]
         )
-        self.snapshot()
         return len(rows)
 
     def sync_chunks(self, chunks: list[KnowledgeChunk], embeddings: list[list[float]]) -> int:
@@ -128,18 +125,6 @@ class ChromaKnowledgeStore:
             raise VectorStoreUnavailable(self.error or "Chroma + text-embedding-3-small 主检索方案不可用")
         return self._embed(texts)
 
-    def snapshot(self) -> str | None:
-        if not self.can_embed:
-            return None
-        if not self.persist_dir.exists():
-            return None
-        snapshot_root = self._resolve_path(self.settings.chroma_snapshot_dir)
-        snapshot_root.mkdir(parents=True, exist_ok=True)
-        destination = snapshot_root / utc_now().strftime("%Y%m%d-%H%M%S-%f")
-        shutil.copytree(self.persist_dir, destination)
-        self._prune_snapshots(snapshot_root)
-        return str(destination)
-
     def count(self) -> int:
         if not self.can_embed:
             return 0
@@ -169,12 +154,6 @@ class ChromaKnowledgeStore:
     def _resolve_path(self, value: str) -> Path:
         path = Path(value)
         return path if path.is_absolute() else self.settings.project_root / path
-
-    def _prune_snapshots(self, snapshot_root: Path) -> None:
-        keep = max(1, self.settings.chroma_snapshot_keep)
-        snapshots = sorted([path for path in snapshot_root.iterdir() if path.is_dir()], reverse=True)
-        for stale in snapshots[keep:]:
-            shutil.rmtree(stale, ignore_errors=True)
 
     def _id(self, chunk_id: int) -> str:
         return f"knowledge-chunk-{chunk_id}"

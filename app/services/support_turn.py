@@ -12,8 +12,8 @@ from app.core.time import utc_now
 from app.models.entities import (
     ChatMessage,
     ChatSession,
-    PsychologicalReport,
     ReviewRequest,
+    SafetyAssessmentRecord,
     ToolJob,
     UserAccount,
 )
@@ -23,7 +23,7 @@ from app.services.review import HANDOFF_REASONS
 @dataclass(frozen=True)
 class PersistedSupportTurn:
     message: ChatMessage
-    report: PsychologicalReport | None
+    report: SafetyAssessmentRecord | None
     review: ReviewRequest | None
     jobs: list[ToolJob]
 
@@ -69,7 +69,7 @@ class SupportTurnTransaction:
 
             if run.requires_report and run.assessment is not None:
                 assessment = run.assessment
-                report = PsychologicalReport(
+                report = SafetyAssessmentRecord(
                     user_id=user.id,
                     session_id=session.id,
                     content=content,

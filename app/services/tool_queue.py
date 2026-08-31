@@ -14,7 +14,7 @@ from app.core.config import Settings
 from app.core.database import SessionLocal
 from app.core.enums import RiskLevel, ToolJobKind, ToolJobStatus, ToolStatus
 from app.core.time import utc_now
-from app.models.entities import DeadLetterRecord, ExcelRecord, PsychologicalReport, ToolJob
+from app.models.entities import DeadLetterRecord, ExcelRecord, SafetyAssessmentRecord, ToolJob
 from app.services.tools import ToolOrchestrationService
 
 logger = logging.getLogger(__name__)
@@ -210,7 +210,7 @@ class ToolQueueWorker:
             db.close()
 
     def _execute(self, db: Session, job: ToolJob) -> None:
-        report = db.get(PsychologicalReport, job.report_id)
+        report = db.get(SafetyAssessmentRecord, job.report_id)
         if report is None:
             raise RuntimeError(f"report {job.report_id} not found")
         tools = ToolOrchestrationService(db, self.settings)

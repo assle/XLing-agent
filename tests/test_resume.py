@@ -79,8 +79,8 @@ def test_fallback_is_fixed_safety_message():
     _interrupt_high_risk(runtime, "resume-fallback-001")
     result = asyncio.run(runtime.resume("resume-fallback-001", approved=False))
     fallback = result.fallback_response
-    assert "辅导员" in fallback or "心理" in fallback  # crisis resources
-    assert "400-161-9995" in fallback  # hotline number
+    assert "专业支持" in fallback
+    assert "当地紧急服务" in fallback
 
 
 # ---------------------------------------------------------------------------

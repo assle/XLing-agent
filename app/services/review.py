@@ -12,7 +12,7 @@ from app.core.config import Settings
 from app.core.database import SessionLocal
 from app.core.enums import MessageRole
 from app.core.time import utc_now
-from app.models.entities import ChatMessage, ChatSession, PsychologicalReport, ReviewRequest
+from app.models.entities import ChatMessage, ChatSession, ReviewRequest, SafetyAssessmentRecord
 
 logger = logging.getLogger(__name__)
 
@@ -272,7 +272,7 @@ class ReviewService:
         return review
 
     def _to_dict(self, review: ReviewRequest) -> dict:
-        report = self.db.get(PsychologicalReport, review.report_id)
+        report = self.db.get(SafetyAssessmentRecord, review.report_id)
         messages = (
             self.db.query(ChatMessage)
             .filter(ChatMessage.session_id == review.session_id)

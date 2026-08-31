@@ -40,7 +40,7 @@ ANSWER_OPTIONS = [
     {"value": 3, "label": "几乎每天"},
 ]
 
-DISCLAIMER = "本量表仅用于筛查和趋势参考，不作诊断。如有需要请咨询专业人士。"
+DISCLAIMER = "本量表完全自愿；题目、作答和计分结果仅供你查看筛查与趋势，不作诊断，也不提供治疗方案。"
 QUESTION_VERSION = "standard-zh-2024"
 
 # PHQ-9 Q9 (index 8) asks about self-harm/suicide
@@ -115,6 +115,7 @@ class ScreeningService:
             "answerOptions": scale.answer_options,
             "scoringRules": scale.scoring_rules,
             "disclaimer": scale.disclaimer,
+            "consent": "开始前请确认：你自愿作答，并了解结果只用于筛查、趋势和求助建议。",
             "questionVersion": QUESTION_VERSION,
         }
 

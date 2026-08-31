@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -44,9 +44,6 @@ class UserProfile(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user_accounts.id"), unique=True, index=True)
-    exam_stage: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
-    target_exam: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
-    exam_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     current_concern: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     support_goal: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     preferred_support_style: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
@@ -182,11 +179,11 @@ class KnowledgeChunk(Base):
     source_index: Mapped[int] = mapped_column(Integer)
     content: Mapped[str] = mapped_column(Text)
     embedding_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    exam_stage: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
 
 
-class PsychologicalReport(Base):
+class SafetyAssessmentRecord(Base):
+    """Minimal internal safety record; this is not a diagnostic report."""
     __tablename__ = "psychological_reports"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -200,12 +197,6 @@ class PsychologicalReport(Base):
     confidence: Mapped[float] = mapped_column(Float)
     summary: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
-
-
-# Compatibility name used while callers migrate away from diagnostic-sounding terminology.
-SafetyAssessmentRecord = PsychologicalReport
-
-
 
 
 class RiskTrajectoryPoint(Base):

@@ -146,51 +146,6 @@ class AiClient:
             return self._mock_classify(text)
         return await self._ollama_classify_async(PromptTemplates.classifier_prompt(text))
 
-    def classify_with_logits(self, text: str) -> tuple[str, list[float]]:
-        if self.settings.ai_provider.lower() != "mock":
-            if not self.settings.risk_score_endpoint:
-                raise RuntimeError(
-                    "启用概率校准需要配置可返回真实 logits 的 RISK_SCORE_ENDPOINT"
-                )
-            response = httpx.post(
-                self.settings.risk_score_endpoint,
-                headers=self._risk_score_headers(),
-                json={"text": text},
-                timeout=30,
-            )
-            response.raise_for_status()
-            return _parse_risk_scores(response.json())
-        label = self.classify(text)
-        return label, _risk_logits_for_label(label)
-
-    async def aclassify_with_logits(self, text: str) -> tuple[str, list[float]]:
-        if self.settings.ai_provider.lower() != "mock":
-            if not self.settings.risk_score_endpoint:
-                raise RuntimeError(
-                    "启用概率校准需要配置可返回真实 logits 的 RISK_SCORE_ENDPOINT"
-                )
-            async with httpx.AsyncClient(timeout=30) as client:
-                response = await client.post(
-                    self.settings.risk_score_endpoint,
-                    headers=self._risk_score_headers(),
-                    json={"text": text},
-                )
-            response.raise_for_status()
-            return _parse_risk_scores(response.json())
-        label = await self.aclassify(text)
-        return label, _risk_logits_for_label(label)
-
-    def risk_logits(self, text: str) -> list[float]:
-        return self.classify_with_logits(text)[1]
-
-    async def arisk_logits(self, text: str) -> list[float]:
-        return (await self.aclassify_with_logits(text))[1]
-
-    def _risk_score_headers(self) -> dict[str, str]:
-        if not self.settings.risk_score_api_key:
-            return {}
-        return {"Authorization": f"Bearer {self.settings.risk_score_api_key}"}
-
     def generate_sub_queries(self, query: str, n: int = 3) -> list[str]:
         """Use LLM to rewrite a student question into n sub-queries for multi-query retrieval."""
         messages = PromptTemplates.sub_query_prompt(query, n)
@@ -400,7 +355,7 @@ class AiClient:
                 return "CONSULT"
             return "CHAT"
         if "当前由 CounselorAgent" in system:
-            return "我听到你最近压力很大，还影响到了睡眠，这种状态确实会让人很消耗。你可以先做两件小事：今晚把最担心的事情写成清单，先只选一个最小步骤处理；睡前 30 分钟把手机和学习任务放远一点，用缓慢呼吸或热水澡帮身体降下来。如果这种失眠持续一周以上，建议联系学校心理中心或辅导员一起看一看。"
+            return "我听到你最近压力很大，还影响到了睡眠，这种状态确实会让人很消耗。你可以先做两件小事：今晚把最担心的事情写成清单，先只选一个最小步骤处理；睡前 30 分钟把手机和学习任务放远一点，用缓慢呼吸或热水澡帮身体放松。如果这种失眠持续一周以上，建议联系适用的专业支持资源一起评估。"
         if "评审员" in system:
             return '{"empathy":3,"safety":4,"actionability":3,"boundary":4,"empathy_reason":"mock judge","safety_reason":"mock judge","actionability_reason":"mock judge","boundary_reason":"mock judge"}'
         if "当前由 CompanionAgent" in system:
@@ -409,7 +364,7 @@ class AiClient:
             return "SUFFICIENT"
         if "KnowledgeAgent" in system:
             return last[:40] or "校园心理支持"
-        return "我在。先把你现在最具体的困扰说出来，我们可以一步一步拆开。如果情况已经影响安全，请马上联系身边可信任的人或学校心理中心。"
+        return "我在。先把你现在最具体的困扰说出来，我们可以一步一步拆开。如果情况已经影响安全，请马上联系身边可信任的人、当地紧急服务或部署方提供的专业支持资源。"
 
 
 def format_history(history: list[AiMessage]) -> str:
@@ -445,29 +400,6 @@ def has_consult_signal(text: str) -> bool:
 def split_text(text: str, size: int) -> Iterable[str]:
     for index in range(0, len(text), size):
         yield text[index:index + size]
-
-
-def _risk_logits_for_label(label: str) -> list[float]:
-    return {
-        "正常": [4.0, 0.0, -4.0],
-        "焦虑": [3.0, 1.0, -4.0],
-        "低落": [0.0, 4.0, -2.0],
-        "高风险": [-4.0, 0.0, 5.0],
-    }.get(label.strip(), [0.0, 0.0, 0.0])
-
-
-def _parse_risk_scores(data: dict) -> tuple[str, list[float]]:
-    label = data.get("label")
-    logits = data.get("logits")
-    if not isinstance(label, str) or label.strip() not in {"正常", "焦虑", "低落", "高风险"}:
-        raise ValueError("风险分数接口缺少有效 label")
-    if (
-        not isinstance(logits, list)
-        or len(logits) != 3
-        or any(isinstance(value, bool) or not isinstance(value, (int, float)) for value in logits)
-    ):
-        raise ValueError("风险分数接口必须返回 LOW/MEDIUM/HIGH 三个 logits")
-    return label.strip(), [float(value) for value in logits]
 
 
 _SYNONYM_PAIRS = [

@@ -13,7 +13,7 @@ from app.agents.runtime import AgentRunResult
 from app.core.bootstrap import create_schema, seed_data
 from app.core.enums import RiskLevel
 from app.core.versioning import ArtifactVersionResolver
-from app.models.entities import ChatSession, PsychologicalReport, ReviewRequest, UserAccount
+from app.models.entities import ChatSession, ReviewRequest, SafetyAssessmentRecord, UserAccount
 from app.schemas.dtos import ChatRequest
 from app.services.chat import ChatDependencies, ChatService
 from evals.config import EvalSettings, get_eval_settings
@@ -80,9 +80,9 @@ async def _run_case(db, settings: EvalSettings, user: UserAccount, case: dict) -
 
     session = db.query(ChatSession).filter(ChatSession.public_id == session_id).one()
     report = (
-        db.query(PsychologicalReport)
-        .filter(PsychologicalReport.session_id == session.id)
-        .order_by(PsychologicalReport.created_at.desc())
+        db.query(SafetyAssessmentRecord)
+        .filter(SafetyAssessmentRecord.session_id == session.id)
+        .order_by(SafetyAssessmentRecord.created_at.desc())
         .first()
     )
     review = (

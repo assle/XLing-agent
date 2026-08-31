@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import Settings
 from app.models.entities import KnowledgeChunk
-from app.services.bge_retrieval import BgeM3Retriever, BgeRetrieverUnavailable
+from app.services.bge_retrieval import BgeRetrieverUnavailable
 from app.services.vector_store import FALLBACK_RETRIEVAL_LABEL, PRIMARY_RETRIEVAL_LABEL, ChromaKnowledgeStore
 
 logger = logging.getLogger(__name__)
@@ -32,10 +32,10 @@ class KnowledgeService:
         self.settings = settings
         self.vector_store = ChromaKnowledgeStore(settings)
         self.ai_client = ai_client
+        # Only offline evaluation passes a retriever here. Online construction
+        # never selects an experimental retriever from runtime configuration.
         self.retriever = retriever
         self.vector_fallback_used = False
-        if self.retriever is None and settings.knowledge_retriever == "bge_m3":
-            self.retriever = BgeM3Retriever.from_settings(settings)
         self._bm25 = None
 
     def count(self) -> int:
@@ -77,7 +77,6 @@ class KnowledgeService:
             "vectorChunks": vector_chunks,
             "chromaPersistDir": self.settings.chroma_persist_dir,
             "chromaCollectionName": self.settings.chroma_collection_name,
-            "chromaSnapshotDir": self.settings.chroma_snapshot_dir,
             "vectorError": vector_error,
         }
 
@@ -89,21 +88,13 @@ class KnowledgeService:
         self.db.commit()
         return len(rows)
 
-    def backup_vector_index(self) -> str:
-        if not self.vector_store.can_embed:
-            raise RuntimeError(getattr(self.vector_store, "error", "") or "Chroma 向量库不可用")
-        snapshot = self.vector_store.snapshot()
-        if snapshot is None:
-            raise RuntimeError("Chroma 持久化目录不存在，无法生成快照")
-        return snapshot
-
-    def ingest(self, source: str, content: str, exam_stage: str | None = None) -> int:
+    def ingest(self, source: str, content: str) -> int:
         chunks = chunk_text(content, self.settings.knowledge_chunk_size, self.settings.knowledge_chunk_overlap)
         self._delete_vector_source(source)
         self.db.query(KnowledgeChunk).filter(KnowledgeChunk.source == source).delete()
         rows = []
         for index, chunk in enumerate(chunks):
-            row = KnowledgeChunk(source=source, source_index=index, content=chunk, exam_stage=exam_stage)
+            row = KnowledgeChunk(source=source, source_index=index, content=chunk)
             self.db.add(row)
             rows.append(row)
         self.db.flush()
@@ -123,25 +114,14 @@ class KnowledgeService:
         top_k = top_k or self.settings.knowledge_top_k
         if self.retriever is not None:
             try:
-                chunks = self.db.query(KnowledgeChunk).order_by(
-                    KnowledgeChunk.source.asc(),
-                    KnowledgeChunk.source_index.asc(),
-                ).all()
+                chunks = self.db.query(KnowledgeChunk).order_by(KnowledgeChunk.source.asc(), KnowledgeChunk.source_index.asc()).all()
                 ranked = self.retriever.retrieve(query, chunks, top_k)
-                results = [
-                    SearchResult(
-                        chunk_id=item.chunk.id,
-                        source=item.chunk.source,
-                        content=item.chunk.content,
-                        score=item.score,
-                    )
+                return self._expand_best([
+                    SearchResult(item.chunk.id, item.chunk.source, item.chunk.content, item.score)
                     for item in ranked
-                ]
-                return self._expand_best(results, top_k)
+                ], top_k)
             except BgeRetrieverUnavailable:
-                if self.settings.bge_required:
-                    raise
-                logger.warning("BGE-M3 检索不可用，回退到当前检索", exc_info=True)
+                logger.warning("离线 BGE 检索不可用，回退到当前检索", exc_info=True)
         return self._retrieve_current(query, top_k)
 
     def _retrieve_current(self, query: str, top_k: int) -> list[SearchResult]:
@@ -158,35 +138,7 @@ class KnowledgeService:
         query: str,
         top_k: int | None = None,
     ) -> list[SearchResult]:
-        if self.retriever is None:
-            return self.retrieve(query, top_k)
-        top_k = top_k or self.settings.knowledge_top_k
-        chunks = self.db.query(KnowledgeChunk).order_by(
-            KnowledgeChunk.source.asc(),
-            KnowledgeChunk.source_index.asc(),
-        ).all()
-        try:
-            ranked = await asyncio.to_thread(
-                self.retriever.retrieve,
-                query,
-                chunks,
-                top_k,
-            )
-            results = [
-                SearchResult(
-                    chunk_id=item.chunk.id,
-                    source=item.chunk.source,
-                    content=item.chunk.content,
-                    score=item.score,
-                )
-                for item in ranked
-            ]
-            return self._expand_best(results, top_k)
-        except BgeRetrieverUnavailable:
-            if self.settings.bge_required:
-                raise
-            logger.warning("BGE-M3 检索不可用，回退到当前检索", exc_info=True)
-            return self._retrieve_current(query, top_k)
+        return await asyncio.to_thread(self.retrieve, query, top_k)
 
     def retrieve_multi_query(self, query: str, top_k: int | None = None, base_retrieve=None) -> list[SearchResult]:
         """Multi-query retrieval: generate 3 sub-queries, retrieve top-K for each,
@@ -252,26 +204,6 @@ class KnowledgeService:
         reranked.sort(key=lambda r: r.score, reverse=True)
         return reranked[:top_k]
 
-
-    def retrieve_with_stage(self, query: str, exam_stage: str | None = None, top_k: int | None = None) -> list[SearchResult]:
-        """Retrieve with exam-stage filtering (issue 06).
-
-        When exam_stage is provided, only chunks matching that stage
-        (or with no/all stage metadata) are returned. When None, all
-        chunks are searched (backward compatible).
-        """
-        top_k = top_k or self.settings.knowledge_top_k
-        results = self.retrieve(query, top_k * 3 if exam_stage else top_k)
-        if not exam_stage:
-            return results[:top_k]
-        filtered = [r for r in results if _matches_stage(self._get_chunk_stage(r.chunk_id), exam_stage)]
-        return filtered[:top_k]
-
-    def _get_chunk_stage(self, chunk_id: int | None) -> str | None:
-        if chunk_id is None:
-            return None
-        chunk = self.db.get(KnowledgeChunk, chunk_id)
-        return getattr(chunk, 'exam_stage', None) if chunk else None
 
     def _retrieve_bm25(self, query: str, top_k: int) -> list[SearchResult]:
         """BM25 keyword retrieval using rank_bm25."""

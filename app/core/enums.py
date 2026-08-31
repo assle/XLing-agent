@@ -41,11 +41,3 @@ class ToolJobStatus(str, Enum):
     RUNNING = "RUNNING"
     SUCCESS = "SUCCESS"
     DEAD = "DEAD"
-
-
-class ExamStage(str, Enum):
-    FOUNDATION = "基础"
-    REINFORCEMENT = "强化"
-    SPRINT = "冲刺"
-    PRE_EXAM = "考前"
-    POST_EXAM = "考后"

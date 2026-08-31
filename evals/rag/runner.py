@@ -37,10 +37,6 @@ def evaluate(
     settings = settings or get_eval_settings()
     eval_settings = _eval_settings(settings)
     if strategy in {"bge-m3", "bge-m3-rerank"}:
-        eval_settings = eval_settings.model_copy(update={
-            "knowledge_retriever": "bge_m3",
-            "bge_rerank_enabled": strategy == "bge-m3-rerank",
-        })
         retriever = retriever or BgeM3Retriever.from_settings(eval_settings)
     engine = _build_engine(eval_settings.rag_eval_database_url)
     create_schema(engine)
@@ -232,7 +228,6 @@ def _eval_settings(settings: EvalSettings) -> EvalSettings:
     return settings.model_copy(update={
         "chroma_persist_dir": settings.rag_eval_chroma_persist_dir,
         "chroma_collection_name": settings.rag_eval_chroma_collection_name,
-        "chroma_snapshot_dir": settings.rag_eval_chroma_snapshot_dir,
         "ai_provider": settings.rag_eval_ai_provider,
         "openai_api_key": settings.rag_eval_api_key or settings.openai_api_key,
         "openai_base_url": settings.rag_eval_base_url or settings.openai_base_url,

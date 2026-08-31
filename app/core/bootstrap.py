@@ -82,17 +82,17 @@ def seed_data(db: Session, settings: Settings | None = None) -> None:
     if db.query(UserAccount).count() == 0:
         admin = UserAccount(
             username="admin",
-            display_name="Counselor Admin",
+            display_name="Authorized Reviewer",
             password_hash=hash_password("admin123"),
         )
         admin.roles = {"ROLE_ADMIN", "ROLE_USER"}
-        student = UserAccount(
+        user = UserAccount(
             username="student",
-            display_name="Demo Student",
+            display_name="Demo User",
             password_hash=hash_password("student123"),
         )
-        student.roles = {"ROLE_USER"}
-        db.add_all([admin, student])
+        user.roles = {"ROLE_USER"}
+        db.add_all([admin, user])
         db.commit()
 
     service = KnowledgeService(db, settings)

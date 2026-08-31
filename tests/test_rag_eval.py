@@ -210,7 +210,6 @@ def test_eval_settings_swaps_chroma_dirs_to_eval():
     eval_settings = _eval_settings(base)
     assert eval_settings.chroma_persist_dir == base.rag_eval_chroma_persist_dir
     assert eval_settings.chroma_collection_name == base.rag_eval_chroma_collection_name
-    assert eval_settings.chroma_snapshot_dir == base.rag_eval_chroma_snapshot_dir
     # eval-only fields pass through unchanged
     assert eval_settings.rag_eval_database_url == base.rag_eval_database_url
 

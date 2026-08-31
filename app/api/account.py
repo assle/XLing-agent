@@ -1,15 +1,17 @@
+import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.security import (
     create_access_token,
     current_user,
     verify_password,
 )
-from app.models.entities import UserAccount
+from app.models.entities import ChatSession, UserAccount
 from app.schemas.dtos import (
     CreateMemoryCardRequest,
     LoginRequest,
@@ -17,12 +19,12 @@ from app.schemas.dtos import (
     SupportProfileResponse,
     UpdateMemoryCardRequest,
     UpdateSupportProfileRequest,
-    UpdateUserProfileRequest,
-    UserProfileResponse,
     authority,
 )
 from app.services.data_deletion import PRIVACY_NOTICE, DataDeletionService
+from app.services.escalation import EscalationService
 from app.services.memory_cards import MemoryCardService
+from app.services.review import ReviewService
 from app.services.screening import ScreeningService
 from app.services.user_profile import UserProfileService
 
@@ -80,43 +82,6 @@ def profile(user: Annotated[UserAccount, Depends(current_user)]):
         "displayName": user.display_name,
         "roles": [authority(role) for role in user.roles],
     }
-
-
-@router.get("/api/profile/exam")
-def get_exam_profile(
-    user: Annotated[UserAccount, Depends(current_user)],
-    db: Annotated[Session, Depends(get_db)],
-):
-    profile = UserProfileService(db).get_profile(user.id)
-    if profile is None:
-        return UserProfileResponse()
-    return UserProfileResponse(
-        examStage=profile.exam_stage,
-        targetExam=profile.target_exam,
-        examDate=profile.exam_date.isoformat() if profile.exam_date else None,
-    )
-
-
-@router.put("/api/profile/exam")
-def update_exam_profile(
-    request: UpdateUserProfileRequest,
-    user: Annotated[UserAccount, Depends(current_user)],
-    db: Annotated[Session, Depends(get_db)],
-):
-    try:
-        profile = UserProfileService(db).update_profile(
-            user.id,
-            exam_stage=request.examStage,
-            target_exam=request.targetExam,
-            exam_date=request.examDate,
-        )
-    except ValueError as exc:
-        raise HTTPException(400, str(exc)) from exc
-    return UserProfileResponse(
-        examStage=profile.exam_stage,
-        targetExam=profile.target_exam,
-        examDate=profile.exam_date.isoformat() if profile.exam_date else None,
-    )
 
 
 @router.get("/api/profile/support")
@@ -204,7 +169,29 @@ def submit_screening(
         )
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
-    return screening.to_response(result)
+    response = screening.to_response(result)
+    if result.high_risk_flagged:
+        session = ChatSession(
+            public_id=uuid.uuid4().hex,
+            user_id=user.id,
+            title="自愿量表筛查安全升级",
+        )
+        db.add(session)
+        db.commit()
+        db.refresh(session)
+        escalation = EscalationService(db, ReviewService(db, get_settings())).check_screening_escalation(
+            user_id=user.id,
+            session_id=session.id,
+            report_id=None,
+            thread_id=session.public_id,
+            high_risk_flagged=True,
+            current_difficulty=f"{result.scale_type} 自愿量表筛查出现需要立即关注的答案",
+        )
+        response["escalated"] = escalation.should_escalate
+        response["safetyMessage"] = escalation.user_message
+    else:
+        response["escalated"] = False
+    return response
 
 
 @router.get("/api/memory-cards")

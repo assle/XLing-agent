@@ -28,18 +28,14 @@ class Settings(BaseSettings):
     knowledge_chunk_overlap: int = 64
     knowledge_vector_enabled: bool = True
     knowledge_vector_required: bool = False
-    knowledge_retriever: str = "current"
     bge_embedding_model: str = "BAAI/bge-m3"
     bge_reranker_model: str = "BAAI/bge-reranker-v2-m3"
     bge_candidate_pool: int = 20
     bge_rerank_enabled: bool = True
     bge_use_fp16: bool = False
     bge_device: str = "cpu"
-    bge_required: bool = False
     chroma_persist_dir: str = "data/chroma"
     chroma_collection_name: str = "xling_knowledge"
-    chroma_snapshot_dir: str = "data/chroma-snapshots"
-    chroma_snapshot_keep: int = 5
     embedding_timeout_seconds: float = 30.0
     excel_path: str = "data/xling-risk-ledger.xlsx"
     redis_url: str = "redis://127.0.0.1:6379/0"
@@ -80,10 +76,6 @@ class Settings(BaseSettings):
     risk_trajectory_session_window: int = 3
     risk_trajectory_cross_session_days: int = 7
     risk_trajectory_rising_threshold: int = 3
-    risk_calibration_artifact: str = ""
-    risk_calibration_required: bool = False
-    risk_score_endpoint: str = ""
-    risk_score_api_key: str = ""
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     @property

@@ -10,8 +10,8 @@ from app.core.enums import EmotionLabel, IntentType, RiskLevel
 from app.models.entities import (
     ChatMessage,
     ChatSession,
-    PsychologicalReport,
     ReviewRequest,
+    SafetyAssessmentRecord,
     ToolJob,
     UserAccount,
 )
@@ -68,7 +68,7 @@ def test_support_turn_persists_message_report_review_and_jobs_atomically():
         assert persisted.review is not None
         assert [job.kind for job in persisted.jobs] == ["EXCEL_REPORT", "RISK_ALERT"]
         assert db.query(ChatMessage).count() == 1
-        assert db.query(PsychologicalReport).count() == 1
+        assert db.query(SafetyAssessmentRecord).count() == 1
         assert db.query(ReviewRequest).count() == 1
         assert db.query(ToolJob).count() == 2
     finally:
@@ -182,7 +182,7 @@ def test_support_turn_rolls_back_every_business_record_after_injected_failure(st
             )
 
         assert db.query(ChatMessage).count() == 0
-        assert db.query(PsychologicalReport).count() == 0
+        assert db.query(SafetyAssessmentRecord).count() == 0
         assert db.query(ReviewRequest).count() == 0
         assert db.query(ToolJob).count() == 0
     finally:

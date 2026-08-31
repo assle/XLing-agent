@@ -55,7 +55,6 @@ class ActionPlanService:
         user_id: int,
         session_id: int | None,
         cbt_summary: str = "",
-        exam_stage: str = "",
         *,
         commit: bool = True,
     ) -> ActionPlan:
@@ -64,7 +63,7 @@ class ActionPlanService:
         Uses LLM structured output; falls back to safe default items on failure.
         Only call this when all four aspects are complete.
         """
-        items = self._generate_items(cbt_summary, exam_stage)
+        items = self._generate_items(cbt_summary)
         plan = ActionPlan(
             user_id=user_id,
             session_id=session_id,
@@ -146,11 +145,11 @@ class ActionPlanService:
     # LLM generation
     # ------------------------------------------------------------------
 
-    def _generate_items(self, cbt_summary: str, exam_stage: str) -> list[str]:
+    def _generate_items(self, cbt_summary: str) -> list[str]:
         if not self.ai:
             return FALLBACK_ITEMS.copy()
         try:
-            messages = self._generation_prompt(cbt_summary, exam_stage)
+            messages = self._generation_prompt(cbt_summary)
             raw = self.ai.complete(messages)
             return self._parse_items(raw)
         except (json.JSONDecodeError, ValidationError) as exc:
@@ -160,8 +159,8 @@ class ActionPlanService:
             logger.warning("Action plan generation error, using fallback: %s", exc)
             return FALLBACK_ITEMS.copy()
 
-    def _generation_prompt(self, cbt_summary: str, exam_stage: str) -> list[AiMessage]:
-        stage_context = f"备考阶段：{exam_stage}\n" if exam_stage else ""
+    def _generation_prompt(self, cbt_summary: str) -> list[AiMessage]:
+        stage_context = ""
         return [
             AiMessage(role="system", content=(
                 "你是一个心理行动规划助手。基于用户的认知行为四维追问摘要，生成 3-5 个小而具体、"

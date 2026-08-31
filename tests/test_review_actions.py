@@ -4,7 +4,7 @@ from __future__ import annotations
 from app.api.routes import router
 from app.core.security import hash_password
 from app.core.time import utc_now
-from app.models.entities import ChatMessage, ChatSession, PsychologicalReport, ReviewRequest, UserAccount
+from app.models.entities import ChatMessage, ChatSession, ReviewRequest, SafetyAssessmentRecord, UserAccount
 from tests.support import ApiHarness
 
 _harness = ApiHarness(router)
@@ -15,7 +15,7 @@ client = _harness.client
 def _seed_review() -> int:
     db = Session()
     db.query(ReviewRequest).delete()
-    db.query(PsychologicalReport).delete()
+    db.query(SafetyAssessmentRecord).delete()
     db.query(ChatMessage).delete()
     db.query(ChatSession).delete()
     db.query(UserAccount).delete()
@@ -29,7 +29,7 @@ def _seed_review() -> int:
     session = ChatSession(public_id="review-action-session", title="安全支持", user_id=student.id)
     db.add(session)
     db.flush()
-    report = PsychologicalReport(
+    report = SafetyAssessmentRecord(
         user_id=student.id,
         session_id=session.id,
         content="需要更多支持",

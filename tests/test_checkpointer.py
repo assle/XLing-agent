@@ -63,14 +63,10 @@ def test_agent_context_checkpoint_payload_is_json_safe_and_round_trips():
         assessment=PsychologyAssessment(
             EmotionLabel.ANXIETY,
             2.5,
-            RiskLevel.MEDIUM,
-            0.7,
-            "压力表达",
-            risk_probabilities={"LOW": 0.2, "MEDIUM": 0.7, "HIGH": 0.1},
-            raw_risk_probabilities={"LOW": 0.1, "MEDIUM": 0.8, "HIGH": 0.1},
-            prediction_set=(RiskLevel.MEDIUM,),
-            model_version="risk-v1",
-            calibration_version="cal-v1",
+                RiskLevel.MEDIUM,
+                0.7,
+                "压力表达",
+                model_version="risk-v1",
         ),
         retrieved_knowledge=[SearchResult(1, "guide.md", "支持内容", 0.8)],
         cbt_event=CbtEvent(True, 2, "body_reactions", False),
@@ -88,12 +84,7 @@ def test_agent_context_checkpoint_payload_is_json_safe_and_round_trips():
     assert restored.user.id == user.id
     assert restored.session.public_id == session.public_id
     assert restored.intent == IntentType.CONSULT
-    assert restored.assessment.calibration_version == "cal-v1"
-    assert restored.assessment.raw_risk_probabilities == {
-        "LOW": 0.1,
-        "MEDIUM": 0.8,
-        "HIGH": 0.1,
-    }
+    assert restored.assessment.model_version == "risk-v1"
     assert restored.retrieved_knowledge[0].source == "guide.md"
     assert restored.action_plan_event.items[0].content == "先休息十分钟"
 

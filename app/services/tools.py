@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import Settings
 from app.core.enums import ToolStatus
-from app.models.entities import AlertRecord, ExcelRecord, PsychologicalReport, UserAccount
+from app.models.entities import AlertRecord, ExcelRecord, SafetyAssessmentRecord, UserAccount
 
 EXCEL_WRITE_LOCK = threading.Lock()
 
@@ -19,7 +19,7 @@ class ToolOrchestrationService:
         self.db = db
         self.settings = settings
 
-    def write_excel(self, report: PsychologicalReport) -> ExcelRecord:
+    def write_excel(self, report: SafetyAssessmentRecord) -> ExcelRecord:
         existing = (
             self.db.query(ExcelRecord)
             .filter(ExcelRecord.report_id == report.id, ExcelRecord.status == ToolStatus.SUCCESS.value)
@@ -45,7 +45,7 @@ class ToolOrchestrationService:
         self.db.commit()
         return record
 
-    def notify(self, report: PsychologicalReport) -> AlertRecord:
+    def notify(self, report: SafetyAssessmentRecord) -> AlertRecord:
         existing = (
             self.db.query(AlertRecord)
             .filter(AlertRecord.report_id == report.id, AlertRecord.status == ToolStatus.SUCCESS.value)
@@ -88,7 +88,7 @@ class ToolOrchestrationService:
             )
         return self._save_alert(report, recipient, ToolStatus.SUCCESS.value, f"高风险预警邮件已发送：reportId={report.id}")
 
-    def _save_alert(self, report: PsychologicalReport, recipient: str, status: str, message: str) -> AlertRecord:
+    def _save_alert(self, report: SafetyAssessmentRecord, recipient: str, status: str, message: str) -> AlertRecord:
         record = AlertRecord(
             report_id=report.id,
             channel="email",
@@ -110,7 +110,7 @@ class ToolOrchestrationService:
             missing.append("ALERT_EMAIL_TO")
         return missing
 
-    def _send_alert_email(self, report: PsychologicalReport) -> None:
+    def _send_alert_email(self, report: SafetyAssessmentRecord) -> None:
         message = EmailMessage()
         message["Subject"] = f"{self.settings.alert_email_subject_prefix} reportId={report.id}"
         message["From"] = self._sender()
@@ -140,13 +140,13 @@ class ToolOrchestrationService:
             server.login(self.settings.smtp_username, self.settings.smtp_password)
         server.send_message(message)
 
-    def _email_body(self, report: PsychologicalReport) -> str:
+    def _email_body(self, report: SafetyAssessmentRecord) -> str:
         user = self.db.get(UserAccount, report.user_id)
         username = user.username if user else f"userId={report.user_id}"
         display_name = user.display_name if user else ""
         return "\n".join(
             [
-                "Xling 检测到一条高风险心理预警，请尽快安排辅导员或管理员跟进。",
+                "Xling 检测到一条高风险安全预警，请尽快由授权审核团队安排跟进。",
                 "",
                 f"报告ID：{report.id}",
                 f"学生：{display_name} ({username})" if display_name else f"学生：{username}",

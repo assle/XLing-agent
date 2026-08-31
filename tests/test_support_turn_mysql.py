@@ -13,8 +13,8 @@ from app.core.enums import EmotionLabel, IntentType, RiskLevel
 from app.models.entities import (
     ChatMessage,
     ChatSession,
-    PsychologicalReport,
     ReviewRequest,
+    SafetyAssessmentRecord,
     ToolJob,
     UserAccount,
 )
@@ -96,6 +96,6 @@ def test_mysql_fault_injection_rolls_back_the_whole_support_turn(mysql_db, stage
 
     assert mysql_db.query(ChatSession).count() == 0
     assert mysql_db.query(ChatMessage).count() == 0
-    assert mysql_db.query(PsychologicalReport).count() == 0
+    assert mysql_db.query(SafetyAssessmentRecord).count() == 0
     assert mysql_db.query(ReviewRequest).count() == 0
     assert mysql_db.query(ToolJob).count() == 0

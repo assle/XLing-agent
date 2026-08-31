@@ -16,7 +16,7 @@ from app.core.config import Settings
 from app.core.database import Base
 from app.core.enums import MessageRole
 from app.core.time import utc_now
-from app.models.entities import ChatMessage, ChatSession, PsychologicalReport, ReviewRequest, UserAccount
+from app.models.entities import ChatMessage, ChatSession, ReviewRequest, SafetyAssessmentRecord, UserAccount
 from app.services.review import ReviewService, ReviewTimeoutWorker
 from tests.support import FakeMemoryStore, build_runtime
 
@@ -39,7 +39,7 @@ def _seed_review(db, thread_id: str, status: str = "pending", minutes_ago: int =
     db.add(ChatMessage(user_id=user.id, session_id=session.id, role=MessageRole.USER.value, content="我不想活了"))
     db.add(ChatMessage(user_id=user.id, session_id=session.id, role=MessageRole.ASSISTANT.value, content="我听到了你"))
     db.flush()
-    report = PsychologicalReport(
+    report = SafetyAssessmentRecord(
         user_id=user.id, session_id=session.id, content="我不想活了",
         intent="RISK", emotion="HIGH_RISK", emotion_score=4.0,
         risk_level=risk_level, confidence=0.95, summary="检测到明确高风险表达",
