@@ -176,6 +176,7 @@ async function sendMessage(event) {
   addMessage("user", message);
   const assistant = addMessage("assistant", "");
   let raw = "";
+  let pendingReview = false;
 
   try {
     const response = await api("/api/chat/stream", {
@@ -204,6 +205,7 @@ async function sendMessage(event) {
           handlePlanEvent(eventData);
         }
         if (eventData.type === "pending_review") {
+          pendingReview = true;
           raw = eventData.content || "";
           assistant.textContent = raw;
           setPill(els.sessionBadge, "REVIEW", "warn");
@@ -220,7 +222,7 @@ async function sendMessage(event) {
         }
       });
     }
-    if (!streamFailed) setPill(els.sessionBadge, "DONE", "ok");
+    if (!streamFailed && !pendingReview) setPill(els.sessionBadge, "DONE", "ok");
   } catch (error) {
     assistant.textContent = `发送失败：${error.message}`;
     setPill(els.sessionBadge, "ERROR", "danger");

@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     agent_framework: str = "langgraph"
     ai_provider: str = "ollama"
     ai_temperature: float = 0.35
-    ai_max_tokens: int = 512
+    ai_max_tokens: int = 2048
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "xling-qwen2.5-7b-ft:latest"
     ollama_classifier_model: str = "xling-cls-3b-ft:latest"

@@ -1,3 +1,5 @@
+name: xling
+
 services:
   caddy:
     image: caddy:2-alpine
@@ -28,7 +30,7 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"]
+      test: ["CMD-SHELL", 'mysqladmin ping -h 127.0.0.1 -uroot -p"$${MYSQL_ROOT_PASSWORD}" --silent']
       interval: 5s
       timeout: 3s
       retries: 30
@@ -55,16 +57,21 @@ services:
     environment:
       AGENT_FRAMEWORK: ${AGENT_FRAMEWORK:-langgraph}
       AI_PROVIDER: ${AI_PROVIDER:-ollama}
+      AI_MAX_TOKENS: ${AI_MAX_TOKENS:-2048}
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-xling-qwen2.5-7b-ft:latest}
+      OLLAMA_CLASSIFIER_MODEL: ${OLLAMA_CLASSIFIER_MODEL:-xling-cls-3b-ft:latest}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
       DATABASE_URL: mysql+pymysql://${MYSQL_USER:-xling}:${MYSQL_PASSWORD:-xling}@mysql:3306/${MYSQL_DATABASE:-xling}?charset=utf8mb4
       REDIS_URL: redis://redis:6379/0
       KNOWLEDGE_VECTOR_ENABLED: ${KNOWLEDGE_VECTOR_ENABLED:-true}
       KNOWLEDGE_VECTOR_REQUIRED: ${KNOWLEDGE_VECTOR_REQUIRED:-false}
       CHROMA_PERSIST_DIR: /app/data/chroma
-      CHROMA_SNAPSHOT_DIR: /app/data/chroma-snapshots
       CHROMA_COLLECTION_NAME: ${CHROMA_COLLECTION_NAME:-xling_knowledge}
       TOOL_QUEUE_ENABLED: ${TOOL_QUEUE_ENABLED:-true}
       TOOL_QUEUE_EXCEL_WORKERS: ${TOOL_QUEUE_EXCEL_WORKERS:-1}

@@ -51,6 +51,8 @@ class KnowledgeService:
             .all()
         ]
         if existing == chunks:
+            if self.vector_store.can_embed:
+                self._ensure_vector_index()
             return len(existing)
         return self.ingest(source, content)
 

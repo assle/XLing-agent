@@ -8,7 +8,7 @@ Xling 是一个面向一般用户的非诊断性心理健康支持系统。它�
 
 - 日常对话与心理支持分流：普通问题直接回答，压力、焦虑、低落、睡眠和关系等困扰进入心理支持流程。
 - 分层安全保护：明确危险信号优先由规则识别，再结合分类模型和近期风险变化，得到低、中、高三级安全风险。
-- 人工审核：高风险消息会暂停自动流程，先向用户发送固定安全提示，再等待授权审核人员批准、拒绝、转介或安排后续关注。
+- 人工审核：高风险消息会暂停自动流程，先向用户发送固定安全提示；界面保持“等待审核”状态，直到授权审核人员批准、拒绝、转介或安排后续关注。
 - 认知行为四维追问：使用 CBT（认知行为方法，通过事件、想法、身体反应和行为四方面梳理困扰）逐步理解用户当前处境。
 - 24 小时行动计划与次日反馈：四方面信息完整后生成可逐项执行的计划；次日反馈没有改善或情况恶化时可再次进入人工审核。
 - 知识增强回答：使用 RAG（先检索知识库，再让模型依据相关内容回答）提供更稳定的心理健康支持信息。
@@ -31,7 +31,8 @@ flowchart LR
     Browser[用户界面和管理后台] --> API[网页接口层]
     API --> Chat[ChatService 对话入口]
     Chat --> Orchestrator[单一智能体编排器]
-    Orchestrator --> Model[本地或远程模型]
+    Orchestrator --> ReplyModel[远程回答模型]
+    Orchestrator --> Classifier[本地风险分类器]
     Orchestrator --> Redis[短期会话记忆]
     Orchestrator --> Knowledge[知识检索服务]
     Knowledge --> Chroma[知识向量库]
@@ -60,6 +61,8 @@ flowchart LR
 | `CounselorAgent` | 生成非诊断性的心理支持回复；高风险时只在人工批准后继续 | 检索知识、共享上下文和模型生成 |
 
 这些名称表示编排流程中的专职角色，不表示八个独立模型。回复模型、分类模型、数据库和知识库由这些角色按职责共享使用。
+
+开发和实际联调采用“远程回答模型 + 本地风险分类器”的分工：日常回答、心理支持回复和结构化内容由兼容 OpenAI 的远程接口生成；安全风险分类由本机 Ollama 中的分类模型完成。两者相互独立，远程回答接口不可替代本地风险分类器。`mock` 模式会同时模拟这两部分，只用于无外部依赖的演示和自动测试。
 
 ## 编排流程
 
@@ -104,8 +107,9 @@ flowchart TD
 | LangGraph | 执行默认智能体流程，保存流程检查点，并支持高风险暂停与人工恢复 |
 | MySQL（关系型数据库） | 保存用户、会话、消息、筛查、计划、安全评估、审核和任务记录 |
 | Redis（高速缓存服务） | 保存有时限的短期对话记忆和四维追问进度；不可用时有进程内降级存储 |
-| Chroma（向量数据库） | 保存知识向量并执行相似内容检索；不可用时回退到本地关键词与文本相似度检索 |
-| Ollama（本地模型运行工具）/ 兼容 OpenAI 的接口 | 提供本地或远程对话模型；`mock` 模式可在不连接真实模型时演示流程 |
+| Chroma（向量数据库） | 保存知识向量并执行相似内容检索；应用启动时检查数据库与向量索引是否一致并自动补齐，向量服务不可用时回退到本地关键词与文本相似度检索 |
+| 兼容 OpenAI 的远程接口 | 提供回答模型；也可提供知识向量，或为知识向量单独配置另一服务商 |
+| Ollama（本地模型运行工具） | 运行本地风险分类器；仅在显式选择本地回答模式时同时承担回答模型 |
 | 后台任务队列 | 非阻塞地生成表格台账、发送通知、重试失败任务并记录最终失败 |
 | MCP | 模型上下文协议，用统一接口调用表格写入和风险通知工具；默认在线路径使用持久化队列 |
 | Caddy | 作为部署入口，处理 HTTPS（加密网页连接）和请求转发 |
@@ -190,6 +194,41 @@ docker compose up -d --build
 
 这些账号只用于本地演示，正式部署前必须删除或更换，并在 `.env` 中设置随机且足够长的 `JWT_SECRET_KEY`（登录令牌签名密钥）。
 
+### 真实模型联调
+
+真实模型联调需要同时配置远程回答模型和本地风险分类器：
+
+```dotenv
+AI_PROVIDER=openai
+AI_MAX_TOKENS=2048
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_API_KEY=在本机填写有效密钥
+OPENAI_MODEL=gpt-4o-mini
+
+OLLAMA_BASE_URL=http://host.docker.internal:11434
+OLLAMA_CLASSIFIER_MODEL=xling-cls-3b-ft:latest
+```
+
+- `AI_PROVIDER=openai` 表示回答走兼容 OpenAI 的远程 API（应用程序接口）。
+- `AI_MAX_TOKENS` 是单次回答允许生成的最大模型计量单位数，默认 2048；调高会增加响应时间和模型费用。
+- `OPENAI_BASE_URL`、`OPENAI_API_KEY` 和 `OPENAI_MODEL` 必须属于同一个远程服务。
+- `OLLAMA_BASE_URL` 是容器访问 Mac 上 Ollama 的地址；直接在 Mac 上运行应用时使用 `http://localhost:11434`。
+- `OLLAMA_CLASSIFIER_MODEL` 必须是 `ollama list` 中已存在、并经部署方验证的本地风险分类器名称。仓库中的通用分类器实验在完成人工复核前不会自动替换默认模型。
+
+如需启用真实知识向量检索，还需配置：
+
+```dotenv
+KNOWLEDGE_VECTOR_ENABLED=true
+KNOWLEDGE_VECTOR_REQUIRED=false
+EMBEDDING_BASE_URL=https://your-embedding-provider.example/v1
+EMBEDDING_API_KEY=在本机填写有效密钥
+OPENAI_EMBEDDING_MODEL=向量模型名称
+```
+
+应用启动时会检查知识正文与向量索引是否一致；发现向量条目缺失时会自动补齐。`KNOWLEDGE_VECTOR_REQUIRED=false` 表示向量接口暂时不可用时允许回退到本地检索，避免阻塞应用启动。
+
+MySQL（关系型数据库）的管理员密码由 `MYSQL_ROOT_PASSWORD` 设置，容器健康检查会读取同一配置。修改默认密码时不需要同步修改 `docker-compose.yml`。
+
 ## 本地开发与验证
 
 项目使用 Python 3.12。本地直接启动应用前，需要有可用的 MySQL、Redis，以及所选模型服务；只运行测试不需要这些外部服务。
@@ -202,4 +241,4 @@ python3 -m venv .venv
 .venv/bin/mypy --ignore-missing-imports app evals
 ```
 
-如需连接本地 Ollama 模型，可依次使用 `scripts/start-ollama.sh`、`scripts/create-finetuned-model.sh`、`scripts/create-classifier-model.sh` 和 `scripts/run-dev.sh`。
+如需运行本地风险分类器，可先使用 `scripts/start-ollama.sh` 启动 Ollama，再用 `scripts/create-classifier-model.sh` 注册分类模型。`scripts/create-finetuned-model.sh` 只用于显式选择本地回答模型的可选模式，不是远程回答模型联调的前置条件。
