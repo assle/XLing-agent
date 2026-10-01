@@ -73,6 +73,16 @@ docker run --rm -v xling_app-data:/data -v $(pwd):/backup alpine tar czf /backup
 
 ## 升级
 
+本地 LangGraph 切换使用离线重置，清空旧会话后从新请求联调。先确认业务数据库和 Redis 位于本机，并让应用及其工作任务随应用进程实际退出，保持数据库和 Redis 可用。从项目根目录运行：
+
+```bash
+.venv/bin/python -m app.services.local_reset
+```
+
+命令清理旧会话及关联安全评估、审核、任务、行动计划和反馈，清理对应会话缓存、配置检查点及 WAL/SHM、失效清理任务和本地台账导出。账户、支持背景、记忆卡片、独立筛查和知识、模型、配置继续保留；不会清空整个 Redis、数据目录或数据卷。
+
+返回 JSON 的 `completed=true` 且退出码为 0，才表示各存储核验完成。失败会报告阶段与固定原因或异常类别；SQL 未提交时保留退休编号供离线重试。重启后使用不携带旧会话编号的新请求；待审核会话暂停发送，审核结束后界面自动恢复。
+
 ```bash
 git pull
 docker compose build app

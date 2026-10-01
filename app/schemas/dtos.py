@@ -55,6 +55,7 @@ class ConversationResponse(BaseModel):
     sessionId: str
     title: str
     noMemory: bool = False
+    pendingReview: bool = False
     messages: list[ConversationMessageResponse]
 
 
@@ -99,6 +100,10 @@ class AiMessage(BaseModel):
 
 
 def authority(role: str) -> dict[str, Any]:
+    """将一个角色名称包装成接口约定的权限对象。
+
+    role 原样放入 authority 字段，不在此验证角色或授予权限。
+    """
     return {"authority": role}
 
 

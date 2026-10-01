@@ -55,7 +55,6 @@ services:
       redis:
         condition: service_healthy
     environment:
-      AGENT_FRAMEWORK: ${AGENT_FRAMEWORK:-langgraph}
       AI_PROVIDER: ${AI_PROVIDER:-ollama}
       AI_MAX_TOKENS: ${AI_MAX_TOKENS:-2048}
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}

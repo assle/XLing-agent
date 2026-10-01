@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import asyncio
 
-from app.agents.runtime import AgentRuntimeService
+from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
 from app.core.config import Settings
 from app.core.security import hash_password
 from app.models.entities import ActionPlan, ChatSession, UserAccount
@@ -31,26 +31,54 @@ class StatefulFakeMemory:
     """Fake memory store that persists CBT state across messages."""
 
     def __init__(self):
+        """建立按会话编号存放四维状态的字典。
+
+        用于跨多条消息验证追问进度累计。
+        """
         self._cbt_states: dict[str, dict] = {}
 
     def load_recent(self, session_public_id: str) -> list[AiMessage]:
+        """始终返回空历史，简化完整支持过程测试。
+
+        四维状态仍由独立字典保留。
+        """
         return []
 
     def messages_from_rows(self, rows):
+        """忽略数据库历史转换并返回空列表。
+
+        测试聚焦四维追问和计划流转。
+        """
         return []
 
     def replace(self, session_public_id: str, messages: list[AiMessage]) -> None:
+        """提供不执行操作的缓存回填入口。
+
+        不会改变四维状态字典。
+        """
         pass
 
     def save_cbt_state(self, session_public_id: str, state: dict) -> None:
+        """按会话编号保存传入状态字典。
+
+        当前替身直接保存引用，不做外部持久化或深复制。
+        """
         self._cbt_states[session_public_id] = state
 
     def load_cbt_state(self, session_public_id: str) -> dict:
+        """读取会话已有四维状态，缺失时返回空字典。
+
+        支持同一测试执行器跨消息累计内容。
+        """
         return self._cbt_states.get(session_public_id, {})
 
 
 class FakeKnowledge:
     def retrieve(self, query: str, top_k: int | None = None):
+        """返回空知识结果以隔离检索服务。
+
+        完整过程仍可验证回复规划和行动计划生成。
+        """
         return []
 
 
@@ -64,6 +92,10 @@ _settings = Settings(ai_provider="mock", langgraph_checkpoint_backend="memory", 
 
 
 def _seed():
+    """保存贯穿多轮测试的用户和会话。
+
+    后续消息使用同一会话编号检查支持过程连续性。
+    """
     db = _TestSession()
     try:
         user = UserAccount(username="student", display_name="测试学生", password_hash=hash_password("s"))
@@ -79,9 +111,12 @@ _seed()
 
 
 def _make_runtime(db):
-    """Create a custom runtime with fake deps but real DB for CBT/action plan."""
+    """装配有状态记忆和空知识替身的图执行器。
+
+    数据库会话可在每条消息前重新注入。
+    """
     return build_runtime(
-        AgentRuntimeService,
+        LangGraphAgentRuntimeService,
         db=db,
         settings=_settings,
         memory=StatefulFakeMemory(),
@@ -90,14 +125,17 @@ def _make_runtime(db):
 
 
 async def _run_message(runtime, message: str):
-    """Run a single message through the runtime."""
+    """为一条消息打开数据库会话，执行并提交本轮结果。
+
+    无论成功失败都关闭连接，四维记忆由执行器实例保留。
+    """
     db = _TestSession()
     try:
         runtime.db = db
         user = db.get(UserAccount, 1)
         session = db.query(ChatSession).filter(ChatSession.public_id == "tracer-session").first()
         result = await runtime.run(user, session, message, message)
-        # Production ChatService commits runtime writes together with the turn.
+        # 测试在此模拟聊天服务对本轮执行器写入的统一提交。
         db.commit()
         return result
     finally:
@@ -109,7 +147,10 @@ async def _run_message(runtime, message: str):
 # ---------------------------------------------------------------------------
 
 def test_tracer_bullet_normal_completion():
-    """Full closed-loop: CBT 4 dimensions -> action plan -> check-in improved -> completed."""
+    """分四次补齐事件、想法、身体反应和行为。
+
+    检查生成计划事件与数据库计划一致，再提交改善反馈并验证计划完成。
+    """
     runtime = _make_runtime(None)
 
     # Message 1: trigger event (考研, 复习)
@@ -131,7 +172,7 @@ def test_tracer_bullet_normal_completion():
     result4 = asyncio.run(_run_message(runtime, "我开始逃避复习，压力很大一直拖延"))
     assert len(result4.response_messages) > 0
 
-    # Typed loop events ride on the run result -- no string parsing downstream
+    # 下游直接读取运行结果中的事件对象，不解析日志文字推测进度。
     assert result1.cbt_event is not None and result1.cbt_event.active is True
     assert result4.cbt_event is not None and result4.cbt_event.complete is True
     assert result4.cbt_event.completed_count == 4
@@ -171,7 +212,10 @@ def test_tracer_bullet_normal_completion():
 # ---------------------------------------------------------------------------
 
 def test_tracer_bullet_escalation_worsened():
-    """Full closed-loop with escalation: CBT -> action plan -> check-in worsened -> escalation."""
+    """从干净状态走完四维追问并生成计划。
+
+    提交恶化反馈后调用升级服务，检查创建审核并提供现实求助提示。
+    """
     # Clean up from previous test
     db = _TestSession()
     try:
@@ -235,7 +279,10 @@ def test_tracer_bullet_escalation_worsened():
 # ---------------------------------------------------------------------------
 
 def test_chat_path_skips_cbt():
-    """CHAT intent should not enter CBT flow."""
+    """向同一执行器发送普通编程问题。
+
+    检查正常规划回复但四维追问状态仍为空。
+    """
     runtime = _make_runtime(None)
     runtime.memory = StatefulFakeMemory()
     result = asyncio.run(_run_message(runtime, "Python 怎么读取 JSON 文件？"))

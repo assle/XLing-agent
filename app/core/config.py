@@ -5,7 +5,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    agent_framework: str = "langgraph"
     ai_provider: str = "ollama"
     ai_temperature: float = 0.35
     ai_max_tokens: int = 2048
@@ -45,6 +44,7 @@ class Settings(BaseSettings):
     langgraph_checkpoint_backend: str = "async_sqlite"
     langgraph_checkpoint_path: str = "data/langgraph-checkpoints.db"
     langgraph_checkpoint_retention_days: int = 30
+    diagnostic_log_dir: str = "data/logs"
     review_timeout_minutes: int = 15
     review_timeout_poll_interval_seconds: float = 30.0
     smtp_host: str = ""
@@ -67,12 +67,12 @@ class Settings(BaseSettings):
     tool_queue_excel_workers: int = 1
     tool_queue_email_workers: int = 2
     alert_email_rate_limit_per_minute: int = 30
-    # Security: bcrypt + JWT (issue 01: secure access migration)
+    # 密码校验强度及登录凭证的签名方式、有效时间。
     bcrypt_rounds: int = 12
     jwt_secret_key: str = "xling-dev-secret-change-in-production"
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 1440
-    # Risk trajectory (issue 07)
+    # 风险轨迹的观察范围与连续上升判断阈值。
     risk_trajectory_session_window: int = 3
     risk_trajectory_cross_session_days: int = 7
     risk_trajectory_rising_threshold: int = 3
@@ -80,9 +80,17 @@ class Settings(BaseSettings):
 
     @property
     def project_root(self) -> Path:
+        """根据当前配置文件的位置定位项目根目录。
+
+        返回绝对路径，不依赖启动命令所在的目录，供知识文件和模型文件定位使用。
+        """
         return Path(__file__).resolve().parents[2]
 
 
 @lru_cache
 def get_settings() -> Settings:
+    """读取应用配置并缓存所得的配置对象。
+
+    首次调用时由 Settings 解析环境和配置文件，后续调用复用缓存；运行中改动环境不会自动刷新该缓存。
+    """
     return Settings()

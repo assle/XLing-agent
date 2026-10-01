@@ -1,10 +1,15 @@
-// 学生聊天：消息收发、流式事件解析、认知行为四维追问进度、无记忆会话。
+// 用户聊天：消息收发、流式事件解析、认知行为四维追问进度、无记忆会话。
 
 import { state, api, setPill, isAdmin } from "/app.js";
 import { handlePlanEvent, resetPlanPanel, loadActionPlans } from "/action-plan.js";
 
 const els = {};
+let reviewTimer = null;
 
+/**
+ * 取得聊天元素并绑定发送、新会话、示例语及历史会话点击事件。
+ * 通过父元素监听处理动态生成的按钮，避免每次渲染都重新绑定。
+ */
 export function initChat() {
   els.messages = document.querySelector("#messages");
   els.chatForm = document.querySelector("#chatForm");
@@ -20,6 +25,7 @@ export function initChat() {
   els.chatForm.addEventListener("submit", sendMessage);
   els.newSession.addEventListener("click", startNewSession);
   // 示例语填入输入框：用事件委托，动态渲染的开场白卡片也能响应
+  // 点击示例按钮或其内部元素时，定位最近的示例入口并填入输入框。
   document.addEventListener("click", (event) => {
     const trigger = event.target.closest("[data-quick]");
     if (!trigger) return;
@@ -27,6 +33,7 @@ export function initChat() {
     els.messageInput.focus();
   });
   // 会话历史列表：点击切换回老对话
+  // 在历史列表上统一接收点击，读取实际会话项的公开编号。
   els.sessionList?.addEventListener("click", (event) => {
     const item = event.target.closest(".session-item");
     if (!item) return;
@@ -34,6 +41,10 @@ export function initChat() {
   });
 }
 
+/**
+ * 返回聊天空白状态和示例问题的页面片段。
+ * 内容为预设文字，不从服务器读取，也不发送消息。
+ */
 function welcomeHtml() {
   return `
     <div class="empty">
@@ -47,8 +58,13 @@ function welcomeHtml() {
     </div>`;
 }
 
+/**
+ * 清空当前会话编号，按勾选项准备新会话的无记忆设置。
+ * 重置追问和行动计划展示并刷新历史列表；真正的新会话记录在首条消息发送时创建。
+ */
 function startNewSession() {
   state.sessionId = null;
+  setReviewPending(false);
   state.noMemory = els.noMemoryCheck.checked;
   hideCbtTag();
   els.messages.innerHTML = welcomeHtml();
@@ -61,6 +77,11 @@ function startNewSession() {
 }
 
 // 切换到历史会话：加载消息、行动计划，并高亮当前会话
+/**
+ * 按公开编号读取历史会话，替换消息展示并同步无记忆标志。
+ * 同时调用行动计划加载；该加载入口当前查询用户的计划，没有传入会话编号。
+ * 请求失败展示错误，最后更新历史列表选中状态。
+ */
 async function switchSession(publicId) {
   state.sessionId = publicId;
   hideCbtTag();
@@ -69,6 +90,8 @@ async function switchSession(publicId) {
   try {
     const response = await api(`/api/sessions/${publicId}`);
     const data = await response.json();
+    if (state.sessionId !== publicId) return;
+    setReviewPending(data.pendingReview);
     els.messages.innerHTML = "";
     if (!data.messages || data.messages.length === 0) {
       els.messages.innerHTML = welcomeHtml();
@@ -90,7 +113,33 @@ async function switchSession(publicId) {
   highlightActiveSession();
 }
 
+function setReviewPending(pending) {
+  clearTimeout(reviewTimer);
+  state.pendingReview = Boolean(pending);
+  els.sendButton.disabled = state.sending || state.pendingReview;
+  els.messageInput.disabled = state.pendingReview;
+  if (!state.pendingReview || !state.sessionId) return;
+  setPill(els.sessionBadge, "REVIEW", "warn");
+  const sessionId = state.sessionId;
+  reviewTimer = setTimeout(async () => {
+    if (state.sessionId !== sessionId || !state.auth.token) return;
+    try {
+      const response = await api(`/api/sessions/${sessionId}`);
+      const data = await response.json();
+      if (state.sessionId !== sessionId) return;
+      if (data.pendingReview) setReviewPending(true);
+      else await switchSession(sessionId);
+    } catch {
+      if (state.sessionId === sessionId && state.auth.token) setReviewPending(true);
+    }
+  }, 3000);
+}
+
 // 加载会话历史列表
+/**
+ * 为已登录普通用户读取会话历史并绘制列表。
+ * 未登录或管理员直接跳过；没有记录与请求失败使用不同提示。
+ */
 export async function loadSessionList() {
   if (!state.auth.token || isAdmin(state.profile)) return;
   try {
@@ -100,6 +149,7 @@ export async function loadSessionList() {
       els.sessionList.innerHTML = `<p class="hint">还没有历史会话</p>`;
       return;
     }
+    // 逐个把会话数据转换成按钮内容，并标出当前会话及无记忆状态。
     els.sessionList.innerHTML = sessions.map((s) => {
       const active = s.sessionId === state.sessionId;
       const time = new Date(s.updatedAt).toLocaleString("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -114,12 +164,21 @@ export async function loadSessionList() {
   }
 }
 
+/**
+ * 按当前会话编号更新历史列表中每一项的选中样式。
+ * 列表尚不存在时可选访问会跳过，不创建新的会话内容。
+ */
 function highlightActiveSession() {
+  // 遍历所有会话按钮，仅让编号匹配的按钮保留选中样式。
   els.sessionList?.querySelectorAll(".session-item").forEach((item) => {
     item.classList.toggle("active", item.dataset.sessionId === state.sessionId);
   });
 }
 
+/**
+ * 根据四维追问事件显示已完成数量。
+ * 追问已完成或未激活时隐藏标签；页面只展示服务端提供的进度。
+ */
 function renderCbtTag(data) {
   if (data.complete || !data.active) {
     hideCbtTag();
@@ -129,15 +188,27 @@ function renderCbtTag(data) {
   els.cbtTag.hidden = false;
 }
 
+/**
+ * 隐藏四维追问进度标签。
+ * 仅影响显示，不清除服务端保存的追问状态。
+ */
 function hideCbtTag() {
   els.cbtTag.hidden = true;
 }
 
+/**
+ * 移除消息区域中现有的空白状态提示。
+ * 找不到提示元素时不处理，供追加第一条真实消息前调用。
+ */
 function clearWelcome() {
   const empty = els.messages.querySelector(".empty");
   if (empty) empty.remove();
 }
 
+/**
+ * 创建消息气泡、追加到列表并滚动到底部。
+ * 正文通过 textContent 写入，作为文本展示；返回气泡元素供流式片段持续更新。
+ */
 function addMessage(role, content) {
   clearWelcome();
   const row = document.createElement("article");
@@ -152,10 +223,16 @@ function addMessage(role, content) {
   return row.querySelector(".bubble");
 }
 
+/**
+ * 从接收缓冲中拆出以空行结束的完整事件，并逐个交给回调。
+ * SSE 是服务端持续向网页推送事件的文本格式；尾部未完整的数据返回给下次接收拼接。
+ * 当前仅读取每块首个 data 行，格式或内容解析错误会向外抛出。
+ */
 function parseSse(buffer, onEvent) {
   const parts = buffer.split("\n\n");
   const rest = parts.pop();
   for (const part of parts) {
+    // 寻找当前完整事件块中的数据行，其他行不作为消息内容。
     const dataLine = part.split("\n").find((line) => line.startsWith("data: "));
     if (!dataLine) continue;
     onEvent(JSON.parse(dataLine.slice(6)));
@@ -163,9 +240,14 @@ function parseSse(buffer, onEvent) {
   return rest;
 }
 
+/**
+ * 发送用户输入并持续处理会话信息、回复、追问、计划和审核事件。
+ * 发送期间禁用按钮，接收片段用连续解码避免中文跨字节边界损坏；待审核状态不改成普通完成。
+ * 失败显示错误，最终恢复发送状态，并刷新新会话的历史入口。
+ */
 async function sendMessage(event) {
   event.preventDefault();
-  if (state.sending || isAdmin(state.profile)) return;
+  if (state.sending || (state.sessionId && state.pendingReview) || isAdmin(state.profile)) return;
   const message = els.messageInput.value.trim();
   if (!message) return;
   state.sending = true;
@@ -192,6 +274,7 @@ async function sendMessage(event) {
       const { value, done } = await reader.read();
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
+      // 每解析出一个完整事件就更新相应界面；错误标志与待审核标志分别保留。
       buffer = parseSse(buffer, (eventData) => {
         if (eventData.type === "meta") {
           state.sessionId = eventData.sessionId;
@@ -206,6 +289,7 @@ async function sendMessage(event) {
         }
         if (eventData.type === "pending_review") {
           pendingReview = true;
+          setReviewPending(true);
           raw = eventData.content || "";
           assistant.textContent = raw;
           setPill(els.sessionBadge, "REVIEW", "warn");
@@ -228,7 +312,7 @@ async function sendMessage(event) {
     setPill(els.sessionBadge, "ERROR", "danger");
   } finally {
     state.sending = false;
-    els.sendButton.disabled = false;
+    els.sendButton.disabled = state.pendingReview;
     // 新会话的第一条消息发送后，刷新历史列表让该会话出现
     if (wasNewSession && state.sessionId) {
       loadSessionList();

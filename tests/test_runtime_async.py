@@ -1,28 +1,19 @@
-"""Integration tests for async agent runtime (issue 02: async end-to-end).
-
-Verifies that async run() produces correct results for both the custom
-runtime and the LangGraph runtime (ainvoke), across CHAT and support paths.
-
-Uses mock AiClient + fake memory/knowledge stores -- no external services.
-
-Run: python -m pytest tests/test_runtime_async.py
-"""
+"""Public runtime behavior for the sole LangGraph conversation flow."""
 from __future__ import annotations
 
 import asyncio
+import json
 
 from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
-from app.agents.runtime import AgentRuntimeService
 from app.core.enums import IntentType, RiskLevel
 from app.models.entities import ChatSession, UserAccount
 from app.schemas.dtos import AiMessage
 from tests.support import FakeMemoryStore, build_runtime
 
 
-def _setup_runtime(cls):
-    """Create a runtime through its dependency seam."""
+def _setup_runtime():
     return build_runtime(
-        cls,
+        LangGraphAgentRuntimeService,
         memory=FakeMemoryStore([
             AiMessage(role="user", content="你好"),
             AiMessage(role="assistant", content="你好呀，我在。"),
@@ -30,96 +21,65 @@ def _setup_runtime(cls):
     )
 
 
-def _user_session():
-    user = UserAccount(id=1, display_name="测试学生", roles_csv="ROLE_USER")
-    session = ChatSession(id=1, public_id="test-session-001", user_id=1)
-    return user, session
+def _user_session(public_id="test-native-runtime-001"):
+    return (
+        UserAccount(id=1, display_name="测试用户", roles_csv="ROLE_USER"),
+        ChatSession(id=1, public_id=public_id, user_id=1),
+    )
 
 
-# ---------------------------------------------------------------------------
-# Custom runtime: CHAT path (keyword shortcut, no LLM for classify)
-# ---------------------------------------------------------------------------
-
-def test_custom_runtime_chat():
-    runtime = _setup_runtime(AgentRuntimeService)
-    user, session = _user_session()
+def test_langgraph_runtime_chat():
+    runtime = _setup_runtime()
+    user, session = _user_session("native-chat")
     result = asyncio.run(runtime.run(user, session, "帮我写一段 Python 代码", "帮我写一段 Python 代码"))
     assert result.intent == IntentType.CHAT
     assert result.risk_level == RiskLevel.LOW
-    assert len(result.response_messages) > 0
-    # CHAT path skips knowledge and risk
+    assert result.response_messages
     assert result.retrieved_knowledge == []
     assert result.assessment is None
 
 
-# ---------------------------------------------------------------------------
-# LangGraph runtime: CHAT path via ainvoke
-# ---------------------------------------------------------------------------
-
-def test_langgraph_runtime_chat():
-    runtime = _setup_runtime(LangGraphAgentRuntimeService)
-    user, session = _user_session()
-    result = asyncio.run(runtime.run(user, session, "帮我写一段 Python 代码", "帮我写一段 Python 代码"))
-    assert result.intent == IntentType.CHAT
-    assert len(result.response_messages) > 0
-
-
-# ---------------------------------------------------------------------------
-# Custom runtime: CONSULT support path (LLM classify + knowledge + risk)
-# ---------------------------------------------------------------------------
-
-def test_custom_runtime_consult():
-    runtime = _setup_runtime(AgentRuntimeService)
-    user, session = _user_session()
-    result = asyncio.run(runtime.run(user, session, "最近压力很大，很焦虑", "最近压力很大，很焦虑"))
-    assert result.intent in (IntentType.CONSULT, IntentType.RISK)
-    assert result.assessment is not None  # risk was assessed
-    assert len(result.response_messages) > 0  # counselor response planned
-
-
-# ---------------------------------------------------------------------------
-# LangGraph runtime: CONSULT support path via ainvoke
-# ---------------------------------------------------------------------------
-
 def test_langgraph_runtime_consult():
-    runtime = _setup_runtime(LangGraphAgentRuntimeService)
-    user, session = _user_session()
+    runtime = _setup_runtime()
+    user, session = _user_session("native-support")
     result = asyncio.run(runtime.run(user, session, "最近压力很大，很焦虑", "最近压力很大，很焦虑"))
-    assert result.intent in (IntentType.CONSULT, IntentType.RISK)
+    assert result.intent == IntentType.CONSULT
     assert result.assessment is not None
-    assert len(result.response_messages) > 0
-
-
-# ---------------------------------------------------------------------------
-# RISK path: high-risk keyword triggers RISK intent
-# ---------------------------------------------------------------------------
-
-def test_custom_runtime_risk_keyword():
-    runtime = _setup_runtime(AgentRuntimeService)
-    user, session = _user_session()
-    result = asyncio.run(runtime.run(user, session, "我不想活了", "我不想活了"))
-    assert result.intent == IntentType.RISK
-    assert result.risk_level == RiskLevel.HIGH
-    assert result.assessment is not None
+    assert result.response_messages
+    assert result.cbt_event is not None
 
 
 def test_langgraph_runtime_risk_keyword():
-    runtime = _setup_runtime(LangGraphAgentRuntimeService)
-    user, session = _user_session()
+    runtime = _setup_runtime()
+    user, session = _user_session("native-risk")
     result = asyncio.run(runtime.run(user, session, "我不想活了", "我不想活了"))
     assert result.intent == IntentType.RISK
     assert result.risk_level == RiskLevel.HIGH
+    assert result.pending_review
+    assert result.response_messages == []
 
 
-# ---------------------------------------------------------------------------
-# Parity: custom and LangGraph produce same intent for same input
-# ---------------------------------------------------------------------------
+def test_new_turn_resets_native_state_and_business_events():
+    """A support turn cannot leak its results into the next daily conversation."""
+    runtime = _setup_runtime()
+    user, session = _user_session("native-turn-isolation")
 
-def test_custom_and_langgraph_parity_chat():
-    custom = _setup_runtime(AgentRuntimeService)
-    langgraph = _setup_runtime(LangGraphAgentRuntimeService)
-    user, session = _user_session()
-    text = "帮我写一段 Python 代码"
-    custom_result = asyncio.run(custom.run(user, session, text, text))
-    langgraph_result = asyncio.run(langgraph.run(user, session, text, text))
-    assert custom_result.intent == langgraph_result.intent
+    async def scenario():
+        support = await runtime.run(user, session, "最近压力很大，很焦虑", "最近压力很大，很焦虑")
+        assert support.assessment is not None
+        assert support.cbt_event is not None
+        chat = await runtime.run(user, session, "帮我写一段 Python 代码", "帮我写一段 Python 代码")
+        snapshot = await runtime.aget_state(session.public_id)
+        return chat, snapshot
+
+    chat, snapshot = asyncio.run(scenario())
+    assert chat.assessment is None
+    assert chat.retrieved_knowledge == []
+    assert chat.cbt_event is None
+    assert chat.action_plan_event is None
+    assert chat.risk_level == RiskLevel.LOW
+    assert not chat.pending_review
+    assert "context" not in snapshot.values
+    assert snapshot.values["model_input"] == "帮我写一段 Python 代码"
+    assert snapshot.values["original_run_id"]
+    json.dumps(snapshot.values)

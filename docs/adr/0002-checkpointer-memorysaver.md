@@ -23,11 +23,11 @@ Accepted
 - 检查点文件为 `data/langgraph-checkpoints.db`；
 - 在首次异步运行或恢复时懒初始化连接；
 - 每次网页请求完成后关闭运行时持有的 SQLite 连接；
-- 图状态只保存编号、枚举、字符串、列表和字典；
+- 原生 `GraphState` 只保存编号、枚举值字符串、布尔值、数值、列表和字典；每次新消息完整初始化本轮字段；
 - 不保存 SQLAlchemy 模型或数据库会话；
 - `JsonPlusSerializer` 不启用 pickle 回退；
 - 使用独立活动表记录线程更新时间，默认保留 30 天；
-- 学生删除账号时，在业务数据提交后删除对应检查点；失败时把清理任务持久化，并在后续启动时重试；
+- 用户删除账号时，在业务数据提交后删除对应检查点；失败时把清理任务持久化，并在后续启动时重试；
 - MemorySaver 只作为测试和显式本地适配器保留。
 
 ## 后果
@@ -43,7 +43,7 @@ Accepted
 
 - SQLite 适合单机面试项目，不宣称支持多主机分布式写入；
 - 运行时需要管理异步连接生命周期；
-- 图状态序列化字段变化需要保持向后兼容或安全降级。
+- 原生图状态不迁移旧检查点；本地切换按 ADR-0012 清理旧会话及其关联数据。新流程检查点不可用时安全降级。
 
 ## 仍然保留的安全降级
 
@@ -54,4 +54,5 @@ Accepted
 - [ADR-0001](0001-async-runtime.md)
 - [ADR-0003](0003-interrupt-node-splitting.md)
 - [ADR-0004](0004-resume-auto-degrade.md)
+- [ADR-0012](0012-langgraph-runtime-and-local-diagnostics.md)
 - GitHub Issue #13

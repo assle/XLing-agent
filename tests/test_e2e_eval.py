@@ -7,6 +7,10 @@ from evals.e2e.runner import evaluate
 
 
 def test_e2e_eval_runs_the_production_chat_flow_and_records_versions(tmp_path):
+    """准备日常、支持和高风险三种样本，使用模拟模型运行真实聊天模块。
+
+    检查事件、知识访问、评估先后和审核保存，并重新读取报告验证落盘结果。
+    """
     cases = [
         {
             "id": "chat-01",
@@ -43,7 +47,6 @@ def test_e2e_eval_runs_the_production_chat_flow_and_records_versions(tmp_path):
     )
     settings = EvalSettings(
         ai_provider="mock",
-        agent_framework="langgraph",
         knowledge_vector_enabled=False,
         redis_url="redis://127.0.0.1:6399/15",
         redis_socket_timeout_seconds=0.01,
@@ -66,9 +69,12 @@ def test_e2e_eval_runs_the_production_chat_flow_and_records_versions(tmp_path):
 
 
 def test_curated_e2e_baseline_covers_forty_support_loop_cases(tmp_path):
+    """运行仓库中四十个精选支持过程案例。
+
+    检查全部通过且覆盖日常、支持、风险、知识不足和行动计划五种类型。
+    """
     settings = EvalSettings(
         ai_provider="mock",
-        agent_framework="langgraph",
         knowledge_vector_enabled=False,
         redis_url="redis://127.0.0.1:6399/15",
         redis_socket_timeout_seconds=0.01,

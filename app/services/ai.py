@@ -1,15 +1,33 @@
 from __future__ import annotations
 
 import json
+from contextlib import aclosing
 from typing import Iterable
 
 import httpx
 
+from app.core import diagnostics
 from app.core.config import Settings
 from app.core.enums import IntentType, RiskLevel
 from app.schemas.dtos import AiMessage
 
 
+# PromptTemplates.intent_prompt：组装消息分流的系统要求与当前输入。
+# history 用于补充最近上下文；返回消息列表，不执行模型调用。
+# PromptTemplates.psychology_prompt：组装结构化安全评估请求。
+# 要求模型输出固定字段，实际格式和数值约束由评估服务再次验证。
+# PromptTemplates.answer_system_prompt：按日常对话或心理支持类型构造回复要求。
+# risk 为高风险时增加安全处理要求，context 提供检索资料，display_name 提供称呼。
+# PromptTemplates.crisis_acknowledgment：返回等待人工审核期间使用的固定确认消息。
+# 无需模型生成，告知用户消息已进入审核并提供现实求助方向。
+# PromptTemplates.fallback_response：返回人工拒绝或恢复失败时使用的固定安全回复。
+# 返回预设文本，不调用模型或发送通知。
+# PromptTemplates.sub_query_prompt：请求模型围绕一个问题生成若干替代检索查询。
+# query 是原问题，n 是期望数量；输出格式要求会在调用后再次检查。
+# PromptTemplates.rerank_prompt：把查询和候选资料摘要组织成相关性评分请求。
+# 每条候选保留原列表编号和前 200 个字符，返回的编号用于对应原文档。
+# PromptTemplates.classifier_prompt：构造只允许四个中文标签的分类请求。
+# 只传当前用户表达；分类结果的解释和保守回退由评估服务负责。
 class PromptTemplates:
     @staticmethod
     def intent_prompt(history: list[AiMessage], user_input: str) -> list[AiMessage]:
@@ -118,91 +136,133 @@ class PromptTemplates:
 
 class AiClient:
     def __init__(self, settings: Settings):
+        """保存模型提供方、模型名称和请求参数配置。
+
+        初始化不建立长期网络连接，也不加载本地模型文件。
+        """
         self.settings = settings
 
     def complete(self, messages: list[AiMessage]) -> str:
-        provider = self.settings.ai_provider.lower()
-        if provider == "ollama":
-            return self._ollama(messages, stream=False)
-        if provider == "openai":
-            return self._openai(messages, stream=False)
-        return self._mock(messages)
+        """按配置同步获取完整模型回复。
+
+        本地服务与远程服务分别调用各自入口，其他提供方使用模拟回复；真实请求异常向上传递。
+        """
+        with diagnostics.stage("ai.complete"):
+            provider = self.settings.ai_provider.lower()
+            if provider == "ollama":
+                return self._ollama(messages, stream=False)
+            if provider == "openai":
+                return self._openai(messages, stream=False)
+            return self._mock(messages)
 
     def classify(self, text: str) -> str:
-        """Call the local fine-tuned classifier; returns a Chinese label word.
+        """同步调用本地专用分类模型并返回中文标签文本。
 
-        The classifier is local-only (always via Ollama) regardless of
-        AI_PROVIDER; mock provider uses rule-based simulation. Ollama failure
-        propagates so the caller can fall back to the conservative path.
+        仅 mock 配置采用规则模拟，其他配置都使用本地分类服务，不随对话模型切换到远程提供方。
+        调用失败不在此吞掉，由评估服务选择保守结果。
         """
-        provider = self.settings.ai_provider.lower()
-        if provider == "mock":
-            return self._mock_classify(text)
-        return self._ollama_classify(PromptTemplates.classifier_prompt(text))
+        with diagnostics.stage("ai.classify"):
+            provider = self.settings.ai_provider.lower()
+            if provider == "mock":
+                return self._mock_classify(text)
+            return self._ollama_classify(PromptTemplates.classifier_prompt(text))
 
     async def aclassify(self, text: str) -> str:
-        provider = self.settings.ai_provider.lower()
-        if provider == "mock":
-            return self._mock_classify(text)
-        return await self._ollama_classify_async(PromptTemplates.classifier_prompt(text))
+        """异步调用本地分类模型，模拟模式直接执行关键词规则。
+
+        返回标签文本；网络等待让出执行机会，异常继续交给调用方。
+        """
+        with diagnostics.stage("ai.classify"):
+            provider = self.settings.ai_provider.lower()
+            if provider == "mock":
+                return self._mock_classify(text)
+            return await self._ollama_classify_async(PromptTemplates.classifier_prompt(text))
 
     def generate_sub_queries(self, query: str, n: int = 3) -> list[str]:
-        """Use LLM to rewrite a student question into n sub-queries for multi-query retrieval."""
-        messages = PromptTemplates.sub_query_prompt(query, n)
-        raw = self.complete(messages)
-        try:
-            sub_queries = json.loads(raw)
-            if isinstance(sub_queries, list) and all(isinstance(q, str) for q in sub_queries):
-                return sub_queries[:n]
-        except (json.JSONDecodeError, TypeError):
-            pass
-        return [query]
+        """调用模型生成替代查询，并检查返回值是否为字符串列表。
+
+        合法结果最多取 n 项，格式错误时返回原查询列表；模型请求本身失败仍向上传递。
+        """
+        with diagnostics.stage("ai.sub_queries"):
+            messages = PromptTemplates.sub_query_prompt(query, n)
+            raw = self.complete(messages)
+            try:
+                sub_queries = json.loads(raw)
+                if isinstance(sub_queries, list) and all(isinstance(q, str) for q in sub_queries):
+                    return sub_queries[:n]
+            except (json.JSONDecodeError, TypeError) as exc:
+                diagnostics.degraded("ai.sub_queries", "invalid_sub_queries", exc)
+                return [query]
+            diagnostics.degraded("ai.sub_queries", "invalid_sub_query_shape")
+            return [query]
 
     def rerank(self, query: str, candidates: list[dict]) -> list[tuple[int, float]]:
-        """Batch-score candidates with a single LLM call. Returns (index, score) pairs."""
-        if not candidates:
-            return []
-        messages = PromptTemplates.rerank_prompt(query, candidates)
-        raw = self.complete(messages)
-        try:
-            scored = json.loads(raw)
-            if isinstance(scored, list):
-                result = []
-                for item in scored:
-                    if isinstance(item, dict) and "index" in item and "score" in item:
-                        idx = int(item["index"])
-                        score = float(item["score"])
-                        if 0 <= idx < len(candidates):
-                            result.append((idx, score))
-                if result:
-                    return result
-        except (json.JSONDecodeError, TypeError, ValueError):
-            pass
-        return [(i, 0.0) for i in range(len(candidates))]
+        """通过一次模型请求为候选资料取得编号和相关性分数。
+
+        过滤越界编号；没有可用结果或解析失败时为所有候选返回零分，空候选直接返回空列表。
+        """
+        with diagnostics.stage("ai.rerank"):
+            if not candidates:
+                return []
+            messages = PromptTemplates.rerank_prompt(query, candidates)
+            raw = self.complete(messages)
+            try:
+                scored = json.loads(raw)
+                if isinstance(scored, list):
+                    result = []
+                    for item in scored:
+                        if isinstance(item, dict) and "index" in item and "score" in item:
+                            idx = int(item["index"])
+                            score = float(item["score"])
+                            if 0 <= idx < len(candidates):
+                                result.append((idx, score))
+                    if result:
+                        return result
+            except (json.JSONDecodeError, TypeError, ValueError) as exc:
+                diagnostics.degraded("ai.rerank", "invalid_rerank", exc)
+                return [(i, 0.0) for i in range(len(candidates))]
+            diagnostics.degraded("ai.rerank", "invalid_rerank_shape")
+            return [(i, 0.0) for i in range(len(candidates))]
 
     async def acomplete(self, messages: list[AiMessage]) -> str:
-        provider = self.settings.ai_provider.lower()
-        if provider == "ollama":
-            return await self._ollama_async(messages)
-        if provider == "openai":
-            return await self._openai_async(messages)
-        return self._mock(messages)
+        """按配置异步获取完整模型回复。
+
+        本地和远程服务均使用异步客户端，模拟模式直接返回固定规则结果。
+        """
+        with diagnostics.stage("ai.complete"):
+            provider = self.settings.ai_provider.lower()
+            if provider == "ollama":
+                return await self._ollama_async(messages)
+            if provider == "openai":
+                return await self._openai_async(messages)
+            return self._mock(messages)
 
     async def stream(self, messages: list[AiMessage]):
-        provider = self.settings.ai_provider.lower()
-        if provider == "ollama":
-            async for token in self._ollama_stream(messages):
-                yield token
-            return
-        if provider == "openai":
-            async for token in self._openai_stream(messages):
-                yield token
-            return
-        text = self._mock(messages)
-        for chunk in split_text(text, 12):
-            yield chunk
+        """把所选模型的回复逐段交给调用方。
+
+        本地和远程调用转发收到的文本片段；模拟模式将完整回复按每段 12 个字符拆开。
+        """
+        with diagnostics.stage("ai.stream"):
+            provider = self.settings.ai_provider.lower()
+            if provider == "ollama":
+                async with aclosing(self._ollama_stream(messages)) as stream:
+                    async for token in stream:
+                        yield token
+                return
+            if provider == "openai":
+                async with aclosing(self._openai_stream(messages)) as stream:
+                    async for token in stream:
+                        yield token
+                return
+            text = self._mock(messages)
+            for chunk in split_text(text, 12):
+                yield chunk
 
     def _ollama(self, messages: list[AiMessage], stream: bool) -> str:
+        """向本地对话服务发送同步请求并提取回复正文。
+
+        messages 转为可传输字典；使用配置中的生成参数及 60 秒请求超时，响应状态错误直接抛出。
+        """
         payload = {
             "model": self.settings.ollama_model,
             "messages": [m.model_dump() for m in messages],
@@ -214,6 +274,10 @@ class AiClient:
         return response.json()["message"]["content"]
 
     def _ollama_classify(self, messages: list[AiMessage]) -> str:
+        """同步请求本地专用分类模型。
+
+        使用较低随机性和较短输出上限，30 秒超时；返回去掉首尾空白的模型文本，不在此验证标签。
+        """
         payload = {
             "model": self.settings.ollama_classifier_model,
             "messages": [m.model_dump() for m in messages],
@@ -225,6 +289,10 @@ class AiClient:
         return response.json()["message"]["content"].strip()
 
     async def _ollama_classify_async(self, messages: list[AiMessage]) -> str:
+        """用异步客户端请求本地分类模型。
+
+        参数与同步分类一致；上下文管理器在请求结束或失败后关闭客户端。
+        """
         payload = {
             "model": self.settings.ollama_classifier_model,
             "messages": [m.model_dump() for m in messages],
@@ -237,6 +305,10 @@ class AiClient:
             return response.json()["message"]["content"].strip()
 
     async def _ollama_async(self, messages: list[AiMessage]) -> str:
+        """异步请求本地模型生成完整回复。
+
+        禁用流式传输，使用配置中的生成参数及 120 秒超时；返回响应中的消息正文。
+        """
         payload = {
             "model": self.settings.ollama_model,
             "messages": [m.model_dump() for m in messages],
@@ -249,6 +321,10 @@ class AiClient:
             return response.json()["message"]["content"]
 
     async def _ollama_stream(self, messages: list[AiMessage]):
+        """逐行读取本地模型的流式响应并提取非空文本片段。
+
+        跳过空行，每行解析为对象；请求和解析失败直接传递给上层，不伪装为正常结束。
+        """
         payload = {
             "model": self.settings.ollama_model,
             "messages": [m.model_dump() for m in messages],
@@ -258,6 +334,7 @@ class AiClient:
         async with httpx.AsyncClient(timeout=120) as client:
             async with client.stream("POST", f"{self.settings.ollama_base_url}/api/chat", json=payload) as response:
                 response.raise_for_status()
+                # 持续读取网络返回的完整行，再解析其中的回复片段；不是按网络字节逐字解码。
                 async for line in response.aiter_lines():
                     if not line:
                         continue
@@ -267,6 +344,10 @@ class AiClient:
                         yield token
 
     def _openai(self, messages: list[AiMessage], stream: bool) -> str:
+        """同步向兼容远程聊天接口发送请求并读取第一个回复。
+
+        从配置组装授权头、模型和生成参数；网络或响应格式异常不在此回退。
+        """
         headers = {"Authorization": f"Bearer {self.settings.openai_api_key}"}
         payload = {
             "model": self.settings.openai_model,
@@ -280,6 +361,10 @@ class AiClient:
         return response.json()["choices"][0]["message"]["content"]
 
     async def _openai_async(self, messages: list[AiMessage]) -> str:
+        """异步请求远程模型的一次完整回复。
+
+        请求完成或失败后关闭客户端，返回第一个候选回复的正文。
+        """
         headers = {"Authorization": f"Bearer {self.settings.openai_api_key}"}
         payload = {
             "model": self.settings.openai_model,
@@ -294,6 +379,10 @@ class AiClient:
             return response.json()["choices"][0]["message"]["content"]
 
     async def _openai_stream(self, messages: list[AiMessage]):
+        """从远程服务持续推送的数据行中提取回复增量。
+
+        只解析以 data 开头的事件，遇到结束标记停止；没有正文的事件不产生文本片段。
+        """
         headers = {"Authorization": f"Bearer {self.settings.openai_api_key}"}
         payload = {
             "model": self.settings.openai_model,
@@ -309,6 +398,7 @@ class AiClient:
                     if not line.startswith("data: "):
                         continue
                     raw = line.removeprefix("data: ").strip()
+                    # 该标记表示远程流正常结束，不是需要展示给用户的回复内容。
                     if raw == "[DONE]":
                         break
                     data = json.loads(raw)
@@ -317,7 +407,10 @@ class AiClient:
                         yield token
 
     def _mock_classify(self, text: str) -> str:
-        """Rule-based classifier simulation for mock provider."""
+        """使用固定关键词规则模拟四类中文标签。
+
+        高风险优先于低落，低落优先于一般心理支持；用于离线测试，不代表真实模型效果。
+        """
         if has_high_risk_signal(text):
             return "高风险"
         lowered = text.lower()
@@ -328,6 +421,11 @@ class AiClient:
         return "正常"
 
     def _mock(self, messages: list[AiMessage]) -> str:
+        """根据系统消息中的任务标识返回对应的模拟结果。
+
+        从末尾查找最近用户消息，再按查询改写、重排、提取、评估或回复分支处理。
+        分支匹配有先后顺序，结果用于测试流程，不能作为真实服务质量证据。
+        """
         last = next((m.content for m in reversed(messages) if m.role == "user"), "")
         system = " ".join(m.content for m in messages if m.role == "system")
         if "搜索查询改写器" in system:
@@ -368,6 +466,10 @@ class AiClient:
 
 
 def format_history(history: list[AiMessage]) -> str:
+    """把最近最多二十条消息转换成带角色的多行文本。
+
+    无历史时返回固定占位文字；不改变消息内容和原列表。
+    """
     if not history:
         return "无"
     return "\n".join(f"{m.role}: {m.content}" for m in history[-20:])
@@ -388,16 +490,28 @@ DEPRESSED_WORDS = ["抑郁", "低落", "崩溃", "难过", "丧失", "提不起"
 
 
 def has_high_risk_signal(text: str) -> bool:
+    """检查文本中是否出现预设的明确高风险词组。
+
+    转成小写后按子串匹配，命中任意词组即返回 True；不分析否定、引用等语境。
+    """
     normalized = text.lower()
     return any(word in normalized for word in HIGH_RISK_WORDS)
 
 
 def has_consult_signal(text: str) -> bool:
+    """检查文本中是否出现心理支持相关关键词。
+
+    采用小写子串匹配，结果供分流和备用规则使用，不等于完整的风险评估。
+    """
     normalized = text.lower()
     return any(word in normalized for word in CONSULT_WORDS)
 
 
 def split_text(text: str, size: int) -> Iterable[str]:
+    """按固定字符数依次产出文本片段，供模拟流式回复使用。
+
+    size 是每段步长，调用方应传正整数；空文本不产出片段。
+    """
     for index in range(0, len(text), size):
         yield text[index:index + size]
 
@@ -409,7 +523,10 @@ _SYNONYM_PAIRS = [
 
 
 def _mock_sub_queries(query: str) -> list[str]:
-    """Generate 3 retrieval-oriented sub-queries without an LLM."""
+    """在不调用模型时用同义替换和去尾部标点构造三个查询。
+
+    不足三个时重复原查询补齐，因此返回列表可能包含重复项。
+    """
     result = [query]
     swapped = query
     for old, new in _SYNONYM_PAIRS:
@@ -426,7 +543,11 @@ def _mock_sub_queries(query: str) -> list[str]:
 
 
 def _mock_rerank(user_content: str) -> list[dict]:
-    """Score candidates by keyword overlap without an LLM."""
+    """按查询词在候选摘要中的出现比例模拟相关性评分。
+
+    从约定格式的请求文本提取查询和候选列表；格式缺失或解析失败返回空列表。
+    每个候选返回原编号及零到十分的规则分数，不使用语义模型。
+    """
     import re
     query_match = re.search(r"查询：(.+?)(\n\n候选文档：)", user_content, re.DOTALL)
     docs_match = re.search(r"候选文档：\n(\[.+\])", user_content, re.DOTALL)

@@ -12,6 +12,7 @@ models/Models/
 data/*.db
 data/*.sqlite
 data/*.xlsx
+data/logs/
 data/chroma/
 data/chroma-snapshots/
 data/chroma-eval/

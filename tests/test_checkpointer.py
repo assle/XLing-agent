@@ -17,17 +17,18 @@ import json
 import sqlite3
 
 from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
-from app.agents.runtime import ActionPlanEvent, ActionPlanItemEvent, AgentContext, CbtEvent
 from app.core.config import Settings
-from app.core.enums import EmotionLabel, IntentType, RiskLevel
+from app.core.enums import IntentType
 from app.models.entities import ChatSession, UserAccount
 from app.schemas.dtos import AiMessage
-from app.services.assessment import PsychologyAssessment
-from app.services.knowledge import SearchResult
-from tests.support import FakeMemoryStore, build_runtime
+from tests.support import DatabaseHarness, FakeMemoryStore, build_runtime
 
 
 def _make_runtime(backend: str, checkpoint_path: str | None = None, checkpointer=None) -> LangGraphAgentRuntimeService:
+    """按后端和可选路径创建测试图执行器。
+
+    允许注入共享保存器并重新构图，以隔离状态保存测试。
+    """
     kwargs = {"ai_provider": "mock", "langgraph_checkpoint_backend": backend}
     if checkpoint_path:
         kwargs["langgraph_checkpoint_path"] = checkpoint_path
@@ -46,71 +47,68 @@ def _make_runtime(backend: str, checkpoint_path: str | None = None, checkpointer
 
 
 def _user_session(public_id: str = "session-checkpoint-001"):
+    """创建带固定用户字段和可指定公开编号的会话。
+
+    供状态导出、隔离和恢复测试复用。
+    """
     user = UserAccount(id=1, display_name="测试学生", roles_csv="ROLE_USER")
     session = ChatSession(id=1, public_id=public_id, user_id=1)
     return user, session
 
 
-def test_agent_context_checkpoint_payload_is_json_safe_and_round_trips():
-    user, session = _user_session("json-safe-001")
-    context = AgentContext(
-        user=user,
-        session=session,
-        original_input="最近很焦虑",
-        model_input="最近很焦虑",
-        intent=IntentType.CONSULT,
-        risk_level=RiskLevel.MEDIUM,
-        assessment=PsychologyAssessment(
-            EmotionLabel.ANXIETY,
-            2.5,
-                RiskLevel.MEDIUM,
-                0.7,
-                "压力表达",
-                model_version="risk-v1",
-        ),
-        retrieved_knowledge=[SearchResult(1, "guide.md", "支持内容", 0.8)],
-        cbt_event=CbtEvent(True, 2, "body_reactions", False),
-        action_plan_event=ActionPlanEvent(
-            9,
-            [ActionPlanItemEvent(1, "先休息十分钟", 0, False)],
-            "2026-08-31T00:00:00",
-        ),
-    )
-
-    payload = context.to_checkpoint()
-    restored = AgentContext.from_checkpoint(payload)
-
-    json.dumps(payload, ensure_ascii=False)
-    assert restored.user.id == user.id
-    assert restored.session.public_id == session.public_id
-    assert restored.intent == IntentType.CONSULT
-    assert restored.assessment.model_version == "risk-v1"
-    assert restored.retrieved_knowledge[0].source == "guide.md"
-    assert restored.action_plan_event.items[0].content == "先休息十分钟"
+def test_native_checkpoint_and_result_preserve_action_plan():
+    """The support path persists primitive state while exposing typed business events."""
+    harness = DatabaseHarness()
+    db = harness.sessions()
+    try:
+        runtime = build_runtime(
+            LangGraphAgentRuntimeService, db=db,
+            memory=FakeMemoryStore([AiMessage(role="user", content="你好")]),
+        )
+        user, session = _user_session("json-safe-native")
+        text = "工作加班让我担心，睡不着，还会逃避"
+        result = asyncio.run(runtime.run(user, session, text, text))
+        values = runtime.get_state(session.public_id).values
+        json.dumps(values, ensure_ascii=False)
+        assert "context" not in values
+        assert values["user_id"] == 1
+        assert values["thread_id"] == session.public_id
+        assert result.action_plan_event is not None
+        assert result.action_plan_event.items
+        assert values["action_plan_event"]["items"][0]["content"] == result.action_plan_event.items[0].content
+    finally:
+        db.close()
+        harness.close()
 
 
 # ---------------------------------------------------------------------------
-# State is checkpointed after a run (MemorySaver)
+# 验证一次运行结束后内存保存器中存在状态。
 # ---------------------------------------------------------------------------
 
 def test_state_checkpointed_after_run():
+    """完成一次普通对话后读取状态快照。
+
+    检查消息分类确实保存为日常对话。
+    """
     runtime = _make_runtime("memory")
     user, session = _user_session("session-mem-001")
     asyncio.run(runtime.run(user, session, "帮我写一段 Python 代码", "帮我写一段 Python 代码"))
     snapshot = runtime.get_state("session-mem-001")
     assert snapshot is not None
-    context = snapshot.values["context"]
-    assert context.intent == IntentType.CHAT
+    assert snapshot.values["intent"] == IntentType.CHAT.value
 
 
 # ---------------------------------------------------------------------------
-# Crash recovery: new runtime instance with the SAME checkpointer recovers state
+# 使用同一个保存器的新执行器实例可以读取已有状态。
 # ---------------------------------------------------------------------------
 
 def test_crash_recovery_shared_checkpointer():
-    # A shared MemorySaver simulates a persistent store that survives a crash.
-    # Runtime A checkpoints; a fresh Runtime B (same process, new instance)
-    # reading the same checkpointer recovers A's state.
+    # 这里共享的是同一进程内的保存器对象，不证明真实进程重启后仍有数据。
+    # 第一个实例写入，第二个实例读取同一保存器。
+    """两个执行器显式共用同一个内存保存器。
+
+    检查第二个能读取第一个的状态；这是同进程对象复用，不是重启持久性证明。
+    """
     from langgraph.checkpoint.memory import MemorySaver
     from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 
@@ -121,49 +119,63 @@ def test_crash_recovery_shared_checkpointer():
     result_a = asyncio.run(runtime_a.run(user, session, "帮我写一段 Python 代码", "帮我写一段 Python 代码"))
     assert result_a.intent == IntentType.CHAT
 
-    # Simulate crash: discard runtime A, create runtime B with same checkpointer
+    # 创建新的执行器实例，但继续传入同一个内存保存器。
     runtime_b = _make_runtime("memory", checkpointer=shared_saver)
     snapshot = runtime_b.get_state("session-crash-001")
     assert snapshot is not None
-    context = snapshot.values["context"]
-    assert context.intent == IntentType.CHAT
+    assert snapshot.values["intent"] == IntentType.CHAT.value
 
 
 # ---------------------------------------------------------------------------
-# Different thread_ids have independent checkpoint state
+# 不同会话编号保存各自的执行状态。
 # ---------------------------------------------------------------------------
 
 def test_thread_isolation():
+    """在不同会话编号下分别运行普通与高风险消息。
+
+    检查保存后的分类各自独立，没有相互覆盖。
+    """
     runtime = _make_runtime("memory")
     user1, session1 = _user_session("session-iso-001")
     user2, session2 = _user_session("session-iso-002")
     asyncio.run(runtime.run(user1, session1, "帮我写一段 Python 代码", "帮我写一段 Python 代码"))
     asyncio.run(runtime.run(user2, session2, "我不想活了", "我不想活了"))
 
-    ctx1 = runtime.get_state("session-iso-001").values["context"]
-    ctx2 = runtime.get_state("session-iso-002").values["context"]
-    assert ctx1.intent == IntentType.CHAT
-    assert ctx2.intent == IntentType.RISK
+    state1 = runtime.get_state("session-iso-001").values
+    state2 = runtime.get_state("session-iso-002").values
+    assert state1["intent"] == IntentType.CHAT.value
+    assert state2["intent"] == IntentType.RISK.value
 
 
 # ---------------------------------------------------------------------------
-# Two runs on same thread both checkpoint (history grows)
+# 同一会话连续运行后仍能读到最新状态。
 # ---------------------------------------------------------------------------
 
 def test_same_thread_two_runs():
+    """在同一会话编号下连续运行两次普通问题。
+
+    检查第二轮结束后仍可读取有效状态。
+    """
     runtime = _make_runtime("memory")
     user, session = _user_session("session-twice-001")
     asyncio.run(runtime.run(user, session, "帮我写一段 Python 代码", "帮我写一段 Python 代码"))
-    # Second run on same thread -- state is overwritten with the new run's result
+    # 第二轮在同一会话下运行，随后读取该轮保存的状态。
     asyncio.run(runtime.run(user, session, "帮我写一段 Java 代码", "帮我写一段 Java 代码"))
     snapshot = runtime.get_state("session-twice-001")
     assert snapshot is not None
-    context = snapshot.values["context"]
-    assert context.intent == IntentType.CHAT
+    assert snapshot.values["intent"] == IntentType.CHAT.value
 
 
 def test_async_sqlite_checkpoint_resumes_after_runtime_restart(tmp_path):
+    """关闭首次执行器连接后，用新实例从同一临时文件批准恢复。
+
+    检查没有降级且已准备回复。
+    """
     async def scenario():
+        """建立文件状态库并暂停会话，关闭连接后重新创建执行器。
+
+        批准恢复并关闭新连接，返回结果给外层断言。
+        """
         path = str(tmp_path / "checkpoints.db")
         runtime_a = _make_runtime("async_sqlite", path)
         user, session = _user_session("persistent-approve-001")
@@ -184,7 +196,15 @@ def test_async_sqlite_checkpoint_resumes_after_runtime_restart(tmp_path):
 
 
 def test_async_sqlite_checkpoint_preserves_reject_path_after_restart(tmp_path):
+    """从同一状态文件的新实例拒绝暂停会话。
+
+    检查正常恢复拒绝路径，保留固定回复且没有模型输入。
+    """
     async def scenario():
+        """先保存高风险暂停状态并关闭原连接，再用新实例拒绝。
+
+        通过实际文件读取检查状态可跨实例保留。
+        """
         path = str(tmp_path / "checkpoints.db")
         runtime_a = _make_runtime("async_sqlite", path)
         user, session = _user_session("persistent-reject-001")
@@ -204,7 +224,15 @@ def test_async_sqlite_checkpoint_preserves_reject_path_after_restart(tmp_path):
 
 
 def test_expired_persistent_checkpoint_safely_degrades(tmp_path):
+    """把已保存会话的活动时间设为很久以前。
+
+    新实例恢复时应清理过期状态并安全降级。
+    """
     async def scenario():
+        """准备暂停状态后直接修改临时活动表时间。
+
+        重新初始化触发过期清理，再尝试批准并返回结果。
+        """
         path = str(tmp_path / "checkpoints.db")
         runtime_a = _make_runtime("async_sqlite", path)
         user, session = _user_session("persistent-expired-001")
@@ -228,3 +256,75 @@ def test_expired_persistent_checkpoint_safely_degrades(tmp_path):
 
     assert result.degraded is True
     assert result.fallback_response
+
+
+def test_corrupt_paused_business_state_uses_safe_fallback():
+    """A HIGH-risk pause cannot resume as an ordinary chat or without its assessment."""
+    async def scenario(update, thread_id):
+        runtime = _make_runtime("memory")
+        user, session = _user_session(thread_id)
+        interrupted = await runtime.run(user, session, "我不想活了", "我不想活了")
+        assert interrupted.pending_review
+        config = {"configurable": {"thread_id": thread_id}}
+        await runtime.graph.aupdate_state(config, update, as_node="risk_guardian")
+        return await runtime.resume(thread_id, approved=True)
+
+    updates = [
+        {"intent": "CHAT"},
+        {"assessment": None},
+        {"assessment": {}},
+        {"assessment": {
+            "emotion": "ANXIETY", "emotion_score": 2.0, "risk": "LOW",
+            "confidence": 0.8, "summary": "low risk", "model_version": "test",
+        }},
+        {"assessment": {
+            "emotion": "DEPRESSED", "emotion_score": 3.0, "risk": "MEDIUM",
+            "confidence": 0.8, "summary": "medium risk", "model_version": "test",
+        }},
+    ]
+    for index, update in enumerate(updates):
+        result = asyncio.run(scenario(update, f"corrupt-native-business-{index}"))
+        assert result.degraded
+        assert result.fallback_response
+        assert result.response_messages == []
+        assert not result.pending_review
+
+
+def test_rising_medium_assessment_can_resume_high_risk_review():
+    """A legitimate trajectory escalation remains recoverable after invariant checks."""
+    from app.core.enums import EmotionLabel, RiskLevel
+    from app.services.assessment import PsychologyAssessment
+    from app.services.risk_trajectory import RiskTrajectoryService
+
+    class MediumAssessment:
+        async def aassess(self, text, history):
+            return PsychologyAssessment(EmotionLabel.DEPRESSED, 3.0, RiskLevel.MEDIUM, 0.8, "持续低落")
+
+    harness = DatabaseHarness()
+    db = harness.sessions()
+    try:
+        trajectory = RiskTrajectoryService(db)
+        trajectory.record_point(1, 1, RiskLevel.MEDIUM, 2.0)
+        trajectory.record_point(1, 1, RiskLevel.MEDIUM, 2.5)
+        db.commit()
+        runtime = build_runtime(
+            LangGraphAgentRuntimeService, db=db, assessment=MediumAssessment(),
+            memory=FakeMemoryStore([AiMessage(role="user", content="你好")]),
+        )
+        user, session = _user_session("native-rising-medium-review")
+
+        async def scenario():
+            paused = await runtime.run(user, session, "最近压力很大，睡不着", "最近压力很大，睡不着")
+            assert paused.pending_review
+            assert paused.assessment.risk == RiskLevel.MEDIUM
+            assert paused.risk_level == RiskLevel.HIGH
+            assert paused.trajectory_rising
+            return await runtime.resume(session.public_id, approved=True)
+
+        result = asyncio.run(scenario())
+        assert not result.degraded
+        assert result.response_messages
+        assert result.risk_level == RiskLevel.HIGH
+    finally:
+        db.close()
+        harness.close()
