@@ -13,6 +13,10 @@ client = _harness.client
 
 
 def _token() -> str:
+    """按需建立领域接口测试账户并通过登录取凭证。
+
+    避免重复建立同名账户，始终关闭准备数据的会话。
+    """
     db = _session()
     try:
         if db.query(UserAccount).filter_by(username="domain-user").first() is None:
@@ -30,12 +34,20 @@ def _token() -> str:
 
 
 def test_removed_exam_profile_and_personal_assessment_routes_are_not_public() -> None:
+    """登录后访问已移除的备考背景和个人评估记录入口。
+
+    检查均返回 404，确认当前接口边界。
+    """
     headers = {"Authorization": f"Bearer {_token()}"}
     assert client.get("/api/profile/exam", headers=headers).status_code == 404
     assert client.get("/api/reports/me", headers=headers).status_code == 404
 
 
 def test_online_settings_have_one_retrieval_path_and_no_calibration_switches() -> None:
+    """检查线上配置不包含列出的实验检索和校准切换项。
+
+    保持实验能力与当前应用配置边界一致。
+    """
     settings = Settings()
     for name in (
         "knowledge_retriever",
@@ -50,6 +62,10 @@ def test_online_settings_have_one_retrieval_path_and_no_calibration_switches() -
 
 
 def test_high_risk_screening_creates_a_review_and_returns_a_stable_safety_message() -> None:
+    """提交带需立即关注答案的九题量表。
+
+    检查风险标志、安全提示和升级响应，并直接核对数据库新增一条审核记录。
+    """
     headers = {"Authorization": f"Bearer {_token()}"}
     response = client.post(
         "/api/screening/PHQ-9/submit",

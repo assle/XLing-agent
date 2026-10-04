@@ -11,6 +11,10 @@ from app.core.time import utc_now
 
 
 def now() -> datetime:
+    """为数据库时间字段提供统一的当前时间。
+
+    委托 utc_now 返回无时区标记的世界标准时间，保持各模型默认值一致。
+    """
     return utc_now()
 
 
@@ -28,10 +32,18 @@ class UserAccount(Base):
 
     @property
     def roles(self) -> list[str]:
+        """在逗号分隔的存储文本与业务使用的角色集合之间转换。
+
+        读取时拆分并去掉空项；赋值时将传入角色排序后拼接，保持保存顺序稳定。
+        """
         return [role for role in self.roles_csv.split(",") if role]
 
     @roles.setter
     def roles(self, value: list[str] | set[str]) -> None:
+        """在逗号分隔的存储文本与业务使用的角色集合之间转换。
+
+        读取时拆分并去掉空项；赋值时将传入角色排序后拼接，保持保存顺序稳定。
+        """
         self.roles_csv = ",".join(sorted(value))
 
 
@@ -84,6 +96,10 @@ class ChatSession(Base):
     messages: Mapped[list["ChatMessage"]] = relationship(back_populates="session", cascade="all, delete-orphan")
 
     def touch(self) -> None:
+        """将会话最近更新时间设为当前时间。
+
+        只修改当前对象，是否写入并提交数据库由调用方决定。
+        """
         self.updated_at = now()
 
 

@@ -1,5 +1,7 @@
 {
   "audit_skill": "experiment-audit",
+  "audit_scope": "historical_snapshot_2026-09-01",
+  "current_classifier_reference": "finetune/README.md",
   "verdict": "WARN",
   "reason_code": "synthetic_single_seed_scope",
   "summary": "结果真实可复算，但仅覆盖单种子、单配置、未人工复核的合成模板数据。",
@@ -27,8 +29,8 @@
   "checks": {
     "gt_provenance": {"status": "pass", "details": "Dataset output labels are template-assigned, not model-generated."},
     "score_normalization": {"status": "pass", "details": "Metrics derive directly from confusion counts."},
-    "result_existence": {"status": "pass", "details": "Current data, logs, IDs, predictions and metrics align."},
-    "dead_code": {"status": "pass", "details": "All metric functions are called."},
+    "result_existence": {"status": "pass", "details": "Audited data, logs, IDs, predictions and metrics align."},
+    "dead_code": {"status": "pass", "details": "All metric functions in the audited version are called."},
     "scope": {"status": "warn", "details": "One seed, one config, synthetic templates, no human review."},
     "eval_type": "synthetic_proxy"
   },

@@ -13,11 +13,7 @@ _RISK_ORDER = {RiskLevel.LOW: 1, RiskLevel.MEDIUM: 2, RiskLevel.HIGH: 3}
 
 
 class RiskTrajectoryHealth:
-    """Process-local health state for risk trajectory evaluation.
-
-    The snapshot intentionally contains only operational metadata, never
-    student content or risk details.
-    """
+    """保存当前进程的轨迹组件健康状态，不包含用户表达或风险详情。"""
 
     _lock = threading.Lock()
     _status = "unknown"
@@ -29,6 +25,10 @@ class RiskTrajectoryHealth:
 
     @classmethod
     def record_success(cls) -> None:
+        """记录轨迹组件最近成功时间，并在从降级恢复时记录恢复时间。
+
+        使用共享锁保护状态，只保存在当前进程，不清零累计失败次数。
+        """
         now = utc_now().isoformat()
         with cls._lock:
             if cls._status == "degraded":
@@ -38,7 +38,10 @@ class RiskTrajectoryHealth:
 
     @classmethod
     def record_failure(cls, error: Exception) -> bool:
-        """Record a failure and return whether this is a new degraded state."""
+        """记录异常类型和时间，并返回是否刚进入降级状态。
+
+        返回 True 可用于仅在状态转变时打印醒目日志；不保存用户正文或具体风险内容。
+        """
         now = utc_now().isoformat()
         with cls._lock:
             changed = cls._status != "degraded"
@@ -50,6 +53,10 @@ class RiskTrajectoryHealth:
 
     @classmethod
     def snapshot(cls) -> dict:
+        """在共享锁保护下返回组件运行状态快照。
+
+        只包含计数、时间和异常类型，不查询数据库或主动检测连接。
+        """
         with cls._lock:
             return {
                 "status": cls._status,
@@ -62,19 +69,23 @@ class RiskTrajectoryHealth:
 
 
 class RiskTrajectoryService:
-    """Tracks risk assessment trends across session and cross-session windows.
-
-    Issue 07: session window = last 3 messages, cross-session = last 7 days.
-    Rising trajectory escalates effective risk; explicit HIGH is never downgraded.
-    """
+    """结合会话内和跨会话的近期风险分数识别持续上升趋势。"""
 
     def __init__(self, db: Session, session_window: int = 3, cross_session_days: int = 7, rising_threshold: int = 3):
+        """保存会话窗口、跨会话天数和连续上升阈值。
+
+        db 用于轨迹读写；参数由调用方或配置提供，初始化不记录风险点。
+        """
         self.db = db
         self.session_window = session_window
         self.cross_session_days = cross_session_days
         self.rising_threshold = rising_threshold
 
     def record_point(self, user_id: int, session_id: int | None, risk: RiskLevel, score: float) -> RiskTrajectoryPoint:
+        """为当前用户和可选会话准备一条风险轨迹记录。
+
+        flush 后取得数据库值，但不提交，允许外层与本轮其他记录一起确认保存。
+        """
         point = RiskTrajectoryPoint(
             user_id=user_id,
             session_id=session_id,
@@ -87,7 +98,10 @@ class RiskTrajectoryService:
         return point
 
     def get_session_points(self, user_id: int, session_id: int) -> list[RiskTrajectoryPoint]:
-        """Last N trajectory points within the same session."""
+        """查询指定用户同一会话中最近的若干风险点。
+
+        数量受 session_window 限制，返回顺序为最新在前。
+        """
         return (
             self.db.query(RiskTrajectoryPoint)
             .filter(RiskTrajectoryPoint.user_id == user_id)
@@ -98,7 +112,10 @@ class RiskTrajectoryService:
         )
 
     def get_cross_session_points(self, user_id: int) -> list[RiskTrajectoryPoint]:
-        """All trajectory points in the last N days for this user."""
+        """查询指定用户最近配置天数内的所有风险点。
+
+        不限制会话编号，按最新在前排列，供跨会话趋势判断。
+        """
         cutoff = utc_now() - timedelta(days=self.cross_session_days)
         return (
             self.db.query(RiskTrajectoryPoint)
@@ -109,11 +126,16 @@ class RiskTrajectoryService:
         )
 
     def is_rising(self, points: list[RiskTrajectoryPoint]) -> bool:
-        """Check if risk scores are strictly increasing across consecutive points."""
+        """判断截至最新点的连续严格上升段是否达到阈值。
+
+        输入须为最新在前；先反转成时间顺序，相等或下降就把连续长度重置为一。
+        统计的是连续点数，不是历史上任意一段上升，也不是增加次数。
+        """
         if len(points) < self.rising_threshold:
             return False
-        # points are ordered desc (newest first); reverse for chronological
+        # 输入由新到旧，反转后才能沿时间前进方向比较分数。
         chronological = list(reversed(points))
+        # 相等或下降都会打断连续上升，重新从当前点算起。
         consecutive_rising = 1
         for i in range(1, len(chronological)):
             if chronological[i].risk_score > chronological[i - 1].risk_score:
@@ -125,28 +147,29 @@ class RiskTrajectoryService:
     def get_effective_risk(
         self, user_id: int, session_id: int | None, current_risk: RiskLevel, current_score: float
     ) -> RiskLevel:
-        """Compute effective risk considering trajectory trends.
+        """结合当前分数与会话内、跨会话趋势决定有效风险。
 
-        - Explicit HIGH is never downgraded.
-        - Rising trajectory (>= threshold consecutive increases) escalates risk.
+        已是高风险时立即返回且不在此记录新点；其他情况先记录当前点，再判断趋势。
+        任一窗口持续上升时只提高一级，不降低当前风险。
         """
-        # Explicit HIGH is never downgraded
+        # 已明确高风险时直接保留，不因历史趋势改善而降低。
         if current_risk == RiskLevel.HIGH:
             return RiskLevel.HIGH
 
-        # Record the current point for trajectory analysis
+        # 把当前分数也加入趋势窗口；此处尚未单独提交记录。
         self.record_point(user_id, session_id, current_risk, current_score)
 
-        # Check session window
+        # 检查同一会话内的近期风险点。
         session_points = self.get_session_points(user_id, session_id) if session_id else []
         session_rising = self.is_rising(session_points)
 
-        # Check cross-session window
+        # 再检查该用户跨会话的近期风险点。
         cross_points = self.get_cross_session_points(user_id)
         cross_rising = self.is_rising(cross_points)
 
+        # 两个观察窗口任一满足条件就提高一级，不需要同时成立。
         if session_rising or cross_rising:
-            # Escalate: LOW -> MEDIUM, MEDIUM -> HIGH
+            # 每次只提高一级：低到中，中到高。
             if current_risk == RiskLevel.LOW:
                 return RiskLevel.MEDIUM
             if current_risk == RiskLevel.MEDIUM:
@@ -155,7 +178,10 @@ class RiskTrajectoryService:
         return current_risk
 
     def get_trajectory_summary(self, user_id: int) -> dict:
-        """Admin-viewable summary without sensitive content."""
+        """返回近期轨迹数量、趋势及最新风险，不包含消息正文。
+
+        短窗口从有会话编号的近期点中截取，可能包含不同会话；跨会话窗口同时参与趋势判断。
+        """
         cross_points = self.get_cross_session_points(user_id)
         if not cross_points:
             return {"totalPoints": 0, "trend": "no_data", "currentRisk": None}

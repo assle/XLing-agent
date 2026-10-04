@@ -47,6 +47,42 @@ services:
       retries: 30
     restart: unless-stopped
 
+  mysql-test:
+    image: mysql:8.0
+    profiles: [test]
+    environment:
+      MYSQL_ROOT_PASSWORD: test-only-root
+      MYSQL_DATABASE: xling_test
+      MYSQL_USER: xling_test
+      MYSQL_PASSWORD: test-only
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", 'mysqladmin ping -h 127.0.0.1 -uroot -p"$${MYSQL_ROOT_PASSWORD}" --silent']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  mysql-tests:
+    profiles: [test]
+    build:
+      context: .
+      target: test
+    depends_on:
+      mysql-test:
+        condition: service_healthy
+    environment:
+      MYSQL_TEST_DATABASE_URL: mysql+pymysql://xling_test:test-only@mysql-test:3306/xling_test?charset=utf8mb4
+      DATABASE_URL: mysql+pymysql://xling_test:test-only@mysql-test:3306/xling_test?charset=utf8mb4
+      AI_PROVIDER: mock
+      KNOWLEDGE_VECTOR_ENABLED: "false"
+    volumes:
+      - ./tests:/app/tests:ro
+      - ./pyproject.toml:/app/pyproject.toml:ro
+
   app:
     build: .
     depends_on:

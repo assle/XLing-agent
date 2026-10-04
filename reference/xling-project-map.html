@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Xling 项目地图</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+  <main class="page">
+    <header class="masthead">
+      <p class="eyebrow">Reference · 项目速查</p>
+      <h1>Xling 项目地图</h1>
+      <p class="lede">把“这堆文件”压缩成一张可以反复使用的地图：一个定位、六个步骤、五层技术。</p>
+      <div class="meta"><span class="chip">适合打印</span><span class="chip">阅读代码时放在旁边</span></div>
+    </header>
+
+    <section>
+      <h2>30 秒说明</h2>
+      <div class="say-it">
+        Xling 是一个面向一般用户的非诊断性心理健康支持系统。它先判断消息属于普通交流还是心理支持，再对心理支持消息进行安全风险评估；低、中风险会进入知识检索和结构化追问，高风险则暂停自动流程并等待人工审核。系统用数据库保存关键事实，用短期存储保存会话状态，并把回答逐段发送到网页。
+      </div>
+    </section>
+
+    <section>
+      <h2>一条消息的主链路</h2>
+      <div class="route" aria-label="一条消息的处理路线">
+        <div class="node">浏览器<br>发消息</div>
+        <div class="node">FastAPI<br>接收校验</div>
+        <div class="node accent">LangGraph<br>安排顺序</div>
+        <div class="node">专职模块<br>处理消息</div>
+        <div class="node">数据库<br>保存事实</div>
+        <div class="node">事件流<br>返回页面</div>
+      </div>
+      <p class="section-intro">代码入口依次寻找：<code>sendMessage</code> → <code>chat_stream</code> → <code>ChatService.prepare</code> → <code>_build_graph</code> → <code>save_support_turn</code> → <code>ChatService.stream_chat</code>。</p>
+    </section>
+
+    <section>
+      <h2>五层技术地图</h2>
+      <table>
+        <thead><tr><th>层</th><th>当前技术</th><th>在 Xling 中的工作</th><th>先看哪里</th></tr></thead>
+        <tbody>
+          <tr><td>页面</td><td>HTML、CSS、JavaScript</td><td>显示界面、发请求、读取逐段返回的事件</td><td><code>app/static/chat.js</code></td></tr>
+          <tr><td>网页接口</td><td>FastAPI、Uvicorn、Pydantic</td><td>启动网页服务，匹配地址，校验输入，取得用户和数据库会话</td><td><code>app/main.py</code>、<code>app/api/support.py</code></td></tr>
+          <tr><td>流程与业务</td><td>LangGraph、Python 服务类</td><td>执行安全顺序、条件分支、知识检索、回复和人工暂停</td><td><code>app/agents/langgraph_runtime.py</code></td></tr>
+          <tr><td>数据与状态</td><td>MySQL、SQLAlchemy、Redis、Chroma</td><td>分别保存长期业务事实、操作数据库、短期状态和可相似检索的知识</td><td><code>app/core/database.py</code>、<code>app/services/</code></td></tr>
+          <tr><td>运行与入口</td><td>Docker Compose、Caddy</td><td>一起启动多个服务，并把外部请求转给应用</td><td><code>docker-compose.yml</code>、<code>Caddyfile</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>三条主要分支</h2>
+      <div class="branch-grid">
+        <article class="card"><strong>日常对话</strong><p>快速安全检查 → 读取记忆 → 消息分流 → 日常回答。</p></article>
+        <article class="card"><strong>心理支持</strong><p>安全风险评估 → 知识检索 → 四维追问或行动计划 → 支持回复。</p></article>
+        <article class="card"><strong>高风险消息</strong><p>保存检查点 → 固定安全提示 → 等待人工审核 → 恢复或使用固定回复。</p></article>
+      </div>
+    </section>
+
+    <section>
+      <h2>最容易混淆的边界</h2>
+      <div class="cards">
+        <article class="card"><strong>消息分流 ≠ 风险评估</strong><p>前者选择处理路径，后者判断需要多高的安全保护。</p></article>
+        <article class="card"><strong>角色 ≠ 独立模型</strong><p>多个智能体名称表示不同职责，它们可以共享同一个模型和同一份状态。</p></article>
+        <article class="card"><strong>Redis ≠ MySQL</strong><p>Redis 主要承担有时限的短期状态；MySQL 保存必须长期可靠保留的业务事实。</p></article>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <nav><a href="../README.md">项目入口</a><a href="../CONTEXT.md">领域术语</a><a href="../docs/adr/0012-langgraph-runtime-and-local-diagnostics.md">编排与诊断决策</a></nav>
+    </footer>
+  </main>
+</body>
+</html>

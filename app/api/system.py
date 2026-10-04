@@ -37,7 +37,7 @@ def agent_status(_: Annotated[UserAccount, Depends(current_user)]):
         "provider": provider,
         "model": model,
         "realModelEnabled": provider in {"ollama", "openai"},
-        "agentFramework": agent_framework_status(settings),
+        "agentFramework": agent_framework_status(),
         "finetunedModel": finetuned_model_status(settings),
         "agents": [
             {"name": "MemoryAgent", "status": "READY", "description": "短期上下文与长期记忆摘要"},

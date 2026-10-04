@@ -7,6 +7,10 @@ from app.core.versioning import ArtifactVersionResolver
 
 
 def test_version_manifest_is_stable_and_covers_reproducibility_inputs(tmp_path):
+    """用临时知识和数据文件固定版本输入。
+
+    重复解析应得到相同结果，并核对模型、内容指纹和对外字段映射。
+    """
     knowledge = tmp_path / "knowledge.md"
     knowledge.write_text("备考焦虑支持知识", encoding="utf-8")
     dataset = tmp_path / "eval.jsonl"
@@ -50,6 +54,10 @@ def test_version_manifest_is_stable_and_covers_reproducibility_inputs(tmp_path):
 
 
 def test_dataset_and_index_versions_change_only_with_their_inputs(tmp_path):
+    """先只修改数据集，再只修改知识正文。
+
+    检查相应版本变化、无关版本保持一致，避免不同输入的版本标识相互混淆。
+    """
     knowledge = tmp_path / "knowledge.md"
     knowledge.write_text("版本一", encoding="utf-8")
     dataset = tmp_path / "eval.jsonl"

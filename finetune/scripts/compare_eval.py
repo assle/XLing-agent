@@ -23,6 +23,10 @@ CLASSES = ["正常", "焦虑", "低落", "高风险"]
 
 
 def load_report(path: Path) -> dict:
+    """读取已有分类评估报告。
+
+    文件缺失时打印路径并以失败状态结束脚本；格式错误由文本解析直接抛出。
+    """
     if not path.exists():
         print(f"报告不存在: {path}")
         sys.exit(1)
@@ -31,7 +35,16 @@ def load_report(path: Path) -> dict:
 
 
 def compare(before: dict, after: dict) -> dict:
+    """比较微调前后的准确率、分类综合分数和高风险召回率。
+
+    差值统一按 after 减 before；高风险门槛允许下降不超过 0.05，不等于完全不下降。
+    此处不校验两份报告的数据集和版本是否一致，调用方须保证比较条件。
+    """
     def _summary(r: dict) -> dict:
+        """从一份报告提取模型、提供方及三个总体指标。
+
+        模型和提供方缺失时使用空文本，必要指标缺失则抛错。
+        """
         return {
             "model": r.get("model", ""),
             "provider": r.get("provider", ""),
@@ -55,6 +68,10 @@ def compare(before: dict, after: dict) -> dict:
 
 
 def main() -> None:
+    """解析前后报告和输出路径，保存比较结果并打印分类别变化。
+
+    使用已有报告计算，不重新调用分类模型，也不根据门槛自动替换线上模型。
+    """
     before_path = DEFAULT_BEFORE
     after_path = DEFAULT_AFTER
     output_path = DEFAULT_OUTPUT

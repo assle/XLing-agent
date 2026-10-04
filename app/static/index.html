@@ -225,6 +225,21 @@
         <div id="reviews" class="reviews"></div>
       </section>
 
+      <section class="panel" id="taskPanel">
+        <div class="section-head">
+          <div>
+            <p class="panel-label">后台处理</p>
+            <h2>台账与预警任务</h2>
+          </div>
+          <button id="refreshTasks" class="ghost" type="button">刷新任务</button>
+        </div>
+        <p class="hint">显示最近 100 条任务及失败留存记录；等待重试的任务由系统自动处理。</p>
+        <h3>任务状态</h3>
+        <div id="toolJobs" class="conversation-detail" aria-live="polite"></div>
+        <h3>失败留存</h3>
+        <div id="deadLetters" class="conversation-detail" aria-live="polite"></div>
+      </section>
+
       <section class="panel">
         <div class="section-head">
           <div>

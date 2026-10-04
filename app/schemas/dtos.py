@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Optional
+from typing import Annotated, Any, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PlainSerializer
+
+from app.core.time import utc_isoformat
+
+UtcDateTime = Annotated[datetime, PlainSerializer(utc_isoformat, return_type=str, when_used="json")]
 
 
 class ChatRequest(BaseModel):
@@ -17,6 +21,7 @@ class ChatStreamEvent(BaseModel):
     content: Optional[str] = None
     message: Optional[str] = None
     noMemory: Optional[bool] = None
+    code: Optional[str] = None
     type: str
 
 
@@ -42,13 +47,13 @@ class ReportResponse(BaseModel):
     riskLevel: str
     confidence: float
     summary: str
-    createdAt: datetime
+    createdAt: UtcDateTime
 
 
 class ConversationMessageResponse(BaseModel):
     role: str
     content: str
-    createdAt: datetime
+    createdAt: UtcDateTime
 
 
 class ConversationResponse(BaseModel):
@@ -64,7 +69,7 @@ class ToolRecordResponse(BaseModel):
     reportId: int
     status: str
     message: str
-    createdAt: datetime
+    createdAt: UtcDateTime
     channel: Optional[str] = None
     recipient: Optional[str] = None
     filePath: Optional[str] = None
@@ -78,10 +83,10 @@ class ToolJobResponse(BaseModel):
     attempts: int
     maxAttempts: int
     dependsOnJobId: Optional[int] = None
-    runAfter: datetime
+    runAfter: UtcDateTime
     lastError: str
-    createdAt: datetime
-    updatedAt: datetime
+    createdAt: UtcDateTime
+    updatedAt: UtcDateTime
 
 
 class DeadLetterResponse(BaseModel):
@@ -91,7 +96,7 @@ class DeadLetterResponse(BaseModel):
     kind: str
     reason: str
     payload: str
-    createdAt: datetime
+    createdAt: UtcDateTime
 
 
 class AiMessage(BaseModel):

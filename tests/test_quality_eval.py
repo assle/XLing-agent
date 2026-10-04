@@ -29,6 +29,10 @@ from evals.quality.runner import (
 # ---------------------------------------------------------------------------
 
 def test_parse_judge_response_valid():
+    """解析一份包含四维分数和理由的合法评审回复。
+
+    检查分数及说明保留。
+    """
     raw = '{"empathy":4,"safety":5,"actionability":3,"boundary":4,"empathy_reason":"good","safety_reason":"safe","actionability_reason":"vague","boundary_reason":"clear"}'
     result = parse_judge_response(raw)
     assert result["empathy"] == 4
@@ -39,6 +43,10 @@ def test_parse_judge_response_valid():
 
 
 def test_parse_judge_response_clamp_high():
+    """让四个评分都超过最高值。
+
+    检查各分数被限制为五分。
+    """
     raw = '{"empathy":10,"safety":99,"actionability":7,"boundary":8,"empathy_reason":"","safety_reason":"","actionability_reason":"","boundary_reason":""}'
     result = parse_judge_response(raw)
     assert result["empathy"] == 5
@@ -48,6 +56,10 @@ def test_parse_judge_response_clamp_high():
 
 
 def test_parse_judge_response_clamp_low():
+    """让评分为零或负数。
+
+    检查已解析的评分最低设为一分，与解析失败占位零分区分。
+    """
     raw = '{"empathy":0,"safety":-1,"actionability":0,"boundary":0,"empathy_reason":"","safety_reason":"","actionability_reason":"","boundary_reason":""}'
     result = parse_judge_response(raw)
     assert result["empathy"] == 1
@@ -57,6 +69,10 @@ def test_parse_judge_response_clamp_low():
 
 
 def test_parse_judge_response_invalid_json():
+    """输入无法解析的评审文字。
+
+    检查返回零分和解析错误说明，不伪造正常评分。
+    """
     result = parse_judge_response("not json at all")
     assert result["empathy"] == 0
     assert result["safety"] == 0
@@ -64,6 +80,10 @@ def test_parse_judge_response_invalid_json():
 
 
 def test_parse_judge_response_with_surrounding_text():
+    """在评分对象前后加入解释文字。
+
+    检查解析器仍能提取合法评分。
+    """
     raw = 'Here is my evaluation:\n{"empathy":4,"safety":5,"actionability":3,"boundary":4,"empathy_reason":"x","safety_reason":"x","actionability_reason":"x","boundary_reason":"x"}\nDone.'
     result = parse_judge_response(raw)
     assert result["empathy"] == 4
@@ -71,6 +91,10 @@ def test_parse_judge_response_with_surrounding_text():
 
 
 def test_build_judge_messages_has_dimensions():
+    """构造评审请求后检查系统标准和待评材料。
+
+    要求包含四维名称、评分范围以及用户原话和回复。
+    """
     messages = build_judge_messages("user text", "reply text")
     assert len(messages) == 2
     system_content = messages[0].content
@@ -89,6 +113,10 @@ def test_build_judge_messages_has_dimensions():
 # ---------------------------------------------------------------------------
 
 def test_compute_quality_summary_basic():
+    """输入两例可手算的分数统计。
+
+    检查共情均分为 3.5，零波动不标为不稳定。
+    """
     results = [
         {
             "dimensionStats": {
@@ -114,6 +142,10 @@ def test_compute_quality_summary_basic():
 
 
 def test_compute_quality_summary_unstable_flag():
+    """分别设置高波动与低波动维度。
+
+    检查只把平均标准差超过门槛的维度标为不稳定。
+    """
     results = [
         {
             "dimensionStats": {
@@ -130,6 +162,10 @@ def test_compute_quality_summary_unstable_flag():
 
 
 def test_compute_quality_summary_empty():
+    """汇总空结果列表。
+
+    检查案例数和各维度平均分为零，避免除零。
+    """
     summary = compute_quality_summary([])
     assert summary["totalCases"] == 0
     for dim in QUALITY_DIMENSIONS:
@@ -141,6 +177,10 @@ def test_compute_quality_summary_empty():
 # ---------------------------------------------------------------------------
 
 def test_build_summary_excludes_results():
+    """从含逐例详情的报告生成摘要。
+
+    检查删除 results 但保留总数。
+    """
     report = {
         "totalCases": 5,
         "perDimension": {},
@@ -156,6 +196,10 @@ def test_build_summary_excludes_results():
 # ---------------------------------------------------------------------------
 
 def test_evaluate_mock_mode_structure():
+    """用两条临时样本运行模拟生成与三次模拟评审。
+
+    检查报告版本、每次评分和四维均值波动结构完整。
+    """
     cases = [
         {"id": "q-test-01", "text": "考研倒计时30天，每天复习到凌晨还是觉得不够", "category": "anxiety"},
         {"id": "q-test-02", "text": "今天考完了，感觉还行", "category": "casual"},
@@ -194,6 +238,10 @@ def test_evaluate_mock_mode_structure():
 
 
 def test_evaluate_mock_mode_writes_files():
+    """在临时目录运行一例模拟质量评估。
+
+    检查完整报告与摘要都存在，摘要不包含逐例详情。
+    """
     cases = [
         {"id": "q-test-01", "text": "考研压力好大", "category": "anxiety"},
     ]
@@ -223,7 +271,10 @@ def test_evaluate_mock_mode_writes_files():
 
 
 def test_evaluate_mock_mode_stable_scores():
-    """In mock mode, judge returns fixed scores 3 times -> std should be 0."""
+    """让固定模拟评审重复评价同一回复。
+
+    检查各维度波动为零且未标不稳定，不把该结果当作真实评审一致性证据。
+    """
     cases = [
         {"id": "q-test-01", "text": "考研压力好大", "category": "anxiety"},
     ]

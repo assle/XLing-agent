@@ -28,7 +28,7 @@ _FIELDS = frozenset({
     "interview_completed", "interview_stage", "retrieval_count", "reason_code", "model",
     "provider", "job_kind", "status", "backend", "checkpoint_id", "wait_ms", "streamed",
     "record_count", "tool", "dependency_job_id", "reused", "recovered_count", "decision",
-    "intent", "quick_risk_flagged",
+    "intent", "quick_risk_flagged", "output_characters", "generated_tokens", "finish_reason",
 })
 _context: ContextVar[tuple[str, dict[str, object]] | None] = ContextVar("diagnostic_execution", default=None)
 _stage_start: ContextVar[float | None] = ContextVar("diagnostic_stage_start", default=None)

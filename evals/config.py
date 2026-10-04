@@ -78,4 +78,8 @@ class EvalSettings(Settings):
 
 @lru_cache
 def get_eval_settings() -> EvalSettings:
+    """读取并缓存评估专用配置。
+
+    首次构造后复用同一对象，避免每次读取环境；运行中更改配置文件不会自动更新已缓存值。
+    """
     return EvalSettings()

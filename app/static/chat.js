@@ -49,7 +49,7 @@ function welcomeHtml() {
   return `
     <div class="empty">
       <strong>你好，这里是 Xling</strong>
-      <p>一个可以安心说话的地方。备考的压力、睡不着的夜晚、说不清的烦躁，都可以慢慢写下来。不知道从何说起？点下面任意一句：</p>
+      <p>一个可以安心说话的地方。工作、关系、家庭、睡眠、适应和考试压力，都可以慢慢写下来。不知道从何说起？点下面任意一句：</p>
       <div class="starter-row">
         <button class="starter" type="button" data-quick="我最近压力很大，晚上总是睡不着。">压力大，睡不着</button>
         <button class="starter" type="button" data-quick="快考试了，我总觉得复习不完，心里很慌。">担心复习不完</button>
@@ -79,11 +79,12 @@ function startNewSession() {
 // 切换到历史会话：加载消息、行动计划，并高亮当前会话
 /**
  * 按公开编号读取历史会话，替换消息展示并同步无记忆标志。
- * 同时调用行动计划加载；该加载入口当前查询用户的计划，没有传入会话编号。
+ * 同时按当前会话加载行动计划，避免显示其他会话的计划。
  * 请求失败展示错误，最后更新历史列表选中状态。
  */
 async function switchSession(publicId) {
   state.sessionId = publicId;
+  resetPlanPanel();
   hideCbtTag();
   setPill(els.sessionBadge, "READY");
   els.messages.innerHTML = `<div class="empty"><p>加载中...</p></div>`;
@@ -97,12 +98,13 @@ async function switchSession(publicId) {
       els.messages.innerHTML = welcomeHtml();
     } else {
       for (const msg of data.messages) {
-        const role = msg.role === "user" ? "user" : "assistant";
+        const role = msg.role.toLowerCase() === "user" ? "user" : "assistant";
         addMessage(role, msg.content);
       }
     }
     // 加载该会话关联的行动计划
     await loadActionPlans();
+    if (state.sessionId !== publicId) return;
     // 同步无记忆模式标记
     state.noMemory = Boolean(data.noMemory);
     els.noMemoryCheck.checked = state.noMemory;
@@ -253,6 +255,7 @@ async function sendMessage(event) {
   state.sending = true;
   const wasNewSession = !state.sessionId;
   els.sendButton.disabled = true;
+  hideCbtTag();
   setPill(els.sessionBadge, "THINKING", "warn");
   els.messageInput.value = "";
   addMessage("user", message);
@@ -301,12 +304,20 @@ async function sendMessage(event) {
         }
         if (eventData.type === "error") {
           streamFailed = true;
-          if (!raw) assistant.textContent = eventData.message || "MCP 工具调用失败";
+          const failure = eventData.message || "回复未完成，请稍后重试。";
+          assistant.textContent = raw.trim() ? `${raw}\n\n${failure}` : failure;
           setPill(els.sessionBadge, "ERROR", "danger");
         }
       });
     }
-    if (!streamFailed && !pendingReview) setPill(els.sessionBadge, "DONE", "ok");
+    if (!streamFailed && !pendingReview) {
+      if (raw.trim()) {
+        setPill(els.sessionBadge, "DONE", "ok");
+      } else {
+        assistant.textContent = "回复生成未返回内容，请重试。";
+        setPill(els.sessionBadge, "ERROR", "danger");
+      }
+    }
   } catch (error) {
     assistant.textContent = `发送失败：${error.message}`;
     setPill(els.sessionBadge, "ERROR", "danger");

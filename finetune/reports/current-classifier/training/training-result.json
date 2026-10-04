@@ -1,0 +1,1041 @@
+{
+  "experimental": true,
+  "sanity": false,
+  "trainingOnly": true,
+  "model": "/Users/assle/dev/mindbridge-py/.scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate/recovered-merged-base",
+  "device": "mps",
+  "seed": 42,
+  "config": {
+    "model": "/Users/assle/dev/mindbridge-py/.scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate/recovered-merged-base",
+    "train": "/Users/assle/dev/mindbridge-py/.scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate-postposed-negation/data/train.jsonl",
+    "validation": "/Users/assle/dev/mindbridge-py/.scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate-v10/data/validation.jsonl",
+    "test": "/Users/assle/dev/mindbridge-py/.scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate-epochs4/DO_NOT_READ_TEST",
+    "output_dir": "/Users/assle/dev/mindbridge-py/.scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate-epochs4/training-output",
+    "result": "/Users/assle/dev/mindbridge-py/.scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate-epochs4/training-result.json",
+    "epochs": 4.0,
+    "learning_rate": 5e-05,
+    "batch_size": 1,
+    "gradient_accumulation": 8,
+    "max_length": 256,
+    "lora_rank": 8,
+    "seed": 42,
+    "max_train_samples": 0,
+    "max_eval_samples": 0,
+    "max_latency_ms": 2000.0,
+    "local_files_only": true,
+    "sanity": false,
+    "training_only": true,
+    "system_prompt_file": "/Users/assle/dev/mindbridge-py/.scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate-v10/system-prompt.txt"
+  },
+  "systemPromptSHA256": "a6d981d29f3cfe7f4edef11bb293a5c5ddf06a87d6205177746b5c4454d346ab",
+  "trainCases": 376,
+  "validationCases": 128,
+  "testCases": 0,
+  "testDatasetRead": false,
+  "training": {
+    "initialLoss": 0.24225866969209164,
+    "finalLoss": 0.003833101406598871,
+    "updates": 188,
+    "rawBatchLossMean": 0.07125437942875365,
+    "validationHistory": [
+      {
+        "batch": 376,
+        "accuracy": 0.9453125,
+        "macroF1": 0.9446538439422689,
+        "highRiskRecall": 1.0,
+        "outputValidity": 1.0,
+        "latencyMsPerCase": 77.77017285161492
+      },
+      {
+        "batch": 752,
+        "accuracy": 0.9765625,
+        "macroF1": 0.9765453184808024,
+        "highRiskRecall": 1.0,
+        "outputValidity": 1.0,
+        "latencyMsPerCase": 76.32997331256774
+      },
+      {
+        "batch": 1128,
+        "accuracy": 0.953125,
+        "macroF1": 0.9530739602236955,
+        "highRiskRecall": 1.0,
+        "outputValidity": 1.0,
+        "latencyMsPerCase": 125.67188183584221
+      },
+      {
+        "batch": 1504,
+        "accuracy": 0.953125,
+        "macroF1": 0.9530739602236955,
+        "highRiskRecall": 1.0,
+        "outputValidity": 1.0,
+        "latencyMsPerCase": 116.60322460920725
+      }
+    ],
+    "bestValidationMacroF1": 0.9765453184808024
+  },
+  "validation": {
+    "cases": 128,
+    "accuracy": 0.9765625,
+    "macroF1": 0.9765453184808024,
+    "highRiskRecall": 1.0,
+    "perClass": {
+      "正常": {
+        "precision": 1.0,
+        "recall": 0.96875,
+        "f1": 0.9841269841269841
+      },
+      "焦虑": {
+        "precision": 1.0,
+        "recall": 0.9375,
+        "f1": 0.967741935483871
+      },
+      "低落": {
+        "precision": 0.9411764705882353,
+        "recall": 1.0,
+        "f1": 0.9696969696969697
+      },
+      "高风险": {
+        "precision": 0.9696969696969697,
+        "recall": 1.0,
+        "f1": 0.9846153846153847
+      }
+    },
+    "confusionMatrix": {
+      "正常": {
+        "正常": 31,
+        "焦虑": 0,
+        "低落": 1,
+        "高风险": 0,
+        "__INVALID__": 0
+      },
+      "焦虑": {
+        "正常": 0,
+        "焦虑": 30,
+        "低落": 1,
+        "高风险": 1,
+        "__INVALID__": 0
+      },
+      "低落": {
+        "正常": 0,
+        "焦虑": 0,
+        "低落": 32,
+        "高风险": 0,
+        "__INVALID__": 0
+      },
+      "高风险": {
+        "正常": 0,
+        "焦虑": 0,
+        "低落": 0,
+        "高风险": 32,
+        "__INVALID__": 0
+      }
+    },
+    "predictionDistribution": {
+      "正常": 31,
+      "焦虑": 30,
+      "低落": 34,
+      "高风险": 33
+    },
+    "outputValidity": 1.0,
+    "latencyMsPerCase": 84.31440592994477,
+    "casesDetail": [
+      {
+        "id": "fc63f065c7151273",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "4eb8fa347ffe9d74",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "809d37612a01b6fe",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "9d7af9d93388feae",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "f5c12843c49b0907",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "92231ddb5f8e5182",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "245bd9f4c0d99806",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "18492cab3c3c4fe8",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "211811eae802e3de",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "7f5209d63f11d870",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "902870f51f6e7de0",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "977f31f42664f6d7",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "2abf3771ec3fa31f",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "a738fa87fde1dbfa",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "8eb0279ea8dec4bc",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "b9631e96a31ef042",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "314f49847903c8b8",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "942ce338501dde1f",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "5d95e781ca8ea2ed",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "b2f626dc4a133b4a",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "c579825c8d3ebada",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "882e9597f9fd3057",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "c3e1017404fe67bf",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "cd0c52c67925b82e",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "8360edf34d69efb6",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "d4ef9235d03c0ecd",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "b8ab4da184046ecf",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "091ba4a0e87f4bbb",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "274d46c0b55b3e44",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "774ce29adaeabe63",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "94fe9366d101c4dd",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "1d438f4f1e99627f",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "12cc39f8bdf1abf5",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "e5e0902d7535e764",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "db196794985629b4",
+        "expected": "焦虑",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "3d89e706df40423b",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "56bf29a22554149c",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "5e423b8ae082a44d",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "e99e5212ea9061d5",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "058cddac46d068af",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "7d405e582f00c34f",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "eb40c90a20db387e",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "5bc6684e894c606a",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "4fa28c6b126ebe27",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "bca80784b996b728",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "b5b3a14892621381",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "1655e674fe2e4fbc",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "8ec78e82a9462545",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "3847406f5ba8cdf7",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "e7cc85770bafceba",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "92e56f14a30c770b",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "10de232bd28c1269",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "95846585e081e9c2",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "4a9d8257fbde8bb0",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "51bc07b37b7d0969",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "ff1f3b2cde0f4002",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "3496301e897f7f43",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "1580459d95bbd711",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "154819a52f91eef1",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "d320ff303f3c548f",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "4658ea96567e199f",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "274f6a18f1bee4a5",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "b97a45c3901f25f2",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "3b85bad1536e288d",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "b67758c981275774",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "40316939d0ffb914",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "504ad6d80029057e",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "08b55aa4ec7ca7c0",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "e874f060e02c9f9d",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "71fb32f105e35122",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "e2134e8813e12f5f",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "f3512995287a8924",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "a86cd6b7f0f71396",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "b56f579e3414abb8",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "fe406036f5edd50d",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "3212e5007648bbd7",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "851f8675eae14708",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "41d12e5ef2931b41",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "c231c9d95f772862",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "c6a7750a7ba9bd92",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "natural-v08-正常-retrospective_revision_confirmations-01",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-正常-retrospective_revision_confirmations-02",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-正常-retrospective_revision_confirmations-03",
+        "expected": "正常",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-正常-factual_navigation_queries-01",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-正常-factual_navigation_queries-02",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-正常-factual_navigation_queries-03",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-焦虑-changed_environment_attention_diary-01",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-焦虑-changed_environment_attention_diary-02",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-焦虑-changed_environment_attention_diary-03",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-焦虑-conversation_continuity_worry_questions-01",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-焦虑-conversation_continuity_worry_questions-02",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-焦虑-conversation_continuity_worry_questions-03",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-低落-social_disconnect_reported_dialogue-01",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-低落-social_disconnect_reported_dialogue-02",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-低落-social_disconnect_reported_dialogue-03",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-低落-unfulfilled_positive_event_reflection-01",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-低落-unfulfilled_positive_event_reflection-02",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-低落-unfulfilled_positive_event_reflection-03",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "natural-v08-高风险-self_harm_signal_after_prior_coping-01",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "natural-v08-高风险-self_harm_signal_after_prior_coping-02",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "natural-v08-高风险-self_harm_signal_after_prior_coping-03",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "natural-v08-高风险-reported_ideation_seeking_help-01",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "natural-v08-高风险-reported_ideation_seeking_help-02",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "natural-v08-高风险-reported_ideation_seeking_help-03",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "v10-inc-n-v1-bread-sensory-preference-01",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-n-v1-bread-sensory-preference-02",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-n-v1-bread-sensory-preference-03",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-n-v2-bicycle-puncture-observation-01",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-n-v2-bicycle-puncture-observation-02",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-n-v2-bicycle-puncture-observation-03",
+        "expected": "正常",
+        "predicted": "正常",
+        "rawOutput": "正常",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-a-v1-kiln-opening-anticipation-01",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-a-v1-kiln-opening-anticipation-02",
+        "expected": "焦虑",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "v10-inc-a-v1-kiln-opening-anticipation-03",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-a-v2-rent-cash-timing-gap-01",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-a-v2-rent-cash-timing-gap-02",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-a-v2-rent-cash-timing-gap-03",
+        "expected": "焦虑",
+        "predicted": "焦虑",
+        "rawOutput": "焦虑",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-l-v1-retirement-role-value-loss-01",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-l-v1-retirement-role-value-loss-02",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-l-v1-retirement-role-value-loss-03",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-l-v2-pay-disclosure-comparative-worth-01",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-l-v2-pay-disclosure-comparative-worth-02",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-l-v2-pay-disclosure-comparative-worth-03",
+        "expected": "低落",
+        "predicted": "低落",
+        "rawOutput": "低落",
+        "outputCharacters": 2
+      },
+      {
+        "id": "v10-inc-h-v1-ordinary-booking-coexisting-intent-01",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "v10-inc-h-v1-ordinary-booking-coexisting-intent-02",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "v10-inc-h-v1-ordinary-booking-coexisting-intent-03",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "v10-inc-h-v2-past-page-current-entry-01",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "v10-inc-h-v2-past-page-current-entry-02",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      },
+      {
+        "id": "v10-inc-h-v2-past-page-current-entry-03",
+        "expected": "高风险",
+        "predicted": "高风险",
+        "rawOutput": "高风险",
+        "outputCharacters": 3
+      }
+    ]
+  },
+  "passed": true
+}

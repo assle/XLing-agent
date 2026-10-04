@@ -3,6 +3,7 @@ import ssl
 import threading
 from email.message import EmailMessage
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 from openpyxl import Workbook, load_workbook
 from sqlalchemy.orm import Session
@@ -12,7 +13,7 @@ from app.core.config import Settings
 from app.core.enums import ToolStatus
 from app.models.entities import AlertRecord, ExcelRecord, SafetyAssessmentRecord, UserAccount
 
-EXCEL_WRITE_LOCK = threading.Lock()
+EXCEL_WRITE_LOCK = threading.RLock()
 
 
 class ToolOrchestrationService:
@@ -27,23 +28,25 @@ class ToolOrchestrationService:
     def write_excel(self, report: SafetyAssessmentRecord) -> ExcelRecord:
         """把安全评估记录追加到表格并登记写入结果。
 
-        若数据库已有成功记录则直接复用；否则在进程内文件锁保护下打开或创建工作簿并保存。
+        在进程内文件锁中确认评估仍存在；若已有成功记录则复用，否则打开或创建工作簿并保存。
         文件保存先于数据库提交，两者不共享事务，不能保证异常情况下绝不重复写行。
         """
         with diagnostics.stage("tool.excel", report_id=report.id):
-            existing = (
-                self.db.query(ExcelRecord)
-                .filter(ExcelRecord.report_id == report.id, ExcelRecord.status == ToolStatus.SUCCESS.value)
-                .first()
-            )
-            # 复用数据库中的成功结果，避免普通重复请求再次执行外部操作。
-            if existing is not None:
-                diagnostics.emit("tool.reused", tool="excel", report_id=report.id)
-                return existing
-            path = Path(self.settings.excel_path)
-            path.parent.mkdir(parents=True, exist_ok=True)
-            # 此锁只协调当前进程里的表格操作，不能阻止另一个进程同时修改同一文件。
+            # 账户删除也持有此锁直到业务提交，等待中的工具不能重新导出已删除评估。
             with EXCEL_WRITE_LOCK:
+                if self.db.query(SafetyAssessmentRecord.id).filter(SafetyAssessmentRecord.id == report.id).first() is None:
+                    raise ValueError(f"report {report.id} not found")
+                existing = (
+                    self.db.query(ExcelRecord)
+                    .filter(ExcelRecord.report_id == report.id, ExcelRecord.status == ToolStatus.SUCCESS.value)
+                    .first()
+                )
+                # 复用数据库中的成功结果，避免普通重复请求再次执行外部操作。
+                if existing is not None:
+                    diagnostics.emit("tool.reused", tool="excel", report_id=report.id)
+                    return existing
+                path = Path(self.settings.excel_path)
+                path.parent.mkdir(parents=True, exist_ok=True)
                 if path.exists():
                     workbook = load_workbook(path)
                     sheet = workbook.active
@@ -55,10 +58,48 @@ class ToolOrchestrationService:
                 sheet.append([report.id, report.risk_level, report.emotion, report.confidence, report.summary, report.created_at.isoformat()])
                 # 先把工作簿写到文件系统，下面才登记数据库结果；异常时两者可能处于不同状态。
                 workbook.save(path)
-            record = ExcelRecord(report_id=report.id, file_path=str(path), status=ToolStatus.SUCCESS.value, message="Excel 台账已写入")
-            self.db.add(record)
-            self.db.commit()
-            return record
+                workbook.close()
+                record = ExcelRecord(report_id=report.id, file_path=str(path), status=ToolStatus.SUCCESS.value, message="Excel 台账已写入")
+                self.db.add(record)
+                self.db.commit()
+                return record
+
+    @staticmethod
+    def delete_excel_reports(report_ids: list[int], paths: list[str]) -> int:
+        """从已知台账中移除指定评估行，保留表头和其他用户的记录。
+
+        和写入共用进程内锁；文件缺失无需操作，读取或保存失败直接抛出。
+        """
+        if not report_ids:
+            return 0
+        deleted = 0
+        with EXCEL_WRITE_LOCK:
+            for path in {Path(value) for value in paths}:
+                if not path.exists():
+                    continue
+                workbook = load_workbook(path)
+                try:
+                    sheet = workbook.active
+                    if sheet.cell(1, 1).value != "reportId":
+                        raise ValueError("Unrecognized risk ledger header")
+                    rows = [
+                        row for row in range(2, sheet.max_row + 1)
+                        if sheet.cell(row, 1).value in report_ids
+                    ]
+                    for row in reversed(rows):
+                        sheet.delete_rows(row)
+                    if rows:
+                        with NamedTemporaryFile(dir=path.parent, suffix=".xlsx", delete=False) as temporary:
+                            temporary_path = Path(temporary.name)
+                        try:
+                            workbook.save(temporary_path)
+                            temporary_path.replace(path)
+                        finally:
+                            temporary_path.unlink(missing_ok=True)
+                    deleted += len(rows)
+                finally:
+                    workbook.close()
+        return deleted
 
     def notify(self, report: SafetyAssessmentRecord) -> AlertRecord:
         """根据投递模式处理风险通知并保存结果。

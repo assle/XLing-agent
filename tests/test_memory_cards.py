@@ -345,7 +345,7 @@ def test_no_memory_session_does_not_load_long_term_context(monkeypatch):
     result = asyncio.run(runtime.run(
         UserAccount(id=1, display_name="测试用户"),
         ChatSession(id=1, public_id="no-memory-session", user_id=1, no_memory=True),
-        "帮我写代码", "帮我写代码",
+        "帮我写代码",
     ))
 
     assert calls == {"profile": 0, "cards": 0}
@@ -404,7 +404,7 @@ def test_normal_session_loads_long_term_context(monkeypatch):
     result = asyncio.run(runtime.run(
         UserAccount(id=1, display_name="测试用户"),
         ChatSession(id=1, public_id="normal-session", user_id=1, no_memory=False),
-        "帮我写代码", "帮我写代码",
+        "帮我写代码",
     ))
 
     assert calls == {"profile": 1, "cards": 1}

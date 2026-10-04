@@ -9,6 +9,7 @@
 #   LLAMA_CPP_DIR=/path/to/llama.cpp ./finetune/scripts/quantize.sh
 set -euo pipefail
 
+# 定位已合并模型、转换工具、目标模型目录和中间格式文件。
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 MERGED_DIR="${MERGED_DIR:-$ROOT_DIR/finetune/saves/qwen25-3b-cls-merged}"
 LLAMA_CPP_DIR="${LLAMA_CPP_DIR:-$ROOT_DIR/../llama.cpp}"
@@ -16,12 +17,14 @@ MODEL_DIR="$ROOT_DIR/models/xling-cls-3b-ft"
 GGUF_FILE="xling-cls-3b-ft-q4_k_m.gguf"
 TMP_GGUF="$ROOT_DIR/finetune/saves/xling-cls-3b-ft-fp16.gguf"
 
+# 先检查训练权重合并产物，量化脚本不会代替前面的训练或合并步骤。
 if [ ! -d "$MERGED_DIR" ]; then
   echo "未找到合并后的模型: $MERGED_DIR"
   echo "请先执行合并: llamafactory-cli export finetune/configs/merge_lora.yaml"
   exit 1
 fi
 
+# 转换和量化依赖独立工具目录，缺失时停止并提示准备工具。
 if [ ! -d "$LLAMA_CPP_DIR" ]; then
   echo "未找到 llama.cpp: $LLAMA_CPP_DIR"
   echo "请克隆: git clone https://github.com/ggerganov/llama.cpp"
@@ -31,9 +34,11 @@ fi
 mkdir -p "$MODEL_DIR"
 
 echo "1/2 转换 HF 模型为 gguf (fp16)..."
+# 先把训练框架的模型转换为本地推理工具可读取的中间格式。
 python "$LLAMA_CPP_DIR/convert_hf_to_gguf.py" "$MERGED_DIR" --outfile "$TMP_GGUF"
 
 echo "2/2 量化为 Q4_K_M..."
+# 再用较低精度压缩模型参数，输出供本地服务注册的量化文件；中间文件仍保留。
 "$LLAMA_CPP_DIR/llama-quantize" "$TMP_GGUF" "$MODEL_DIR/$GGUF_FILE" q4_k_m
 
 echo "完成: $MODEL_DIR/$GGUF_FILE"

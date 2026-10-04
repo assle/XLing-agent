@@ -1,0 +1,113 @@
+{
+  "atUTC": "2026-10-03T15:19:08.706544+00:00",
+  "dataSHA256": "a1984a75d366d9d5d678cea7c1e9a27ba52308861fea46eedfed4035f3954a1e",
+  "rows": 376,
+  "sourceGroupCount": 64,
+  "byLabel": {
+    "正常": {
+      "rows": 94,
+      "sourceGroups": 16,
+      "characterLength": {
+        "min": 23,
+        "max": 80,
+        "mean": 41.0
+      }
+    },
+    "焦虑": {
+      "rows": 94,
+      "sourceGroups": 16,
+      "characterLength": {
+        "min": 31,
+        "max": 97,
+        "mean": 45.9
+      }
+    },
+    "低落": {
+      "rows": 94,
+      "sourceGroups": 16,
+      "characterLength": {
+        "min": 28,
+        "max": 98,
+        "mean": 46.01
+      }
+    },
+    "高风险": {
+      "rows": 94,
+      "sourceGroups": 16,
+      "characterLength": {
+        "min": 25,
+        "max": 83,
+        "mean": 42.14
+      }
+    }
+  },
+  "sourceGroupSizeDistribution": {
+    "10": 20,
+    "4": 44
+  },
+  "sourceComposition": [
+    {
+      "name": "机械模板主体",
+      "rows": 200,
+      "percent": 53.19,
+      "labels": {
+        "正常": 50,
+        "焦虑": 50,
+        "低落": 50,
+        "高风险": 50
+      }
+    },
+    {
+      "name": "自然表达增补",
+      "rows": 48,
+      "percent": 12.77,
+      "labels": {
+        "正常": 12,
+        "焦虑": 12,
+        "低落": 12,
+        "高风险": 12
+      }
+    },
+    {
+      "name": "范围与否定增补",
+      "rows": 48,
+      "percent": 12.77,
+      "labels": {
+        "正常": 12,
+        "焦虑": 12,
+        "低落": 12,
+        "高风险": 12
+      }
+    },
+    {
+      "name": "时间作用域增补",
+      "rows": 48,
+      "percent": 12.77,
+      "labels": {
+        "高风险": 12,
+        "焦虑": 12,
+        "低落": 12,
+        "正常": 12
+      }
+    },
+    {
+      "name": "后置否定增补",
+      "rows": 32,
+      "percent": 8.51,
+      "labels": {
+        "正常": 8,
+        "焦虑": 8,
+        "低落": 8,
+        "高风险": 8
+      }
+    }
+  ],
+  "validation": {
+    "rows": 128,
+    "sha256": "e07fd17f36cd9561d7488efd604774bda7e1741ef72a81038c5194383fd6cd25",
+    "sourceGroups": 24,
+    "exactInputOverlap": 0,
+    "namedSourceGroupOverlap": 0
+  },
+  "evidenceLimits": "Template source groups are distinct across splits; shared generation recipes and topics still limit natural-language generalization inference. No prediction-based sample removal or relabeling."
+}

@@ -9,6 +9,10 @@ const SHOTS = new URL("./shots/", import.meta.url).pathname;
 mkdirSync(SHOTS, { recursive: true });
 
 let failures = 0;
+/**
+ * 记录一个页面验证条件是否成立，并累计失败数量。
+ * cond 为真假条件，label 为可读说明；失败不中断后续验证，最后由总数决定退出状态。
+ */
 function assert(cond, label) {
   if (cond) console.log(`  PASS  ${label}`);
   else { failures += 1; console.error(`  FAIL  ${label}`); }
@@ -16,27 +20,44 @@ function assert(cond, label) {
 
 const browser = await chromium.launch({ channel: "msedge", headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+// 将浏览器页面脚本错误打印到验证输出，便于定位页面异常。
 page.on("pageerror", (err) => console.error("  [pageerror]", err.message));
 
+// 按给定名称保存当前视口截图，供人工检查布局，不截取完整长页面。
 const shot = (name) => page.screenshot({ path: `${SHOTS}${name}.png`, fullPage: false });
+// 返回指定页面元素是否可见，供后续断言复用。
 const visible = (sel) => page.isVisible(sel);
 
+/**
+ * 在浏览器中填写账号密码并等待账户区域出现。
+ * 使用固定等待上限；这里只验证页面登录状态，后续权限和功能由其他步骤检查。
+ */
 async function login(username, password) {
   await page.fill("#username", username);
   await page.fill("#password", password);
   await page.click('#loginForm button[type="submit"]');
+  // 轮询账户徽标是否显示，作为登录页面切换完成的条件。
   await page.waitForFunction(() => document.querySelector("#accountBadge")?.hidden === false, null, { timeout: 8000 });
 }
 
+/**
+ * 点击切换账号并等待登录表单重新出现。
+ * 通过页面行为退出，不直接修改服务器数据。
+ */
 async function logout() {
   await page.click("#switchAccount");
   await page.waitForSelector("#loginForm:not([hidden])", { timeout: 8000 });
 }
 
+/**
+ * 输入并发送一条消息，等待页面进入完成或错误状态。
+ * 等到 ERROR 也会结束等待，因此后续仍须检查具体断言，不能把等待返回当作发送成功。
+ */
 async function sendChat(message) {
   await page.fill("#messageInput", message);
   await page.click("#sendButton");
   await page.waitForFunction(
+    // 轮询发送状态，完成和错误都会结束等待，避免无限阻塞验证。
     () => ["DONE", "ERROR"].includes(document.querySelector("#sessionBadge")?.textContent),
     null, { timeout: 15000 }
   );
@@ -71,6 +92,7 @@ await page.fill("#profileTargetExam", "考研");
 await page.fill("#profileExamDate", "2026-12-21");
 await page.click('#profileForm button[type="submit"]');
 await page.waitForFunction(
+  // 等待旧版背景摘要出现指定阶段文字；该脚本仍引用旧版表单字段。
   () => document.querySelector("#profileSummaryText")?.textContent.includes("冲刺"),
   null, { timeout: 8000 }
 );
@@ -83,6 +105,7 @@ await page.click("#profileEdit");
 await page.fill("#profileExamDate", "");
 await page.click('#profileForm button[type="submit"]');
 await page.waitForFunction(
+  // 等待清空操作在摘要中生效，确认日期不再显示。
   () => !document.querySelector("#profileSummaryText")?.textContent.includes("2026-12-21"),
   null, { timeout: 8000 }
 );
@@ -92,6 +115,7 @@ await page.click("#profileEdit");
 await page.fill("#profileExamDate", "2026-12-21");
 await page.click('#profileForm button[type="submit"]');
 await page.waitForFunction(
+  // 等待恢复的日期重新出现在摘要中。
   () => document.querySelector("#profileSummaryText")?.textContent.includes("2026-12-21"),
   null, { timeout: 8000 }
 );
@@ -122,6 +146,7 @@ await shot("06-action-plan");
 // 勾选完成第一条
 await page.locator("#planItems .plan-item input[type=checkbox]").first().check();
 await page.waitForFunction(
+  // 等待完成数量从零变为一，再继续后续行动项操作。
   () => document.querySelector("#planProgress")?.textContent.startsWith("1/"),
   null, { timeout: 8000 }
 );
@@ -134,6 +159,7 @@ await page.locator("#planItems .plan-item:not(.done) .replace-btn").first().clic
 await page.locator("#planItems .plan-replace-row input").first().fill("去操场慢走 10 分钟");
 await page.locator("#planItems .plan-replace-row button").first().click();
 await page.waitForFunction(
+  // 把修改前的正文传入页面回调，等待第二条正文发生变化。
   (old) => document.querySelectorAll("#planItems .plan-item .plan-item-text")[1]?.textContent !== old,
   secondContent, { timeout: 8000 }
 );
@@ -150,6 +176,7 @@ await page.check('input[name="improvement"][value="improved"]');
 await page.fill("#checkinNotes", "今天状态好一些");
 await page.click('#checkinForm button[type="submit"]');
 await page.waitForFunction(
+  // 等待改善反馈后的计划面板收起。
   () => document.querySelector("#planPanel")?.hidden === true,
   null, { timeout: 8000 }
 );
@@ -169,6 +196,7 @@ await page.locator('#memoryCardList .memory-card button:text-is("编辑")').firs
 await page.locator("#memoryCardList .card-edit-row input").first().fill("我习惯晚上 9 点后复习");
 await page.locator('#memoryCardList .card-edit-row button:text-is("保存")').first().click();
 await page.waitForFunction(
+  // 等待记忆卡片显示新编辑的文本。
   () => document.querySelector("#memoryCardList .memory-card p")?.textContent.includes("晚上 9 点"),
   null, { timeout: 8000 }
 );
@@ -176,6 +204,7 @@ assert(true, "编辑卡片成功");
 // 删除
 await page.locator('#memoryCardList .memory-card button:text-is("删除")').first().click();
 await page.waitForFunction(
+  // 等待被删除卡片的特定文本从列表中消失。
   () => !document.querySelector("#memoryCardList .memory-card p")?.textContent.includes("晚上 9 点"),
   null, { timeout: 8000 }
 );
@@ -248,6 +277,7 @@ await page.locator("#reviews .review-item .decide-monitor").first().click();
 await page.fill(".review-note-row input", "先持续关注两天");
 await page.click(".review-note-row button");
 await page.waitForFunction(
+  // 等待待审核项消失或不再提供决定按钮，观察提交后的界面状态。
   () => document.querySelectorAll("#reviews .review-item").length === 0
     || !document.querySelector("#reviews .review-item .review-decisions"),
   null, { timeout: 8000 }
@@ -278,6 +308,7 @@ await page.fill("#username", "student");
 await page.fill("#password", "student123");
 await page.click('#loginForm button[type="submit"]');
 await page.waitForFunction(
+  // 等待已删除账户重新登录时出现失败提示。
   () => document.querySelector("#loginState")?.textContent.includes("登录失败"),
   null, { timeout: 8000 }
 );

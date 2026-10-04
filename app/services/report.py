@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session
 
+from app.core.time import utc_isoformat
 from app.models.entities import (
     AlertRecord,
     ChatMessage,
@@ -148,8 +149,8 @@ class ReportService:
                 "sessionId": s.public_id,
                 "title": s.title,
                 "noMemory": s.no_memory,
-                "createdAt": s.created_at.isoformat(),
-                "updatedAt": s.updated_at.isoformat(),
+                "createdAt": utc_isoformat(s.created_at),
+                "updatedAt": utc_isoformat(s.updated_at),
                 "messageCount": msg_count,
             })
         return result

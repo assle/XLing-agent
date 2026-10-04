@@ -35,7 +35,7 @@ class TrackingAssessment:
         """
         self.order = order
 
-    async def aassess(self, text, history):  # noqa: ANN001
+    async def aassess(self, text):  # noqa: ANN001
         """记录风险评估发生并返回固定低风险结果。
 
         供测试比较它与知识检索的实际调用顺序。
@@ -98,7 +98,7 @@ def test_langgraph_high_risk_interrupts():
     """
     runtime = _setup_runtime(LangGraphAgentRuntimeService)
     user, session = _user_session("interrupt-high-001")
-    result = asyncio.run(runtime.run(user, session, "我不想活了", "我不想活了"))
+    result = asyncio.run(runtime.run(user, session, "我不想活了"))
     assert result.intent == IntentType.RISK
     assert result.risk_level == RiskLevel.HIGH
     assert result.pending_review is True
@@ -118,7 +118,7 @@ def test_langgraph_high_risk_skips_knowledge_retrieval():
     runtime = _setup_runtime(LangGraphAgentRuntimeService)
     runtime.knowledge = FailingKnowledgeService()
     user, session = _user_session("interrupt-before-knowledge-001")
-    result = asyncio.run(runtime.run(user, session, "我不想活了", "我不想活了"))
+    result = asyncio.run(runtime.run(user, session, "我不想活了"))
     assert result.pending_review is True
 
 
@@ -132,7 +132,7 @@ def test_langgraph_assesses_support_before_knowledge():
     runtime.assessment = TrackingAssessment(order)
     runtime.knowledge = TrackingKnowledgeService(order)
     user, session = _user_session("risk-before-knowledge-001")
-    result = asyncio.run(runtime.run(user, session, "最近压力很大", "最近压力很大"))
+    result = asyncio.run(runtime.run(user, session, "最近压力很大"))
     assert result.pending_review is False
     assert order[:2] == ["risk", "knowledge"]
 
@@ -148,7 +148,7 @@ def test_langgraph_chat_no_interrupt():
     """
     runtime = _setup_runtime(LangGraphAgentRuntimeService)
     user, session = _user_session("interrupt-chat-001")
-    result = asyncio.run(runtime.run(user, session, "帮我写一段 Python 代码", "帮我写一段 Python 代码"))
+    result = asyncio.run(runtime.run(user, session, "帮我写一段 Python 代码"))
     assert result.pending_review is False
     assert len(result.response_messages) > 0
     assert result.quick_safety_checked is True
@@ -166,7 +166,7 @@ def test_langgraph_consult_low_no_interrupt():
     """
     runtime = _setup_runtime(LangGraphAgentRuntimeService)
     user, session = _user_session("interrupt-consult-001")
-    result = asyncio.run(runtime.run(user, session, "最近压力很大，很焦虑", "最近压力很大，很焦虑"))
+    result = asyncio.run(runtime.run(user, session, "最近压力很大，很焦虑"))
     assert result.pending_review is False
     assert len(result.response_messages) > 0
 
@@ -197,7 +197,7 @@ def test_interrupted_state_has_gate_pending():
     """
     runtime = _setup_runtime(LangGraphAgentRuntimeService)
     user, session = _user_session("interrupt-next-001")
-    asyncio.run(runtime.run(user, session, "我不想活了", "我不想活了"))
+    asyncio.run(runtime.run(user, session, "我不想活了"))
     state = runtime.get_state("interrupt-next-001")
     assert state.next  # non-empty -> interrupted
     assert "risk_guardian_gate" in state.next  # gate node paused, awaiting resume

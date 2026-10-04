@@ -35,6 +35,10 @@ _TestSession = _harness.sessions
 client = _harness.client
 
 def _seed():
+    """准备两个普通用户，供反馈归属测试分别登录。
+
+    提交账户后关闭测试连接。
+    """
     db = _TestSession()
     try:
         s = UserAccount(username="student", display_name="S", password_hash=hash_password("student123"))
@@ -49,13 +53,25 @@ def _seed():
 _seed()
 
 def _token(u="student", p="student123"):
+    """用指定测试账号登录并取得凭证。
+
+    默认使用第一位普通用户。
+    """
     r = client.post("/api/auth/login", json={"username": u, "password": p})
     return r.json()["accessToken"]
 
 def _auth(t):
+    """把给定凭证包装成接口请求头。
+
+    供同一测试中多次请求复用。
+    """
     return {"Authorization": f"Bearer {t}"}
 
 def _clean():
+    """按依赖顺序清空审核、评估、反馈、行动项、计划和会话。
+
+    保留账户，使每例从干净的支持过程开始。
+    """
     db = _TestSession()
     try:
         db.query(ReviewRequest).delete()
@@ -69,6 +85,10 @@ def _clean():
         db.close()
 
 def _make_plan(user_id=1, age_hours=0):
+    """创建不关联会话的默认计划，可把创建时间调早。
+
+    返回编号，用于验证新旧计划的反馈可用性。
+    """
     db = _TestSession()
     try:
         svc = ActionPlanService(db, ai=None)
@@ -82,7 +102,10 @@ def _make_plan(user_id=1, age_hours=0):
 
 
 def _make_plan_with_session(user_id=1):
-    """Plan linked to a real chat session, so escalation can attach a review."""
+    """先保存一个用户会话，再生成关联行动计划。
+
+    为需要创建人工审核的反馈测试提供有效会话依据。
+    """
     db = _TestSession()
     try:
         session = ChatSession(public_id=f"sess-{user_id}-checkin", title="t", user_id=user_id)
@@ -95,10 +118,14 @@ def _make_plan_with_session(user_id=1):
 
 
 # ---------------------------------------------------------------------------
-# Pending plans
+# 尚未提交反馈的计划。
 # ---------------------------------------------------------------------------
 
 def test_pending_plans_empty():
+    """清空计划后查询待反馈列表。
+
+    检查没有凭空生成反馈任务。
+    """
     _clean()
     db = _TestSession()
     try:
@@ -107,6 +134,10 @@ def test_pending_plans_empty():
         db.close()
 
 def test_pending_plans_found():
+    """准备创建已超过一天的计划。
+
+    检查它出现在待反馈列表并保持相同编号。
+    """
     _clean()
     plan_id = _make_plan(age_hours=25)
     db = _TestSession()
@@ -118,6 +149,10 @@ def test_pending_plans_found():
         db.close()
 
 def test_new_plan_is_available_for_feedback_before_target_window():
+    """创建新计划后立即查询待反馈列表。
+
+    检查建议反馈时间尚未到也允许提前提交。
+    """
     _clean()
     plan_id = _make_plan()
     db = _TestSession()
@@ -128,6 +163,10 @@ def test_new_plan_is_available_for_feedback_before_target_window():
         db.close()
 
 def test_pending_excludes_plans_with_checkin():
+    """为计划提交改善反馈后再次查询。
+
+    检查已反馈计划不再出现在待反馈列表。
+    """
     _clean()
     plan_id = _make_plan()
     db = _TestSession()
@@ -140,10 +179,14 @@ def test_pending_excludes_plans_with_checkin():
 
 
 # ---------------------------------------------------------------------------
-# Submit check-in
+# 保存次日反馈并更新计划状态。
 # ---------------------------------------------------------------------------
 
 def test_submit_improved_completes_plan():
+    """提交改善状态和备注。
+
+    核对反馈内容已保存，并将计划标记完成。
+    """
     _clean()
     plan_id = _make_plan()
     db = _TestSession()
@@ -158,6 +201,10 @@ def test_submit_improved_completes_plan():
         db.close()
 
 def test_submit_unchanged_keeps_active():
+    """提交没有改善的反馈。
+
+    检查计划继续保持进行中，供后续调整。
+    """
     _clean()
     plan_id = _make_plan()
     db = _TestSession()
@@ -170,6 +217,10 @@ def test_submit_unchanged_keeps_active():
         db.close()
 
 def test_submit_worsened_keeps_active():
+    """提交恶化反馈。
+
+    检查计划仍保持进行中，安全升级由其他入口处理。
+    """
     _clean()
     plan_id = _make_plan()
     db = _TestSession()
@@ -183,10 +234,14 @@ def test_submit_worsened_keeps_active():
 
 
 # ---------------------------------------------------------------------------
-# Idempotent submission
+# 同一计划重复提交更新原反馈，不新增重复记录。
 # ---------------------------------------------------------------------------
 
 def test_idempotent_update():
+    """对同一计划先提交未改善，再提交改善和新备注。
+
+    检查沿用同一反馈编号、更新内容且列表仍只有一条。
+    """
     _clean()
     plan_id = _make_plan()
     db = _TestSession()
@@ -194,20 +249,24 @@ def test_idempotent_update():
         svc = CheckInService(db)
         c1 = svc.submit_checkin(1, plan_id, "unchanged", "first")
         c2 = svc.submit_checkin(1, plan_id, "improved", "second")
-        assert c1.id == c2.id  # same check-in, updated
+        assert c1.id == c2.id  # 仍为同一反馈编号，内容已更新。
         assert c2.improvement_status == "improved"
         assert c2.notes == "second"
-        # Only one check-in exists
+        # 验证没有生成第二条反馈。
         assert len(svc.list_checkins(1)) == 1
     finally:
         db.close()
 
 
 # ---------------------------------------------------------------------------
-# User isolation
+# 不同用户的数据访问隔离。
 # ---------------------------------------------------------------------------
 
 def test_user_isolation():
+    """让另一用户给不属于自己的计划提交反馈。
+
+    要求抛出归属校验错误。
+    """
     _clean()
     plan_id = _make_plan(1)
     db = _TestSession()
@@ -223,10 +282,14 @@ def test_user_isolation():
 
 
 # ---------------------------------------------------------------------------
-# Validation
+# 输入与归属校验。
 # ---------------------------------------------------------------------------
 
 def test_invalid_status_raises():
+    """向自有计划提交不支持的改善状态。
+
+    要求抛出 ValueError，避免保存未知状态。
+    """
     _clean()
     plan_id = _make_plan()
     db = _TestSession()
@@ -241,10 +304,14 @@ def test_invalid_status_raises():
 
 
 # ---------------------------------------------------------------------------
-# API endpoints
+# 通过接口验证请求与响应。
 # ---------------------------------------------------------------------------
 
 def test_api_pending():
+    """准备一份待反馈计划后通过登录接口查询。
+
+    检查请求成功且返回一份计划。
+    """
     _clean()
     _make_plan(age_hours=25)
     t = _token()
@@ -253,6 +320,10 @@ def test_api_pending():
     assert len(r.json()) == 1
 
 def test_api_submit():
+    """通过接口提交改善反馈及备注。
+
+    检查成功响应保留提交的改善状态。
+    """
     _clean()
     plan_id = _make_plan()
     t = _token()
@@ -263,6 +334,10 @@ def test_api_submit():
     assert r.json()["improvementStatus"] == "improved"
 
 def test_api_list():
+    """先经接口提交反馈再查询历史。
+
+    检查反馈确实进入当前用户列表。
+    """
     _clean()
     plan_id = _make_plan()
     t = _token()
@@ -272,18 +347,24 @@ def test_api_list():
     assert len(r.json()) == 1
 
 def test_api_requires_auth():
+    """未登录查询反馈历史。
+
+    检查返回 401 而不是暴露已有记录。
+    """
     r = client.get("/api/check-ins")
     assert r.status_code == 401
 
 
 # ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
-# Closed-loop wiring: check-in -> escalation -> human review
+# 次日反馈与安全升级、人工审核之间的连接。
 # ---------------------------------------------------------------------------
 
 def test_api_checkin_worsened_creates_review():
-    """Worsened check-in on a session-linked plan -> SUSTAINED_NO_IMPROVEMENT
-    review is created and the student gets the safety message back."""
+    """为有会话的计划提交恶化反馈。
+
+    检查响应提供安全提示，并在数据库中生成一条原因正确的待审核记录。
+    """
     _clean()
     plan_id = _make_plan_with_session()
     r = client.post(
@@ -301,12 +382,16 @@ def test_api_checkin_worsened_creates_review():
         assert len(reviews) == 1
         assert reviews[0].handoff_reason == "SUSTAINED_NO_IMPROVEMENT"
         assert reviews[0].status == "pending"
-        assert "没有改善" not in reviews[0].desensitized_summary  # worsened, not unchanged
+        assert "没有改善" not in reviews[0].desensitized_summary  # 本例应记录恶化，而非没有改善。
         assert "情况恶化" in reviews[0].desensitized_summary
     finally:
         db.close()
 
 def test_api_checkin_improved_no_escalation():
+    """为有会话的计划提交改善反馈。
+
+    检查没有安全升级标志，也没有新增审核记录。
+    """
     _clean()
     plan_id = _make_plan_with_session()
     r = client.post(
@@ -323,8 +408,10 @@ def test_api_checkin_improved_no_escalation():
         db.close()
 
 def test_api_checkin_resubmit_does_not_escalate_twice():
-    """Idempotent resubmission updates the check-in but must not create a
-    second review."""
+    """连续两次为同一计划提交恶化反馈。
+
+    检查只产生一条审核记录，第二次响应不再次宣称新增升级。
+    """
     _clean()
     plan_id = _make_plan_with_session()
     token = _token()
@@ -335,7 +422,7 @@ def test_api_checkin_resubmit_does_not_escalate_twice():
             headers=_auth(token),
         )
         assert r.status_code == 200, r.text
-    assert r.json()["escalated"] is False  # second submission
+    assert r.json()["escalated"] is False  # 第二次提交不重复创建审核。
     db = _TestSession()
     try:
         assert db.query(ReviewRequest).count() == 1
@@ -343,8 +430,10 @@ def test_api_checkin_resubmit_does_not_escalate_twice():
         db.close()
 
 def test_api_checkin_without_session_escalates_without_review():
-    """Session-less plan (legacy data): escalation is skipped gracefully,
-    submission still succeeds."""
+    """对没有关联会话的计划提交恶化反馈。
+
+    当前断言要求接口 escalated 为 False 且无审核记录，避免把内部升级意图当作已成功入队。
+    """
     _clean()
     plan_id = _make_plan()
     r = client.post(
@@ -361,5 +450,5 @@ def test_api_checkin_without_session_escalates_without_review():
         db.close()
 
 
-# Runner
+# 本组测试结束。
 # ---------------------------------------------------------------------------

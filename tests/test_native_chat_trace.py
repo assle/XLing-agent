@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-from builtins import ExceptionGroup
 
 import httpx
 import pytest
@@ -230,9 +229,13 @@ def test_http_stream_failure_keeps_completed_stages_and_excludes_provider_error(
 
     transport = httpx.MockTransport(lambda request: httpx.Response(200, stream=FailingResponse()))
     monkeypatch.setattr(httpx, "AsyncClient", lambda *args, **kwargs: original_client(*args, transport=transport, **kwargs))
-    with pytest.raises(ExceptionGroup) as caught:
-        harness.client.post("/api/chat/stream", json={"message": "Python 怎么读取 JSON？"}, headers=user_headers)
-    assert caught.value.subgroup(RuntimeError) is not None
+    events = _events(harness.client.post(
+        "/api/chat/stream", json={"message": "Python 怎么读取 JSON？"}, headers=user_headers,
+    ))
+    assert events[-1][0] == "error"
+    assert events[-1][1]["code"] == "CHAT_FAILED"
+    assert "done" not in [name for name, _ in events]
+    assert marker not in json.dumps(events)
 
     sessions = harness.client.get("/api/sessions", headers=user_headers).json()
     assert len(sessions) == 1
@@ -250,6 +253,78 @@ def test_http_stream_failure_keeps_completed_stages_and_excludes_provider_error(
     assert stream_failure["duration_ms"] >= 0
     terminal = capsys.readouterr()
     assert marker not in json.dumps(records) + terminal.out + terminal.err
+
+
+@pytest.mark.parametrize("signal,code,word", [
+    (httpx.ReadTimeout, "MODEL_TIMEOUT", "超时"),
+    (httpx.ConnectError, "MODEL_UNAVAILABLE", "模型服务"),
+])
+def test_provider_failure_has_readable_error_without_saving_partial_reply(native_api, monkeypatch, signal, code, word):
+    from app.services.ai import AiClient
+
+    harness, _, user_headers, _ = native_api
+
+    async def failing_stream(self, messages):
+        yield "unfinished"
+        raise signal("PRIVATE-ERROR-MARKER")
+
+    monkeypatch.setattr(AiClient, "stream", failing_stream)
+    events = _events(harness.client.post(
+        "/api/chat/stream", json={"message": "Python 怎么读取 JSON？"}, headers=user_headers,
+    ))
+    assert events[-1][0] == "error"
+    assert events[-1][1]["code"] == code
+    assert word in events[-1][1]["message"]
+    assert "PRIVATE-ERROR-MARKER" not in json.dumps(events)
+    session_id = next(data["sessionId"] for name, data in events if name == "meta")
+    saved = harness.client.get(f"/api/sessions/{session_id}", headers=user_headers).json()
+    assert [row["role"] for row in saved["messages"]] == ["USER"]
+
+
+@pytest.mark.parametrize("pending", [False, True])
+def test_handled_dispatch_failure_never_exposes_tool_details(native_api, monkeypatch, pending):
+    import app.services.chat as chat_module
+    from app.services.report_dispatch import ReportDispatchError
+
+    harness, settings, user_headers, _ = native_api
+    marker = "PRIVATE-TOOL-RESULT-AND-ERROR"
+
+    class FailingDispatcher:
+        async def dispatch(self, report_id, risk_level):
+            raise ReportDispatchError(marker)
+
+    monkeypatch.setattr(chat_module, "create_report_dispatcher", lambda db, config: FailingDispatcher())
+    text = "我有伤害自己的念头" if pending else "我最近焦虑失眠，担心工作安排"
+    events = _events(harness.client.post("/api/chat/stream", json={"message": text}, headers=user_headers))
+    errors = [data for name, data in events if name == "error"]
+    assert errors and "后续处理暂未完成" in errors[0]["message"]
+    assert marker not in json.dumps(events)
+    assert pending == any(name == "pending_review" for name, _ in events)
+    assert any(row.get("reason_code") == "report_dispatch_failed" for row in _records(settings))
+
+
+@pytest.mark.parametrize("tokens", [[], ["", " \n"]])
+def test_empty_model_stream_reports_error_and_keeps_only_user_message(native_api, monkeypatch, tokens):
+    from app.services.ai import AiClient
+
+    harness, settings, user_headers, _ = native_api
+
+    async def empty_stream(self, messages):
+        for token in tokens:
+            yield token
+
+    monkeypatch.setattr(AiClient, "stream", empty_stream)
+    events = _events(harness.client.post(
+        "/api/chat/stream", json={"message": "Python 怎么读取 JSON？"}, headers=user_headers,
+    ))
+    names = [name for name, _ in events]
+    assert "error" in names
+    assert "done" not in names
+    assert events[-1][1]["message"]
+    session_id = next(data["sessionId"] for name, data in events if name == "meta")
+    saved = harness.client.get(f"/api/sessions/{session_id}", headers=user_headers).json()
+    assert [row["role"] for row in saved["messages"]] == ["USER"]
+    assert any(row.get("reason_code") == "empty_model_response" for row in _records(settings))
 
 
 def test_asgi_disconnect_closes_streams_in_the_request_context_without_saving_partial_reply(native_api, capsys, monkeypatch):

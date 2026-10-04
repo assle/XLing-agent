@@ -177,7 +177,7 @@ def test_empty_redis_memory_is_rebuilt_from_committed_database_messages():
             memory=memory,
             settings=Settings(ai_provider="mock", langgraph_checkpoint_backend="memory", knowledge_vector_enabled=False),
         )
-        result = asyncio.run(runtime.run(user, session, "帮我写代码", "帮我写代码"))
+        result = asyncio.run(runtime.run(user, session, "帮我写代码"))
 
         assert [message.content for message in memory.replaced] == ["最近压力很大"]
         assert any(message.content == "最近压力很大" for message in result.response_messages)

@@ -36,14 +36,14 @@ class EscalationResult:
     review_id: Optional[int] = None
 
 
-# Safety message shown to user before any escalation
+# 安全升级时使用的统一用户提示。
 SAFETY_MESSAGE = (
     "我注意到你可能需要更多支持。你的情况已进入人工审核流程。"
     "如果你现在处于紧急情况，请立刻联系身边可信任的人、"
     "当地紧急服务或部署方提供的专业支持与当地紧急资源。"
 )
 
-# Screening suggestion message (not forced)
+# 自愿筛查邀请文字，不强制用户作答。
 SCREENING_SUGGESTION = (
     "我注意到你最近的情绪有一些变化。如果你愿意，可以完成一次简短的自愿量表筛查（PHQ-9 或 GAD-7），"
     "这可以帮助你更好地了解自己的状态。这只是自愿的筛查，不会影响你和我的对话。"
@@ -51,9 +51,13 @@ SCREENING_SUGGESTION = (
 
 
 class EscalationService:
-    """Orchestrates risk-triggered escalation across services (issue 12)."""
+    """把风险轨迹、自愿筛查、次日反馈和主动求助连接到人工审核流程。"""
 
     def __init__(self, db: Session, review_svc: ReviewService | None = None):
+        """保存数据库和可选人工审核服务，供各类触发入口共用。
+
+        未提供审核服务时仍可计算需要升级的结果，但不会建立审核记录。
+        """
         self.db = db
         self.review_svc = review_svc
 
@@ -68,13 +72,12 @@ class EscalationService:
         current_difficulty: str = "",
         risk_trend: str = "",
     ) -> EscalationResult:
-        """Check if rising trajectory should trigger escalation.
+        """在单次风险尚非高风险但轨迹上升时准备安全升级。
 
-        Single message not HIGH but trajectory rising -> RISK_TRAJECTORY_RISING review.
-        Explicit HIGH is already handled by keyword path.
+        已明确高风险的情况交给其他路径；无上升标志时返回无需升级的结果。
         """
         if current_risk == RiskLevel.HIGH:
-            # HIGH risk keyword path handles this separately
+            # 当前已明确高风险的情况由独立安全路径处理。
             return EscalationResult(should_escalate=False)
 
         if not trajectory_rising:
@@ -99,11 +102,9 @@ class EscalationService:
         improvement_status: str,
         current_difficulty: str = "",
     ) -> EscalationResult:
-        """Check if next-day feedback should trigger safety escalation.
+        """根据次日反馈中的恶化或没有改善触发安全升级。
 
-        Worsened or sustained no improvement -> SUSTAINED_NO_IMPROVEMENT review.
-        report_id may be None: next-day feedback has no prior assessment report, so an
-        honestly-labeled one is created for review-queue display.
+        构造相关摘要，必要时创建最小关联记录；当前一次 unchanged 就会触发，并未在此统计连续次数。
         """
         if improvement_status not in ("worsened", "unchanged"):
             return EscalationResult(should_escalate=False)
@@ -130,7 +131,10 @@ class EscalationService:
         high_risk_flagged: bool,
         current_difficulty: str = "",
     ) -> EscalationResult:
-        """Check if screening high-risk answers should trigger escalation."""
+        """在自愿量表筛查标记需立即关注时触发人工审核。
+
+        high_risk_flagged 为 False 时直接返回；为 True 时整理困境与筛查来源摘要。
+        """
         if not high_risk_flagged:
             return EscalationResult(should_escalate=False)
 
@@ -152,7 +156,10 @@ class EscalationService:
         thread_id: str,
         current_difficulty: str = "",
     ) -> EscalationResult:
-        """User explicitly requests human support -> USER_REQUEST review."""
+        """为用户主动请求人工支持创建对应原因的升级结果。
+
+        使用传入会话和记录编号关联审核，困境摘要先经过隐私处理。
+        """
         summary = PrivacySanitizer.build_review_summary(
             current_difficulty=current_difficulty,
         risk_trend="用户主动请求人工支持",
@@ -165,13 +172,12 @@ class EscalationService:
 
     @staticmethod
     def get_screening_suggestion() -> str:
-        """Return the voluntary screening suggestion message."""
+        """返回自愿量表筛查的固定邀请文字。
+
+        不强制开始量表，也不保存答案或推断量表分数。
+        """
         return SCREENING_SUGGESTION
 
-    @staticmethod
-    def get_safety_message() -> str:
-        """Return the safety message shown before escalation."""
-        return SAFETY_MESSAGE
 
     def _create_escalation(
         self,
@@ -183,11 +189,10 @@ class EscalationService:
         desensitized_summary: str,
         report_kind: str = "对话",
     ) -> EscalationResult:
-        """Create a review request with the given handoff reason.
+        """汇总升级原因，并在依赖和会话信息齐全时创建审核记录。
 
-        Review creation is skipped (with a warning) when there is no session to
-        attach to: ReviewRequest.session_id / thread_id are required and the
-        review queue renders from the linked session's context.
+        缺少审核服务或会话信息仍返回需要升级，但 review_id 为空，不能当作已成功入队。
+        无关联评估记录时先创建最小记录，再单独保存审核请求。
         """
         if self.review_svc is None:
             return EscalationResult(
@@ -228,11 +233,9 @@ class EscalationService:
         )
 
     def _ensure_report(self, user_id: int, session_id: int, handoff_reason: str, report_kind: str) -> int:
-        """Create a minimal safety assessment record for non-conversation triggers.
+        """为非完整模型评估来源的升级建立最小关联记录。
 
-        The review queue renders studentMessage/riskLevel from the linked report,
-        so safety escalations that did not originate from a chat message
-        need one. It is labeled honestly: not an assessment, confidence 0.
+        使用零置信度和说明标注其来源，供审核列表关联展示；提交后返回编号，不伪称模型已评估。
         """
         from app.models.entities import SafetyAssessmentRecord
 

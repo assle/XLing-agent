@@ -13,6 +13,10 @@ client = _harness.client
 
 
 def _seed_review() -> int:
+    """清理当前测试环境后创建管理员、普通用户及一条待处理审核。
+
+    包含关联会话和评估记录，返回编号供接口操作。
+    """
     db = Session()
     db.query(ReviewRequest).delete()
     db.query(SafetyAssessmentRecord).delete()
@@ -59,15 +63,27 @@ def _seed_review() -> int:
 
 
 def _admin_token() -> str:
+    """通过测试管理员登录取得凭证。
+
+    后续决定接口仍执行真实权限检查。
+    """
     response = client.post("/api/auth/login", json={"username": "review-admin", "password": "admin123"})
     return response.json()["accessToken"]
 
 
 def _auth(token: str) -> dict[str, str]:
+    """把管理员凭证放入授权请求头。
+
+    只封装文本，不跳过身份验证。
+    """
     return {"Authorization": f"Bearer {token}"}
 
 
 def test_refer_decision_persists_action_and_student_message():
+    """提交转介去向和下一步行动。
+
+    检查审核字段已保存、状态为已转介，并实际新增用户可见会话消息。
+    """
     review_id = _seed_review()
     response = client.post(
         f"/api/admin/reviews/{review_id}/decision",
@@ -94,6 +110,10 @@ def test_refer_decision_persists_action_and_student_message():
 
 
 def test_monitor_decision_requires_action_fields():
+    """只提交持续关注决定而缺少负责人及时间。
+
+    检查接口返回 400，不接受无后续行动依据的决定。
+    """
     review_id = _seed_review()
     response = client.post(
         f"/api/admin/reviews/{review_id}/decision",

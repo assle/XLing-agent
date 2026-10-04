@@ -25,6 +25,10 @@ VAL_PER_CLASS = 60
 
 
 def load_data(path: Path) -> list[dict]:
+    """逐行读取合成数据中的样本对象并跳过空白行。
+
+    输入格式错误会直接抛出，保持错误可见而不是漏掉样本。
+    """
     rows = []
     with path.open(encoding="utf-8") as f:
         for line in f:
@@ -35,6 +39,11 @@ def load_data(path: Path) -> list[dict]:
 
 
 def split_by_label(rows: list[dict], val_per_class: int, seed: int) -> tuple[list[dict], list[dict]]:
+    """按类别分别打乱并预留固定数量的验证样本。
+
+    使用独立随机数对象和排序后的类别保证重复运行一致；复制类别列表后打乱，不改传入列表顺序。
+    某类不足 val_per_class 时该类全部进入验证集，本函数不额外补足训练样本。
+    """
     by_label: dict[str, list[dict]] = {}
     for r in rows:
         by_label.setdefault(r["output"], []).append(r)
@@ -50,12 +59,20 @@ def split_by_label(rows: list[dict], val_per_class: int, seed: int) -> tuple[lis
 
 
 def write_jsonl(path: Path, rows: list[dict]) -> None:
+    """把样本逐行写入目标文件并保留中文。
+
+    父目录由调用方准备，此函数以覆盖模式写入。
+    """
     with path.open("w", encoding="utf-8") as f:
         for r in rows:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
 
 def write_dataset_info(path: Path) -> None:
+    """生成训练工具识别训练集和验证集所需的注册文件。
+
+    使用固定数据文件名和格式标记，不读取或校验样本内容。
+    """
     info = {
         "psychqa_cls_train": {
             "file_name": "train.jsonl",
@@ -71,6 +88,10 @@ def write_dataset_info(path: Path) -> None:
 
 
 def main() -> None:
+    """读取源数据，分层切分并保存两份数据和训练工具注册信息。
+
+    打印各类数量和随机种子便于检查；不启动模型训练。
+    """
     rows = load_data(SRC)
     print(f"源数据: {len(rows)} 条")
     print(f"标签分布: {dict(Counter(r['output'] for r in rows))}")

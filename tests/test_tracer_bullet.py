@@ -134,7 +134,7 @@ async def _run_message(runtime, message: str):
         runtime.db = db
         user = db.get(UserAccount, 1)
         session = db.query(ChatSession).filter(ChatSession.public_id == "tracer-session").first()
-        result = await runtime.run(user, session, message, message)
+        result = await runtime.run(user, session, message)
         # 测试在此模拟聊天服务对本轮执行器写入的统一提交。
         db.commit()
         return result

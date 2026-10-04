@@ -27,6 +27,10 @@ _settings = Settings()
 
 
 def _seed():
+    """准备管理员、普通用户、会话及高风险评估记录。
+
+    作为后续审核字段和决定测试的共同基础。
+    """
     db = _TestSession()
     try:
         u = UserAccount(username="admin", display_name="Admin", password_hash=hash_password("admin123"))
@@ -48,10 +52,18 @@ _seed()
 
 
 def _svc():
+    """为本次测试新建数据库会话并包装审核服务。
+
+    调用方负责关闭服务持有的会话。
+    """
     return ReviewService(_TestSession(), _settings)
 
 
 def _clean():
+    """清空审核请求记录并提交。
+
+    保留共同基础数据，便于每例重新创建审核。
+    """
     db = _TestSession()
     try:
         db.query(ReviewRequest).delete()
@@ -65,21 +77,41 @@ def _clean():
 # ---------------------------------------------------------------------------
 
 def test_sanitize_phone():
+    """输入含匹配手机号的文本。
+
+    检查该格式的号码被替换为隐藏标记。
+    """
     assert "[手机号已隐藏]" in PrivacySanitizer.sanitize("我电话是13812345678")
 
 def test_sanitize_email():
+    """输入含邮箱的文本。
+
+    检查模式匹配将邮箱替换成隐藏标记。
+    """
     assert "[邮箱已隐藏]" in PrivacySanitizer.sanitize("邮箱test@example.com")
 
 def test_sanitize_name():
+    """输入带姓名提示和焦虑内容的句子。
+
+    检查姓名被去除，同时保留困扰内容。
+    """
     result = PrivacySanitizer.sanitize("我叫张三，最近很焦虑")
     assert "张三" not in result
     assert "焦虑" in result
 
 def test_sanitize_keeps_content():
+    """输入没有匹配身份信息的支持表达。
+
+    检查普通困扰内容未被误删。
+    """
     result = PrivacySanitizer.sanitize("最近考研压力很大")
     assert "考研压力" in result
 
 def test_build_review_summary():
+    """提供困境、趋势、四维摘要和计划状态。
+
+    检查输出包含四种中文分段标签。
+    """
     summary = PrivacySanitizer.build_review_summary(
         current_difficulty="考研冲刺阶段焦虑",
         risk_trend="rising",
@@ -92,6 +124,10 @@ def test_build_review_summary():
     assert "行动计划状态" in summary
 
 def test_build_review_summary_empty():
+    """不给任何摘要信息。
+
+    检查返回明确的无可用内容说明。
+    """
     summary = PrivacySanitizer.build_review_summary()
     assert "无可用" in summary
 
@@ -101,6 +137,10 @@ def test_build_review_summary_empty():
 # ---------------------------------------------------------------------------
 
 def test_create_with_context():
+    """创建含有效触发原因和脱敏摘要的审核。
+
+    检查两字段原样保存且状态待处理。
+    """
     _clean()
     svc = _svc()
     try:
@@ -117,6 +157,10 @@ def test_create_with_context():
         svc.db.close()
 
 def test_create_with_invalid_handoff_raises():
+    """使用不在允许集合中的审核原因。
+
+    要求创建入口抛错，不保存未知原因。
+    """
     _clean()
     svc = _svc()
     try:
@@ -134,6 +178,10 @@ def test_create_with_invalid_handoff_raises():
 # ---------------------------------------------------------------------------
 
 def test_mark_decision_approve():
+    """批准待审核记录并附备注与审核人。
+
+    检查决定、状态、人员和处理时间均保存。
+    """
     _clean()
     svc = _svc()
     try:
@@ -148,6 +196,10 @@ def test_mark_decision_approve():
         svc.db.close()
 
 def test_mark_decision_reject():
+    """拒绝一条待审核记录。
+
+    检查状态转换为已拒绝。
+    """
     _clean()
     svc = _svc()
     try:
@@ -158,6 +210,10 @@ def test_mark_decision_reject():
         svc.db.close()
 
 def test_mark_decision_refer():
+    """提交转介对象和下一步说明。
+
+    检查字段、用户提示及实际会话消息保存一致。
+    """
     _clean()
     svc = _svc()
     try:
@@ -183,6 +239,10 @@ def test_mark_decision_refer():
         svc.db.close()
 
 def test_mark_decision_monitor():
+    """提交持续关注负责人和时间。
+
+    检查保存字段及用户提示中包含相同后续安排。
+    """
     _clean()
     svc = _svc()
     try:
@@ -204,6 +264,10 @@ def test_mark_decision_monitor():
 
 
 def test_refer_requires_target_and_next_step():
+    """只提交转介决定而没有行动详情。
+
+    检查抛错并提示缺少转介目标。
+    """
     _clean()
     svc = _svc()
     try:
@@ -218,6 +282,10 @@ def test_refer_requires_target_and_next_step():
 
 
 def test_blank_refer_fields_are_rejected():
+    """把转介对象填成空白。
+
+    检查去空白后的无效字段不能被当作已填写。
+    """
     _clean()
     svc = _svc()
     try:
@@ -232,6 +300,10 @@ def test_blank_refer_fields_are_rejected():
 
 
 def test_monitor_requires_owner_and_follow_up_time():
+    """缺少负责人和时间时提交持续关注。
+
+    检查拒绝并指出所需字段。
+    """
     _clean()
     svc = _svc()
     try:
@@ -245,6 +317,10 @@ def test_monitor_requires_owner_and_follow_up_time():
         svc.db.close()
 
 def test_invalid_decision_raises():
+    """提交未知审核决定。
+
+    要求明确报错，避免状态进入未定义分支。
+    """
     _clean()
     svc = _svc()
     try:
@@ -258,6 +334,10 @@ def test_invalid_decision_raises():
         svc.db.close()
 
 def test_cannot_re_decide():
+    """先批准后再尝试拒绝同一条记录。
+
+    检查已处理审核不能再次决定。
+    """
     _clean()
     svc = _svc()
     try:
@@ -277,6 +357,10 @@ def test_cannot_re_decide():
 # ---------------------------------------------------------------------------
 
 def test_to_dict_includes_new_fields():
+    """创建轨迹上升触发的审核再读取列表。
+
+    检查触发原因和脱敏摘要包含在返回字段中。
+    """
     _clean()
     svc = _svc()
     try:
@@ -297,6 +381,10 @@ def test_to_dict_includes_new_fields():
 # ---------------------------------------------------------------------------
 
 def test_all_handoff_reasons_accepted():
+    """遍历当前允许的全部触发原因创建审核。
+
+    检查每种正式原因都能保存并原样读取。
+    """
     _clean()
     svc = _svc()
     try:
@@ -308,5 +396,5 @@ def test_all_handoff_reasons_accepted():
 
 
 # ---------------------------------------------------------------------------
-# Runner
+# 本组测试结束。
 # ---------------------------------------------------------------------------

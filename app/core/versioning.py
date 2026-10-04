@@ -101,6 +101,11 @@ class ArtifactVersionResolver:
         """
         prompt_sources = (
             PromptTemplates,
+            LangGraphAgentRuntimeService._response_contract,
+            LangGraphAgentRuntimeService._plan_context,
+            LangGraphAgentRuntimeService._companion_node,
+            LangGraphAgentRuntimeService._counselor_node,
+            LangGraphAgentRuntimeService._cbt_node,
             LangGraphAgentRuntimeService._rewrite_query,
             LangGraphAgentRuntimeService._summarize_memory,
             ActionPlanService._generation_prompt,

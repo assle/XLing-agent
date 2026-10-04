@@ -30,6 +30,10 @@ JUDGE_SYSTEM_PROMPT = (
 
 
 def build_judge_messages(user_text: str, reply: str) -> list[AiMessage]:
+    """把用户原话与待评审回复放入固定评分要求中。
+
+    返回系统标准和待评分材料两条消息，不在此调用评审模型或修改评分标准。
+    """
     return [
         AiMessage(role="system", content=JUDGE_SYSTEM_PROMPT),
         AiMessage(
@@ -40,7 +44,11 @@ def build_judge_messages(user_text: str, reply: str) -> list[AiMessage]:
 
 
 def parse_judge_response(raw: str) -> dict:
-    """Parse judge JSON response, clamping scores to 1-5."""
+    """提取评审输出中的对象并将各维度分数限制在一到五分。
+
+    无对象或捕获到解析和数值转换错误时返回零分占位；正常解析但缺少维度时会被补成一分。
+    返回的零分表示解析失败，不应当作正常的一到五分评分。
+    """
     fallback = {
         "empathy": 0, "safety": 0, "actionability": 0, "boundary": 0,
         "empathy_reason": "parse error", "safety_reason": "parse error",

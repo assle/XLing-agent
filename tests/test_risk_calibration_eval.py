@@ -7,6 +7,10 @@ from evals.risk.calibration_runner import collect_calibration_inputs, evaluate_c
 
 
 def test_calibration_eval_writes_model_artifact_and_uncertainty_metrics(tmp_path):
+    """用临时校准与测试数据生成报告和参数文件。
+
+    检查概率、候选集合和切分证据齐全，小样本仍标为探索性且不允许直接部署。
+    """
     calibration = [
         {"id": "c-low-1", "expectedRisk": "LOW", "logits": [5.0, 0.0, -2.0]},
         {"id": "c-low-2", "expectedRisk": "LOW", "logits": [3.0, 1.0, -1.0]},
@@ -73,6 +77,10 @@ def test_calibration_eval_writes_model_artifact_and_uncertainty_metrics(tmp_path
 
 
 def test_calibration_split_is_disjoint_and_score_collection_is_reproducible(tmp_path):
+    """提供互不重叠的三类样本清单并收集规则分数。
+
+    检查集合编号隔离、类别覆盖和每条三维分数；本例未重复收集比较相等性。
+    """
     source = [
         {"id": "low-a", "text": "今天状态不错", "expected_risk": "LOW"},
         {"id": "mid-a", "text": "最近很低落", "expected_risk": "MEDIUM"},

@@ -148,9 +148,9 @@ flowchart TD
 ├── scripts/                      # 开发启动、模型创建和发布打包脚本
 ├── tests/                        # 单元测试、接口测试、流程恢复和数据库事务测试
 ├── docs/                         # 领域术语、架构决策和部署说明
+├── reference/                    # 项目地图等代码阅读参考
+├── assets/                       # 参考页面样式
 ├── .scratch/                     # 已实施功能的需求拆分与验收材料
-├── idea-stage/                   # 实验前的研究约束
-├── refine-logs/                  # 实验计划、执行记录、结果和代码审查
 ├── data/                         # 本地运行生成的向量库、检查点和台账，不作为源码维护
 ├── .env.example                  # 本地开发与无模型演示配置样例
 ├── .env.production.example       # 正式部署配置样例
@@ -161,8 +161,10 @@ flowchart TD
 ├── pyproject.toml                # 测试、代码检查和类型检查配置
 ├── CONTEXT.md                    # 项目统一领域术语
 ├── MANIFEST.md                   # 研究与模型产物登记
-└── EXPERIMENT_AUDIT.*            # 实验完整性审计结果
+└── EXPERIMENT_AUDIT.*             # 2026-09-01 分类器实验完整性审计
 ```
+
+阅读代码可先查看 [项目地图](reference/xling-project-map.html)；领域术语以 [CONTEXT.md](CONTEXT.md) 为准，架构决策见 [docs/adr/](docs/adr/)，部署步骤见 [部署指南](docs/deployment-guide.md)。分类器当前实验入口统一在 [finetune/README.md](finetune/README.md)。
 
 `app/services/` 是主要业务实现层，文件按以下职责组织：
 
@@ -213,7 +215,7 @@ OLLAMA_CLASSIFIER_MODEL=xling-cls-3b-ft:latest
 - `AI_MAX_TOKENS` 是单次回答允许生成的最大模型计量单位数，默认 2048；调高会增加响应时间和模型费用。
 - `OPENAI_BASE_URL`、`OPENAI_API_KEY` 和 `OPENAI_MODEL` 必须属于同一个远程服务。
 - `OLLAMA_BASE_URL` 是容器访问 Mac 上 Ollama 的地址；直接在 Mac 上运行应用时使用 `http://localhost:11434`。
-- `OLLAMA_CLASSIFIER_MODEL` 必须是 `ollama list` 中已存在、并经部署方验证的本地风险分类器名称。仓库中的通用分类器实验在完成人工复核前不会自动替换默认模型。
+- `OLLAMA_CLASSIFIER_MODEL` 必须是 `ollama list` 中已存在的本地分类器版本。通用分类器的数据、训练配置与固定评测结果见 [finetune/README.md](finetune/README.md)；切换模型时核对请求契约并完成应用回归，训练和评测脚本不会自动替换当前配置。
 
 如需启用真实知识向量检索，还需配置：
 
@@ -229,9 +231,22 @@ OPENAI_EMBEDDING_MODEL=向量模型名称
 
 MySQL（关系型数据库）的管理员密码由 `MYSQL_ROOT_PASSWORD` 设置，容器健康检查会读取同一配置。修改默认密码时不需要同步修改 `docker-compose.yml`。
 
+### MySQL 事务集成测试
+
+使用独立容器和 `xling_test` 数据库执行事务回滚测试：
+
+```bash
+docker compose --profile test build mysql-tests
+docker compose --profile test run --rm mysql-tests
+docker compose --profile test stop mysql-test
+docker compose --profile test rm -f mysql-test
+```
+
+测试容器中的 `MYSQL_TEST_DATABASE_URL` 已指向 `mysql-test:3306/xling_test`，测试用户只拥有该库的权限。测试会重建表结构；数据库名必须以 `_test` 结尾。测试数据使用临时内存文件系统，不挂载业务 `mysql-data`，测试服务不发布主机端口，也不会随普通 `docker compose up` 启动。
+
 ## 本地开发与验证
 
-项目使用 Python 3.12。本地直接启动应用前，需要有可用的 MySQL、Redis，以及所选模型服务；只运行测试不需要这些外部服务。
+项目使用 Python 3.12。本地直接启动应用前，需要有可用的 MySQL、Redis，以及所选模型服务。默认单元测试不需要这些外部服务；MySQL 事务集成测试使用上述专用 Docker 环境。
 
 ```bash
 python3 -m venv .venv
@@ -241,7 +256,16 @@ python3 -m venv .venv
 .venv/bin/mypy --ignore-missing-imports app evals
 ```
 
+未配置 `MYSQL_TEST_DATABASE_URL` 时，Python 测试会跳过 MySQL 事务用例；完整验证还需执行上面的独立容器测试。浏览器脚本回归测试需要 Node.js，并启用其 VM 模块：
+
+```bash
+node --experimental-vm-modules --test tests/*-ui.test.mjs
+git diff --check
+```
+
 开发联调的执行记录同时输出终端摘要和 `data/logs/execution.jsonl`。按 `run_id` 查找一次聊天的准备、图节点、条件分支、回复生成和保存；审核恢复有自己的执行编号，通过 `origin_run_id` 关联首次执行。记录保留分支依据、耗时、异常类别与文件/函数/行号，不保存用户正文、完整提示或模型回答。
+
+本地分类器的 `ai.classify.output` 记录有效标签、空输出或非标签输出状态，以及输出字符数、可用的生成 token 数和结束原因，帮助区分格式异常与生成预算截断。分类正文不写入诊断；未知标签或调用异常由安全评估服务使用保守结果。执行和资源生命周期的约束见 [ADR-0012](docs/adr/0012-langgraph-runtime-and-local-diagnostics.md)。
 
 文件每 10 MiB 轮转，保留 5 个轮转文件。`DIAGNOSTIC_LOG_DIR` 可指定本地输出目录；默认日志目录已从版本控制和发布包排除。输出故障只提示诊断不可用，不阻断业务；图暂停记为等待审核，取消和真正异常分别记录。
 

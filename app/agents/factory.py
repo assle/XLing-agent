@@ -18,7 +18,7 @@ def create_agent_runtime(
     return LangGraphAgentRuntimeService(db, settings, dependencies)
 
 
-def agent_framework_status(settings: Settings) -> dict:
+def agent_framework_status() -> dict:
     available = langgraph_available()
     return {
         "active": "langgraph" if available else "unavailable",

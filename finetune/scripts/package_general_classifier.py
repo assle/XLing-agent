@@ -13,6 +13,10 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def parse_args() -> argparse.Namespace:
+    """读取基础模型、适配参数、评估结果和合并输出位置。
+
+    local-files-only 可限制模型读取为已有本地缓存，未指定项使用脚本默认值。
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="Qwen/Qwen2.5-0.5B-Instruct")
     parser.add_argument("--adapter", default="finetune/saves/qwen25-05b-general-cls/adapter")
@@ -23,6 +27,11 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """检查评估门槛通过后，将微调增量参数合并进基础模型并保存。
+
+    同时保存分词器和说明清单，标记已打包但未激活、人工审核尚未完成。
+    会加载模型并写出模型文件，不执行本地服务注册或线上切换。
+    """
     args = parse_args()
     results = json.loads((ROOT / args.results).read_text(encoding="utf-8"))
     if not results.get("replacementGate", {}).get("passed"):

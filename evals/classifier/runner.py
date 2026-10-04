@@ -42,6 +42,10 @@ CONSULT_WORDS = ["焦虑", "抑郁", "压力", "失眠", "难过", "崩溃", "�
 
 
 def load_dataset(path: Path) -> list[dict]:
+    """逐行读取分类评估数据，跳过空行并解析每行对象。
+
+    path 指向每行一个样本的文件；格式错误直接抛出，避免静默遗漏样本。
+    """
     rows: list[dict] = []
     with path.open(encoding="utf-8") as f:
         for line in f:
@@ -52,14 +56,15 @@ def load_dataset(path: Path) -> list[dict]:
 
 
 def normalize_label(raw: str) -> str:
-    """Extract the first matching label word from model output."""
-    for label in CLASSES:
-        if label in raw:
-            return label
+    """与业务分类路径一致，仅去掉首尾空白，不从自由文本中猜测标签。"""
     return raw.strip()
 
 
 def classify_mock(text: str) -> str:
+    """用固定关键词优先级模拟分类器输出。
+
+    高风险、低落和心理支持信号依次匹配，其余返回正常；只用于验证流程。
+    """
     lowered = text.lower()
     if any(w in lowered for w in HIGH_RISK_WORDS):
         return "高风险"
@@ -71,6 +76,10 @@ def classify_mock(text: str) -> str:
 
 
 def classify_ollama(text: str, model: str, base_url: str) -> str:
+    """向指定本地模型发送单条分类请求。
+
+    text 为样本原文，model 和 base_url 明确选择待评估模型；请求失败直接抛出，外层记录失败样本。
+    """
     payload = {
         "model": model,
         "messages": [
@@ -86,6 +95,10 @@ def classify_ollama(text: str, model: str, base_url: str) -> str:
 
 
 def classify_openai(text: str, model: str, base_url: str, api_key: str) -> str:
+    """通过兼容远程聊天接口请求分类标签。
+
+    使用传入地址、密钥和模型，限制输出长度；返回模型原文，标签提取另行处理。
+    """
     headers = {"Authorization": f"Bearer {api_key}"}
     payload = {
         "model": model,
@@ -102,14 +115,20 @@ def classify_openai(text: str, model: str, base_url: str, api_key: str) -> str:
 
 
 def compute_metrics(results: list[dict]) -> dict:
-    """Per-class precision/recall/F1, accuracy, confusion matrix, high-risk recall."""
+    """统计四类分类结果的准确率、各类命中表现和混淆矩阵。
+
+    precision 表示预测为该类的结果有多少正确，recall 表示真实该类有多少被找回，F1 综合两者。
+    未知预测不进入四类矩阵，但计入准确率分母和真实类别的漏判数。
+    """
     classes = CLASSES
     total = max(1, len(results))
 
+    # 矩阵行是真实类别，列是预测类别；对角线表示分类正确。
     confusion = {exp: {pred: 0 for pred in classes} for exp in classes}
     for r in results:
         exp = r["expected"]
         pred = r["predicted"]
+        # 未知标签不写入四类矩阵；下面总体准确率仍会统计它为未命中样本。
         if exp in confusion and pred in confusion[exp]:
             confusion[exp][pred] += 1
 
@@ -117,12 +136,13 @@ def compute_metrics(results: list[dict]) -> dict:
     for cls in classes:
         tp = confusion[cls][cls]
         fp = sum(confusion[other][cls] for other in classes if other != cls)
-        fn = sum(confusion[cls][other] for other in classes if other != cls)
+        fn = sum(1 for row in results if row["expected"] == cls and row["predicted"] != cls)
         precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
         recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
         f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
         per_class[cls] = {"precision": precision, "recall": recall, "f1": f1}
 
+    # 每类等权平均，避免大量正常样本完全主导综合表现。
     macro_f1 = sum(per_class[cls]["f1"] for cls in classes) / len(classes)
     correct = sum(1 for r in results if r["expected"] == r["predicted"])
     accuracy = correct / total
@@ -138,7 +158,11 @@ def compute_metrics(results: list[dict]) -> dict:
 
 
 def evaluate(settings: EvalSettings | None = None, provider: str | None = None, model: str | None = None) -> dict:
-    """Run classifier evaluation on the held-out validation set."""
+    """遍历分类数据集调用所选模型，保存详细报告与不含样本的摘要。
+
+    每条异常记为错误预测后继续；仅接受去掉首尾空白后严格属于四个标签的输出。
+    输出平均每条耗时及版本信息，不自动训练或部署模型。
+    """
     settings = settings or get_eval_settings()
     provider = provider or settings.cls_eval_ai_provider
 
@@ -164,6 +188,7 @@ def evaluate(settings: EvalSettings | None = None, provider: str | None = None, 
             else:
                 raw = classify_ollama(text, resolved_model, base_url)
             predicted = normalize_label(raw)
+        # 单条调用失败保留在评估结果中，不从总样本数量里删掉。
         except Exception as exc:
             logger.warning("classify failed for case: %s", type(exc).__name__)
             predicted = "__ERROR__"

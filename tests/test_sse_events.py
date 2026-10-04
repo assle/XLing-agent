@@ -48,19 +48,39 @@ db.close()
 
 class _FakeMemory:
     def append(self, session_public_id: str, role: str, content: str) -> None:
+        """提供不保存消息的缓存替身入口。
+
+        让网页事件测试不依赖外部缓存写入。
+        """
         pass
 
     def load_recent(self, session_public_id: str):
+        """返回空历史。
+
+        当前事件测试主要使用预设执行结果，不依赖真实记忆恢复。
+        """
         return []
 
     def save_cbt_state(self, session_public_id: str, state: dict) -> None:
+        """忽略四维状态写入。
+
+        此替身只满足接口，不验证状态持久化。
+        """
         pass
 
     def load_cbt_state(self, session_public_id: str) -> dict:
+        """返回空四维状态。
+
+        为未使用真实追问执行器的事件测试提供默认值。
+        """
         return {}
 
 
 def _assessment() -> PsychologyAssessment:
+    """构造固定低风险评估对象。
+
+    供不同事件场景复用，待审核场景可再调整等级。
+    """
     return PsychologyAssessment(
         emotion=EmotionLabel.ANXIETY,
         emotion_score=0.6,
@@ -76,6 +96,10 @@ class _StubRuntime:
     def __init__(self, steps, intent=IntentType.CONSULT, pending_review=False,
                  trajectory_rising=False, trajectory_trend="",
                  cbt_event=None, action_plan_event=None):
+        """保存预设步骤、分类、审核和网页事件字段。
+
+        每个参数用于控制聊天服务将要收到的执行结果。
+        """
         self._steps = steps
         self._intent = intent
         self._pending_review = pending_review
@@ -84,7 +108,11 @@ class _StubRuntime:
         self._cbt_event = cbt_event
         self._action_plan_event = action_plan_event
 
-    async def run(self, user, session, text, model_input) -> AgentRunResult:
+    async def run(self, user, session, model_input) -> AgentRunResult:
+        """返回由初始化参数组装的运行结果。
+
+        待审核时将评估改为高风险，模型输入保留本次文本，不执行真实流程。
+        """
         assessment = _assessment()
         if self._pending_review:
             assessment.risk = RiskLevel.HIGH
@@ -105,6 +133,10 @@ class _StubRuntime:
 
 class _NoopReportDispatcher:
     async def dispatch(self, report_id: int, risk_level: str | None) -> None:
+        """提供不执行工具操作的异步调度入口。
+
+        避免事件测试生成表格或发送通知。
+        """
         pass
 
 
@@ -119,7 +151,10 @@ def _run_stream(
     cbt_event=None,
     action_plan_event=None,
 ):
-    """Drive ChatService.stream_chat with a stub runtime, return parsed SSE events."""
+    """用预设执行器替换聊天依赖，完整收集并解析一次服务端事件流。
+
+    返回事件名与数据列表，同时关闭本次数据库会话。
+    """
     runtime = _StubRuntime(
         steps, intent, pending_review, trajectory_rising, trajectory_trend, cbt_event, action_plan_event
     )
@@ -128,6 +163,7 @@ def _run_stream(
         dependencies = replace(
             chat_module.ChatDependencies.create(db, _settings),
             memory=_FakeMemory(),
+            # 匿名工厂始终返回本例预设执行器，确保只测试聊天服务的事件转换。
             runtime_factory=lambda db, settings: runtime,
             report_dispatcher=_NoopReportDispatcher(),
         )
@@ -136,6 +172,10 @@ def _run_stream(
         raw_events = []
 
         async def collect():
+            """逐个读取聊天服务的事件片段并放入外层列表。
+
+            使同步测试可以检查完整事件顺序。
+            """
             async for chunk in service.stream_chat(db.get(UserAccount, USER_ID), request):
                 raw_events.append(chunk)
 
@@ -157,7 +197,10 @@ def _run_stream(
 # ---------------------------------------------------------------------------
 
 def test_cbt_event_emitted_between_meta_and_token():
-    """CBT ask event -> SSE `cbt` event with active=true, count and next dimension."""
+    """注入四维追问进度事件。
+
+    检查它位于会话信息之后、回复文本之前，字段值与输入一致。
+    """
     events = _run_stream(
         [], cbt_event=CbtEvent(active=True, completed_count=2, next_dimension="body_reactions", complete=False)
     )
@@ -173,7 +216,10 @@ def test_cbt_event_emitted_between_meta_and_token():
 
 
 def test_action_plan_event_on_cbt_completion():
-    """CBT complete + plan events -> cbt complete SSE + action_plan SSE with items."""
+    """注入完整追问和行动计划事件。
+
+    检查两类事件均在回复前发送，条目内容和编号正确。
+    """
     plan_event = ActionPlanEvent(
         plan_id=42,
         items=[
@@ -201,7 +247,10 @@ def test_action_plan_event_on_cbt_completion():
 
 
 def test_chat_intent_emits_no_loop_events():
-    """Plain CHAT run -> no cbt / action_plan events."""
+    """只注入日常对话步骤。
+
+    检查事件流中没有追问或行动计划事件。
+    """
     steps = [AgentStep(1, "SupervisorAgent", "ROUTE_INTENT", "intent=CHAT")]
     events = _run_stream(steps, message="Python 怎么读取 JSON？", intent=IntentType.CHAT)
     names = [name for name, _ in events]
@@ -210,7 +259,10 @@ def test_chat_intent_emits_no_loop_events():
 
 
 def test_no_memory_flag_on_new_session():
-    """noMemory=true on request -> created session flagged no_memory."""
+    """请求新建无记忆会话并收集会话编号。
+
+    直接读数据库确认该标志实际保存，而非仅存在于页面事件中。
+    """
     events = _run_stream([], message="不想被记住的话", no_memory=True)
     meta = next(data for name, data in events if name == "meta")
     db = _TestSession()
@@ -224,7 +276,10 @@ def test_no_memory_flag_on_new_session():
 
 
 def test_default_session_not_no_memory():
-    """Omitting noMemory -> session.no_memory stays False."""
+    """省略无记忆参数创建会话。
+
+    检查默认保存为普通会话。
+    """
     events = _run_stream([], message="普通一句话")
     meta = next(data for name, data in events if name == "meta")
     db = _TestSession()
@@ -237,6 +292,10 @@ def test_default_session_not_no_memory():
 
 
 def test_existing_no_memory_session_cannot_be_reenabled():
+    """先保存无记忆会话，再用相同编号传入关闭标志。
+
+    检查已有会话的隐私设置保持创建时的值。
+    """
     from app.services.chat import ChatService
 
     db = _TestSession()
@@ -254,7 +313,10 @@ def test_existing_no_memory_session_cannot_be_reenabled():
 
 
 def test_pending_review_has_reason_and_desensitized_summary():
-    """High-risk handoff -> admin-facing review has a reason and sanitized context."""
+    """输入含身份信息的待审核消息。
+
+    检查审核原因和摘要已保存，手机号被替换而没有原样出现在摘要中。
+    """
     events = _run_stream(
         [],
         message="我叫小明，手机号 13812345678，最近有伤害自己的念头",
@@ -281,6 +343,10 @@ def test_pending_review_has_reason_and_desensitized_summary():
 # ---------------------------------------------------------------------------
 
 def _latest_review():
+    """按编号倒序读取最后一条审核记录。
+
+    查询结束关闭会话，返回已加载对象供断言检查字段。
+    """
     db = _TestSession()
     try:
         return (
@@ -293,8 +359,10 @@ def _latest_review():
 
 
 def test_pending_review_keyword_reason_and_chinese_trend():
-    """Explicit HIGH message -> HIGH_RISK_KEYWORD review with a Chinese,
-    honest trend label (no more English placeholder)."""
+    """创建普通高风险审核结果。
+
+    检查保存原因和摘要采用单条消息高风险的中文说明。
+    """
     _run_stream([], pending_review=True)
     review = _latest_review()
     assert review is not None
@@ -306,8 +374,10 @@ def test_pending_review_keyword_reason_and_chinese_trend():
 
 
 def test_pending_review_trajectory_reason_when_rising():
-    """Trajectory-raised HIGH -> RISK_TRAJECTORY_RISING review carrying the
-    real trend text from the risk guardian."""
+    """让执行结果明确标记轨迹上升并给出趋势文本。
+
+    检查审核原因改为轨迹上升，摘要包含该趋势。
+    """
     _run_stream(
         [],
         pending_review=True,
@@ -321,5 +391,5 @@ def test_pending_review_trajectory_reason_when_rising():
     print("  trajectory review labeled correctly")
 
 
-# Runner
+# 本组测试结束。
 # ---------------------------------------------------------------------------

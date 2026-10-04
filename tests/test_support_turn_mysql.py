@@ -26,6 +26,10 @@ MYSQL_TEST_DATABASE_URL = os.getenv("MYSQL_TEST_DATABASE_URL", "")
 
 @pytest.fixture
 def mysql_db():
+    """提供专用 MySQL 测试数据库，并在前后重建表结构。
+
+    缺少地址时跳过，名称不以 _test 结尾则拒绝运行，防止测试清理作用于普通数据库。
+    """
     if not MYSQL_TEST_DATABASE_URL:
         pytest.skip("需要 MYSQL_TEST_DATABASE_URL 才运行 MySQL 事务集成测试")
     url = make_url(MYSQL_TEST_DATABASE_URL)
@@ -45,6 +49,10 @@ def mysql_db():
 
 
 def _seed(db):
+    """先提交测试用户，再准备尚未提交的新会话。
+
+    让故障测试同时验证会话和本轮关联记录可以一起撤销。
+    """
     user = UserAccount(username="mysql-student", display_name="学生", password_hash="hash")
     db.add(user)
     db.commit()
@@ -55,6 +63,10 @@ def _seed(db):
 
 
 def _high_risk_run() -> AgentRunResult:
+    """构造待人工审核的高风险运行结果。
+
+    采用固定评估字段隔离模型服务，专注验证数据库事务。
+    """
     assessment = PsychologyAssessment(
         EmotionLabel.HIGH_RISK,
         4.0,
@@ -75,9 +87,17 @@ def _high_risk_run() -> AgentRunResult:
 
 @pytest.mark.parametrize("stage", ["message", "report", "review", "jobs"])
 def test_mysql_fault_injection_rolls_back_the_whole_support_turn(mysql_db, stage):
+    """在专用数据库的不同保存阶段抛出模拟异常。
+
+    确认新会话、消息、评估、审核和工具任务都没有残留。
+    """
     user, session = _seed(mysql_db)
 
     def fail(current_stage: str) -> None:
+        """匹配本轮参数指定的阶段后抛错。
+
+        其他阶段继续执行，确保故障发生在预期的保存位置。
+        """
         if current_stage == stage:
             raise RuntimeError(f"fail after {stage}")
 

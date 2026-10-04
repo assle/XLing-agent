@@ -14,10 +14,18 @@ const SEVERITY_LABELS = {
   severe: "重度"
 };
 
+/**
+ * 把服务端筛查程度代码转换成中文展示文字。
+ * 未知代码优先原样显示，空值显示未知，不重新计算分数或程度。
+ */
 function severityLabel(value) {
   return SEVERITY_LABELS[value] || value || "未知";
 }
 
+/**
+ * 绑定筛查弹窗、量表选择、作答和历史记录事件。
+ * 用户选择量表后才加载题目，点击开始后才显示作答页。
+ */
 export function initScreening() {
   els.open = document.querySelector("#openScreening");
   els.screenTabBtn = document.querySelector("#screenTabBtn");
@@ -33,17 +41,22 @@ export function initScreening() {
   els.result = document.querySelector("#scaleResult");
   els.history = document.querySelector("#screeningHistory");
 
+  // 打开弹窗时回到筛查页并清理上一次未完成的本地流程。
   els.open.addEventListener("click", () => {
     openModal("screeningModal");
     showTab("screen");
     resetFlow();
   });
+  // 点击筛查标签只切换可见区域。
   els.screenTabBtn.addEventListener("click", () => showTab("screen"));
+  // 点击历史标签后再读取最新筛查记录。
   els.historyTabBtn.addEventListener("click", () => {
     showTab("history");
     loadHistory();
   });
+  // 为每个量表选择按钮各绑定自己的量表名称。
   document.querySelectorAll(".scale-choice").forEach((button) => {
+    // 用户点击后按该按钮的 data-scale 字段读取量表。
     button.addEventListener("click", () => loadScale(button.dataset.scale));
   });
   els.scaleStart.addEventListener("click", showQuestions);
@@ -51,6 +64,10 @@ export function initScreening() {
   els.questions.addEventListener("submit", submitAnswers);
 }
 
+/**
+ * 在筛查流程和历史记录之间切换显示及选中样式。
+ * which 为 screen 时显示筛查，其余值显示历史；不自动请求数据。
+ */
 function showTab(which) {
   const screen = which === "screen";
   els.screenTab.hidden = !screen;
@@ -59,6 +76,10 @@ function showTab(which) {
   els.historyTabBtn.classList.toggle("active", !screen);
 }
 
+/**
+ * 清空当前量表选择并回到量表入口。
+ * 隐藏说明、作答和结果区，不删除服务端已保存的结果。
+ */
 function resetFlow() {
   view.scaleType = null;
   view.scaleInfo = null;
@@ -68,6 +89,10 @@ function resetFlow() {
   els.result.hidden = true;
 }
 
+/**
+ * 按量表名称读取题目和规则，然后进入说明页。
+ * 路径中编码量表名称，失败在选择区展示提示。
+ */
 async function loadScale(scaleType) {
   try {
     const response = await api(`/api/screening/${encodeURIComponent(scaleType)}`);
@@ -79,6 +104,10 @@ async function loadScale(scaleType) {
   }
 }
 
+/**
+ * 展示当前量表的用途、题数、计分规则和非诊断说明。
+ * 内容来自服务端定义；这里只组织显示，不另行维护量表规则。
+ */
 function renderIntro() {
   const info = view.scaleInfo;
   els.scaleSelect.hidden = true;
@@ -94,7 +123,8 @@ function renderIntro() {
   const scoring = document.createElement("p");
   scoring.textContent = `计分规则：${info.scoringRules}`;
   const options = document.createElement("p");
-  options.textContent = `每题四个选项：${info.answerOptions.map((o) => o.label).join(" / ")}`;
+  // 提取每个选项的显示标签，组合成说明文字。
+  options.textContent = `每题四个选项：${info.answerOptions.map((o) => `${o.value} 分：${o.label}`).join(" / ")}`;
   const disclaimer = document.createElement("p");
   disclaimer.textContent = info.disclaimer;
   disclaimer.className = "danger-text";
@@ -103,10 +133,15 @@ function renderIntro() {
   els.scaleIntroBody.append(block);
 }
 
+/**
+ * 依据服务端题目和选项创建逐题单选控件。
+ * 同一道题使用相同 name，不同题使用索引区分，供提交时按原顺序读取。
+ */
 function showQuestions() {
   els.scaleIntro.hidden = true;
   els.questions.hidden = false;
   els.questions.innerHTML = "";
+  // 逐题建立独立的单选组，索引与提交答案顺序一致。
   view.scaleInfo.questions.forEach((question, index) => {
     const fieldset = document.createElement("div");
     fieldset.className = "scale-question";
@@ -133,12 +168,18 @@ function showQuestions() {
   els.questions.append(submit);
 }
 
+/**
+ * 按题目顺序收集选项并阻止漏答提交。
+ * 将选择值转为数字，缺失项为 null；所有题完成后提交并展示服务端结果。
+ */
 async function submitAnswers(event) {
   event.preventDefault();
+  // 按题号读取被选中的控件，未选择时保留 null。
   const answers = view.scaleInfo.questions.map((_, index) => {
     const checked = els.questions.querySelector(`input[name="q${index}"]:checked`);
     return checked ? Number(checked.value) : null;
   });
+  // 只要存在漏答就阻止请求，避免用默认分数替代用户答案。
   if (answers.some((answer) => answer === null)) {
     alert("还有题目未作答，请完成所有题目后再提交。");
     return;
@@ -155,6 +196,10 @@ async function submitAnswers(event) {
   }
 }
 
+/**
+ * 显示筛查总分、程度和时间，并在特定答案需关注时展示求助提示。
+ * 分数直接采用服务端返回值，同时展示非诊断说明。
+ */
 function renderResult(result) {
   els.questions.hidden = true;
   els.result.hidden = false;
@@ -185,6 +230,10 @@ function renderResult(result) {
   els.result.append(box);
 }
 
+/**
+ * 读取筛查历史并逐条显示量表名称、分数、程度和时间。
+ * 空记录和查询失败分别展示提示，不把历史结果用于自动诊断。
+ */
 async function loadHistory() {
   els.history.innerHTML = `<p class="hint">读取中...</p>`;
   try {

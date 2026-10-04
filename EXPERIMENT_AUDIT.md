@@ -4,6 +4,8 @@
 **Auditor**: GPT-5.6-Sol ultra（同系列新代理，只读，暂定结论）
 **Project**: Xling
 
+本报告只记录 2026-09-01 合成模板分类器实验的审计结论，输入文件及哈希保存在 [EXPERIMENT_AUDIT.json](EXPERIMENT_AUDIT.json)。它不代表后续数据、模型或应用回归的审计结果；当前实验入口见 [finetune/README.md](finetune/README.md)。
+
 ## Overall Verdict: WARN
 
 ## Integrity Status: warn
@@ -18,11 +20,11 @@
 
 ### C. Result File Existence: PASS
 
-数据、日志、逐条预测和当前结果编号完全对齐。基座与微调后指标可独立精确复算，训练日志与结果文件一致。
+审计输入的数据、日志、逐条预测和结果编号完全对齐。基座与微调后指标可独立精确复算，训练日志与结果文件一致。
 
 ### D. Dead Code Detection: PASS
 
-当前版本没有未调用的指标函数，声明指标均出现在结果文件中。
+审计时版本没有未调用的指标函数，声明指标均出现在结果文件中。
 
 ### E. Scope Assessment: WARN
 

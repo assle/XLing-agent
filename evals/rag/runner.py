@@ -24,15 +24,10 @@ def evaluate(
     strategy: str = "baseline",
     retriever: BgeM3Retriever | None = None,
 ) -> dict:
-    """Run the RAG eval against a self-contained SQLite knowledge base.
+    """在评估专用数据库和向量目录中运行选定知识检索方案。
 
-    Builds its own SQLite engine (no MySQL/Docker) and an isolated Chroma store
-    so the run is repeatable and does not mutate dev state. Writes the full
-    per-case report to ``rag_eval_output`` and a compact 5-metric baseline
-    summary to ``rag_eval_baseline_output``.
-
-    Supported strategies: baseline, multi-query, hybrid-rrf, llm-rerank.
-    Each writes its own summary file for cross-run comparison.
+    初始化知识库后逐例调用检索，记录命中、延迟及安全关键遗漏，分别保存完整报告和摘要。
+    支持默认、多查询、排名融合、模型重排及离线模型实验；无论成功失败都关闭数据库会话和引擎。
     """
     settings = settings or get_eval_settings()
     eval_settings = _eval_settings(settings)
@@ -107,6 +102,10 @@ def evaluate(
 def compute_report(
     results: list[dict], dataset: str, top_k: int, retrieval_label: str
 ) -> dict:
+    """汇总逐例检索质量、延迟和安全关键样本遗漏率。
+
+    先排序延迟再取第 95 百分位；首次相关名次只在命中样本上平均，空集合以零返回。
+    """
     total = max(1, len(results))
     hits = [item for item in results if item["hit"]]
     safety_cases = [item for item in results if item.get("safetyCritical", False)]
@@ -133,10 +132,9 @@ def compute_report(
 
 
 def build_eval_summary(report: dict) -> dict:
-    """Compact 5-metric summary for cross-run comparison (baseline vs enhancements).
+    """从完整检索报告提取质量、延迟、版本和比较资格字段。
 
-    Kept separate from the full report so issues 02-04 can write their own
-    summary files (multi-query / hybrid-rrf / llm-rerank) against this baseline.
+    保留当前报告中的统计值，不重复计算；缺少新增字段时使用兼容默认值。
     """
     return {
         "createdAt": report["createdAt"],
@@ -163,8 +161,14 @@ def build_eval_summary(report: dict) -> dict:
 
 
 def evaluate_case(retrieve_fn, case: dict, top_k: int) -> dict:
+    """执行一次检索，按来源或词项判断相关性并记录排序指标。
+
+    当前 recallAtK 实际是本题是否至少命中一次的零一值；precisionAtK 以请求的 top_k 为分母。
+    只计检索调用的耗时，后续指标整理时间不计入该延迟。
+    """
     started = time.perf_counter()
     retrieved = retrieve_fn(case["question"], top_k)
+    # 这里只测检索调用耗时，相关性判断与报告整理不包含在内。
     latency_ms = (time.perf_counter() - started) * 1000.0
     expected_sources = {source.lower() for source in case.get("expectedSources", [])}
     expected_terms = [term.lower() for term in case.get("expectedTerms", [])]
@@ -185,6 +189,7 @@ def evaluate_case(retrieve_fn, case: dict, top_k: int) -> dict:
             "relevant": relevant,
             "preview": " ".join(item.content.split())[:160],
         })
+    # 至少找到一个相关结果就算本题命中；不是对所有真实相关文档计算完整召回。
     hit = first_rank > 0
     return {
         "id": case["id"],
@@ -204,6 +209,10 @@ def evaluate_case(retrieve_fn, case: dict, top_k: int) -> dict:
 
 
 def is_relevant(source: str, content: str, expected_sources: set[str], expected_terms: list[str]) -> bool:
+    """判断候选是否命中期望来源或期望词项。
+
+    来源命中直接视为相关；否则任一长度至少二的词项出现在正文中即可，不执行语义评判。
+    """
     if source.lower() in expected_sources:
         return True
     lower = content.lower()
@@ -211,6 +220,10 @@ def is_relevant(source: str, content: str, expected_sources: set[str], expected_
 
 
 def ndcg(items: list[dict]) -> float:
+    """计算相关结果在当前列表中的排序质量，并相对理想顺序归一化。
+
+    相关项排得越后贡献越小；理想值基于当前列表命中的相关项数，未命中任何项时返回零。
+    """
     dcg = 0.0
     relevant = 0
     for index, item in enumerate(items):
@@ -224,7 +237,10 @@ def ndcg(items: list[dict]) -> float:
 
 
 def _eval_settings(settings: EvalSettings) -> EvalSettings:
-    """Copy of settings pointing Chroma at the isolated eval store."""
+    """复制配置并把向量存储和模型参数指向评估专用设置。
+
+    不改原配置对象，避免离线评估复用应用的默认向量集合。
+    """
     return settings.model_copy(update={
         "chroma_persist_dir": settings.rag_eval_chroma_persist_dir,
         "chroma_collection_name": settings.rag_eval_chroma_collection_name,
@@ -237,6 +253,10 @@ def _eval_settings(settings: EvalSettings) -> EvalSettings:
 
 
 def _build_engine(url: str):
+    """根据评估数据库地址创建连接引擎。
+
+    文件数据库先准备目录并允许跨线程连接；其他地址直接交给数据库库处理。
+    """
     kwargs: dict[str, Any] = {}
     if url.startswith("sqlite"):
         kwargs["connect_args"] = {"check_same_thread": False}
@@ -245,6 +265,10 @@ def _build_engine(url: str):
 
 
 def _ensure_sqlite_parent_dir(url: str) -> None:
+    """为文件形式的评估数据库创建父目录。
+
+    内存数据库或未提供文件名时跳过，不建立多余目录。
+    """
     database = make_url(url).database
     if not database or database == ":memory:":
         return
@@ -252,6 +276,10 @@ def _ensure_sqlite_parent_dir(url: str) -> None:
 
 
 def _retrieval_label(service: KnowledgeService, strategy: str = "baseline") -> str:
+    """根据实验方案及默认向量可用状态给报告选择路径标签。
+
+    默认路径还检查是否曾发生向量回退；离线模型标签按所选方案返回。
+    """
     if strategy == "bge-m3":
         return "BGE-M3"
     if strategy == "bge-m3-rerank":
@@ -266,13 +294,20 @@ def _retrieval_label(service: KnowledgeService, strategy: str = "baseline") -> s
 
 
 def _write_json(data: dict, path: str) -> None:
+    """确保输出目录存在，再把报告写成保留中文的缩进文本。
+
+    path 指定目标文件，会覆盖同路径旧报告。
+    """
     output = Path(path)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def _build_ai_client(settings: EvalSettings, strategy: str):
-    """Create an AiClient for strategies that need LLM (multi-query, llm-rerank)."""
+    """为需要查询改写或重排的方案准备模型客户端。
+
+    多查询、排名融合和模型重排返回客户端，其余方案返回 None。
+    """
     if strategy in ("multi-query", "hybrid-rrf", "llm-rerank"):
         from app.services.ai import AiClient
         return AiClient(settings)
@@ -280,6 +315,10 @@ def _build_ai_client(settings: EvalSettings, strategy: str):
 
 
 def _strategy_label(strategy: str, retrieval_label: str) -> str:
+    """给报告生成对应检索组合的可读名称。
+
+    未知方案使用传入默认路径标签，不在这里执行检索。
+    """
     labels = {
         "baseline": retrieval_label,
         "multi-query": f"multi-query + {retrieval_label}",
@@ -292,18 +331,28 @@ def _strategy_label(strategy: str, retrieval_label: str) -> str:
 
 
 def _build_retrieve_fn(service: KnowledgeService, strategy: str, settings: EvalSettings):
-    """Return a (query, top_k) -> list[SearchResult] callable for the given strategy."""
+    """把方案选择转换成接收查询和结果数量的可调用函数。
+
+    匿名函数分别转发默认、多查询或融合入口；模型重排使用下方闭包，未知方案回到默认检索。
+    """
     if strategy == "baseline":
+        # 该匿名函数统一接收查询和数量，再转发默认检索入口。
         return lambda q, k: service.retrieve(q, k)
     if strategy == "multi-query":
+        # 多查询方案保持相同调用形式，便于逐例评估统一使用。
         return lambda q, k: service.retrieve_multi_query(q, k)
     if strategy == "hybrid-rrf":
+        # 每条改写查询都使用排名融合检索，再由多查询入口合并去重。
         return lambda q, k: service.retrieve_multi_query(q, k, base_retrieve=service.retrieve_hybrid_rrf)
     if strategy == "llm-rerank":
         from app.services.knowledge import SearchResult as _SR
         pool = settings.rag_eval_rerank_candidate_pool
 
         def _retrieve(q: str, k: int):
+            """先用多查询与排名融合取得候选，再由模型评分并截取前 k 项。
+
+            q 是问题，k 是最终数量；无候选或无模型时直接截取原结果，未评分候选按零分排序。
+            """
             candidates = service.retrieve_multi_query(q, pool, base_retrieve=service.retrieve_hybrid_rrf)
             if not candidates or not service.ai_client:
                 return candidates[:k] if candidates else []
@@ -317,14 +366,19 @@ def _build_retrieve_fn(service: KnowledgeService, strategy: str, settings: EvalS
                 _SR(c.chunk_id, c.source, c.content, index_to_score.get(i, 0.0))
                 for i, c in enumerate(candidates)
             ]
+            # 按模型重排后替换的分数排序，截取最终候选。
             reranked.sort(key=lambda r: r.score, reverse=True)
             return reranked[:k]
         return _retrieve
+    # 把统一的查询和数量参数传给默认检索入口。
     return lambda q, k: service.retrieve(q, k)
 
 
 def _strategy_paths(strategy: str, settings: EvalSettings) -> tuple[str, str]:
-    """Return (report_path, summary_path) for the given strategy."""
+    """为检索方案选择详细报告和摘要两个输出路径。
+
+    各实验使用不同文件名，未知方案使用默认路径。
+    """
     path_map = {
         "baseline": (settings.rag_eval_output, settings.rag_eval_baseline_output),
         "multi-query": (
@@ -364,10 +418,10 @@ COMPARISON_STRATEGIES = [
 
 
 def build_comparison(settings: EvalSettings | None = None) -> dict:
-    """Read 4 strategy summaries and return comparison data with delta.
+    """读取六种检索方案已有摘要，比较质量并生成候选采用建议。
 
-    Missing summary files are marked as unavailable rather than raising.
-    Delta is computed as best strategy (highest MRR) minus baseline.
+    缺失文件标记未运行；最高平均倒数排名方案与基线计算差值。
+    当前参照优先选择排名融合方案，建议是否可比依据参照记录的资格标志，不重新验证所有报告的数据集一致性。
     """
     settings = settings or get_eval_settings()
     path_map = {
@@ -382,6 +436,7 @@ def build_comparison(settings: EvalSettings | None = None) -> dict:
     strategies: list[dict[str, Any]] = []
     for name in COMPARISON_STRATEGIES:
         path = Path(path_map[name])
+        # 缺失报告与已有但指标较低不同：前者标记未运行，不补成零分参与比较。
         if path.exists():
             summary = json.loads(path.read_text(encoding="utf-8"))
             metrics = {k: summary.get(k) for k in [*COMPARISON_METRICS, *DECISION_METRICS]}
@@ -410,6 +465,7 @@ def build_comparison(settings: EvalSettings | None = None) -> dict:
 
     delta = None
     if baseline and len(available) > 1:
+        # 用平均倒数排名选择最佳方案，缺少该指标时按零比较。
         best = max(available, key=lambda s: (s["metrics"] or {}).get("mrr", 0) or 0)
         baseline_metrics = baseline["metrics"] or {}
         best_metrics = best["metrics"] or {}
@@ -452,6 +508,11 @@ def build_retrieval_decision(
     *,
     fair_comparison: bool = True,
 ) -> dict:
+    """按质量增益、安全遗漏、延迟和可比性门槛生成候选检索建议。
+
+    召回或平均倒数排名至少提升 0.03，安全遗漏不增加，延迟不超过基线的 1.5 倍才可能通过。
+    返回判断依据和文字建议，不实际切换应用检索器。
+    """
     recall_gain = (candidate.get("recallAtK") or 0.0) - (baseline.get("recallAtK") or 0.0)
     mrr_gain = (candidate.get("mrr") or 0.0) - (baseline.get("mrr") or 0.0)
     quality_gate = recall_gain >= 0.03 or mrr_gain >= 0.03
@@ -481,7 +542,10 @@ def build_retrieval_decision(
 
 
 def format_comparison_markdown(comparison: dict) -> str:
-    """Render comparison dict as a Markdown table."""
+    """把各方案摘要及相对基线差值绘制成 Markdown 表格。
+
+    不可用方案标记未运行，缺少单项指标显示横线，数值保留四位小数。
+    """
     headers = ["策略", "Recall@K", "Precision@K", "MRR", "NDCG@K", "HitRate"]
     lines = [
         "| " + " | ".join(headers) + " |",
@@ -511,7 +575,10 @@ def format_comparison_markdown(comparison: dict) -> str:
 
 
 def write_comparison(settings: EvalSettings | None = None) -> tuple[str, str]:
-    """Build comparison and write JSON + Markdown outputs. Returns (json_path, md_path)."""
+    """构造方案比较并保存数据文件和可阅读表格文件。
+
+    自动准备父目录，返回两份文件路径；读取已有摘要，不重新调用模型。
+    """
     settings = settings or get_eval_settings()
     comparison = build_comparison(settings)
     md = format_comparison_markdown(comparison)

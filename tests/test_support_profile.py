@@ -11,6 +11,10 @@ client = _harness.client
 
 
 def _seed_user() -> None:
+    """创建支持背景接口测试专用用户。
+
+    使用当前密码算法并赋予普通用户角色。
+    """
     db = _Session()
     try:
         user = UserAccount(
@@ -29,6 +33,10 @@ _seed_user()
 
 
 def _token() -> str:
+    """通过专用测试账户登录取得凭证。
+
+    后续背景请求仍走完整身份验证。
+    """
     response = client.post(
         "/api/auth/login",
         json={"username": "support-profile-user", "password": "support-profile-password"},
@@ -37,10 +45,18 @@ def _token() -> str:
 
 
 def _auth() -> dict[str, str]:
+    """每次获取测试凭证并构造请求头。
+
+    便于背景读写测试共用认证步骤。
+    """
     return {"Authorization": f"Bearer {_token()}"}
 
 
 def _clean_profiles() -> None:
+    """清除测试用户的背景记录。
+
+    保留账户，模拟尚未填写背景的状态。
+    """
     db = _Session()
     try:
         db.query(UserProfile).filter(UserProfile.user_id == 1).delete()
@@ -50,6 +66,10 @@ def _clean_profiles() -> None:
 
 
 def test_user_can_save_and_read_a_general_support_background():
+    """提交关注问题、支持目标和支持方式后重新读取。
+
+    检查保存响应和读取结果完全一致。
+    """
     _clean_profiles()
 
     saved = client.put(
@@ -76,6 +96,10 @@ def test_user_can_save_and_read_a_general_support_background():
 
 
 def test_support_background_is_optional_and_requires_authentication():
+    """在没有背景时分别匿名和登录读取。
+
+    匿名须被拒绝，登录用户可获得三个空字段而不是被要求先填写。
+    """
     _clean_profiles()
 
     anonymous = client.get("/api/profile/support")

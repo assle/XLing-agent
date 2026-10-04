@@ -7,8 +7,8 @@ from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy.orm import Session
 
 from app.core import diagnostics
-from app.core.time import utc_now
-from app.models.entities import ActionPlan, ActionPlanItem
+from app.core.time import utc_isoformat, utc_now
+from app.models.entities import ActionPlan, ActionPlanItem, ChatSession
 from app.schemas.dtos import AiMessage
 from app.services.ai import AiClient
 
@@ -30,9 +30,9 @@ class ActionPlanSchema(BaseModel):
 # ---------------------------------------------------------------------------
 
 FALLBACK_ITEMS = [
-    "今晚把最担心的一件事写在纸上，只选一个最小步骤明天先做",
-    "睡前 30 分钟把手机放远，用缓慢呼吸帮身体放松",
-    "明天固定一个 25 分钟专注时段，只做最重要的一件事",
+    "方便时用一分钟写下最担心的一件事，先不要求解决它",
+    "在不影响当前事务时，停留一分钟，留意呼吸并轻轻放松肩膀",
+    "选一个符合现有安排的小步骤；暂时做不到也可以只记下来",
 ]
 
 
@@ -58,13 +58,15 @@ class ActionPlanService:
         cbt_summary: str = "",
         *,
         commit: bool = True,
+        user_context: str = "",
     ) -> ActionPlan:
         """根据四维追问摘要生成并保存一份 24 小时行动计划。
 
-        user_id 和 session_id 确定归属，cbt_summary 提供生成背景；调用方负责确认四个方面已完成。
+        user_id 和 session_id 确定归属，cbt_summary 提供四维摘要，user_context 保留用户原话及约束。
+        调用方负责确认四个方面已完成。
         commit 为 False 时只写入未提交事务，允许外层统一确认保存；返回带数据库编号的计划对象。
         """
-        items = self._generate_items(cbt_summary)
+        items = self._generate_items(cbt_summary, user_context)
         plan = ActionPlan(
             user_id=user_id,
             session_id=session_id,
@@ -99,17 +101,26 @@ class ActionPlanService:
             return None
         return plan
 
-    def list_plans(self, user_id: int) -> list[ActionPlan]:
-        """按创建时间从新到旧列出指定用户的行动计划。
+    def get_session_plan(self, user_id: int, session_id: int) -> ActionPlan | None:
+        """读取本会话最新计划，包括已反馈完成的计划，供后续支持回复复用。"""
+        return (
+            self.db.query(ActionPlan)
+            .filter(ActionPlan.user_id == user_id, ActionPlan.session_id == session_id)
+            .order_by(ActionPlan.created_at.desc(), ActionPlan.id.desc())
+            .first()
+        )
+
+    def list_plans(self, user_id: int, session_public_id: str | None = None) -> list[ActionPlan]:
+        """按创建时间从新到旧列出自有计划，可限定到一个自有会话。
 
         返回数据库对象列表，不限定计划状态，也不修改记录。
         """
-        return (
-            self.db.query(ActionPlan)
-            .filter(ActionPlan.user_id == user_id)
-            .order_by(ActionPlan.created_at.desc())
-            .all()
-        )
+        query = self.db.query(ActionPlan).filter(ActionPlan.user_id == user_id)
+        if session_public_id is not None:
+            query = query.join(ChatSession, ActionPlan.session_id == ChatSession.id).filter(
+                ChatSession.public_id == session_public_id, ChatSession.user_id == user_id,
+            )
+        return query.order_by(ActionPlan.created_at.desc(), ActionPlan.id.desc()).all()
 
     def mark_item_completed(self, user_id: int, item_id: int) -> ActionPlanItem | None:
         """记录一个自有行动项的完成状态和当前完成时间。
@@ -151,8 +162,8 @@ class ActionPlanService:
             "id": plan.id,
             "status": plan.status,
             "targetWindowHours": plan.target_window_hours,
-            "createdAt": plan.created_at.isoformat(),
-            "feedbackDueAt": feedback_due_at.isoformat(),
+            "createdAt": utc_isoformat(plan.created_at),
+            "feedbackDueAt": utc_isoformat(feedback_due_at),
             "feedbackAvailable": plan.status == "active",
             "items": [
                 {
@@ -160,7 +171,7 @@ class ActionPlanService:
                     "content": item.content,
                     "order": item.order_index,
                     "completed": item.completed,
-                    "completedAt": item.completed_at.isoformat() if item.completed_at else None,
+                    "completedAt": utc_isoformat(item.completed_at) if item.completed_at else None,
                 }
                 for item in items
             ],
@@ -170,7 +181,7 @@ class ActionPlanService:
     # 模型生成与输出解析。
     # ------------------------------------------------------------------
 
-    def _generate_items(self, cbt_summary: str) -> list[str]:
+    def _generate_items(self, cbt_summary: str, user_context: str = "") -> list[str]:
         """尝试由模型生成行动项，在不可用或输出解析失败时使用默认项。
 
         cbt_summary 是四维追问摘要；返回独立的文本列表，默认列表通过复制避免被后续修改污染。
@@ -179,7 +190,7 @@ class ActionPlanService:
             if not self.ai:
                 return FALLBACK_ITEMS.copy()
             try:
-                messages = self._generation_prompt(cbt_summary)
+                messages = self._generation_prompt(cbt_summary, user_context)
                 raw = self.ai.complete(messages)
                 return self._parse_items(raw)
             # 输出格式或字段不满足约定时使用安全默认条目，不保存未经校验的模型结构。
@@ -193,17 +204,19 @@ class ActionPlanService:
     # 把四维追问摘要组装成行动计划生成请求。
     # 返回系统要求与用户背景两条消息，只要求模型给出约定结构；此处不调用模型。
     # 本函数源码参与提示词版本计算，中文说明放在函数外以保持其指纹不变。
-    def _generation_prompt(self, cbt_summary: str) -> list[AiMessage]:
-        stage_context = ""
+    def _generation_prompt(self, cbt_summary: str, user_context: str = "") -> list[AiMessage]:
         return [
             AiMessage(role="system", content=(
                 "你是一个心理行动规划助手。基于用户的认知行为四维追问摘要，生成 3-5 个小而具体、"
                 "安全、可操作的 24 小时行动计划条目。只返回严格 JSON："
                 '{"items":[{"content":"具体行动描述","order":0}]}'
                 "\n每个条目应小而具体、安全，并与用户当前处境和四维追问摘要相关。"
+                "用户原话中的可用时间、工作职责、必须保留的安排和不愿做的事是硬约束；"
+                "最新的纠正优先于摘要或较早表达。不得建议违反这些约束的行动，也不得擅自扩大投入时间。"
+                "资源须适用于已知身份和地点；信息不足时使用通用支持方向，不假定用户在校。"
             )),
             AiMessage(role="user", content=(
-                f"{stage_context}认知行为四维追问摘要：\n{cbt_summary}"
+                f"认知行为四维追问摘要：\n{cbt_summary}\n\n用户原话与支持背景：\n{user_context or '未提供'}"
             )),
         ]
 

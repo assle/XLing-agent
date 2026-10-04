@@ -17,10 +17,9 @@ RISK_CLASSES = ["LOW", "MEDIUM", "HIGH"]
 
 
 def compute_metrics(results: list[dict]) -> dict:
-    """Compute per-class precision/recall/F1, macro-F1, accuracy, confusion matrix.
+    """比较真实与预测风险，计算三类风险的准确率和各类统计。
 
-    Each result dict must have ``expected_risk`` and ``predicted_risk`` keys
-    with values in RISK_CLASSES.
+    混淆矩阵按真实风险为行、预测风险为列；未知类别不会进入矩阵，但样本仍参与总体准确率。
     """
     classes = RISK_CLASSES
     total = max(1, len(results))
@@ -58,6 +57,10 @@ def compute_metrics(results: list[dict]) -> dict:
 async def _run_cases(
     cases: list[dict], service: PsychologicalAssessmentService
 ) -> list[dict]:
+    """逐条异步调用当前评估服务并整理风险结果。
+
+    返回标签、分数、置信度和是否命中等信息；服务内部的保守回退也会作为实际预测记录。
+    """
     results: list[dict] = []
     for case in cases:
         assessment = await service.aassess(case["text"])
@@ -82,11 +85,9 @@ async def _run_cases(
 def evaluate(
     settings: EvalSettings | None = None, provider: str | None = None
 ) -> dict:
-    """Run risk evaluation against the labeled dataset.
+    """读取已标注风险数据，调用评估服务并写出详细报告和摘要。
 
-    Reads cases from ``risk_eval_dataset``, calls
-    ``PsychologicalAssessmentService.aassess()`` for each, computes metrics,
-    and writes full report + compact summary to disk.
+    模型配置复制自评估设置，具体主入口仍使用专用分类器路径；不会据此启用校准实验方案。
     """
     settings = settings or get_eval_settings()
     provider = provider or settings.risk_eval_ai_provider
@@ -135,7 +136,10 @@ def evaluate(
 
 
 def build_summary(report: dict) -> dict:
-    """Compact summary without per-case detail, for cross-run comparison."""
+    """从完整风险报告中去掉逐例 results。
+
+    保留总体指标、数据集和版本信息，便于不同运行之间比较。
+    """
     return {k: v for k, v in report.items() if k != "results"}
 
 

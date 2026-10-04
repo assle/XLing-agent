@@ -1,0 +1,3398 @@
+{
+  "schemaVersion": 1,
+  "scope": {
+    "source": "/Users/assle/dev/mindbridge-py/.scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate-postposed-negation/data/train.jsonl",
+    "sourceSha256": "a1984a75d366d9d5d678cea7c1e9a27ba52308861fea46eedfed4035f3954a1e",
+    "sourceRows": 376,
+    "reviewedRows": 188,
+    "reviewedLabels": {
+      "LOW": 94,
+      "HIGH": 94
+    },
+    "bodyReviewComplete": true,
+    "reviewBasis": "逐条读完两个标签的全部实际正文，并核对 sourceGroup 与冻结 SYS 的文字规则。",
+    "excludedFromReview": [
+      "正常与焦虑正文",
+      "模型预测与结果",
+      "val/test/new40",
+      "训练过程及参数"
+    ],
+    "modelCalls": 0,
+    "trainingRuns": 0,
+    "networkCalls": 0,
+    "dataOrGtChanged": false,
+    "fullBodiesCopiedToArtifact": false,
+    "policySource": "/Users/assle/dev/mindbridge-py/.scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate-v10/system-prompt.txt",
+    "policySourceSha256": "a6d981d29f3cfe7f4edef11bb293a5c5ddf06a87d6205177746b5c4454d346ab"
+  },
+  "engineeringMeaning": {
+    "LOW": "明确悲伤，或兴趣、动力降低；不要求临床诊断或固定持续时间。",
+    "HIGH_currentState": "当前肯定自伤或轻生意念，或近期已发生主动自伤；无具体计划、有陪伴、无死亡意图均不能取消已肯定危险。",
+    "frozenSysRelevantRule": "自伤或轻生意念、意图、行为是高风险，陪伴、没有计划或虚构备注不能取消危险信号。",
+    "policyVsFact": "冻结 SYS 包含危险内容分流策略：虚构备注不取消 HIGH；这不能转化为真实用户当下危险的事实断言。四条显式虚构正文按策略支持 HIGH，同时保留主体/真实性边界。"
+  },
+  "judgmentDefinitions": {
+    "clear": "正文对所标工程路由有明确支持，否定的对象与时间经逐条核对。",
+    "support boundary": "正文有合理支持但目标状态不够明确，或冻结路由策略与真实用户当前状态的证明范围存在边界；不据此自动认定 GT 错误。",
+    "clear conflict": "正文与所标路由的规则支持明确冲突；不是为了减少边界数量而强行使用。"
+  },
+  "summary": {
+    "total": {
+      "rows": 188,
+      "judgments": {
+        "clear": 168,
+        "support boundary": 20,
+        "clear conflict": 0
+      }
+    },
+    "byLabel": {
+      "LOW": {
+        "sourceLabel": "低落",
+        "rows": 94,
+        "judgments": {
+          "clear": 78,
+          "support boundary": 16,
+          "clear conflict": 0
+        },
+        "boundaryIds": [
+          "e24fd53bbae3ee9f",
+          "29e13b118c179c75",
+          "448dbe6a8190af11",
+          "f3e495b67965665d",
+          "d68bf5fd80ac2e66",
+          "4153c0c806ec470f",
+          "1c620aa15de465e1",
+          "9f72f9e8d61a58b3",
+          "0329970c90f259f1",
+          "a79ca81f5653e7a8",
+          "natural-v08-低落-sustained_disengagement_narrative-01",
+          "natural-v08-低落-sustained_disengagement_narrative-04",
+          "natural-v08-低落-flattened_everyday_experience-02",
+          "natural-v08-低落-slowed_selfcare_diary-01",
+          "natural-v08-低落-slowed_selfcare_diary-02",
+          "natural-v08-低落-slowed_selfcare_diary-03"
+        ],
+        "conflictIds": []
+      },
+      "HIGH": {
+        "sourceLabel": "高风险",
+        "rows": 94,
+        "judgments": {
+          "clear": 90,
+          "support boundary": 4,
+          "clear conflict": 0
+        },
+        "boundaryIds": [
+          "natural-v08-高风险-fictitious_annotated_ideation-01",
+          "natural-v08-高风险-fictitious_annotated_ideation-02",
+          "natural-v08-高风险-fictitious_annotated_ideation-03",
+          "natural-v08-高风险-fictitious_annotated_ideation-04"
+        ],
+        "conflictIds": []
+      }
+    },
+    "bySourceGroup": [
+      {
+        "sourceGroup": "低落-template-01",
+        "label": "LOW",
+        "rows": 10,
+        "judgments": {
+          "clear": 10,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "explicit_interest_reduction": 10,
+          "explicit_motivation_reduction": 10
+        }
+      },
+      {
+        "sourceGroup": "低落-template-02",
+        "label": "LOW",
+        "rows": 10,
+        "judgments": {
+          "clear": 10,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "explicit_motivation_reduction": 10,
+          "subjective_heaviness": 10
+        }
+      },
+      {
+        "sourceGroup": "低落-template-03",
+        "label": "LOW",
+        "rows": 10,
+        "judgments": {
+          "clear": 10,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "explicit_low_mood": 10,
+          "functional_difficulty": 10
+        }
+      },
+      {
+        "sourceGroup": "低落-template-04",
+        "label": "LOW",
+        "rows": 10,
+        "judgments": {
+          "clear": 10,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "crying_or_sadness_expression": 10,
+          "emotional_numbness": 10,
+          "social_withdrawal": 10
+        }
+      },
+      {
+        "sourceGroup": "低落-template-05",
+        "label": "LOW",
+        "rows": 10,
+        "judgments": {
+          "clear": 0,
+          "support boundary": 10,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "fatigue": 10,
+          "no_explicit_target_low_signal": 10,
+          "self_devaluation": 10
+        }
+      },
+      {
+        "sourceGroup": "高风险-template-01",
+        "label": "HIGH",
+        "rows": 10,
+        "judgments": {
+          "clear": 10,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_suicidal_ideation": 10
+        }
+      },
+      {
+        "sourceGroup": "高风险-template-02",
+        "label": "HIGH",
+        "rows": 10,
+        "judgments": {
+          "clear": 10,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_suicidal_ideation": 10
+        }
+      },
+      {
+        "sourceGroup": "高风险-template-03",
+        "label": "HIGH",
+        "rows": 10,
+        "judgments": {
+          "clear": 10,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_self_harm_ideation": 10
+        }
+      },
+      {
+        "sourceGroup": "高风险-template-04",
+        "label": "HIGH",
+        "rows": 10,
+        "judgments": {
+          "clear": 10,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_suicidal_intent": 10,
+          "preparation_present": 10
+        }
+      },
+      {
+        "sourceGroup": "高风险-template-05",
+        "label": "HIGH",
+        "rows": 10,
+        "judgments": {
+          "clear": 10,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "action_time_present": 10,
+          "current_suicidal_intent": 10,
+          "preparation_present": 10
+        }
+      },
+      {
+        "sourceGroup": "natural-v08-低落-sustained_disengagement_narrative",
+        "label": "LOW",
+        "rows": 4,
+        "judgments": {
+          "clear": 2,
+          "support boundary": 2,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "behavioral_hobby_withdrawal": 2,
+          "explicit_interest_reduction": 2,
+          "explicit_motivation_reduction": 1,
+          "no_explicit_target_low_signal": 2,
+          "past_current_contrast": 2,
+          "selfcare_behavior_change": 1
+        }
+      },
+      {
+        "sourceGroup": "natural-v08-低落-flattened_everyday_experience",
+        "label": "LOW",
+        "rows": 4,
+        "judgments": {
+          "clear": 3,
+          "support boundary": 1,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "flattened_experience": 3,
+          "no_explicit_target_low_signal": 1,
+          "past_current_contrast": 2,
+          "semantic_interest_reduction": 3
+        }
+      },
+      {
+        "sourceGroup": "natural-v08-低落-slowed_selfcare_diary",
+        "label": "LOW",
+        "rows": 4,
+        "judgments": {
+          "clear": 1,
+          "support boundary": 3,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "behavioral_initiation_difficulty": 3,
+          "explicit_motivation_reduction": 1,
+          "no_explicit_target_low_signal": 3,
+          "selfcare_behavior_change": 2
+        }
+      },
+      {
+        "sourceGroup": "natural-v08-高风险-expressed_ideation_without_plan",
+        "label": "HIGH",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_self_harm_ideation": 1,
+          "current_suicidal_ideation": 3,
+          "plan_or_action_preparation_denied": 4,
+          "support_seeking_or_disclosure": 4
+        }
+      },
+      {
+        "sourceGroup": "natural-v08-高风险-expressed_ideation_with_support_person",
+        "label": "HIGH",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_self_harm_ideation": 2,
+          "current_suicidal_ideation": 2,
+          "support_person_present": 4,
+          "support_seeking_or_disclosure": 4
+        }
+      },
+      {
+        "sourceGroup": "natural-v08-高风险-fictitious_annotated_ideation",
+        "label": "HIGH",
+        "rows": 4,
+        "judgments": {
+          "clear": 0,
+          "support boundary": 4,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "fiction_or_role_quotation": 4,
+          "policy_factual_subject_boundary": 4,
+          "quoted_plan_denial": 1,
+          "quoted_self_harm_ideation": 2,
+          "quoted_suicidal_ideation": 2,
+          "quoted_support_presence": 1,
+          "third_person_hypothetical": 1
+        }
+      },
+      {
+        "sourceGroup": "v10-l-t1-bereavement-memento",
+        "label": "LOW",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "bereavement_context": 4,
+          "crying_or_sadness_expression": 1,
+          "current_danger_denied": 4,
+          "explicit_low_mood": 3
+        }
+      },
+      {
+        "sourceGroup": "v10-l-t2-repaired-receipt-self-worth",
+        "label": "LOW",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "crying_or_sadness_expression": 1,
+          "current_danger_denied": 4,
+          "explicit_low_mood": 3,
+          "resolved_task_distress_persists": 4,
+          "self_devaluation": 4
+        }
+      },
+      {
+        "sourceGroup": "v10-l-t3-unexplained-voice-note-tears",
+        "label": "LOW",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_danger_denied": 4,
+          "explicit_low_mood": 4,
+          "unexplained_tears": 4
+        }
+      },
+      {
+        "sourceGroup": "v10-h-t1-plan-denial-scope-correction",
+        "label": "HIGH",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_self_harm_ideation": 2,
+          "current_suicidal_ideation": 2,
+          "explicit_negation_scope_correction": 4,
+          "plan_or_action_preparation_denied": 4
+        }
+      },
+      {
+        "sourceGroup": "v10-h-t2-directed-at-self-not-others",
+        "label": "HIGH",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_self_harm_ideation": 4,
+          "explicit_negation_scope_correction": 4,
+          "harm_to_others_denied": 4
+        }
+      },
+      {
+        "sourceGroup": "v10-h-t3-deliberate-today-not-accident",
+        "label": "HIGH",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "accident_denied": 4,
+          "recent_deliberate_self_harm": 4,
+          "remote_history_denied": 2,
+          "suicidal_intent_denied": 4
+        }
+      },
+      {
+        "sourceGroup": "temporal-v06-20261003-h1-seed-lending",
+        "label": "HIGH",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_self_harm_ideation": 4,
+          "past_current_contrast": 4,
+          "past_danger_denied": 4,
+          "plan_or_action_preparation_denied": 2,
+          "support_person_present": 2
+        }
+      },
+      {
+        "sourceGroup": "temporal-v06-r2-20261003-h2-surname-registry",
+        "label": "HIGH",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_self_harm_ideation": 4,
+          "past_current_contrast": 4,
+          "past_danger_denied": 4,
+          "plan_or_action_preparation_denied": 2,
+          "support_person_present": 3
+        }
+      },
+      {
+        "sourceGroup": "temporal-v06-20261003-h3-coastal-observation",
+        "label": "HIGH",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_self_harm_ideation": 4,
+          "past_current_contrast": 4,
+          "past_danger_denied": 4,
+          "plan_or_action_preparation_denied": 2,
+          "support_person_present": 2
+        }
+      },
+      {
+        "sourceGroup": "temporal-v06-r2-20261003-l1-planetarium-guide",
+        "label": "LOW",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_danger_denied": 4,
+          "explicit_low_mood": 4,
+          "function_continues_distress_persists": 4,
+          "past_current_contrast": 4
+        }
+      },
+      {
+        "sourceGroup": "temporal-v06-20261003-l2-weaving-courtyard",
+        "label": "LOW",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_danger_denied": 4,
+          "explicit_interest_reduction": 3,
+          "explicit_low_mood": 4,
+          "explicit_motivation_reduction": 1,
+          "past_current_contrast": 4
+        }
+      },
+      {
+        "sourceGroup": "temporal-v06-r2-20261003-l3-beekeeper-rounds",
+        "label": "LOW",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_danger_denied": 4,
+          "explicit_low_mood": 4,
+          "explicit_motivation_reduction": 1,
+          "function_continues_distress_persists": 4,
+          "past_current_contrast": 4
+        }
+      },
+      {
+        "sourceGroup": "neggen-20261003-f05-debate-argument-disengagement",
+        "label": "LOW",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_danger_denied": 4,
+          "explicit_interest_reduction": 4,
+          "explicit_low_mood": 4,
+          "explicit_motivation_reduction": 4,
+          "postposed_danger_negation": 4
+        }
+      },
+      {
+        "sourceGroup": "neggen-20261003-f06-breakfast-delivery-disengagement",
+        "label": "LOW",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_danger_denied": 4,
+          "explicit_interest_reduction": 4,
+          "explicit_low_mood": 4,
+          "explicit_motivation_reduction": 4,
+          "postposed_danger_negation": 4
+        }
+      },
+      {
+        "sourceGroup": "neggen-20261003-f07-orienteering-feedback-disclosure",
+        "label": "HIGH",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_self_harm_ideation": 4,
+          "plan_or_action_preparation_denied": 4,
+          "postposed_plan_negation": 4,
+          "support_seeking_or_disclosure": 4
+        }
+      },
+      {
+        "sourceGroup": "neggen-20261003-f08-language-exchange-support-disclosure",
+        "label": "HIGH",
+        "rows": 4,
+        "judgments": {
+          "clear": 4,
+          "support boundary": 0,
+          "clear conflict": 0
+        },
+        "bodyStructureCounts": {
+          "current_suicidal_ideation": 4,
+          "plan_or_action_preparation_denied": 4,
+          "postposed_plan_negation": 4,
+          "support_seeking_or_disclosure": 4
+        }
+      }
+    ],
+    "findings": [
+      "LOW 78 条 clear、16 条 support boundary；10 条 template-05 只写疲惫和自我否定，另 6 条自然叙事的兴趣/动力状态仍依赖行为或空白感推断。",
+      "HIGH 90 条 clear、4 条 support boundary；四条边界均为显式虚构、联调或假设角色正文，按冻结 SYS 支持风险内容分流，不能据此确认真实用户当前危险，也不能统计成确认错标。",
+      "其余 HIGH 正文的当前本人危险信号均为肯定表达；否定具体计划、否定伤害别人、否定意外、否定死亡意图、过去无危险和当前陪伴均未覆盖所肯定信号。",
+      "LOW 的父亲遗物悲伤和无明确成因的哭泣有直接悲伤支持；固定工程含义不要求把这些表达转成临床状态后才允许 LOW。",
+      "两个标签各有 50 条固定句架与 10 个情境槽位交叉生成，占各标签 53.19%；其余每个 sourceGroup 有 4 个措辞变体，不能将 188 行理解成 188 个独立情境。"
+    ]
+  },
+  "structureStatistics": {
+    "sourceFamilyCountsByLabel": {
+      "LOW": {
+        "base-template": 50,
+        "natural-v08": 12,
+        "v10": 12,
+        "temporal-v06": 12,
+        "neggen": 8
+      },
+      "HIGH": {
+        "base-template": 50,
+        "natural-v08": 12,
+        "v10": 12,
+        "temporal-v06": 12,
+        "neggen": 8
+      }
+    },
+    "sourceGroups": {
+      "LOW": 16,
+      "HIGH": 16,
+      "total": 32
+    },
+    "baseTemplateCrossProduct": {
+      "templatesPerLabel": 5,
+      "scenarioSlotsPerTemplate": 10,
+      "rowsPerLabel": 50,
+      "scenarioSlots": [
+        "anxiety",
+        "low_mood",
+        "sleep",
+        "work",
+        "family",
+        "relationships",
+        "adjustment",
+        "exam",
+        "ordinary",
+        "safety"
+      ],
+      "interpretation": "这些槽位是背景情境，不直接决定标签；固定尾部目标信号通常直接决定可支持路由。"
+    },
+    "nonBaseGroupPattern": {
+      "sourceGroupsPerLabel": 11,
+      "rowsPerSourceGroup": 4,
+      "rowsPerLabel": 44,
+      "interpretation": "每组共享核心情境与语义结构，4 个正文主要为措辞、时间词和否定形式的变化。"
+    },
+    "scenarioMetadataCountsByLabel": {
+      "LOW": {
+        "anxiety": 5,
+        "low_mood": 5,
+        "sleep": 5,
+        "work": 5,
+        "family": 5,
+        "relationships": 5,
+        "adjustment": 5,
+        "exam": 5,
+        "ordinary": 5,
+        "safety": 5,
+        "sustained_disengagement_narrative": 4,
+        "flattened_everyday_experience": 4,
+        "slowed_selfcare_diary": 4,
+        "父亲遗物触发悲伤": 4,
+        "已改妥的小票错误": 4,
+        "当下语音记录哽咽": 4,
+        "常设星空展讲解期间的持续悲伤": 4,
+        "共享织布房搬离旧院后的持续失落": 4,
+        "蜂农日常照看蜂箱期间的持续低落": 4,
+        "<absent>": 8
+      },
+      "HIGH": {
+        "anxiety": 5,
+        "low_mood": 5,
+        "sleep": 5,
+        "work": 5,
+        "family": 5,
+        "relationships": 5,
+        "adjustment": 5,
+        "exam": 5,
+        "ordinary": 5,
+        "safety": 5,
+        "expressed_ideation_without_plan": 4,
+        "expressed_ideation_with_support_person": 4,
+        "fictitious_annotated_ideation": 4,
+        "纠正计划否定的范围": 4,
+        "区分自伤对象与对人发火": 4,
+        "当日故意自伤行为": 4,
+        "社区种子借还台轮值后的状态变化": 4,
+        "个人改姓登记提交后的状态变化": 4,
+        "海岸自然观察站交班后的状态变化": 4,
+        "<absent>": 8
+      }
+    },
+    "semanticBodyStructureCountsByLabel": {
+      "LOW": {
+        "behavioral_hobby_withdrawal": 2,
+        "behavioral_initiation_difficulty": 3,
+        "bereavement_context": 4,
+        "crying_or_sadness_expression": 12,
+        "current_danger_denied": 32,
+        "emotional_numbness": 10,
+        "explicit_interest_reduction": 23,
+        "explicit_low_mood": 40,
+        "explicit_motivation_reduction": 32,
+        "fatigue": 10,
+        "flattened_experience": 3,
+        "function_continues_distress_persists": 8,
+        "functional_difficulty": 10,
+        "no_explicit_target_low_signal": 16,
+        "past_current_contrast": 16,
+        "postposed_danger_negation": 8,
+        "resolved_task_distress_persists": 4,
+        "self_devaluation": 14,
+        "selfcare_behavior_change": 3,
+        "semantic_interest_reduction": 3,
+        "social_withdrawal": 10,
+        "subjective_heaviness": 10,
+        "unexplained_tears": 4
+      },
+      "HIGH": {
+        "accident_denied": 4,
+        "action_time_present": 10,
+        "current_self_harm_ideation": 35,
+        "current_suicidal_ideation": 31,
+        "current_suicidal_intent": 20,
+        "explicit_negation_scope_correction": 8,
+        "fiction_or_role_quotation": 4,
+        "harm_to_others_denied": 4,
+        "past_current_contrast": 12,
+        "past_danger_denied": 12,
+        "plan_or_action_preparation_denied": 22,
+        "policy_factual_subject_boundary": 4,
+        "postposed_plan_negation": 8,
+        "preparation_present": 20,
+        "quoted_plan_denial": 1,
+        "quoted_self_harm_ideation": 2,
+        "quoted_suicidal_ideation": 2,
+        "quoted_support_presence": 1,
+        "recent_deliberate_self_harm": 4,
+        "remote_history_denied": 2,
+        "suicidal_intent_denied": 4,
+        "support_person_present": 11,
+        "support_seeking_or_disclosure": 16,
+        "third_person_hypothetical": 1
+      }
+    },
+    "negationWordingRowCountsByLabel": {
+      "LOW": {
+        "都没有": 21,
+        "均未出现": 2,
+        "不存在": 2,
+        "还没有": 0,
+        "没有定": 0,
+        "尚未做": 0,
+        "不能": 0,
+        "不是": 2
+      },
+      "HIGH": {
+        "都没有": 4,
+        "均未出现": 0,
+        "不存在": 0,
+        "还没有": 4,
+        "没有定": 3,
+        "尚未做": 2,
+        "不能": 4,
+        "不是": 9
+      }
+    },
+    "countingNotes": [
+      "语义结构标签由全文审读手动分配，一行可出现多个结构，不能把各计数相加当作样本总数。",
+      "措辞统计只数正文中包含某个精确短语的行数，不用于自动推定否定范围或标签。",
+      "scenario 字段缺失的 neggen 8 条分别覆盖辩论、早餐轮值、定向活动、语言交换四组正文情境。",
+      "HIGH 的 quoted_* 字段专指虚构/引述层面内容，未计入 current_* 的真实说话者当下证据。"
+    ]
+  },
+  "items": [
+    {
+      "id": "c2da0208f0e337d7",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-01",
+      "judgment": "clear",
+      "reason": "“提不起劲”和原来喜欢的事失去兴趣，直接支持当前动力与兴趣降低。",
+      "span": "我持续提不起劲，原来喜欢的事情也没兴趣。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "explicit_interest_reduction"
+      ]
+    },
+    {
+      "id": "0640b3520780f433",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-01",
+      "judgment": "clear",
+      "reason": "“提不起劲”和原来喜欢的事失去兴趣，直接支持当前动力与兴趣降低。",
+      "span": "我持续提不起劲，原来喜欢的事情也没兴趣。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "explicit_interest_reduction"
+      ]
+    },
+    {
+      "id": "d1c8f8ceac3bbf13",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-01",
+      "judgment": "clear",
+      "reason": "“提不起劲”和原来喜欢的事失去兴趣，直接支持当前动力与兴趣降低。",
+      "span": "我持续提不起劲，原来喜欢的事情也没兴趣。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "explicit_interest_reduction"
+      ]
+    },
+    {
+      "id": "111df867c3cded50",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-01",
+      "judgment": "clear",
+      "reason": "“提不起劲”和原来喜欢的事失去兴趣，直接支持当前动力与兴趣降低。",
+      "span": "我持续提不起劲，原来喜欢的事情也没兴趣。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "explicit_interest_reduction"
+      ]
+    },
+    {
+      "id": "df113b4bc302a6a4",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-01",
+      "judgment": "clear",
+      "reason": "“提不起劲”和原来喜欢的事失去兴趣，直接支持当前动力与兴趣降低。",
+      "span": "我持续提不起劲，原来喜欢的事情也没兴趣。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "explicit_interest_reduction"
+      ]
+    },
+    {
+      "id": "67c20c1002e8dd0a",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-01",
+      "judgment": "clear",
+      "reason": "“提不起劲”和原来喜欢的事失去兴趣，直接支持当前动力与兴趣降低。",
+      "span": "我持续提不起劲，原来喜欢的事情也没兴趣。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "explicit_interest_reduction"
+      ]
+    },
+    {
+      "id": "0cd53b0a08076571",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-01",
+      "judgment": "clear",
+      "reason": "“提不起劲”和原来喜欢的事失去兴趣，直接支持当前动力与兴趣降低。",
+      "span": "我持续提不起劲，原来喜欢的事情也没兴趣。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "explicit_interest_reduction"
+      ]
+    },
+    {
+      "id": "a0263c84964cbb4a",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-01",
+      "judgment": "clear",
+      "reason": "“提不起劲”和原来喜欢的事失去兴趣，直接支持当前动力与兴趣降低。",
+      "span": "我持续提不起劲，原来喜欢的事情也没兴趣。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "explicit_interest_reduction"
+      ]
+    },
+    {
+      "id": "b1d98443d5c987ff",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-01",
+      "judgment": "clear",
+      "reason": "“提不起劲”和原来喜欢的事失去兴趣，直接支持当前动力与兴趣降低。",
+      "span": "我持续提不起劲，原来喜欢的事情也没兴趣。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "explicit_interest_reduction"
+      ]
+    },
+    {
+      "id": "769492778b194a08",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-01",
+      "judgment": "clear",
+      "reason": "“提不起劲”和原来喜欢的事失去兴趣，直接支持当前动力与兴趣降低。",
+      "span": "我持续提不起劲，原来喜欢的事情也没兴趣。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "explicit_interest_reduction"
+      ]
+    },
+    {
+      "id": "e10ba477411b9fda",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-02",
+      "judgment": "clear",
+      "reason": "当前持续沉重感伴随“做什么都没有动力”，明确支持低落工程含义。",
+      "span": "总觉得很沉，做什么都没有动力。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "subjective_heaviness"
+      ]
+    },
+    {
+      "id": "5aa2a8c08a77b7f7",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-02",
+      "judgment": "clear",
+      "reason": "当前持续沉重感伴随“做什么都没有动力”，明确支持低落工程含义。",
+      "span": "总觉得很沉，做什么都没有动力。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "subjective_heaviness"
+      ]
+    },
+    {
+      "id": "369f710cbcbf4ea3",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-02",
+      "judgment": "clear",
+      "reason": "当前持续沉重感伴随“做什么都没有动力”，明确支持低落工程含义。",
+      "span": "总觉得很沉，做什么都没有动力。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "subjective_heaviness"
+      ]
+    },
+    {
+      "id": "d6e386bccc7cec4f",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-02",
+      "judgment": "clear",
+      "reason": "当前持续沉重感伴随“做什么都没有动力”，明确支持低落工程含义。",
+      "span": "总觉得很沉，做什么都没有动力。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "subjective_heaviness"
+      ]
+    },
+    {
+      "id": "efe543843cdf699a",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-02",
+      "judgment": "clear",
+      "reason": "当前持续沉重感伴随“做什么都没有动力”，明确支持低落工程含义。",
+      "span": "总觉得很沉，做什么都没有动力。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "subjective_heaviness"
+      ]
+    },
+    {
+      "id": "dfa2735f5f6324b2",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-02",
+      "judgment": "clear",
+      "reason": "当前持续沉重感伴随“做什么都没有动力”，明确支持低落工程含义。",
+      "span": "总觉得很沉，做什么都没有动力。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "subjective_heaviness"
+      ]
+    },
+    {
+      "id": "a28b0b2bcdd52fa6",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-02",
+      "judgment": "clear",
+      "reason": "当前持续沉重感伴随“做什么都没有动力”，明确支持低落工程含义。",
+      "span": "总觉得很沉，做什么都没有动力。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "subjective_heaviness"
+      ]
+    },
+    {
+      "id": "40501214f08c1640",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-02",
+      "judgment": "clear",
+      "reason": "当前持续沉重感伴随“做什么都没有动力”，明确支持低落工程含义。",
+      "span": "总觉得很沉，做什么都没有动力。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "subjective_heaviness"
+      ]
+    },
+    {
+      "id": "a19882a12f06e5af",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-02",
+      "judgment": "clear",
+      "reason": "当前持续沉重感伴随“做什么都没有动力”，明确支持低落工程含义。",
+      "span": "总觉得很沉，做什么都没有动力。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "subjective_heaviness"
+      ]
+    },
+    {
+      "id": "3082f42c78b46e55",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-02",
+      "judgment": "clear",
+      "reason": "当前持续沉重感伴随“做什么都没有动力”，明确支持低落工程含义。",
+      "span": "总觉得很沉，做什么都没有动力。",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "subjective_heaviness"
+      ]
+    },
+    {
+      "id": "a8daf49d4d7afcf8",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-03",
+      "judgment": "clear",
+      "reason": "正文明确自述这段时间情绪低落，生活行为困难是伴随信息。",
+      "span": "让我情绪低落，连起床和吃饭都变得费力。",
+      "structureTags": [
+        "explicit_low_mood",
+        "functional_difficulty"
+      ]
+    },
+    {
+      "id": "732e876776c3b321",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-03",
+      "judgment": "clear",
+      "reason": "正文明确自述这段时间情绪低落，生活行为困难是伴随信息。",
+      "span": "让我情绪低落，连起床和吃饭都变得费力。",
+      "structureTags": [
+        "explicit_low_mood",
+        "functional_difficulty"
+      ]
+    },
+    {
+      "id": "0f21d20b94a9322f",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-03",
+      "judgment": "clear",
+      "reason": "正文明确自述这段时间情绪低落，生活行为困难是伴随信息。",
+      "span": "让我情绪低落，连起床和吃饭都变得费力。",
+      "structureTags": [
+        "explicit_low_mood",
+        "functional_difficulty"
+      ]
+    },
+    {
+      "id": "39535cd60a153cc9",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-03",
+      "judgment": "clear",
+      "reason": "正文明确自述这段时间情绪低落，生活行为困难是伴随信息。",
+      "span": "让我情绪低落，连起床和吃饭都变得费力。",
+      "structureTags": [
+        "explicit_low_mood",
+        "functional_difficulty"
+      ]
+    },
+    {
+      "id": "b3f122f191fc02e9",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-03",
+      "judgment": "clear",
+      "reason": "正文明确自述这段时间情绪低落，生活行为困难是伴随信息。",
+      "span": "让我情绪低落，连起床和吃饭都变得费力。",
+      "structureTags": [
+        "explicit_low_mood",
+        "functional_difficulty"
+      ]
+    },
+    {
+      "id": "17bf196559e72991",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-03",
+      "judgment": "clear",
+      "reason": "正文明确自述这段时间情绪低落，生活行为困难是伴随信息。",
+      "span": "让我情绪低落，连起床和吃饭都变得费力。",
+      "structureTags": [
+        "explicit_low_mood",
+        "functional_difficulty"
+      ]
+    },
+    {
+      "id": "82c702c6aaa255e9",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-03",
+      "judgment": "clear",
+      "reason": "正文明确自述这段时间情绪低落，生活行为困难是伴随信息。",
+      "span": "让我情绪低落，连起床和吃饭都变得费力。",
+      "structureTags": [
+        "explicit_low_mood",
+        "functional_difficulty"
+      ]
+    },
+    {
+      "id": "86761589a63b486e",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-03",
+      "judgment": "clear",
+      "reason": "正文明确自述这段时间情绪低落，生活行为困难是伴随信息。",
+      "span": "让我情绪低落，连起床和吃饭都变得费力。",
+      "structureTags": [
+        "explicit_low_mood",
+        "functional_difficulty"
+      ]
+    },
+    {
+      "id": "3d7f20b301996759",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-03",
+      "judgment": "clear",
+      "reason": "正文明确自述这段时间情绪低落，生活行为困难是伴随信息。",
+      "span": "让我情绪低落，连起床和吃饭都变得费力。",
+      "structureTags": [
+        "explicit_low_mood",
+        "functional_difficulty"
+      ]
+    },
+    {
+      "id": "dc913e2006cc5a5e",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-03",
+      "judgment": "clear",
+      "reason": "正文明确自述这段时间情绪低落，生活行为困难是伴随信息。",
+      "span": "让我情绪低落，连起床和吃饭都变得费力。",
+      "structureTags": [
+        "explicit_low_mood",
+        "functional_difficulty"
+      ]
+    },
+    {
+      "id": "1150940fe1b98550",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-04",
+      "judgment": "clear",
+      "reason": "持续麻木、常想哭和不想见人共同支持当前悲伤型低落表达。",
+      "span": "越来越麻木，常常想哭，也不想见人。",
+      "structureTags": [
+        "crying_or_sadness_expression",
+        "emotional_numbness",
+        "social_withdrawal"
+      ]
+    },
+    {
+      "id": "15b4d321b468cc5a",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-04",
+      "judgment": "clear",
+      "reason": "持续麻木、常想哭和不想见人共同支持当前悲伤型低落表达。",
+      "span": "越来越麻木，常常想哭，也不想见人。",
+      "structureTags": [
+        "crying_or_sadness_expression",
+        "emotional_numbness",
+        "social_withdrawal"
+      ]
+    },
+    {
+      "id": "0bbdf003d8c855c2",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-04",
+      "judgment": "clear",
+      "reason": "持续麻木、常想哭和不想见人共同支持当前悲伤型低落表达。",
+      "span": "越来越麻木，常常想哭，也不想见人。",
+      "structureTags": [
+        "crying_or_sadness_expression",
+        "emotional_numbness",
+        "social_withdrawal"
+      ]
+    },
+    {
+      "id": "d1329adb2f1539fb",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-04",
+      "judgment": "clear",
+      "reason": "持续麻木、常想哭和不想见人共同支持当前悲伤型低落表达。",
+      "span": "越来越麻木，常常想哭，也不想见人。",
+      "structureTags": [
+        "crying_or_sadness_expression",
+        "emotional_numbness",
+        "social_withdrawal"
+      ]
+    },
+    {
+      "id": "16b0f5f7eacf4b0f",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-04",
+      "judgment": "clear",
+      "reason": "持续麻木、常想哭和不想见人共同支持当前悲伤型低落表达。",
+      "span": "越来越麻木，常常想哭，也不想见人。",
+      "structureTags": [
+        "crying_or_sadness_expression",
+        "emotional_numbness",
+        "social_withdrawal"
+      ]
+    },
+    {
+      "id": "997236df3f741de0",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-04",
+      "judgment": "clear",
+      "reason": "持续麻木、常想哭和不想见人共同支持当前悲伤型低落表达。",
+      "span": "越来越麻木，常常想哭，也不想见人。",
+      "structureTags": [
+        "crying_or_sadness_expression",
+        "emotional_numbness",
+        "social_withdrawal"
+      ]
+    },
+    {
+      "id": "686e0a6a64ae091c",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-04",
+      "judgment": "clear",
+      "reason": "持续麻木、常想哭和不想见人共同支持当前悲伤型低落表达。",
+      "span": "越来越麻木，常常想哭，也不想见人。",
+      "structureTags": [
+        "crying_or_sadness_expression",
+        "emotional_numbness",
+        "social_withdrawal"
+      ]
+    },
+    {
+      "id": "a74e761f68baeafd",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-04",
+      "judgment": "clear",
+      "reason": "持续麻木、常想哭和不想见人共同支持当前悲伤型低落表达。",
+      "span": "越来越麻木，常常想哭，也不想见人。",
+      "structureTags": [
+        "crying_or_sadness_expression",
+        "emotional_numbness",
+        "social_withdrawal"
+      ]
+    },
+    {
+      "id": "29589858ed94ac94",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-04",
+      "judgment": "clear",
+      "reason": "持续麻木、常想哭和不想见人共同支持当前悲伤型低落表达。",
+      "span": "越来越麻木，常常想哭，也不想见人。",
+      "structureTags": [
+        "crying_or_sadness_expression",
+        "emotional_numbness",
+        "social_withdrawal"
+      ]
+    },
+    {
+      "id": "ae1490d62e436464",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-04",
+      "judgment": "clear",
+      "reason": "持续麻木、常想哭和不想见人共同支持当前悲伤型低落表达。",
+      "span": "越来越麻木，常常想哭，也不想见人。",
+      "structureTags": [
+        "crying_or_sadness_expression",
+        "emotional_numbness",
+        "social_withdrawal"
+      ]
+    },
+    {
+      "id": "e24fd53bbae3ee9f",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-05",
+      "judgment": "support boundary",
+      "reason": "疲惫与全盘自我否定可伴随低落，但正文没有明确悲伤、兴趣降低或动力降低，单凭这些不能确认目标状态。",
+      "span": "我一直很疲惫，感觉自己什么都做不好。",
+      "structureTags": [
+        "fatigue",
+        "self_devaluation",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "29e13b118c179c75",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-05",
+      "judgment": "support boundary",
+      "reason": "疲惫与全盘自我否定可伴随低落，但正文没有明确悲伤、兴趣降低或动力降低，单凭这些不能确认目标状态。",
+      "span": "我一直很疲惫，感觉自己什么都做不好。",
+      "structureTags": [
+        "fatigue",
+        "self_devaluation",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "448dbe6a8190af11",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-05",
+      "judgment": "support boundary",
+      "reason": "疲惫与全盘自我否定可伴随低落，但正文没有明确悲伤、兴趣降低或动力降低，单凭这些不能确认目标状态。",
+      "span": "我一直很疲惫，感觉自己什么都做不好。",
+      "structureTags": [
+        "fatigue",
+        "self_devaluation",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "f3e495b67965665d",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-05",
+      "judgment": "support boundary",
+      "reason": "疲惫与全盘自我否定可伴随低落，但正文没有明确悲伤、兴趣降低或动力降低，单凭这些不能确认目标状态。",
+      "span": "我一直很疲惫，感觉自己什么都做不好。",
+      "structureTags": [
+        "fatigue",
+        "self_devaluation",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "d68bf5fd80ac2e66",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-05",
+      "judgment": "support boundary",
+      "reason": "疲惫与全盘自我否定可伴随低落，但正文没有明确悲伤、兴趣降低或动力降低，单凭这些不能确认目标状态。",
+      "span": "我一直很疲惫，感觉自己什么都做不好。",
+      "structureTags": [
+        "fatigue",
+        "self_devaluation",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "4153c0c806ec470f",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-05",
+      "judgment": "support boundary",
+      "reason": "疲惫与全盘自我否定可伴随低落，但正文没有明确悲伤、兴趣降低或动力降低，单凭这些不能确认目标状态。",
+      "span": "我一直很疲惫，感觉自己什么都做不好。",
+      "structureTags": [
+        "fatigue",
+        "self_devaluation",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "1c620aa15de465e1",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-05",
+      "judgment": "support boundary",
+      "reason": "疲惫与全盘自我否定可伴随低落，但正文没有明确悲伤、兴趣降低或动力降低，单凭这些不能确认目标状态。",
+      "span": "我一直很疲惫，感觉自己什么都做不好。",
+      "structureTags": [
+        "fatigue",
+        "self_devaluation",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "9f72f9e8d61a58b3",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-05",
+      "judgment": "support boundary",
+      "reason": "疲惫与全盘自我否定可伴随低落，但正文没有明确悲伤、兴趣降低或动力降低，单凭这些不能确认目标状态。",
+      "span": "我一直很疲惫，感觉自己什么都做不好。",
+      "structureTags": [
+        "fatigue",
+        "self_devaluation",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "0329970c90f259f1",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-05",
+      "judgment": "support boundary",
+      "reason": "疲惫与全盘自我否定可伴随低落，但正文没有明确悲伤、兴趣降低或动力降低，单凭这些不能确认目标状态。",
+      "span": "我一直很疲惫，感觉自己什么都做不好。",
+      "structureTags": [
+        "fatigue",
+        "self_devaluation",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "a79ca81f5653e7a8",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "低落-template-05",
+      "judgment": "support boundary",
+      "reason": "疲惫与全盘自我否定可伴随低落，但正文没有明确悲伤、兴趣降低或动力降低，单凭这些不能确认目标状态。",
+      "span": "我一直很疲惫，感觉自己什么都做不好。",
+      "structureTags": [
+        "fatigue",
+        "self_devaluation",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "natural-v08-低落-sustained_disengagement_narrative-01",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "natural-v08-低落-sustained_disengagement_narrative",
+      "judgment": "support boundary",
+      "reason": "两周未进行曾有的爱好与久坐支持退缩可能，但未拿画本的行为本身没有明确说明兴趣或动力为何降低。",
+      "span": "这半个月却一次也没拿起画本",
+      "structureTags": [
+        "behavioral_hobby_withdrawal",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "natural-v08-低落-sustained_disengagement_narrative-02",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "natural-v08-低落-sustained_disengagement_narrative",
+      "judgment": "clear",
+      "reason": "过去喜欢照料花盆而现在连修剪的兴致都没有，明确表达兴趣降低。",
+      "span": "连伸手修剪的那点兴致都没了",
+      "structureTags": [
+        "explicit_interest_reduction",
+        "past_current_contrast"
+      ]
+    },
+    {
+      "id": "natural-v08-低落-sustained_disengagement_narrative-03",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "natural-v08-低落-sustained_disengagement_narrative",
+      "judgment": "clear",
+      "reason": "喜欢的歌被中途关掉且空闲时也不想找事做，语义上明确当前兴趣与行动意愿降低。",
+      "span": "空着的晚上也不想找别的事情做",
+      "structureTags": [
+        "explicit_interest_reduction",
+        "explicit_motivation_reduction",
+        "past_current_contrast"
+      ]
+    },
+    {
+      "id": "natural-v08-低落-sustained_disengagement_narrative-04",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "natural-v08-低落-sustained_disengagement_narrative",
+      "judgment": "support boundary",
+      "reason": "饭食随便应付和爱看的书未动可支持投入减少，但正文仅给行为变化，尚不能确认悲伤或兴趣动力降低。",
+      "span": "这两周却只随便应付",
+      "structureTags": [
+        "behavioral_hobby_withdrawal",
+        "selfcare_behavior_change",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "natural-v08-低落-flattened_everyday_experience-01",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "natural-v08-低落-flattened_everyday_experience",
+      "judgment": "clear",
+      "reason": "多个原本可期待的休闲活动都没有盼头，表达当前兴趣与愉悦期待降低。",
+      "span": "饭菜、电影和出门都提不出一点盼头",
+      "structureTags": [
+        "semantic_interest_reduction",
+        "flattened_experience"
+      ]
+    },
+    {
+      "id": "natural-v08-低落-flattened_everyday_experience-02",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "natural-v08-低落-flattened_everyday_experience",
+      "judgment": "support boundary",
+      "reason": "连续晚间的空白和感受滑过支持情感迟钝可能，但没有明确悲伤或对活动兴趣动力降低。",
+      "span": "最近连续几个晚上只剩下同样的空白",
+      "structureTags": [
+        "flattened_experience",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "natural-v08-低落-flattened_everyday_experience-03",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "natural-v08-低落-flattened_everyday_experience",
+      "judgment": "clear",
+      "reason": "以前觉得有意思的小路现在走完毫无感觉，直接描述相同活动的愉悦感下降。",
+      "span": "现在走完也没留下什么感觉",
+      "structureTags": [
+        "semantic_interest_reduction",
+        "flattened_experience",
+        "past_current_contrast"
+      ]
+    },
+    {
+      "id": "natural-v08-低落-flattened_everyday_experience-04",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "natural-v08-低落-flattened_everyday_experience",
+      "judgment": "clear",
+      "reason": "由留心新口味变为只想结束且不愿慢慢品尝，语义上支持兴趣减少。",
+      "span": "连坐下来慢慢尝也不想",
+      "structureTags": [
+        "semantic_interest_reduction",
+        "past_current_contrast"
+      ]
+    },
+    {
+      "id": "natural-v08-低落-slowed_selfcare_diary-01",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "natural-v08-低落-slowed_selfcare_diary",
+      "judgment": "support boundary",
+      "reason": "洗漱与换衣持续拖延提示启动困难，但仅凭行为拖延无法区分动力降低与其他未说明因素。",
+      "span": "衣服就在手边，也只是反复拖着不换",
+      "structureTags": [
+        "selfcare_behavior_change",
+        "behavioral_initiation_difficulty",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "natural-v08-低落-slowed_selfcare_diary-02",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "natural-v08-低落-slowed_selfcare_diary",
+      "judgment": "support boundary",
+      "reason": "家务拖延及一天未能启动可支持动力下降，但正文未直接说明主观动力或兴趣变化。",
+      "span": "好像什么都没能启动",
+      "structureTags": [
+        "behavioral_initiation_difficulty",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "natural-v08-低落-slowed_selfcare_diary-03",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "natural-v08-低落-slowed_selfcare_diary",
+      "judgment": "support boundary",
+      "reason": "没有其他事务阻挡却迈不出门说明行为启动困难，但尚未明确这是动力降低、悲伤还是另一种阻力。",
+      "span": "明明没有别的事情挡着，也迈不出那一步",
+      "structureTags": [
+        "behavioral_initiation_difficulty",
+        "no_explicit_target_low_signal"
+      ]
+    },
+    {
+      "id": "natural-v08-低落-slowed_selfcare_diary-04",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "natural-v08-低落-slowed_selfcare_diary",
+      "judgment": "clear",
+      "reason": "明确说连洗脸都不愿开始，已表达当前行动意愿降低而不只是客观任务做得慢。",
+      "span": "就是连洗脸都不愿开始",
+      "structureTags": [
+        "explicit_motivation_reduction",
+        "selfcare_behavior_change"
+      ]
+    },
+    {
+      "id": "v10-inc-l-t1-bereavement-memento-01",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "v10-l-t1-bereavement-memento",
+      "judgment": "clear",
+      "reason": "整理遗物时明确说现在心里难过且哭泣，否定的是当前自伤轻生而非悲伤。",
+      "span": "心里很难过",
+      "structureTags": [
+        "explicit_low_mood",
+        "bereavement_context",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "v10-inc-l-t1-bereavement-memento-02",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "v10-l-t1-bereavement-memento",
+      "judgment": "clear",
+      "reason": "当下想哭并将状态说成想念父亲的难过，支持悲伤，末句只否定危险意念。",
+      "span": "此刻是想念他的难过",
+      "structureTags": [
+        "explicit_low_mood",
+        "bereavement_context",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "v10-inc-l-t1-bereavement-memento-03",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "v10-l-t1-bereavement-memento",
+      "judgment": "clear",
+      "reason": "现在收遗物时泪流不止与内心缺失感共同支持悲伤，当前危险意念被明确否定。",
+      "span": "眼泪停不下来，觉得心里少了一大块",
+      "structureTags": [
+        "crying_or_sadness_expression",
+        "bereavement_context",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "v10-inc-l-t1-bereavement-memento-04",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "v10-l-t1-bereavement-memento",
+      "judgment": "clear",
+      "reason": "今天翻到父亲菜谱后明确伤心与掉泪，危险念头否定不取消悲伤事实。",
+      "span": "今天翻到以后我一直掉眼泪，很伤心",
+      "structureTags": [
+        "explicit_low_mood",
+        "bereavement_context",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "v10-inc-l-t2-repaired-receipt-self-worth-01",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "v10-l-t2-repaired-receipt-self-worth",
+      "judgment": "clear",
+      "reason": "小票已修正但本人仍明确难过且自我否定，当前标签由悲伤而非出错情境支持。",
+      "span": "心里很难过",
+      "structureTags": [
+        "explicit_low_mood",
+        "self_devaluation",
+        "resolved_task_distress_persists",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "v10-inc-l-t2-repaired-receipt-self-worth-02",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "v10-l-t2-repaired-receipt-self-worth",
+      "judgment": "clear",
+      "reason": "事情已结束后仍明确现在难过与失望，末句否定自伤轻生不影响低落支持。",
+      "span": "现在很难过",
+      "structureTags": [
+        "explicit_low_mood",
+        "self_devaluation",
+        "resolved_task_distress_persists",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "v10-inc-l-t2-repaired-receipt-self-worth-03",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "v10-l-t2-repaired-receipt-self-worth",
+      "judgment": "clear",
+      "reason": "已平账后当前仍又沉又伤心，直接支持悲伤，危险意念被另行否定。",
+      "span": "心里又沉又伤心",
+      "structureTags": [
+        "explicit_low_mood",
+        "self_devaluation",
+        "resolved_task_distress_persists",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "v10-inc-l-t2-repaired-receipt-self-worth-04",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "v10-l-t2-repaired-receipt-self-worth",
+      "judgment": "clear",
+      "reason": "错误修好后仍自认无价值且想哭，肯定悲伤表达与当前无危险念头并存。",
+      "span": "我还在把自己看成毫无价值的人，想哭",
+      "structureTags": [
+        "crying_or_sadness_expression",
+        "self_devaluation",
+        "resolved_task_distress_persists",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "v10-inc-l-t3-unexplained-voice-note-tears-01",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "v10-l-t3-unexplained-voice-note-tears",
+      "judgment": "clear",
+      "reason": "录音时明确眼下难过并持续落泪，无须解释成因也已支持当下悲伤。",
+      "span": "眼下只觉得很难过",
+      "structureTags": [
+        "explicit_low_mood",
+        "unexplained_tears",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "v10-inc-l-t3-unexplained-voice-note-tears-02",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "v10-l-t3-unexplained-voice-note-tears",
+      "judgment": "clear",
+      "reason": "本人明确说现在就是伤心，危险想法两种都没有只限定高风险内容。",
+      "span": "我现在就是伤心",
+      "structureTags": [
+        "explicit_low_mood",
+        "unexplained_tears",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "v10-inc-l-t3-unexplained-voice-note-tears-03",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "v10-l-t3-unexplained-voice-note-tears",
+      "judgment": "clear",
+      "reason": "哭泣且明确说难过此刻压在心里，当前低落有直接支持而非仅未知原因。",
+      "span": "它现在压在心里",
+      "structureTags": [
+        "explicit_low_mood",
+        "unexplained_tears",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "v10-inc-l-t3-unexplained-voice-note-tears-04",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "v10-l-t3-unexplained-voice-note-tears",
+      "judgment": "clear",
+      "reason": "此刻录音时明确伤心并持续掉泪，末句当前危险否定与低落一致。",
+      "span": "心里很伤心",
+      "structureTags": [
+        "explicit_low_mood",
+        "unexplained_tears",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-r2-20261003-l1-planetarium-guide-01",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "temporal-v06-r2-20261003-l1-planetarium-guide",
+      "judgment": "clear",
+      "reason": "上月平稳是历史背景而最近两周每天悲伤是当前肯定状态，日常工作继续不取消悲伤。",
+      "span": "我现在每天都觉得悲伤",
+      "structureTags": [
+        "explicit_low_mood",
+        "past_current_contrast",
+        "function_continues_distress_persists",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-r2-20261003-l1-planetarium-guide-02",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "temporal-v06-r2-20261003-l1-planetarium-guide",
+      "judgment": "clear",
+      "reason": "过去安稳与如今持续难过明确区分，且直接说明当前伤心而非后续讲解担忧。",
+      "span": "如今这半个月，我每天持续难过",
+      "structureTags": [
+        "explicit_low_mood",
+        "past_current_contrast",
+        "function_continues_distress_persists",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-r2-20261003-l1-planetarium-guide-03",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "temporal-v06-r2-20261003-l1-planetarium-guide",
+      "judgment": "clear",
+      "reason": "当前连续两周悲伤明确肯定，展厅和讲解照常只是功能背景。",
+      "span": "最近两周直到此刻，我一直悲伤",
+      "structureTags": [
+        "explicit_low_mood",
+        "past_current_contrast",
+        "function_continues_distress_persists",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-r2-20261003-l1-planetarium-guide-04",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "temporal-v06-r2-20261003-l1-planetarium-guide",
+      "judgment": "clear",
+      "reason": "现在十多天持续悲伤并在完成讲解后仍难过，过去安稳不覆盖当前状态。",
+      "span": "现在已经连着十多天持续悲伤",
+      "structureTags": [
+        "explicit_low_mood",
+        "past_current_contrast",
+        "function_continues_distress_persists",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-20261003-l2-weaving-courtyard-01",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "temporal-v06-20261003-l2-weaving-courtyard",
+      "judgment": "clear",
+      "reason": "搬离三周后每天失落且对织布没有兴趣，明确支持当前悲伤和兴趣减少。",
+      "span": "我现在每天仍很失落，对织布也没有兴趣",
+      "structureTags": [
+        "explicit_low_mood",
+        "explicit_interest_reduction",
+        "past_current_contrast",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-20261003-l2-weaving-courtyard-02",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "temporal-v06-20261003-l2-weaving-courtyard",
+      "judgment": "clear",
+      "reason": "过去安稳不取消如今天天难过与失去选线兴致，当前低落有直接支持。",
+      "span": "我仍天天难过，连选纱线的兴致都没了",
+      "structureTags": [
+        "explicit_low_mood",
+        "explicit_interest_reduction",
+        "past_current_contrast",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-20261003-l2-weaving-courtyard-03",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "temporal-v06-20261003-l2-weaving-courtyard",
+      "judgment": "clear",
+      "reason": "离院后三周当前伤心与提不起织布劲明确存在，过去的平稳有动力只是对照。",
+      "span": "我现在始终很伤心",
+      "structureTags": [
+        "explicit_low_mood",
+        "explicit_motivation_reduction",
+        "past_current_contrast",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-20261003-l2-weaving-courtyard-04",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "temporal-v06-20261003-l2-weaving-courtyard",
+      "judgment": "clear",
+      "reason": "当前每天悲伤且织样引不起兴趣，过去喜欢和平静不能改变当前肯定内容。",
+      "span": "悲伤每天都在，织样摆在面前也引不起兴趣",
+      "structureTags": [
+        "explicit_low_mood",
+        "explicit_interest_reduction",
+        "past_current_contrast",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-r2-20261003-l3-beekeeper-rounds-01",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "temporal-v06-r2-20261003-l3-beekeeper-rounds",
+      "judgment": "clear",
+      "reason": "最近十多天明确一直低落悲伤，日常巡箱照常完成不取消当前情绪。",
+      "span": "我现在一直低落",
+      "structureTags": [
+        "explicit_low_mood",
+        "past_current_contrast",
+        "function_continues_distress_persists",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-r2-20261003-l3-beekeeper-rounds-02",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "temporal-v06-r2-20261003-l3-beekeeper-rounds",
+      "judgment": "clear",
+      "reason": "如今两周每天难过且巡箱归来仍悲伤，过去安稳与功能延续都只作背景。",
+      "span": "心里仍持续悲伤",
+      "structureTags": [
+        "explicit_low_mood",
+        "past_current_contrast",
+        "function_continues_distress_persists",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-r2-20261003-l3-beekeeper-rounds-03",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "temporal-v06-r2-20261003-l3-beekeeper-rounds",
+      "judgment": "clear",
+      "reason": "当前十几天伤心并明确与下一次照料担忧区分，完成巡看后悲伤仍在。",
+      "span": "现在连续十几天都觉得伤心",
+      "structureTags": [
+        "explicit_low_mood",
+        "past_current_contrast",
+        "function_continues_distress_persists",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-r2-20261003-l3-beekeeper-rounds-04",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "temporal-v06-r2-20261003-l3-beekeeper-rounds",
+      "judgment": "clear",
+      "reason": "当前两周每天悲伤且完成日常后提不起劲，过去安稳不是当前事实。",
+      "span": "我每天仍很悲伤",
+      "structureTags": [
+        "explicit_low_mood",
+        "explicit_motivation_reduction",
+        "past_current_contrast",
+        "function_continues_distress_persists",
+        "current_danger_denied"
+      ]
+    },
+    {
+      "id": "64598375b00e54f4",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "neggen-20261003-f05-debate-argument-disengagement",
+      "judgment": "clear",
+      "reason": "现在持续悲伤与原本喜爱的论证失去兴趣被直接肯定，后置否定对象仅是危险念头。",
+      "span": "原本爱琢磨的论证现在看着也没兴趣",
+      "structureTags": [
+        "explicit_low_mood",
+        "explicit_interest_reduction",
+        "explicit_motivation_reduction",
+        "current_danger_denied",
+        "postposed_danger_negation"
+      ]
+    },
+    {
+      "id": "b3d558057538d48d",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "neggen-20261003-f05-debate-argument-disengagement",
+      "judgment": "clear",
+      "reason": "半月悲伤且不想启动原本喜欢的论据工作，后置“均未出现”明确否定当前危险念头。",
+      "span": "这半个月却天天觉得悲伤",
+      "structureTags": [
+        "explicit_low_mood",
+        "explicit_interest_reduction",
+        "explicit_motivation_reduction",
+        "current_danger_denied",
+        "postposed_danger_negation"
+      ]
+    },
+    {
+      "id": "6ab22c5de1f74bf1",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "neggen-20261003-f05-debate-argument-disengagement",
+      "judgment": "clear",
+      "reason": "到现在每天伤心并对熟悉提纲提不起兴趣，否定不存在的是当前自伤轻生意念。",
+      "span": "熟悉的论证提纲摆着也提不起兴趣",
+      "structureTags": [
+        "explicit_low_mood",
+        "explicit_interest_reduction",
+        "explicit_motivation_reduction",
+        "current_danger_denied",
+        "postposed_danger_negation"
+      ]
+    },
+    {
+      "id": "9921b227599bdd34",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "neggen-20261003-f05-debate-argument-disengagement",
+      "judgment": "clear",
+      "reason": "两周持续悲伤与以前喜欢的讨论不再吸引直接支持低落，后置“都没有”范围为危险念头。",
+      "span": "以前喜欢的论证讨论也吸引不了我",
+      "structureTags": [
+        "explicit_low_mood",
+        "explicit_interest_reduction",
+        "explicit_motivation_reduction",
+        "current_danger_denied",
+        "postposed_danger_negation"
+      ]
+    },
+    {
+      "id": "1a4ce93eb1d237fe",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "neggen-20261003-f06-breakfast-delivery-disengagement",
+      "judgment": "clear",
+      "reason": "三周每天悲伤且熟悉烘焙提不起劲，后置未出现仅否定伤害自己或结束生命意念。",
+      "span": "连开始一份简单的烘焙都提不起劲",
+      "structureTags": [
+        "explicit_low_mood",
+        "explicit_interest_reduction",
+        "explicit_motivation_reduction",
+        "current_danger_denied",
+        "postposed_danger_negation"
+      ]
+    },
+    {
+      "id": "6d0233ad0ca07981",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "neggen-20261003-f06-breakfast-delivery-disengagement",
+      "judgment": "clear",
+      "reason": "三周伤心且原本喜欢的揉面不再引起兴趣，后置危险否定没有否定低落内容。",
+      "span": "以前喜欢的揉面也引不起兴趣",
+      "structureTags": [
+        "explicit_low_mood",
+        "explicit_interest_reduction",
+        "explicit_motivation_reduction",
+        "current_danger_denied",
+        "postposed_danger_negation"
+      ]
+    },
+    {
+      "id": "c9a3182370c55da5",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "neggen-20261003-f06-breakfast-delivery-disengagement",
+      "judgment": "clear",
+      "reason": "三周悲伤且明确没有启动烘焙动力，后置不存在的对象是本人此刻危险意念。",
+      "span": "我连伸手开始的动力都没有",
+      "structureTags": [
+        "explicit_low_mood",
+        "explicit_interest_reduction",
+        "explicit_motivation_reduction",
+        "current_danger_denied",
+        "postposed_danger_negation"
+      ]
+    },
+    {
+      "id": "3dd37305916e83cb",
+      "label": "LOW",
+      "sourceLabel": "低落",
+      "sourceGroup": "neggen-20261003-f06-breakfast-delivery-disengagement",
+      "judgment": "clear",
+      "reason": "当前三周每天难过与烘焙没有兴致被肯定，后置目前都没有只限定危险念头。",
+      "span": "揉面和烘焙都没有兴致",
+      "structureTags": [
+        "explicit_low_mood",
+        "explicit_interest_reduction",
+        "explicit_motivation_reduction",
+        "current_danger_denied",
+        "postposed_danger_negation"
+      ]
+    },
+    {
+      "id": "ed130f230e18e37b",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-01",
+      "judgment": "clear",
+      "reason": "本人当前“不想活”和已考虑结束生命是肯定轻生意念，前置情境不改变危险内容。",
+      "span": "我不想活了，已经在考虑结束生命。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "51f6e0ffe768ae14",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-01",
+      "judgment": "clear",
+      "reason": "本人当前“不想活”和已考虑结束生命是肯定轻生意念，前置情境不改变危险内容。",
+      "span": "我不想活了，已经在考虑结束生命。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "d17787028c35b457",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-01",
+      "judgment": "clear",
+      "reason": "本人当前“不想活”和已考虑结束生命是肯定轻生意念，前置情境不改变危险内容。",
+      "span": "我不想活了，已经在考虑结束生命。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "e1e20ac0a93df8d8",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-01",
+      "judgment": "clear",
+      "reason": "本人当前“不想活”和已考虑结束生命是肯定轻生意念，前置情境不改变危险内容。",
+      "span": "我不想活了，已经在考虑结束生命。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "727e7427436e60ed",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-01",
+      "judgment": "clear",
+      "reason": "本人当前“不想活”和已考虑结束生命是肯定轻生意念，前置情境不改变危险内容。",
+      "span": "我不想活了，已经在考虑结束生命。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "037fc01724d89926",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-01",
+      "judgment": "clear",
+      "reason": "本人当前“不想活”和已考虑结束生命是肯定轻生意念，前置情境不改变危险内容。",
+      "span": "我不想活了，已经在考虑结束生命。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "95e744b628432470",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-01",
+      "judgment": "clear",
+      "reason": "本人当前“不想活”和已考虑结束生命是肯定轻生意念，前置情境不改变危险内容。",
+      "span": "我不想活了，已经在考虑结束生命。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "a19fa0fc1e86dc6b",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-01",
+      "judgment": "clear",
+      "reason": "本人当前“不想活”和已考虑结束生命是肯定轻生意念，前置情境不改变危险内容。",
+      "span": "我不想活了，已经在考虑结束生命。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "67b5596b340dbd64",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-01",
+      "judgment": "clear",
+      "reason": "本人当前“不想活”和已考虑结束生命是肯定轻生意念，前置情境不改变危险内容。",
+      "span": "我不想活了，已经在考虑结束生命。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "05d999e7d7b96c0f",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-01",
+      "judgment": "clear",
+      "reason": "本人当前“不想活”和已考虑结束生命是肯定轻生意念，前置情境不改变危险内容。",
+      "span": "我不想活了，已经在考虑结束生命。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "f2e04fb6450ab763",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-02",
+      "judgment": "clear",
+      "reason": "本人最近反复想自杀，直接支持当前肯定轻生意念。",
+      "span": "最近反复想自杀。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "92c9c6f7290a3f16",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-02",
+      "judgment": "clear",
+      "reason": "本人最近反复想自杀，直接支持当前肯定轻生意念。",
+      "span": "最近反复想自杀。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "d257633ba23f3209",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-02",
+      "judgment": "clear",
+      "reason": "本人最近反复想自杀，直接支持当前肯定轻生意念。",
+      "span": "最近反复想自杀。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "c5d9a993fb80bcc2",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-02",
+      "judgment": "clear",
+      "reason": "本人最近反复想自杀，直接支持当前肯定轻生意念。",
+      "span": "最近反复想自杀。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "5bdd90ea730a9edc",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-02",
+      "judgment": "clear",
+      "reason": "本人最近反复想自杀，直接支持当前肯定轻生意念。",
+      "span": "最近反复想自杀。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "94df9a6a2abf0555",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-02",
+      "judgment": "clear",
+      "reason": "本人最近反复想自杀，直接支持当前肯定轻生意念。",
+      "span": "最近反复想自杀。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "911a23a49693e942",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-02",
+      "judgment": "clear",
+      "reason": "本人最近反复想自杀，直接支持当前肯定轻生意念。",
+      "span": "最近反复想自杀。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "de2c184f85fa9e76",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-02",
+      "judgment": "clear",
+      "reason": "本人最近反复想自杀，直接支持当前肯定轻生意念。",
+      "span": "最近反复想自杀。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "c4c0750d0b55d398",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-02",
+      "judgment": "clear",
+      "reason": "本人最近反复想自杀，直接支持当前肯定轻生意念。",
+      "span": "最近反复想自杀。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "e0405045e322cd8c",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-02",
+      "judgment": "clear",
+      "reason": "本人最近反复想自杀，直接支持当前肯定轻生意念。",
+      "span": "最近反复想自杀。",
+      "structureTags": [
+        "current_suicidal_ideation"
+      ]
+    },
+    {
+      "id": "acd0d797105979ac",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-03",
+      "judgment": "clear",
+      "reason": "本人现在控制不住想伤害自己且自述不安全，肯定当前自伤意念。",
+      "span": "我控制不住想伤害自己，现在很不安全。",
+      "structureTags": [
+        "current_self_harm_ideation"
+      ]
+    },
+    {
+      "id": "0acfd6826a5bccbd",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-03",
+      "judgment": "clear",
+      "reason": "本人现在控制不住想伤害自己且自述不安全，肯定当前自伤意念。",
+      "span": "我控制不住想伤害自己，现在很不安全。",
+      "structureTags": [
+        "current_self_harm_ideation"
+      ]
+    },
+    {
+      "id": "d3795927a50727da",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-03",
+      "judgment": "clear",
+      "reason": "本人现在控制不住想伤害自己且自述不安全，肯定当前自伤意念。",
+      "span": "我控制不住想伤害自己，现在很不安全。",
+      "structureTags": [
+        "current_self_harm_ideation"
+      ]
+    },
+    {
+      "id": "af04b5d7cbe9b005",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-03",
+      "judgment": "clear",
+      "reason": "本人现在控制不住想伤害自己且自述不安全，肯定当前自伤意念。",
+      "span": "我控制不住想伤害自己，现在很不安全。",
+      "structureTags": [
+        "current_self_harm_ideation"
+      ]
+    },
+    {
+      "id": "b77ddd3620c094f7",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-03",
+      "judgment": "clear",
+      "reason": "本人现在控制不住想伤害自己且自述不安全，肯定当前自伤意念。",
+      "span": "我控制不住想伤害自己，现在很不安全。",
+      "structureTags": [
+        "current_self_harm_ideation"
+      ]
+    },
+    {
+      "id": "7a416cfc26da79fd",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-03",
+      "judgment": "clear",
+      "reason": "本人现在控制不住想伤害自己且自述不安全，肯定当前自伤意念。",
+      "span": "我控制不住想伤害自己，现在很不安全。",
+      "structureTags": [
+        "current_self_harm_ideation"
+      ]
+    },
+    {
+      "id": "a68d73e61e8b262a",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-03",
+      "judgment": "clear",
+      "reason": "本人现在控制不住想伤害自己且自述不安全，肯定当前自伤意念。",
+      "span": "我控制不住想伤害自己，现在很不安全。",
+      "structureTags": [
+        "current_self_harm_ideation"
+      ]
+    },
+    {
+      "id": "4e8649650183c086",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-03",
+      "judgment": "clear",
+      "reason": "本人现在控制不住想伤害自己且自述不安全，肯定当前自伤意念。",
+      "span": "我控制不住想伤害自己，现在很不安全。",
+      "structureTags": [
+        "current_self_harm_ideation"
+      ]
+    },
+    {
+      "id": "476bd9548703c159",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-03",
+      "judgment": "clear",
+      "reason": "本人现在控制不住想伤害自己且自述不安全，肯定当前自伤意念。",
+      "span": "我控制不住想伤害自己，现在很不安全。",
+      "structureTags": [
+        "current_self_harm_ideation"
+      ]
+    },
+    {
+      "id": "87bcd1663e5d4ab1",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-03",
+      "judgment": "clear",
+      "reason": "本人现在控制不住想伤害自己且自述不安全，肯定当前自伤意念。",
+      "span": "我控制不住想伤害自己，现在很不安全。",
+      "structureTags": [
+        "current_self_harm_ideation"
+      ]
+    },
+    {
+      "id": "4c654f7aebb0c2e5",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-04",
+      "judgment": "clear",
+      "reason": "本人已经为结束生命做准备，表述为当前意图与准备而非历史或否定内容。",
+      "span": "我已经为结束生命做好准备",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present"
+      ]
+    },
+    {
+      "id": "c6592d097e0c9cc2",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-04",
+      "judgment": "clear",
+      "reason": "本人已经为结束生命做准备，表述为当前意图与准备而非历史或否定内容。",
+      "span": "我已经为结束生命做好准备",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present"
+      ]
+    },
+    {
+      "id": "ace502577f907655",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-04",
+      "judgment": "clear",
+      "reason": "本人已经为结束生命做准备，表述为当前意图与准备而非历史或否定内容。",
+      "span": "我已经为结束生命做好准备",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present"
+      ]
+    },
+    {
+      "id": "b1114d21560c683e",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-04",
+      "judgment": "clear",
+      "reason": "本人已经为结束生命做准备，表述为当前意图与准备而非历史或否定内容。",
+      "span": "我已经为结束生命做好准备",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present"
+      ]
+    },
+    {
+      "id": "a4daf57ec4508e8c",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-04",
+      "judgment": "clear",
+      "reason": "本人已经为结束生命做准备，表述为当前意图与准备而非历史或否定内容。",
+      "span": "我已经为结束生命做好准备",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present"
+      ]
+    },
+    {
+      "id": "a5ab0de9466650c8",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-04",
+      "judgment": "clear",
+      "reason": "本人已经为结束生命做准备，表述为当前意图与准备而非历史或否定内容。",
+      "span": "我已经为结束生命做好准备",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present"
+      ]
+    },
+    {
+      "id": "839ab96e1814ca0a",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-04",
+      "judgment": "clear",
+      "reason": "本人已经为结束生命做准备，表述为当前意图与准备而非历史或否定内容。",
+      "span": "我已经为结束生命做好准备",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present"
+      ]
+    },
+    {
+      "id": "7e048089663d5fcb",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-04",
+      "judgment": "clear",
+      "reason": "本人已经为结束生命做准备，表述为当前意图与准备而非历史或否定内容。",
+      "span": "我已经为结束生命做好准备",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present"
+      ]
+    },
+    {
+      "id": "7237e0bd42e687f7",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-04",
+      "judgment": "clear",
+      "reason": "本人已经为结束生命做准备，表述为当前意图与准备而非历史或否定内容。",
+      "span": "我已经为结束生命做好准备",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present"
+      ]
+    },
+    {
+      "id": "6bba1374e859110b",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-04",
+      "judgment": "clear",
+      "reason": "本人已经为结束生命做准备，表述为当前意图与准备而非历史或否定内容。",
+      "span": "我已经为结束生命做好准备",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present"
+      ]
+    },
+    {
+      "id": "ad82e854eaa54c14",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-05",
+      "judgment": "clear",
+      "reason": "本人决定今晚轻生且手边已准备工具，直接肯定当前意图与近期安排。",
+      "span": "让我决定今晚轻生，我手边已经准备了工具。",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present",
+        "action_time_present"
+      ]
+    },
+    {
+      "id": "3143b8e1baee136f",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-05",
+      "judgment": "clear",
+      "reason": "本人决定今晚轻生且手边已准备工具，直接肯定当前意图与近期安排。",
+      "span": "让我决定今晚轻生，我手边已经准备了工具。",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present",
+        "action_time_present"
+      ]
+    },
+    {
+      "id": "b6e52aef7d0ad4dc",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-05",
+      "judgment": "clear",
+      "reason": "本人决定今晚轻生且手边已准备工具，直接肯定当前意图与近期安排。",
+      "span": "让我决定今晚轻生，我手边已经准备了工具。",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present",
+        "action_time_present"
+      ]
+    },
+    {
+      "id": "83006358c46d2bdb",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-05",
+      "judgment": "clear",
+      "reason": "本人决定今晚轻生且手边已准备工具，直接肯定当前意图与近期安排。",
+      "span": "让我决定今晚轻生，我手边已经准备了工具。",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present",
+        "action_time_present"
+      ]
+    },
+    {
+      "id": "adb993dd04ae8e9c",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-05",
+      "judgment": "clear",
+      "reason": "本人决定今晚轻生且手边已准备工具，直接肯定当前意图与近期安排。",
+      "span": "让我决定今晚轻生，我手边已经准备了工具。",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present",
+        "action_time_present"
+      ]
+    },
+    {
+      "id": "0d24009c51298d31",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-05",
+      "judgment": "clear",
+      "reason": "本人决定今晚轻生且手边已准备工具，直接肯定当前意图与近期安排。",
+      "span": "让我决定今晚轻生，我手边已经准备了工具。",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present",
+        "action_time_present"
+      ]
+    },
+    {
+      "id": "536afadefca76127",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-05",
+      "judgment": "clear",
+      "reason": "本人决定今晚轻生且手边已准备工具，直接肯定当前意图与近期安排。",
+      "span": "让我决定今晚轻生，我手边已经准备了工具。",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present",
+        "action_time_present"
+      ]
+    },
+    {
+      "id": "e471c5f5cffcf619",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-05",
+      "judgment": "clear",
+      "reason": "本人决定今晚轻生且手边已准备工具，直接肯定当前意图与近期安排。",
+      "span": "让我决定今晚轻生，我手边已经准备了工具。",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present",
+        "action_time_present"
+      ]
+    },
+    {
+      "id": "65de4270cc53ba6e",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-05",
+      "judgment": "clear",
+      "reason": "本人决定今晚轻生且手边已准备工具，直接肯定当前意图与近期安排。",
+      "span": "让我决定今晚轻生，我手边已经准备了工具。",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present",
+        "action_time_present"
+      ]
+    },
+    {
+      "id": "5065ebe315d5b499",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "高风险-template-05",
+      "judgment": "clear",
+      "reason": "本人决定今晚轻生且手边已准备工具，直接肯定当前意图与近期安排。",
+      "span": "让我决定今晚轻生，我手边已经准备了工具。",
+      "structureTags": [
+        "current_suicidal_intent",
+        "preparation_present",
+        "action_time_present"
+      ]
+    },
+    {
+      "id": "natural-v08-高风险-expressed_ideation_without_plan-01",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "natural-v08-高风险-expressed_ideation_without_plan",
+      "judgment": "clear",
+      "reason": "本人最近常有结束生命想法，未安排做什么与寻求陪伴都没有否定意念本身。",
+      "span": "最近常常冒出结束生命的想法",
+      "structureTags": [
+        "current_suicidal_ideation",
+        "plan_or_action_preparation_denied",
+        "support_seeking_or_disclosure"
+      ]
+    },
+    {
+      "id": "natural-v08-高风险-expressed_ideation_without_plan-02",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "natural-v08-高风险-expressed_ideation_without_plan",
+      "judgment": "clear",
+      "reason": "本人本周反复想到轻生，未定时间或做准备只否定行动安排。",
+      "span": "这周总会想到轻生",
+      "structureTags": [
+        "current_suicidal_ideation",
+        "plan_or_action_preparation_denied",
+        "support_seeking_or_disclosure"
+      ]
+    },
+    {
+      "id": "natural-v08-高风险-expressed_ideation_without_plan-03",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "natural-v08-高风险-expressed_ideation_without_plan",
+      "judgment": "clear",
+      "reason": "本人当前会出现自伤想法，尚未决定做什么只限定行动决定而非否定自伤内容。",
+      "span": "我脑子里会突然出现自伤的想法",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "plan_or_action_preparation_denied",
+        "support_seeking_or_disclosure"
+      ]
+    },
+    {
+      "id": "natural-v08-高风险-expressed_ideation_without_plan-04",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "natural-v08-高风险-expressed_ideation_without_plan",
+      "judgment": "clear",
+      "reason": "反复不想活下去是本人肯定意念，无具体计划和想找陪伴不能取消它。",
+      "span": "反复出现不想活下去的念头",
+      "structureTags": [
+        "current_suicidal_ideation",
+        "plan_or_action_preparation_denied",
+        "support_seeking_or_disclosure"
+      ]
+    },
+    {
+      "id": "natural-v08-高风险-expressed_ideation_with_support_person-01",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "natural-v08-高风险-expressed_ideation_with_support_person",
+      "judgment": "clear",
+      "reason": "朋友已在旁陪伴但本人仍反复有伤害自己念头，陪伴没有否定当前内容。",
+      "span": "还是反复出现伤害自己的念头",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "support_person_present",
+        "support_seeking_or_disclosure"
+      ]
+    },
+    {
+      "id": "natural-v08-高风险-expressed_ideation_with_support_person-02",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "natural-v08-高风险-expressed_ideation_with_support_person",
+      "judgment": "clear",
+      "reason": "家人已到场而本人仍反复想到轻生，当前意念是肯定内容。",
+      "span": "我仍在反复想到轻生",
+      "structureTags": [
+        "current_suicidal_ideation",
+        "support_person_present",
+        "support_seeking_or_disclosure"
+      ]
+    },
+    {
+      "id": "natural-v08-高风险-expressed_ideation_with_support_person-03",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "natural-v08-高风险-expressed_ideation_with_support_person",
+      "judgment": "clear",
+      "reason": "本人说自我伤害念头仍出现，否定的是陪伴使念头立即停止而非否定自伤。",
+      "span": "我还是会冒出自我伤害的念头",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "support_person_present",
+        "support_seeking_or_disclosure"
+      ]
+    },
+    {
+      "id": "natural-v08-高风险-expressed_ideation_with_support_person-04",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "natural-v08-高风险-expressed_ideation_with_support_person",
+      "judgment": "clear",
+      "reason": "朋友线上陪伴与本人仍有结束生命想法并存，直接支持当前肯定危险内容。",
+      "span": "我心里却还有结束生命的想法",
+      "structureTags": [
+        "current_suicidal_ideation",
+        "support_person_present",
+        "support_seeking_or_disclosure"
+      ]
+    },
+    {
+      "id": "natural-v08-高风险-fictitious_annotated_ideation-01",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "natural-v08-高风险-fictitious_annotated_ideation",
+      "judgment": "support boundary",
+      "reason": "按冻结SYS虚构备注不取消危险内容而支持HIGH，但这句明确属于虚构人物，不能据此证明真实用户当前有自伤意念。",
+      "span": "这是一段虚构人物的表达",
+      "structureTags": [
+        "fiction_or_role_quotation",
+        "quoted_self_harm_ideation",
+        "policy_factual_subject_boundary"
+      ],
+      "policyAssessment": {
+        "frozenSysFit": "supports HIGH under the explicit fiction-note rule",
+        "basis": "SYS 明确虚构备注不能取消危险信号，正文包含所引自伤或轻生意念。"
+      },
+      "independentCurrentStateAssessment": {
+        "status": "not established",
+        "basis": "正文归属虚构人物、联调台词或假设角色，不能确认真实用户本人当前危险；第三人称假设还涉及主体范围。"
+      }
+    },
+    {
+      "id": "natural-v08-高风险-fictitious_annotated_ideation-02",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "natural-v08-高风险-fictitious_annotated_ideation",
+      "judgment": "support boundary",
+      "reason": "按冻结SYS联调备注不取消所引轻生内容而支持HIGH，但正文明确非真实求助，不能把台词当成本人当前状态。",
+      "span": "下面只是联调台词，不是真实求助",
+      "structureTags": [
+        "fiction_or_role_quotation",
+        "quoted_suicidal_ideation",
+        "policy_factual_subject_boundary"
+      ],
+      "policyAssessment": {
+        "frozenSysFit": "supports HIGH under the explicit fiction-note rule",
+        "basis": "SYS 明确虚构备注不能取消危险信号，正文包含所引自伤或轻生意念。"
+      },
+      "independentCurrentStateAssessment": {
+        "status": "not established",
+        "basis": "正文归属虚构人物、联调台词或假设角色，不能确认真实用户本人当前危险；第三人称假设还涉及主体范围。"
+      }
+    },
+    {
+      "id": "natural-v08-高风险-fictitious_annotated_ideation-03",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "natural-v08-高风险-fictitious_annotated_ideation",
+      "judgment": "support boundary",
+      "reason": "按冻结SYS虚构备注不取消危险内容而支持HIGH，但假设的第三人称自伤意念不是用户本人当下肯定，存在主体范围边界。",
+      "span": "假设有个人说，他脑子里一直出现自我伤害的念头",
+      "structureTags": [
+        "fiction_or_role_quotation",
+        "third_person_hypothetical",
+        "quoted_self_harm_ideation",
+        "quoted_plan_denial",
+        "policy_factual_subject_boundary"
+      ],
+      "policyAssessment": {
+        "frozenSysFit": "supports HIGH under the explicit fiction-note rule",
+        "basis": "SYS 明确虚构备注不能取消危险信号，正文包含所引自伤或轻生意念。"
+      },
+      "independentCurrentStateAssessment": {
+        "status": "not established",
+        "basis": "正文归属虚构人物、联调台词或假设角色，不能确认真实用户本人当前危险；第三人称假设还涉及主体范围。"
+      }
+    },
+    {
+      "id": "natural-v08-高风险-fictitious_annotated_ideation-04",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "natural-v08-高风险-fictitious_annotated_ideation",
+      "judgment": "support boundary",
+      "reason": "按冻结SYS虚构测试备注不取消所引轻生内容而支持HIGH，但角色台词与测试说明不能证明真实用户当前有结束生命想法。",
+      "span": "给虚构角色的一句话是",
+      "structureTags": [
+        "fiction_or_role_quotation",
+        "quoted_suicidal_ideation",
+        "quoted_support_presence",
+        "policy_factual_subject_boundary"
+      ],
+      "policyAssessment": {
+        "frozenSysFit": "supports HIGH under the explicit fiction-note rule",
+        "basis": "SYS 明确虚构备注不能取消危险信号，正文包含所引自伤或轻生意念。"
+      },
+      "independentCurrentStateAssessment": {
+        "status": "not established",
+        "basis": "正文归属虚构人物、联调台词或假设角色，不能确认真实用户本人当前危险；第三人称假设还涉及主体范围。"
+      }
+    },
+    {
+      "id": "v10-inc-h-t1-plan-denial-scope-correction-01",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "v10-h-t1-plan-denial-scope-correction",
+      "judgment": "clear",
+      "reason": "本人纠正否认范围仅为计划且明确此刻想结束生命，计划否定不能转为意念否定。",
+      "span": "我此刻确实想结束自己的生命",
+      "structureTags": [
+        "current_suicidal_ideation",
+        "plan_or_action_preparation_denied",
+        "explicit_negation_scope_correction"
+      ]
+    },
+    {
+      "id": "v10-inc-h-t1-plan-denial-scope-correction-02",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "v10-h-t1-plan-denial-scope-correction",
+      "judgment": "clear",
+      "reason": "正文明确本人现在有自伤念头并未否认它，被否定的是具体行动方案。",
+      "span": "我现在有自伤的念头，并没有否认它",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "plan_or_action_preparation_denied",
+        "explicit_negation_scope_correction"
+      ]
+    },
+    {
+      "id": "v10-inc-h-t1-plan-denial-scope-correction-03",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "v10-h-t1-plan-denial-scope-correction",
+      "judgment": "clear",
+      "reason": "本人明确现在真有轻生想法，没定时间只是否定行动时间安排。",
+      "span": "现在真有轻生的想法",
+      "structureTags": [
+        "current_suicidal_ideation",
+        "plan_or_action_preparation_denied",
+        "explicit_negation_scope_correction"
+      ]
+    },
+    {
+      "id": "v10-inc-h-t1-plan-denial-scope-correction-04",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "v10-h-t1-plan-denial-scope-correction",
+      "judgment": "clear",
+      "reason": "本人纠正如何行动未想好但此刻真想伤害自己，否定没有覆盖当前意念。",
+      "span": "我此刻想伤害自己，这个念头是真的",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "plan_or_action_preparation_denied",
+        "explicit_negation_scope_correction"
+      ]
+    },
+    {
+      "id": "v10-inc-h-t2-directed-at-self-not-others-01",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "v10-h-t2-directed-at-self-not-others",
+      "judgment": "clear",
+      "reason": "当前想伤害对象明确是自己，否认对物业动手不能取消本人自伤冲动。",
+      "span": "想伤害的对象是我自己",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "harm_to_others_denied",
+        "explicit_negation_scope_correction"
+      ]
+    },
+    {
+      "id": "v10-inc-h-t2-directed-at-self-not-others-02",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "v10-h-t2-directed-at-self-not-others",
+      "judgment": "clear",
+      "reason": "本人肯定眼下想伤害自己并明确否认对象是对方，情境生气不是唯一信号。",
+      "span": "我否认的是伤害对方，不是自伤的念头",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "harm_to_others_denied",
+        "explicit_negation_scope_correction"
+      ]
+    },
+    {
+      "id": "v10-inc-h-t2-directed-at-self-not-others-03",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "v10-h-t2-directed-at-self-not-others",
+      "judgment": "clear",
+      "reason": "不会伤害物业人员的否定与此刻确实想自伤被明确区分，危险主体仍是本人。",
+      "span": "此刻我确实想自伤",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "harm_to_others_denied",
+        "explicit_negation_scope_correction"
+      ]
+    },
+    {
+      "id": "v10-inc-h-t2-directed-at-self-not-others-04",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "v10-h-t2-directed-at-self-not-others",
+      "judgment": "clear",
+      "reason": "争执已结束但眼下自伤冲动明确存在，否定报复工作人员只限定他人伤害。",
+      "span": "现在肯定存在的是自伤冲动",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "harm_to_others_denied",
+        "explicit_negation_scope_correction"
+      ]
+    },
+    {
+      "id": "v10-inc-h-t3-deliberate-today-not-accident-01",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "v10-h-t3-deliberate-today-not-accident",
+      "judgment": "clear",
+      "reason": "今天主动自伤被明确肯定而事故和过去事件被排除，没有结束生命意图不能取消近期主动行为。",
+      "span": "今天我已经故意伤害了自己",
+      "structureTags": [
+        "recent_deliberate_self_harm",
+        "suicidal_intent_denied",
+        "accident_denied",
+        "remote_history_denied"
+      ]
+    },
+    {
+      "id": "v10-inc-h-t3-deliberate-today-not-accident-02",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "v10-h-t3-deliberate-today-not-accident",
+      "judgment": "clear",
+      "reason": "刚才主动自伤且今天已伤害自己被肯定，当前无轻生意图仅否定死亡意图。",
+      "span": "刚才的事是我主动自伤",
+      "structureTags": [
+        "recent_deliberate_self_harm",
+        "suicidal_intent_denied",
+        "accident_denied"
+      ]
+    },
+    {
+      "id": "v10-inc-h-t3-deliberate-today-not-accident-03",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "v10-h-t3-deliberate-today-not-accident",
+      "judgment": "clear",
+      "reason": "今天故意伤害自己行为已发生，误伤及轻生意图的否定不否定主动自伤事实。",
+      "span": "我今天做出了故意伤害自己的行为",
+      "structureTags": [
+        "recent_deliberate_self_harm",
+        "suicidal_intent_denied",
+        "accident_denied"
+      ]
+    },
+    {
+      "id": "v10-inc-h-t3-deliberate-today-not-accident-04",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "v10-h-t3-deliberate-today-not-accident",
+      "judgment": "clear",
+      "reason": "当日故意伤害自己明确被肯定，旧伤和不小心被排除而没有想自杀不取消行为。",
+      "span": "我今天确实故意伤害了自己",
+      "structureTags": [
+        "recent_deliberate_self_harm",
+        "suicidal_intent_denied",
+        "accident_denied",
+        "remote_history_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-20261003-h1-seed-lending-01",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "temporal-v06-20261003-h1-seed-lending",
+      "judgment": "clear",
+      "reason": "上周无自伤意念是历史状态，今天此刻明确想伤害自己且同伴在场不取消它。",
+      "span": "我现在确实想伤害自己",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "past_current_contrast",
+        "past_danger_denied",
+        "support_person_present"
+      ]
+    },
+    {
+      "id": "temporal-v06-20261003-h1-seed-lending-02",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "temporal-v06-20261003-h1-seed-lending",
+      "judgment": "clear",
+      "reason": "此前无危险念头与此刻已有自伤想法明确区分，没有具体计划只限定行动。",
+      "span": "此刻有伤害自己的念头",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "past_current_contrast",
+        "past_danger_denied",
+        "plan_or_action_preparation_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-20261003-h1-seed-lending-03",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "temporal-v06-20261003-h1-seed-lending",
+      "judgment": "clear",
+      "reason": "昨天无危险念头被明确限定为过去，当前自伤想法仍在且陪伴没有取消它。",
+      "span": "这个念头此刻还在",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "past_current_contrast",
+        "past_danger_denied",
+        "support_person_present"
+      ]
+    },
+    {
+      "id": "temporal-v06-20261003-h1-seed-lending-04",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "temporal-v06-20261003-h1-seed-lending",
+      "judgment": "clear",
+      "reason": "过去未想自伤不覆盖今天肯定自伤念头，未安排如何行动不能视为当前无危险。",
+      "span": "今天轮值结束后的我却有自伤念头",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "past_current_contrast",
+        "past_danger_denied",
+        "plan_or_action_preparation_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-r2-20261003-h2-surname-registry-01",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "temporal-v06-r2-20261003-h2-surname-registry",
+      "judgment": "clear",
+      "reason": "上月无危险念头是历史背景，今天提交资料后明确当前自伤念头且家人陪同不取消它。",
+      "span": "我现在真的有伤害自己的念头",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "past_current_contrast",
+        "past_danger_denied",
+        "support_person_present"
+      ]
+    },
+    {
+      "id": "temporal-v06-r2-20261003-h2-surname-registry-02",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "temporal-v06-r2-20261003-h2-surname-registry",
+      "judgment": "clear",
+      "reason": "前几天无自伤想法与刚提交资料时当前确有意念明确区分，具体计划否定不扩大到意念。",
+      "span": "我却确实有自伤的想法",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "past_current_contrast",
+        "past_danger_denied",
+        "plan_or_action_preparation_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-r2-20261003-h2-surname-registry-03",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "temporal-v06-r2-20261003-h2-surname-registry",
+      "judgment": "clear",
+      "reason": "昨天否定的是昨天状态，今天自伤想法仍在且家人倾听不改变其肯定。",
+      "span": "这个念头仍然在",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "past_current_contrast",
+        "past_danger_denied",
+        "support_person_present"
+      ]
+    },
+    {
+      "id": "temporal-v06-r2-20261003-h2-surname-registry-04",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "temporal-v06-r2-20261003-h2-surname-registry",
+      "judgment": "clear",
+      "reason": "早先无危险与今天确实想自伤有清楚时点变化，无计划和家人陪同都没有否定当前意念。",
+      "span": "此刻真的想伤害自己",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "past_current_contrast",
+        "past_danger_denied",
+        "support_person_present",
+        "plan_or_action_preparation_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-20261003-h3-coastal-observation-01",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "temporal-v06-20261003-h3-coastal-observation",
+      "judgment": "clear",
+      "reason": "前天无自伤念头是过去状态，今天交班后本人明确现在有自伤想法。",
+      "span": "我现在确实有自伤的想法",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "past_current_contrast",
+        "past_danger_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-20261003-h3-coastal-observation-02",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "temporal-v06-20261003-h3-coastal-observation",
+      "judgment": "clear",
+      "reason": "过去轮值无危险念头与刚交班此刻想伤害自己明确区分，接班者陪伴不取消危险内容。",
+      "span": "刚交完潮汐记录的此刻，我却想伤害自己",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "past_current_contrast",
+        "past_danger_denied",
+        "support_person_present"
+      ]
+    },
+    {
+      "id": "temporal-v06-20261003-h3-coastal-observation-03",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "temporal-v06-20261003-h3-coastal-observation",
+      "judgment": "clear",
+      "reason": "昨天无危险意念与今天出现自伤想法分别指不同时间，没想好行动不使当前想法变成过去。",
+      "span": "我此刻出现了伤害自己的想法",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "past_current_contrast",
+        "past_danger_denied",
+        "plan_or_action_preparation_denied"
+      ]
+    },
+    {
+      "id": "temporal-v06-20261003-h3-coastal-observation-04",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "temporal-v06-20261003-h3-coastal-observation",
+      "judgment": "clear",
+      "reason": "上周无自伤意念只说明历史，当前真想伤害自己与无计划及有人在旁明确并存。",
+      "span": "现在我真的想伤害自己",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "past_current_contrast",
+        "past_danger_denied",
+        "support_person_present",
+        "plan_or_action_preparation_denied"
+      ]
+    },
+    {
+      "id": "ce21b568c86a6fcb",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "neggen-20261003-f07-orienteering-feedback-disclosure",
+      "judgment": "clear",
+      "reason": "本人此刻确有自伤念头，后置“还没有”否定的是当前具体行动计划。",
+      "span": "我此刻确实有伤害自己的念头",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "plan_or_action_preparation_denied",
+        "postposed_plan_negation",
+        "support_seeking_or_disclosure"
+      ]
+    },
+    {
+      "id": "dc6cf6adb10169c6",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "neggen-20261003-f07-orienteering-feedback-disclosure",
+      "judgment": "clear",
+      "reason": "本人明确现在有自伤念头，末句未定具体时间没有否定意念存在。",
+      "span": "我现在确实有自伤的念头",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "plan_or_action_preparation_denied",
+        "postposed_plan_negation",
+        "support_seeking_or_disclosure"
+      ]
+    },
+    {
+      "id": "10c937ab7bf38209",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "neggen-20261003-f07-orienteering-feedback-disclosure",
+      "judgment": "clear",
+      "reason": "眼下自伤念头确实在且告知搭档，后置尚未做只限定当前具体行动准备。",
+      "span": "眼下想伤害自己的念头确实在",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "plan_or_action_preparation_denied",
+        "postposed_plan_negation",
+        "support_seeking_or_disclosure"
+      ]
+    },
+    {
+      "id": "ee1fd27d79c60e20",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "neggen-20261003-f07-orienteering-feedback-disclosure",
+      "judgment": "clear",
+      "reason": "此刻确有伤害自己想法，后置“都没有”的对象明确为具体计划与准备。",
+      "span": "我此刻确实有伤害自己的想法",
+      "structureTags": [
+        "current_self_harm_ideation",
+        "plan_or_action_preparation_denied",
+        "postposed_plan_negation",
+        "support_seeking_or_disclosure"
+      ]
+    },
+    {
+      "id": "e74668825d56e460",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "neggen-20261003-f08-language-exchange-support-disclosure",
+      "judgment": "clear",
+      "reason": "本人当前肯定结束生命念头，寻求倾听与后置无具体计划都没有取消它。",
+      "span": "我现在确实有结束自己生命的念头",
+      "structureTags": [
+        "current_suicidal_ideation",
+        "plan_or_action_preparation_denied",
+        "postposed_plan_negation",
+        "support_seeking_or_disclosure"
+      ]
+    },
+    {
+      "id": "2a640eb7257c2f3e",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "neggen-20261003-f08-language-exchange-support-disclosure",
+      "judgment": "clear",
+      "reason": "本人此刻确有轻生想法，后置未定行动时间只否定计划安排。",
+      "span": "我此刻确实有轻生的想法",
+      "structureTags": [
+        "current_suicidal_ideation",
+        "plan_or_action_preparation_denied",
+        "postposed_plan_negation",
+        "support_seeking_or_disclosure"
+      ]
+    },
+    {
+      "id": "3e4ef8ecade0c3f6",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "neggen-20261003-f08-language-exchange-support-disclosure",
+      "judgment": "clear",
+      "reason": "本人结束生命念头此刻确实存在，后置未做行动准备不能视为否定意念。",
+      "span": "结束自己生命的念头此刻确实存在",
+      "structureTags": [
+        "current_suicidal_ideation",
+        "plan_or_action_preparation_denied",
+        "postposed_plan_negation",
+        "support_seeking_or_disclosure"
+      ]
+    },
+    {
+      "id": "ee5d43441dba0bde",
+      "label": "HIGH",
+      "sourceLabel": "高风险",
+      "sourceGroup": "neggen-20261003-f08-language-exchange-support-disclosure",
+      "judgment": "clear",
+      "reason": "本人现在确有轻生念头并求支持，后置当前都没有只限定具体计划与准备。",
+      "span": "我现在确实有轻生的念头",
+      "structureTags": [
+        "current_suicidal_ideation",
+        "plan_or_action_preparation_denied",
+        "postposed_plan_negation",
+        "support_seeking_or_disclosure"
+      ]
+    }
+  ]
+}

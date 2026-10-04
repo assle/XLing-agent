@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import random
@@ -20,6 +21,10 @@ SYSTEM_PROMPT = "你是心理健康支持消息分类器。只输出一个标签
 
 
 def parse_args() -> argparse.Namespace:
+    """读取模型、数据文件、训练参数及运行模式。
+
+    返回参数对象；只声明选项和默认值，不在此加载模型或验证文件。
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="Qwen/Qwen2.5-0.5B-Instruct")
     parser.add_argument("--train", default="finetune/data/general-train.jsonl")
@@ -39,15 +44,25 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-latency-ms", type=float, default=2000.0)
     parser.add_argument("--local-files-only", action="store_true")
     parser.add_argument("--sanity", action="store_true")
+    parser.add_argument("--training-only", action="store_true", help="保存验证集选出的适配器，不读取测试集")
+    parser.add_argument("--system-prompt-file", default="", help="固定训练与评估使用的系统提示文件")
     return parser.parse_args()
 
 
 def load_jsonl(path: str | Path, limit: int = 0) -> list[dict]:
+    """读取逐行样本文件，可按类别限制样本数量。
+
+    limit 为零时返回全部；启用抽样时当前固定使用种子 42，与训练入口的随机种子参数分开。
+    """
     rows = [json.loads(line) for line in Path(path).read_text(encoding="utf-8").splitlines() if line.strip()]
     return stratified_sample(rows, limit, 42) if limit else rows
 
 
 def stratified_sample(rows: list[dict], limit: int, seed: int) -> list[dict]:
+    """按四类轮流取样，尽量保持小样本集合的类别覆盖。
+
+    每类先用指定种子打乱；上限至少要容纳四个标签，类别耗尽后继续从其他类别取样。
+    """
     if not limit or limit >= len(rows):
         return list(rows)
     if limit < len(LABELS):
@@ -69,6 +84,10 @@ def stratified_sample(rows: list[dict], limit: int, seed: int) -> list[dict]:
 
 
 def prompt_text(tokenizer, text: str) -> str:
+    """使用模型分词器提供的聊天模板组装分类请求。
+
+    返回尚未编码的文本，并添加模型开始回答所需的提示标记。
+    """
     return tokenizer.apply_chat_template(
         [
             {"role": "system", "content": SYSTEM_PROMPT},
@@ -81,6 +100,11 @@ def prompt_text(tokenizer, text: str) -> str:
 
 class ClassificationDataset(Dataset):
     def __init__(self, rows: list[dict], tokenizer, max_length: int):
+        """把分类样本编码成模型输入和用于训练的目标编号。
+
+        提示词部分的目标设为 -100，使损失只关注输出标签及结束标记。
+        超过 max_length 时拒绝样本，避免静默截掉标签、产生没有监督目标的训练。
+        """
         self.examples = []
         for row in rows:
             prompt = prompt_text(tokenizer, row["input"])
@@ -88,20 +112,34 @@ class ClassificationDataset(Dataset):
             full_ids = tokenizer(
                 prompt + row["output"] + tokenizer.eos_token,
                 add_special_tokens=False,
-                truncation=True,
-                max_length=max_length,
             )["input_ids"]
+            if len(full_ids) > max_length or len(full_ids) <= len(prompt_ids):
+                raise ValueError(f"分类样本 {row.get('id', 'unknown')} 没有完整监督目标，请调整 max_length")
+            # 让模型只学习该输出标签；提示词本身不计入本次监督训练的损失。
             labels = [-100] * min(len(prompt_ids), len(full_ids)) + full_ids[len(prompt_ids):]
-            self.examples.append({"input_ids": full_ids, "labels": labels})
+            self.examples.append({"input_ids": full_ids, "labels": labels, "output": row["output"]})
 
     def __len__(self) -> int:
+        """返回预先编码好的样本数量。
+
+        供数据加载器计算批次数，不重新读取文件。
+        """
         return len(self.examples)
 
     def __getitem__(self, index: int) -> dict:
+        """按索引返回已编码样本字典。
+
+        返回保存对象本身，没有额外复制；越界按列表规则抛错。
+        """
         return self.examples[index]
 
 
 def collate(batch: list[dict], pad_token_id: int) -> dict[str, torch.Tensor]:
+    """把一个批次补到相同长度，并转换为模型使用的整数张量。
+
+    输入补 pad_token_id，训练目标补 -100，注意力掩码将真实文本与补齐位置区分。
+    返回输入、训练目标和掩码三组张量，要求批次非空。
+    """
     width = max(len(item["input_ids"]) for item in batch)
     inputs, labels, masks = [], [], []
     for item in batch:
@@ -117,6 +155,10 @@ def collate(batch: list[dict], pad_token_id: int) -> dict[str, torch.Tensor]:
 
 
 def device_name() -> str:
+    """按可用性选择 NVIDIA 显卡、苹果图形加速或中央处理器。
+
+    依次检查 cuda、mps，均不可用时用 cpu；只选择设备名称，不搬移模型。
+    """
     if torch.cuda.is_available():
         return "cuda"
     if torch.backends.mps.is_available():
@@ -125,6 +167,10 @@ def device_name() -> str:
 
 
 def generate_label(model, tokenizer, text: str, device: str, max_length: int) -> tuple[str, str]:
+    """关闭梯度计算，以确定性生成取得一个中文分类标签。
+
+    输入按最大长度截断，输出只解码新增部分；严格属于四类才接受，否则标为无效并保留原文。
+    """
     prompt = prompt_text(tokenizer, text)
     encoded = tokenizer(
         prompt,
@@ -152,6 +198,10 @@ def generate_label(model, tokenizer, text: str, device: str, max_length: int) ->
 
 
 def metrics(rows: list[dict], predictions: list[str]) -> dict:
+    """统计分类结果和无效输出，计算总体与分类别表现。
+
+    混淆矩阵单独保留无效预测列，使其计入真实类别漏报；调用方应保证样本和预测数量相同。
+    """
     prediction_labels = (*LABELS, "__INVALID__")
     confusion = {expected: {predicted: 0 for predicted in prediction_labels} for expected in LABELS}
     for row, predicted in zip(rows, predictions):
@@ -179,13 +229,19 @@ def metrics(rows: list[dict], predictions: list[str]) -> dict:
     }
 
 
-def fixed_subset_loss(model, dataset: Dataset, device: str, pad_token_id: int, limit: int = 8) -> float:
+def fixed_subset_loss(model, dataset: ClassificationDataset, device: str, pad_token_id: int, limit: int = 8) -> float:
+    """用固定分层的少量样本测量损失探针。
+
+    默认至多八条，尽量均衡覆盖数据中存在的标签，不代表全数据损失。
+    切换为评估模式且不计算梯度，便于比较训练前后；无结果或损失非有限数时抛错。
+    """
     model.eval()
     values = []
     loader = DataLoader(
-        dataset,
+        stratified_sample(dataset.examples, limit, 42),
         batch_size=1,
         shuffle=False,
+        # 匿名整理函数把加载器提供的样本列表补齐，使用本次固定的补齐编号。
         collate_fn=lambda batch: collate(batch, pad_token_id),
     )
     with torch.no_grad():
@@ -200,19 +256,37 @@ def fixed_subset_loss(model, dataset: Dataset, device: str, pad_token_id: int, l
 
 
 def evaluate(model, tokenizer, rows: list[dict], device: str, max_length: int) -> dict:
+    """逐条生成分类结果并统计效果及平均每例耗时。
+
+    保留样本编号、真实标签、规范预测和模型原文，供后续定位错误。
+    """
     model.eval()
     predictions, cases = [], []
     started = time.perf_counter()
     for row in rows:
         predicted, raw = generate_label(model, tokenizer, row["input"], device, max_length)
         predictions.append(predicted)
-        cases.append({"id": row["id"], "expected": row["output"], "predicted": predicted, "rawOutput": raw})
+        cases.append({
+            "id": row["id"], "expected": row["output"], "predicted": predicted,
+            "rawOutput": raw if raw in LABELS else "__INVALID__", "outputCharacters": len(raw),
+        })
     elapsed = time.perf_counter() - started
     return {**metrics(rows, predictions), "latencyMsPerCase": elapsed * 1000 / max(1, len(rows)), "casesDetail": cases}
 
 
 def main() -> None:
+    """执行微调训练、按验证集选择最佳增量参数，再评估独立测试集。
+
+    LoRA 是仅训练少量附加参数的微调方式；梯度累积将多个小批次的梯度合并后更新，减少设备内存需求。
+    健全性和 training-only 模式检查训练损失下降，不读取测试集；正式模式在参数选定后比较基础模型与微调模型。
+    保存增量参数、训练记录和替换门槛结果，不自动激活模型。
+    """
+    global SYSTEM_PROMPT
     args = parse_args()
+    if args.system_prompt_file:
+        SYSTEM_PROMPT = (ROOT / args.system_prompt_file).read_text(encoding="utf-8").strip()
+        if not SYSTEM_PROMPT:
+            raise ValueError("分类系统提示不能为空")
     random.seed(args.seed)
     torch.manual_seed(args.seed)
     device = device_name()
@@ -268,8 +342,10 @@ def main() -> None:
         batch_size=args.batch_size,
         shuffle=True,
         generator=generator,
+        # 每批使用当前分词器的补齐编号，确保输入长度一致且补齐位置不参与损失。
         collate_fn=lambda batch: collate(batch, tokenizer.pad_token_id),
     )
+    # 优化器只更新允许训练的增量参数，基础模型其余权重保持冻结。
     parameters = [parameter for parameter in model.parameters() if parameter.requires_grad]
     pre_train_loss = fixed_subset_loss(model, dataset, device, tokenizer.pad_token_id)
     optimizer = torch.optim.AdamW(parameters, lr=args.learning_rate)
@@ -287,14 +363,19 @@ def main() -> None:
         for batch in loader:
             if batch_index >= total_batches:
                 break
+            if batch_index % args.gradient_accumulation == 0:
+                # 同一累积组使用固定分母，末组只按实际剩余批数平均。
+                accumulation_batches = min(args.gradient_accumulation, total_batches - batch_index)
             batch_index += 1
             batch = {key: value.to(device) for key, value in batch.items()}
-            loss = model(**batch).loss / args.gradient_accumulation
+            # 先缩小每批损失再累积梯度，使多个小批次共同完成一次参数更新。
+            loss = model(**batch).loss / accumulation_batches
             if not torch.isfinite(loss):
                 raise RuntimeError(f"训练损失不是有限数：batch={batch_index}")
             loss.backward()
-            losses.append(float(loss.item() * args.gradient_accumulation))
+            losses.append(float(loss.item() * accumulation_batches))
             if batch_index % args.gradient_accumulation == 0 or batch_index == total_batches:
+                # 参数更新前限制梯度整体大小，降低某一批次梯度过大带来的不稳定。
                 torch.nn.utils.clip_grad_norm_(parameters, 1.0)
                 optimizer.step()
                 scheduler.step()
@@ -305,6 +386,7 @@ def main() -> None:
             if batch_index % len(loader) == 0 or batch_index == total_batches:
                 validation = evaluate(model, tokenizer, validation_rows, device, args.max_length)
                 validation_history.append({"batch": batch_index, **{key: validation[key] for key in ("accuracy", "macroF1", "highRiskRecall", "outputValidity", "latencyMsPerCase")}})
+                # 仅根据验证集表现选择参数，复制到中央处理器内存，避免后续训练继续改写最佳版本。
                 if validation["macroF1"] > best_validation_f1:
                     best_validation_f1 = validation["macroF1"]
                     best_state = {
@@ -330,14 +412,17 @@ def main() -> None:
         "validationHistory": validation_history,
         "bestValidationMacroF1": best_validation_f1,
     }
-    if args.sanity:
+    # 两种隔离训练模式均不打开测试集，损失下降不代表模型质量已通过。
+    if args.sanity or args.training_only:
         result = {
             "experimental": True,
-            "sanity": True,
+            "sanity": args.sanity,
+            "trainingOnly": args.training_only,
             "model": args.model,
             "device": device,
             "seed": args.seed,
             "config": vars(args),
+            "systemPromptSHA256": hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest(),
             "trainCases": len(train_rows),
             "validationCases": len(validation_rows),
             "testCases": 0,
@@ -349,12 +434,12 @@ def main() -> None:
         result_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
         print(json.dumps({"device": device, "training": training, "passed": result["passed"]}, ensure_ascii=False, indent=2))
         if not result["passed"]:
-            raise RuntimeError("健全性训练未通过：训练损失没有下降")
+            raise RuntimeError("训练检查未通过：训练损失没有下降")
         return
 
-    # The independent test set is opened only after validation has selected
-    # and locked the adapter checkpoint. Baseline and final use identical cases.
+    # 最终测试集在最佳参数已确定后才读取，避免用测试成绩反复挑选训练版本。
     test_rows = load_jsonl(ROOT / args.test, args.max_eval_samples)
+    # 暂时关闭附加参数得到同一基础模型的对照结果，随后恢复附加参数在相同样本上比较。
     with model.disable_adapter():
         baseline = evaluate(model, tokenizer, test_rows, device, args.max_length)
     final = evaluate(model, tokenizer, test_rows, device, args.max_length)

@@ -1,3 +1,4 @@
+from contextlib import aclosing
 from typing import Annotated
 
 from anyio import CancelScope
@@ -17,7 +18,7 @@ from app.schemas.dtos import (
     ReplaceActionItemRequest,
 )
 from app.services.action_plan import ActionPlanService
-from app.services.chat import ChatService, PendingReviewError
+from app.services.chat import ChatService, PendingReviewError, sse
 from app.services.checkin import CheckInService
 from app.services.escalation import EscalationService
 from app.services.report import ReportService
@@ -50,15 +51,32 @@ async def chat_stream(
     # 返回流式响应对象，消息处理和内容生成由聊天服务在流被读取时推进。
     if "ROLE_ADMIN" in user.roles:
         raise HTTPException(403, "管理员账号只能查看后台记录，不能发起学生对话。")
-    service = ChatService(db, get_settings())
+    settings = get_settings()
+    service = ChatService(db, settings)
     try:
         service.ensure_chat_available(user, request.sessionId)
     except PendingReviewError as exc:
         with diagnostics.execution("chat.rejected", session_id=request.sessionId):
             diagnostics.emit("chat.blocked", reason_code="PENDING_REVIEW")
         raise HTTPException(409, str(exc)) from exc
+    bind = db.get_bind()
+    user_id = user.id
+
+    async def body():
+        # FastAPI may close request dependencies before consuming the response.
+        # The stream owns this Session until completion, failure, or disconnect.
+        with Session(bind=bind) as stream_db:
+            stream_user = stream_db.get(UserAccount, user_id)
+            if stream_user is None:
+                yield sse("error", {"type": "error", "message": "账号已失效，请重新登录。"})
+                return
+            stream_service = ChatService(stream_db, settings)
+            async with aclosing(stream_service.stream_chat(stream_user, request)) as stream:
+                async for chunk in stream:
+                    yield chunk
+
     return ChatStreamingResponse(
-        service.stream_chat(user, request),
+        body(),
         media_type="text/event-stream",
     )
 
@@ -176,13 +194,14 @@ def list_checkins(
 def list_action_plans(
     user: Annotated[UserAccount, Depends(current_user)],
     db: Annotated[Session, Depends(get_db)],
+    sessionId: str | None = None,
 ):
     # 列出当前用户的行动计划并附上各项内容。
     # 查询和返回格式均通过行动计划服务统一处理。
     action_plans = ActionPlanService(db)
     return [
         action_plans.to_response(plan)
-        for plan in action_plans.list_plans(user.id)
+        for plan in action_plans.list_plans(user.id, sessionId)
     ]
 
 

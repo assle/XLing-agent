@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 import threading
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Callable
 
 from sqlalchemy.orm import Session
@@ -12,7 +12,7 @@ from app.core import diagnostics
 from app.core.config import Settings
 from app.core.database import SessionLocal
 from app.core.enums import MessageRole
-from app.core.time import utc_now
+from app.core.time import utc_isoformat, utc_now
 from app.models.entities import ChatMessage, ChatSession, ReviewRequest, SafetyAssessmentRecord
 
 logger = logging.getLogger(__name__)
@@ -248,7 +248,11 @@ class ReviewService:
         review.referral_target = referral_target
         review.next_step = next_step
         review.follow_up_owner = follow_up_owner
-        review.follow_up_at = follow_up_at
+        review.follow_up_at = (
+            follow_up_at.astimezone(UTC).replace(tzinfo=None)
+            if follow_up_at is not None and follow_up_at.tzinfo is not None
+            else follow_up_at
+        )
         review.reviewed_at = utc_now()
         # 将审核决定映射成对外展示和后续查询使用的处理状态。
         status_map = {"approve": "approved", "reject": "rejected", "refer": "referred", "monitor": "monitoring"}
@@ -275,7 +279,7 @@ class ReviewService:
                 f"下一步：{review.next_step}。如你现在处于紧急危险中，请立即联系身边可信任的人或当地紧急服务。"
             )
         if review.reviewer_decision == "monitor":
-            when = review.follow_up_at.strftime("%Y-%m-%d %H:%M") if review.follow_up_at else "后续约定时间"
+            when = review.follow_up_at.strftime("%Y-%m-%d %H:%M UTC") if review.follow_up_at else "后续约定时间"
             return f"人工审核记录了持续关注建议。负责人：{review.follow_up_owner}；建议跟进时间：{when}。如情况变化，请主动联系身边可信任的人或当地支持服务。"
         return ""
 
@@ -341,15 +345,15 @@ class ReviewService:
             "referralTarget": review.referral_target,
             "nextStep": review.next_step,
             "followUpOwner": review.follow_up_owner,
-            "followUpAt": review.follow_up_at.isoformat() if review.follow_up_at else None,
+            "followUpAt": utc_isoformat(review.follow_up_at) if review.follow_up_at else None,
             "status": review.status,
-            "reviewedAt": review.reviewed_at.isoformat() if review.reviewed_at else None,
+            "reviewedAt": utc_isoformat(review.reviewed_at) if review.reviewed_at else None,
             "riskLevel": report.risk_level if report else None,
             "emotion": report.emotion if report else None,
             "emotionScore": report.emotion_score if report else None,
             "studentMessage": report.content if report else None,
             "recentContext": [{"role": m.role, "content": m.content} for m in messages],
-            "createdAt": review.created_at.isoformat() if review.created_at else None,
+            "createdAt": utc_isoformat(review.created_at) if review.created_at else None,
             "waitSeconds": (now - review.created_at).total_seconds() if review.created_at else None,
         }
 

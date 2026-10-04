@@ -83,7 +83,7 @@ def _run(runtime, intent: IntentType, text: str = "有点担心", *, thread_id="
     runtime.ai = RoutingAi()
     user = UserAccount(id=1, display_name="测试用户", roles_csv="ROLE_USER")
     session = ChatSession(id=1, public_id=thread_id, user_id=1)
-    return asyncio.run(runtime.run(user, session, text, text))
+    return asyncio.run(runtime.run(user, session, text))
 
 
 def test_risk_intent_preserves_low_assessment():
@@ -128,9 +128,9 @@ def test_resume_does_not_repeat_risk_assessment():
     original = runtime.assessment.aassess
     calls = []
 
-    async def counted(text, history):
+    async def counted(text):
         calls.append(text)
-        return await original(text, history)
+        return await original(text)
 
     runtime.assessment.aassess = counted
     interrupted = _run(runtime, IntentType.RISK, "我不想活了", thread_id="risk-once-on-resume")

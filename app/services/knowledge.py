@@ -37,7 +37,6 @@ class KnowledgeService:
         # 实验检索器只由离线评估显式注入，在线默认构造不读取实验切换配置。
         self.retriever = retriever
         self.vector_fallback_used = False
-        self._bm25 = None
 
     def count(self) -> int:
         """统计数据库中的全部知识片段数量。
@@ -220,28 +219,6 @@ class KnowledgeService:
         fused = self._rrf_fuse([vector_results, bm25_results], top_k)
         return self._expand_best(fused, top_k)
 
-    def retrieve_with_rerank(self, query: str, top_k: int | None = None, candidate_pool: int = 20) -> list[SearchResult]:
-        """先取较大候选集合，再用模型相关性评分重新排序。
-
-        candidate_pool 控制候选数量；无模型时直接截取原顺序，缺少某候选分数时按零分处理。
-        """
-        top_k = top_k or self.settings.knowledge_top_k
-        candidates = self.retrieve(query, candidate_pool)
-        if not candidates or not self.ai_client:
-            return candidates[:top_k] if candidates else []
-        candidate_dicts = [
-            {"source": c.source, "content": c.content, "chunk_id": c.chunk_id}
-            for c in candidates
-        ]
-        scored = self.ai_client.rerank(query, candidate_dicts)
-        index_to_score = {idx: score for idx, score in scored}
-        reranked = []
-        for idx, candidate in enumerate(candidates):
-            score = index_to_score.get(idx, 0.0)
-            reranked.append(SearchResult(candidate.chunk_id, candidate.source, candidate.content, score))
-        # 按结果对象上的当前分数降序排列，保留更相关的候选。
-        reranked.sort(key=lambda r: r.score, reverse=True)
-        return reranked[:top_k]
 
 
     def _retrieve_bm25(self, query: str, top_k: int) -> list[SearchResult]:
@@ -571,14 +548,3 @@ def extract_pdf(data: bytes) -> str:
 
     reader = PdfReader(BytesIO(data))
     return "\n".join(page.extract_text() or "" for page in reader.pages)
-
-
-def _matches_stage(chunk_stage: str | None, target_stage: str) -> bool:
-    """判断片段的阶段标记是否覆盖目标阶段。
-
-    未设置、空值或 all 表示通用；其余按逗号分隔并去掉首尾空白后进行精确匹配。
-    """
-    if chunk_stage is None or chunk_stage == "" or chunk_stage == "all":
-        return True
-    stages = [s.strip() for s in chunk_stage.split(",")]
-    return target_stage in stages

@@ -22,6 +22,10 @@ from tests.support import FakeMemoryStore, build_runtime
 
 
 def _make_db():
+    """创建当前测试独享的内存数据库并建立表结构。
+
+    返回可直接准备审核数据的会话，不连接默认数据库。
+    """
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     session = sessionmaker(bind=engine)()
@@ -29,7 +33,10 @@ def _make_db():
 
 
 def _seed_review(db, thread_id: str, status: str = "pending", minutes_ago: int = 0, risk_level: str = "HIGH"):
-    """Insert a user, session, messages, report, and review request. Returns review_id."""
+    """按指定风险、状态和等待分钟数保存完整审核样本。
+
+    先建立用户、会话及消息，再创建评估和审核，返回审核编号。
+    """
     user = UserAccount(username=f"u_{thread_id}", display_name="测试学生", password_hash="x", roles_csv="ROLE_USER")
     db.add(user)
     db.flush()
@@ -61,6 +68,10 @@ def _seed_review(db, thread_id: str, status: str = "pending", minutes_ago: int =
 # ---------------------------------------------------------------------------
 
 def test_list_pending_returns_only_pending():
+    """准备待审核和已批准混合记录。
+
+    检查列表只包含待处理项且保留风险摘要。
+    """
     db = _make_db()
     _seed_review(db, "thread-001", status="pending")
     _seed_review(db, "thread-002", status="approved")
@@ -76,6 +87,10 @@ def test_list_pending_returns_only_pending():
 # ---------------------------------------------------------------------------
 
 def test_list_pending_includes_context():
+    """准备一条包含两条历史消息的审核。
+
+    检查列表带会话编号、评估字段、上下文和非负等待时间。
+    """
     db = _make_db()
     _seed_review(db, "thread-ctx-001", status="pending")
     svc = ReviewService(db, Settings(ai_provider="mock"))
@@ -95,6 +110,10 @@ def test_list_pending_includes_context():
 # ---------------------------------------------------------------------------
 
 def test_mark_approved_removes_from_pending():
+    """把待审核记录批准。
+
+    检查它离开待处理列表，并保存批准状态和处理时间。
+    """
     db = _make_db()
     review_id = _seed_review(db, "thread-approve-001", status="pending")
     svc = ReviewService(db, Settings(ai_provider="mock"))
@@ -107,6 +126,10 @@ def test_mark_approved_removes_from_pending():
 
 
 def test_mark_rejected_removes_from_pending():
+    """把待审核记录拒绝。
+
+    检查列表不再显示待处理，记录状态和时间已更新。
+    """
     db = _make_db()
     review_id = _seed_review(db, "thread-reject-001", status="pending")
     svc = ReviewService(db, Settings(ai_provider="mock"))
@@ -119,6 +142,10 @@ def test_mark_rejected_removes_from_pending():
 
 
 def test_mark_escalated_removes_from_pending():
+    """将待审核记录标为安全升级。
+
+    检查状态变化并离开待处理队列。
+    """
     db = _make_db()
     review_id = _seed_review(db, "thread-escalated-001", status="pending")
     svc = ReviewService(db, Settings(ai_provider="mock"))
@@ -135,6 +162,10 @@ def test_mark_escalated_removes_from_pending():
 # ---------------------------------------------------------------------------
 
 def test_mark_non_pending_raises():
+    """先批准一条审核，再尝试重复批准。
+
+    要求抛错，避免已处理记录重复决定。
+    """
     db = _make_db()
     review_id = _seed_review(db, "thread-dup-001", status="pending")
     svc = ReviewService(db, Settings(ai_provider="mock"))
@@ -152,6 +183,10 @@ def test_mark_non_pending_raises():
 # ---------------------------------------------------------------------------
 
 def test_list_pending_oldest_first():
+    """建立风险相同但等待时间不同的审核。
+
+    检查等待更久的排在前面。
+    """
     db = _make_db()
     _seed_review(db, "thread-new-001", status="pending", minutes_ago=1)
     _seed_review(db, "thread-old-001", status="pending", minutes_ago=30)
@@ -166,6 +201,10 @@ def test_list_pending_oldest_first():
 # ---------------------------------------------------------------------------
 
 def test_list_pending_high_before_medium():
+    """建立等待较短的高风险和等待较长的中风险。
+
+    检查风险优先级高于等待时长。
+    """
     db = _make_db()
     _seed_review(db, "thread-med-001", status="pending", minutes_ago=30, risk_level="MEDIUM")
     _seed_review(db, "thread-high-001", status="pending", minutes_ago=1, risk_level="HIGH")
@@ -177,6 +216,10 @@ def test_list_pending_high_before_medium():
 
 
 def test_list_pending_same_risk_longest_wait_first():
+    """让两项都为高风险，只改变等待时间。
+
+    检查同级风险按等待更久优先。
+    """
     db = _make_db()
     _seed_review(db, "thread-wait-short", status="pending", minutes_ago=1, risk_level="HIGH")
     _seed_review(db, "thread-wait-long", status="pending", minutes_ago=30, risk_level="HIGH")
@@ -191,6 +234,10 @@ def test_list_pending_same_risk_longest_wait_first():
 # ---------------------------------------------------------------------------
 
 def test_escalate_timed_out_marks_escalated():
+    """准备超过十五分钟门槛的审核。
+
+    检查升级编号、状态、系统处理者和超时说明均保存。
+    """
     db = _make_db()
     review_id = _seed_review(db, "thread-timeout-001", status="pending", minutes_ago=20)
     svc = ReviewService(db, Settings(ai_provider="mock", review_timeout_minutes=15))
@@ -205,6 +252,10 @@ def test_escalate_timed_out_marks_escalated():
 
 
 def test_timeout_worker_runs_without_admin_list_request():
+    """直接运行一轮后台超时处理，不调用管理列表。
+
+    检查超时审核被独立处理。
+    """
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     factory = sessionmaker(bind=engine)
@@ -219,6 +270,10 @@ def test_timeout_worker_runs_without_admin_list_request():
 
 
 def test_timeout_worker_is_idempotent():
+    """连续运行两次超时处理。
+
+    检查仅首轮返回升级编号，固定安全回复也只保存一次。
+    """
     from app.services.ai import PromptTemplates
 
     engine = create_engine("sqlite:///:memory:")
@@ -237,6 +292,10 @@ def test_timeout_worker_is_idempotent():
 
 
 def test_escalate_skips_recent_reviews():
+    """准备仍在等待期限内的审核。
+
+    检查本轮不升级，记录继续待处理。
+    """
     db = _make_db()
     review_id = _seed_review(db, "thread-recent-001", status="pending", minutes_ago=5)
     svc = ReviewService(db, Settings(ai_provider="mock", review_timeout_minutes=15))
@@ -247,6 +306,10 @@ def test_escalate_skips_recent_reviews():
 
 
 def test_escalate_saves_fallback_message():
+    """让一条审核超时后查询会话消息。
+
+    检查固定安全回复以助手角色实际保存。
+    """
     from app.services.ai import PromptTemplates
 
     db = _make_db()
@@ -265,6 +328,10 @@ def test_escalate_saves_fallback_message():
 
 
 def test_escalated_removed_from_pending():
+    """同时准备近期和超时审核再运行超时处理。
+
+    检查待审核列表只保留近期记录。
+    """
     db = _make_db()
     _seed_review(db, "thread-esc-pending", status="pending", minutes_ago=5)
     _seed_review(db, "thread-esc-timeout", status="pending", minutes_ago=20)
@@ -276,7 +343,7 @@ def test_escalated_removed_from_pending():
 
 
 # ---------------------------------------------------------------------------
-# Runner
+# 本组测试结束。
 # ---------------------------------------------------------------------------
 
 
@@ -285,7 +352,10 @@ def test_escalated_removed_from_pending():
 # ---------------------------------------------------------------------------
 
 def _interrupted_runtime(thread_id: str):
-    """Interrupt a HIGH-risk run so the shared checkpointer holds the state."""
+    """为给定会话编号建立真实的高风险暂停状态。
+
+    使用模拟模型和内存保存器，并断言待审核状态确实产生。
+    """
     import asyncio
 
     from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
@@ -302,11 +372,15 @@ def _interrupted_runtime(thread_id: str):
 
     user = UserAccount(id=1, display_name="测试学生", roles_csv="ROLE_USER")
     session = ChatSession(id=1, public_id=thread_id, user_id=1)
-    result = asyncio.run(runtime.run(user, session, "我不想活了", "我不想活了"))
+    result = asyncio.run(runtime.run(user, session, "我不想活了"))
     assert result.pending_review is True
 
 
 def test_resume_and_respond_approve_persists_ai_message():
+    """准备审核和对应暂停状态，再批准恢复。
+
+    检查正常生成非空文字，并实际存为助手消息。
+    """
     import asyncio
 
     db = _make_db()
@@ -326,6 +400,10 @@ def test_resume_and_respond_approve_persists_ai_message():
 
 
 def test_resume_and_respond_reject_persists_fallback():
+    """对有效暂停状态执行拒绝。
+
+    检查未降级但保存固定安全回复，符合正常拒绝路径。
+    """
     import asyncio
 
     from app.services.ai import PromptTemplates
@@ -347,6 +425,10 @@ def test_resume_and_respond_reject_persists_fallback():
 
 
 def test_resume_and_respond_degraded_when_checkpoint_lost():
+    """有审核记录但没有对应可恢复状态。
+
+    检查批准请求转为降级并返回固定回复。
+    """
     import asyncio
 
     from app.services.ai import PromptTemplates
@@ -361,12 +443,20 @@ def test_resume_and_respond_degraded_when_checkpoint_lost():
 
 
 def test_resume_and_respond_degrades_when_checkpoint_store_is_unavailable(monkeypatch):
+    """替换恢复方法让其抛出存储不可用异常。
+
+    检查审核服务采用固定安全回复并标记降级。
+    """
     import asyncio
 
     from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
     from app.services.ai import PromptTemplates
 
     async def unavailable(self, thread_id: str, approved: bool):
+        """模拟状态存储读取失败。
+
+        通过可等待接口抛错，测试审核服务的异常保护。
+        """
         raise OSError("checkpoint store unavailable")
 
     monkeypatch.setattr(LangGraphAgentRuntimeService, "resume", unavailable)
@@ -390,6 +480,10 @@ def test_resume_and_respond_degrades_when_checkpoint_store_is_unavailable(monkey
 
 
 def test_resume_and_respond_degrades_when_checkpoint_database_is_corrupt(tmp_path):
+    """把非数据库字节写入临时状态文件再尝试恢复。
+
+    检查损坏文件不会导致普通模型回复，而是返回降级安全文本。
+    """
     import asyncio
 
     from app.services.ai import PromptTemplates

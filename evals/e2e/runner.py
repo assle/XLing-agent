@@ -20,7 +20,10 @@ from evals.config import EvalSettings, get_eval_settings
 
 
 def evaluate(settings: EvalSettings | None = None) -> dict:
-    """Run curated cases through the real chat module and observable persistence."""
+    """在独立内存数据库中运行完整聊天模块的精选验证场景。
+
+    按评估配置选择模型，关闭向量检索并使用进程内执行状态保存；完成后释放数据库资源并写出报告。
+    """
     settings = settings or get_eval_settings()
     settings = settings.model_copy(
         update={
@@ -61,8 +64,14 @@ def evaluate(settings: EvalSettings | None = None) -> dict:
 
 
 async def _run_case(db, settings: EvalSettings, user: UserAccount, case: dict) -> dict:
+    """按一个案例的消息顺序执行真实聊天流程并检查保存结果。
+
+    从会话事件取得编号，收集执行步骤和最新评估及审核记录，比较分流、风险、事件顺序与知识访问。
+    返回具体失败原因列表；知识顺序检查基于全部步骤中首次评估与首次检索的位置。
+    """
     session_id = None
     events: list[str] = []
+    # 直接观察执行结果对象，从结构化步骤验证先后关系，不解析面向人的日志描述。
     observed_runs: list[AgentRunResult] = []
     dependencies = replace(
         ChatDependencies.create(db, settings),
@@ -143,10 +152,18 @@ async def _run_case(db, settings: EvalSettings, user: UserAccount, case: dict) -
 
 
 def _load_cases(path: Path) -> list[dict]:
+    """读取每行一个对象的完整流程评估样本。
+
+    跳过空白行，保持文件顺序，格式异常直接向上传递。
+    """
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
 def _parse_event(chunk: str) -> tuple[str | None, dict]:
+    """从聊天服务发出的单个事件文本提取事件名和数据字典。
+
+    没有对应行时保留 None 或空字典；不是处理任意网络碎片的缓冲解析器。
+    """
     name = None
     payload = {}
     for line in chunk.splitlines():

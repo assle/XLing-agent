@@ -1,0 +1,309 @@
+{
+  "status": "sealed",
+  "summary": {
+    "status": "completed-and-sealed",
+    "pid": 51341,
+    "execSessionId": 22507,
+    "observedExitCode": 0,
+    "sameHandleTerminalConfirmed": true,
+    "processAbsent": true,
+    "optimizerUpdates": 0,
+    "logicalLabelsCompleted": 376,
+    "manifestSHA256": "c28d755a5a5dc73e04f1264580263215f9eed7ce30432a7ad7a15a13fb7b2a69",
+    "scriptSHA256": "5abf8794b66a38f82f6829c61d71a71e2f44cf6a0886aad01d854cfc995b5b39",
+    "resultSHA256": "6824fd6695b6dc53b540fbb19cabe0fdb97d908cc5cb0d98de190362757118cf",
+    "metrics": {
+      "cases": 376,
+      "accuracy": 0.9867021276595744,
+      "macroF1": 0.986700634407699,
+      "highRiskRecall": 1.0,
+      "perClass": {
+        "正常": {
+          "precision": 0.9690721649484536,
+          "recall": 1.0,
+          "f1": 0.9842931937172774
+        },
+        "焦虑": {
+          "precision": 0.978494623655914,
+          "recall": 0.9680851063829787,
+          "f1": 0.9732620320855615
+        },
+        "低落": {
+          "precision": 1.0,
+          "recall": 0.9787234042553191,
+          "f1": 0.989247311827957
+        },
+        "高风险": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        }
+      },
+      "confusionMatrix": {
+        "正常": {
+          "正常": 94,
+          "焦虑": 0,
+          "低落": 0,
+          "高风险": 0,
+          "__INVALID__": 0
+        },
+        "焦虑": {
+          "正常": 3,
+          "焦虑": 91,
+          "低落": 0,
+          "高风险": 0,
+          "__INVALID__": 0
+        },
+        "低落": {
+          "正常": 0,
+          "焦虑": 2,
+          "低落": 92,
+          "高风险": 0,
+          "__INVALID__": 0
+        },
+        "高风险": {
+          "正常": 0,
+          "焦虑": 0,
+          "低落": 0,
+          "高风险": 94,
+          "__INVALID__": 0
+        }
+      },
+      "predictionDistribution": {
+        "正常": 97,
+        "焦虑": 93,
+        "低落": 92,
+        "高风险": 94
+      },
+      "outputValidity": 1.0,
+      "falseHighCount": 0
+    },
+    "errorIDs": [
+      "natural-v08-低落-slowed_selfcare_diary-03",
+      "v10-inc-a-t2-storm-alert-overnight-roof-04",
+      "v10-inc-a-t3-relative-road-safety-sendoff-02",
+      "v10-inc-a-t3-relative-road-safety-sendoff-04",
+      "v10-inc-l-t1-bereavement-memento-03"
+    ],
+    "errorClassDistribution": {
+      "低落": 2,
+      "焦虑": 3
+    },
+    "errorSourceGroupDistribution": {
+      "natural-v08-低落-slowed_selfcare_diary": 1,
+      "v10-a-t2-storm-alert-overnight-roof": 1,
+      "v10-a-t3-relative-road-safety-sendoff": 2,
+      "v10-l-t1-bereavement-memento": 1
+    },
+    "trainComparison": {
+      "baselineResultSHA256": "ff86bb6a28a5ca866bc1d968f536d5a3daab18f201e5e91393ec478161e76269",
+      "baselineErrors": 5,
+      "newErrors": 5,
+      "baselineHighMisses": 2,
+      "newHighMisses": 0,
+      "checks": {
+        "highMissesTwoToZero": true,
+        "totalErrorsBelowFive": false,
+        "falseHighZeroMaintained": true,
+        "validityOneMaintained": true
+      },
+      "improvementSufficient": false,
+      "qualificationClaim": false
+    },
+    "newStrictValidation": {
+      "decision": "FAIL",
+      "checks": {
+        "accuracyAtLeast095": true,
+        "macroF1AtLeast095": true,
+        "highRiskRecallOne": true,
+        "falseHighCountZero": false,
+        "outputValidityOne": true
+      },
+      "accuracy": 0.9765625,
+      "macroF1": 0.9765453184808024,
+      "highRiskRecall": 1.0,
+      "falseHighCount": 1,
+      "outputValidity": 1.0,
+      "gatesUnchanged": true
+    },
+    "generatedTokens": 938,
+    "finishReasonDistribution": {
+      "eos": 376
+    },
+    "protectionAfter": {
+      "trainingFreezeSHA256": "74071b61b10cdc0f89f353763c8219aeaccf17d8bee415b1996fff55849da288",
+      "allFrozenSourceAndOldProtectionChecksPassed": true,
+      "criticalFingerprintCount": 202,
+      "adapterSHA256": "39312e62bae612295d46153242b6159e15e0b5196ba4e3906df779e87f770efd",
+      "trainSHA256": "a1984a75d366d9d5d678cea7c1e9a27ba52308861fea46eedfed4035f3954a1e",
+      "systemPromptSHA256": "a6d981d29f3cfe7f4edef11bb293a5c5ddf06a87d6205177746b5c4454d346ab",
+      "protectedFilesReadAsHashesOnly": true,
+      "forbiddenBodiesParsed": false,
+      "registeredTrainDiagnosticRunsEvenIfStrictValFAIL": true
+    },
+    "portsAfter": {
+      "8081": {
+        "listening": false,
+        "pids": []
+      },
+      "8026": {
+        "listening": false,
+        "pids": []
+      },
+      "11434": {
+        "listening": false,
+        "pids": []
+      },
+      "11435": {
+        "listening": false,
+        "pids": []
+      }
+    },
+    "oldStrictValDecision": "FAIL unchanged",
+    "GTChanged": false,
+    "productDecoderChanged": false,
+    "nextAction": "Seal and stop; any strict FAIL or insufficient train improvement bars qualification/test/export/register; no epoch5/rank/LR/prompt/data/likelihood follow-up."
+  },
+  "files": [
+    {
+      "path": "command.txt",
+      "bytes": 411,
+      "sha256": "e056bdd7816c18a7e40751ed8dab9ad0a8b0cd025b1921630ae172e4f31b0d47"
+    },
+    {
+      "path": "completion-summary.json",
+      "bytes": 1748,
+      "sha256": "0509e4d8c2f06afaa017167a8614cfb678088a5fba2d37311de726bddb462372"
+    },
+    {
+      "path": "freeze.json",
+      "bytes": 68120,
+      "sha256": "74071b61b10cdc0f89f353763c8219aeaccf17d8bee415b1996fff55849da288"
+    },
+    {
+      "path": "main-start.json",
+      "bytes": 231,
+      "sha256": "3ac5ab071ca149a33a33d07e30b795182da30fbde7b4c27903d90d9bb0ae856e"
+    },
+    {
+      "path": "main-summary.json",
+      "bytes": 2054,
+      "sha256": "65f6af4c880097d222865e5011c27f4efac175dcd62fa27561c14659b73dd0ec"
+    },
+    {
+      "path": "main-terminal.json",
+      "bytes": 267,
+      "sha256": "9c0372bb4634b4824f20c4365e8582f7a895e371e1929dfc50679c7d08902fc0"
+    },
+    {
+      "path": "main.log",
+      "bytes": 4176,
+      "sha256": "0a931fa1ec1b55fbd2261942a3ea4b77552d43d83c1d0e8db3303435764fef99"
+    },
+    {
+      "path": "post-train-diagnostic.py",
+      "bytes": 20742,
+      "sha256": "5abf8794b66a38f82f6829c61d71a71e2f44cf6a0886aad01d854cfc995b5b39"
+    },
+    {
+      "path": "preflight-summary.json",
+      "bytes": 950,
+      "sha256": "afeb9c2190bf388ce94c32c10802758d35bdaaf1ea20eabb365c7b9177360666"
+    },
+    {
+      "path": "preparation-checks.json",
+      "bytes": 38797,
+      "sha256": "c00f734b7125cc5b7fce4c47bef6144cda86305356f0e5803d44cda2ec574bce"
+    },
+    {
+      "path": "prepared-plan.json",
+      "bytes": 2713,
+      "sha256": "9a87843e6d3e3f49188fadd56f53544e0a350fc08fff79946729a97446184c4d"
+    },
+    {
+      "path": "train-diagnostic-manifest.json",
+      "bytes": 20509,
+      "sha256": "c28d755a5a5dc73e04f1264580263215f9eed7ce30432a7ad7a15a13fb7b2a69"
+    },
+    {
+      "path": "train-diagnostic-result.json",
+      "bytes": 115742,
+      "sha256": "6824fd6695b6dc53b540fbb19cabe0fdb97d908cc5cb0d98de190362757118cf"
+    },
+    {
+      "path": "train-diagnostic-start.json",
+      "bytes": 218,
+      "sha256": "3864944daf36d19e41b31fdf5fb01e2fb0d4aa874b906d212f6c83b6d90a9362"
+    },
+    {
+      "path": "train-diagnostic-summary.json",
+      "bytes": 4593,
+      "sha256": "eb6a6d9d4b3b4440f5c2970f2122d29f29b8d0cbc1e5bb89912c37eb1203c0c9"
+    },
+    {
+      "path": "train-diagnostic-terminal.json",
+      "bytes": 319,
+      "sha256": "c1f905e9f5ad4b4cc4c2770ede9b49490006157f0b088163cc54ffdb133bfc81"
+    },
+    {
+      "path": "train-diagnostic.log",
+      "bytes": 2283,
+      "sha256": "c4a38b6aeb58990c5badc2c1e6371b7f54d2349f58c394da4360bf9867992ad8"
+    },
+    {
+      "path": "training-output/adapter/README.md",
+      "bytes": 5211,
+      "sha256": "dbb4b15fd7f872dfc8de68bdf13e169a8ab7a3319ad8e6b149f7230a456c0ad1"
+    },
+    {
+      "path": "training-output/adapter/adapter_config.json",
+      "bytes": 790,
+      "sha256": "e1fc7a917ca4fef0c585c160f6f5875b7bf88aa92087bfd5ccd179762fd8e385"
+    },
+    {
+      "path": "training-output/adapter/adapter_model.safetensors",
+      "bytes": 4350392,
+      "sha256": "39312e62bae612295d46153242b6159e15e0b5196ba4e3906df779e87f770efd"
+    },
+    {
+      "path": "training-output/adapter/added_tokens.json",
+      "bytes": 605,
+      "sha256": "58b54bbe36fc752f79a24a271ef66a0a0830054b4dfad94bde757d851968060b"
+    },
+    {
+      "path": "training-output/adapter/merges.txt",
+      "bytes": 1671853,
+      "sha256": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+    },
+    {
+      "path": "training-output/adapter/special_tokens_map.json",
+      "bytes": 613,
+      "sha256": "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd"
+    },
+    {
+      "path": "training-output/adapter/tokenizer.json",
+      "bytes": 11421994,
+      "sha256": "e1bb43ac6226b35aa5fb20bf7f7eeb9c8c63289288dc1ce1ea4c7c69d8079a1d"
+    },
+    {
+      "path": "training-output/adapter/tokenizer_config.json",
+      "bytes": 7306,
+      "sha256": "7e88129d9769a0b14b1587a7d5e829fe93ac0e1511636471fdfc0811951418e6"
+    },
+    {
+      "path": "training-output/adapter/vocab.json",
+      "bytes": 2776833,
+      "sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+    },
+    {
+      "path": "training-result.json",
+      "bytes": 28539,
+      "sha256": "7db5069d0ef5fc13eedb66a6afb9df07369ef104810b696d6286825183081757"
+    },
+    {
+      "path": "wrapper.py",
+      "bytes": 3316,
+      "sha256": "92438887844a0a61809f09e4a88b7171bb05ade3885793f9a6811dbe51f2f2ae"
+    }
+  ]
+}

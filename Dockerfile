@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.12-slim AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
@@ -18,3 +18,9 @@ COPY models/xling-qwen2.5-7b-ft/Modelfile ./models/xling-qwen2.5-7b-ft/Modelfile
 EXPOSE 8080
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers", "--forwarded-allow-ips=*"]
+
+FROM base AS test
+RUN pip install --no-cache-dir pytest
+CMD ["python", "-m", "pytest", "tests/test_support_turn_mysql.py", "-q"]
+
+FROM base AS runtime

@@ -7,8 +7,9 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT_DIR = ROOT / "finetune" / "data"
-REPORT_PATH = ROOT / "target" / "general-classifier-data-report.json"
+DATASET_VERSION = "general-routing-v2"
+OUT_DIR = ROOT / "finetune" / "data" / DATASET_VERSION
+REPORT_PATH = ROOT / "target" / f"{DATASET_VERSION}-data-report.json"
 SEED = 42
 INSTRUCTION = "判断用户当前表达的路由标签，只输出：正常、焦虑、低落、高风险。分类只用于心理支持分流，不作诊断。"
 
@@ -25,22 +26,35 @@ SCENARIOS = {
     "safety": "现实安全和强烈痛苦",
 }
 
+NORMAL_SCENARIOS = {
+    "anxiety": "明天的日程安排",
+    "low_mood": "周末的家务清单",
+    "sleep": "卧室灯光和休息时间",
+    "work": "工作任务的先后顺序",
+    "family": "全家聚餐的采购清单",
+    "relationships": "和朋友约见的时间地点",
+    "adjustment": "搬家后的物品收纳",
+    "exam": "复习资料的目录整理",
+    "ordinary": "周六买菜和准备便当",
+    "safety": "通讯录中联系人的整理",
+}
+
 TEMPLATES = {
     "正常": {
         "train": [
-            "今天谈到{topic}，整体还能应付，只是想整理一下安排。",
-            "关于{topic}，我现在状态平稳，想听听普通建议。",
-            "最近有{topic}这件事，不过没有明显困扰，我只是来聊聊。",
-            "我正在处理{topic}，进度还可以，想确认下一步怎么安排。",
-            "今天的{topic}没有影响吃饭睡觉，我只是顺手记录一下。",
+            "今天想整理{topic}，请帮我列出最先做的两步。",
+            "{topic}已经定好了，我想把它记成简短的备忘。",
+            "这是我下周的{topic}，想按先后顺序整理一下。",
+            "我准备更新{topic}，你能给我一个简洁的表格格式吗？",
+            "请记住我喜欢用小清单处理{topic}，以后照这个偏好提醒就好。",
         ],
         "val": [
-            "虽然有{topic}，但我目前能正常生活，只想简单交流。",
-            "我对{topic}有些想法，情绪总体稳定，不需要危机支持。",
+            "关于{topic}，我偏好一次只列三项，请按这个格式写。",
+            "{topic}可以先给我一个标题和几个要点吗？我要保存到笔记里。",
         ],
         "test": [
-            "说到{topic}，我没有持续难受，今天只是想做个常规咨询。",
-            "目前{topic}都在可控范围内，我想获得一点一般性信息。",
+            "帮我把{topic}分成今天和明天两栏，方便照着安排。",
+            "我想把{topic}整理给朋友看，能写成一句明白的说明吗？",
         ],
     },
     "焦虑": {
@@ -98,24 +112,38 @@ TEMPLATES = {
 
 
 def _ngrams(text: str, size: int = 3) -> set[str]:
+    """去除空白后提取连续 size 个字符组成的片段集合。
+
+    默认每片三个字符，用于近重复比较；短于片长的文本仍生成一次切片。
+    """
     compact = "".join(text.split())
     return {compact[index:index + size] for index in range(max(1, len(compact) - size + 1))}
 
 
 def _similarity(left: str, right: str) -> float:
+    """计算两段文本的字符片段交集占并集的比例。
+
+    返回零到一之间的相似度，分母至少为一；这是字符重叠比较，不使用语义模型。
+    """
     a, b = _ngrams(left), _ngrams(right)
     return len(a & b) / max(1, len(a | b))
 
 
 def build_rows() -> list[dict]:
+    """把各标签模板与场景组合成带来源分组和集合归属的合成样本。
+
+    样本编号由模板组、场景和固定种子计算得到；标明人工审核待完成，不把生成等同于审核。
+    """
     rows: list[dict] = []
     for label, splits in TEMPLATES.items():
         template_number = 0
         for split, templates in splits.items():
             for template in templates:
                 template_number += 1
-                source_group = f"{label}-template-{template_number:02d}"
-                for scenario, topic in SCENARIOS.items():
+                prefix = "正常-facts-v2" if label == "正常" else label
+                source_group = f"{prefix}-template-{template_number:02d}"
+                topics = NORMAL_SCENARIOS if label == "正常" else SCENARIOS
+                for scenario, topic in topics.items():
                     text = template.format(topic=topic)
                     row_id = hashlib.sha256(f"{source_group}:{scenario}:{SEED}".encode()).hexdigest()[:16]
                     rows.append({
@@ -125,7 +153,7 @@ def build_rows() -> list[dict]:
                         "output": label,
                         "scenario": scenario,
                         "sourceGroup": source_group,
-                        "provenance": "deterministic-template-v1",
+                        "provenance": "deterministic-normal-facts-v2" if label == "正常" else "deterministic-template-v1",
                         "split": split,
                         "humanReviewStatus": "pending",
                     })
@@ -133,6 +161,11 @@ def build_rows() -> list[dict]:
 
 
 def validate(rows: list[dict]) -> dict:
+    """检查样本编号、精确文本、来源组和跨集合近重复情况。
+
+    同模板组不能跨训练、验证和测试集合，近重复相似度达到 0.86 时抛错。
+    全部检查通过后返回各集合的标签及场景分布，仍保留人工审核未完成标志。
+    """
     ids = [row["id"] for row in rows]
     texts = [row["input"] for row in rows]
     if len(ids) != len(set(ids)):
@@ -140,6 +173,7 @@ def validate(rows: list[dict]) -> dict:
     if len(texts) != len(set(texts)):
         raise ValueError("存在精确重复文本")
 
+    # 把同模板的改写视为同一来源组，检查它们是否泄漏到不同用途的数据集合。
     group_splits: dict[str, set[str]] = defaultdict(set)
     for row in rows:
         group_splits[row["sourceGroup"]].add(row["split"])
@@ -150,6 +184,7 @@ def validate(rows: list[dict]) -> dict:
     cross_split_near_duplicates = []
     for left_index, left in enumerate(rows):
         for right in rows[left_index + 1:]:
+            # 只检查不同集合之间的近重复，避免把训练内部的相似模板当作跨集合泄漏。
             if left["split"] == right["split"]:
                 continue
             score = _similarity(left["input"], right["input"])
@@ -168,7 +203,7 @@ def validate(rows: list[dict]) -> dict:
             "sourceGroups": len({row["sourceGroup"] for row in split_rows}),
         }
     return {
-        "datasetVersion": "general-routing-v1",
+        "datasetVersion": DATASET_VERSION,
         "seed": SEED,
         "totalCases": len(rows),
         "exactDuplicates": 0,
@@ -180,11 +215,19 @@ def validate(rows: list[dict]) -> dict:
 
 
 def write_jsonl(path: Path, rows: list[dict]) -> None:
+    """创建父目录并以每行一个对象的格式写入样本。
+
+    保留中文，覆盖指定文件；不会追加到已有数据末尾。
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows), encoding="utf-8")
 
 
 def main() -> None:
+    """生成样本、完成重复检查，再输出分集合文件、总源文件和检查报告。
+
+    只有 validate 成功后才开始写文件，脚本会覆盖配置的输出位置。
+    """
     rows = build_rows()
     report = validate(rows)
     for split in ("train", "val", "test"):

@@ -23,16 +23,26 @@
 
   <script type="module">
     // 公开的隐私说明页：无需登录，调用 GET /api/privacy 渲染说明文本。
+    /**
+     * 转义正文中的与号和尖括号，防止作为页面标签解释。
+     * 只用于此页面的文本渲染，不是通用的所有页面上下文转义器。
+     */
     function escapeHtml(text) {
       return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
     // 服务端返回的是轻量 Markdown（# 标题、- 列表、**加粗**），这里做最小渲染。
+    /**
+     * 将服务端隐私说明中的标题、列表和段落转换为页面片段。
+     * 逐行处理，用闭合函数维护列表与章节边界；只支持代码中列出的轻量格式。
+     */
     function renderNotice(markdown) {
       const sections = [];
       let current = [];
       let inList = false;
+      // 列表结束时补上闭合标签并复位标志，避免后续段落继续落在列表内。
       const closeList = () => { if (inList) { current.push("</ul>"); inList = false; } };
+      // 切换章节前先关闭列表，再收集当前内容并清空章节缓冲。
       const closeSection = () => {
         closeList();
         if (current.length) sections.push(`<section class="privacy-section">${current.join("")}</section>`);
@@ -58,10 +68,18 @@
       return sections.join("");
     }
 
+    /**
+     * 先转义普通文本，再把双星号包围的内容显示为加粗。
+     * 处理顺序避免原文中的页面标签直接进入结果。
+     */
     function inline(text) {
       return escapeHtml(text).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
     }
 
+    /**
+     * 读取公开隐私说明并填充页面。
+     * 无需登录凭证，失败提示也先进行文本转义；正文唯一来源仍为服务端隐私接口。
+     */
     async function load() {
       const target = document.querySelector("#privacyContent");
       try {

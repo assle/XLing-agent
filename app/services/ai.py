@@ -14,8 +14,6 @@ from app.schemas.dtos import AiMessage
 
 # PromptTemplates.intent_prompt：组装消息分流的系统要求与当前输入。
 # history 用于补充最近上下文；返回消息列表，不执行模型调用。
-# PromptTemplates.psychology_prompt：组装结构化安全评估请求。
-# 要求模型输出固定字段，实际格式和数值约束由评估服务再次验证。
 # PromptTemplates.answer_system_prompt：按日常对话或心理支持类型构造回复要求。
 # risk 为高风险时增加安全处理要求，context 提供检索资料，display_name 提供称呼。
 # PromptTemplates.crisis_acknowledgment：返回等待人工审核期间使用的固定确认消息。
@@ -26,8 +24,6 @@ from app.schemas.dtos import AiMessage
 # query 是原问题，n 是期望数量；输出格式要求会在调用后再次检查。
 # PromptTemplates.rerank_prompt：把查询和候选资料摘要组织成相关性评分请求。
 # 每条候选保留原列表编号和前 200 个字符，返回的编号用于对应原文档。
-# PromptTemplates.classifier_prompt：构造只允许四个中文标签的分类请求。
-# 只传当前用户表达；分类结果的解释和保守回退由评估服务负责。
 class PromptTemplates:
     @staticmethod
     def intent_prompt(history: list[AiMessage], user_input: str) -> list[AiMessage]:
@@ -36,17 +32,6 @@ class PromptTemplates:
                 "你是一个用户意图分类器，只做意图识别，不回答问题。"
                 "只输出 CHAT、CONSULT、RISK 之一。CHAT 包含普通闲聊、学习、编程和通用事务；"
                 "CONSULT 包含压力、焦虑、低落、失眠、情绪倾诉；RISK 包含自杀、自残、伤人或即时危险信号。"
-            )),
-            AiMessage(role="user", content=f"最近上下文：\n{format_history(history)}\n\n当前输入：\n{user_input}"),
-        ]
-
-    @staticmethod
-    def psychology_prompt(history: list[AiMessage], user_input: str) -> list[AiMessage]:
-        return [
-            AiMessage(role="system", content=(
-                "你负责分析心理健康支持消息。只返回严格 JSON："
-                '{"emotion":"NORMAL|ANXIETY|DEPRESSED|HIGH_RISK","emotionScore":0.0,'
-                '"risk":"LOW|MEDIUM|HIGH","confidence":0.0,"summary":"short reason"}'
             )),
             AiMessage(role="user", content=f"最近上下文：\n{format_history(history)}\n\n当前输入：\n{user_input}"),
         ]
@@ -119,20 +104,6 @@ class PromptTemplates:
             AiMessage(role="user", content=f"查询：{query}\n\n候选文档：\n{_json.dumps(docs, ensure_ascii=False)}"),
         ]
 
-    @staticmethod
-    def classifier_prompt(user_input: str) -> list[AiMessage]:
-        return [
-            AiMessage(role="system", content=(
-                "你是心理支持情绪分类器。只输出一个标签词，不要解释、不要标点。"
-                "可选标签：正常、焦虑、低落、高风险。"
-                "正常：情绪平稳的日常表达；"
-                "焦虑：紧张、担心、压力、未来导向的不安；"
-                "低落：压抑、丧失兴趣、疲惫、情绪低沉；"
-                "高风险：自伤、自杀、轻生意念或具体计划。"
-            )),
-            AiMessage(role="user", content=user_input),
-        ]
-
 
 class AiClient:
     def __init__(self, settings: Settings):
@@ -165,7 +136,7 @@ class AiClient:
             provider = self.settings.ai_provider.lower()
             if provider == "mock":
                 return self._mock_classify(text)
-            return self._ollama_classify(PromptTemplates.classifier_prompt(text))
+            return self._ollama_classify([AiMessage(role="user", content=text)])
 
     async def aclassify(self, text: str) -> str:
         """异步调用本地分类模型，模拟模式直接执行关键词规则。
@@ -176,7 +147,7 @@ class AiClient:
             provider = self.settings.ai_provider.lower()
             if provider == "mock":
                 return self._mock_classify(text)
-            return await self._ollama_classify_async(PromptTemplates.classifier_prompt(text))
+            return await self._ollama_classify_async([AiMessage(role="user", content=text)])
 
     def generate_sub_queries(self, query: str, n: int = 3) -> list[str]:
         """调用模型生成替代查询，并检查返回值是否为字符串列表。
@@ -276,17 +247,17 @@ class AiClient:
     def _ollama_classify(self, messages: list[AiMessage]) -> str:
         """同步请求本地专用分类模型。
 
-        使用较低随机性和较短输出上限，30 秒超时；返回去掉首尾空白的模型文本，不在此验证标签。
+        系统提示和生成参数由注册分类器的 Modelfile 提供，避免覆盖训练契约。
+        30 秒超时；返回去掉首尾空白的模型文本，不在此验证标签。
         """
         payload = {
             "model": self.settings.ollama_classifier_model,
             "messages": [m.model_dump() for m in messages],
             "stream": False,
-            "options": {"temperature": 0.1, "num_predict": 16},
         }
         response = httpx.post(f"{self.settings.ollama_base_url}/api/chat", json=payload, timeout=30)
         response.raise_for_status()
-        return response.json()["message"]["content"].strip()
+        return self._classifier_response(response)
 
     async def _ollama_classify_async(self, messages: list[AiMessage]) -> str:
         """用异步客户端请求本地分类模型。
@@ -297,12 +268,32 @@ class AiClient:
             "model": self.settings.ollama_classifier_model,
             "messages": [m.model_dump() for m in messages],
             "stream": False,
-            "options": {"temperature": 0.1, "num_predict": 16},
         }
         async with httpx.AsyncClient(timeout=30) as client:
             response = await client.post(f"{self.settings.ollama_base_url}/api/chat", json=payload)
             response.raise_for_status()
-            return response.json()["message"]["content"].strip()
+            return self._classifier_response(response)
+
+    def _classifier_response(self, response: httpx.Response) -> str:
+        """保留分类正文返回语义，只记录输出形态与固定范围的生成元数据。"""
+        from app.services.assessment import label_to_emotion
+
+        data = response.json()
+        raw = data["message"]["content"].strip()
+        generated_tokens = data.get("eval_count")
+        finish_reason = data.get("done_reason")
+        diagnostics.emit(
+            "ai.classify.output",
+            model=self.settings.ollama_classifier_model,
+            provider="ollama",
+            status="label" if label_to_emotion(raw) is not None else (
+                "non_label_output" if raw else "empty_output"
+            ),
+            output_characters=len(raw),
+            generated_tokens=generated_tokens if type(generated_tokens) is int and generated_tokens >= 0 else None,
+            finish_reason=finish_reason if finish_reason in ("stop", "length") else "unknown",
+        )
+        return raw
 
     async def _ollama_async(self, messages: list[AiMessage]) -> str:
         """异步请求本地模型生成完整回复。
@@ -423,7 +414,7 @@ class AiClient:
     def _mock(self, messages: list[AiMessage]) -> str:
         """根据系统消息中的任务标识返回对应的模拟结果。
 
-        从末尾查找最近用户消息，再按查询改写、重排、提取、评估或回复分支处理。
+        从末尾查找最近用户消息，再按查询改写、重排、提取或回复分支处理。
         分支匹配有先后顺序，结果用于测试流程，不能作为真实服务质量证据。
         """
         last = next((m.content for m in reversed(messages) if m.role == "user"), "")
@@ -435,17 +426,11 @@ class AiClient:
         if "认知行为四维追问" in system:
             return "Four-part extraction is not available in mock mode"
         if "心理行动规划" in system:
+            from app.services.action_plan import FALLBACK_ITEMS
+
             return json.dumps({"items": [
-                {"content": "写下三个最担心的事，选一个最小的步骤明天先做", "order": 0},
-                {"content": "睡前 30 分钟放下手机，做缓慢呼吸练习", "order": 1},
-                {"content": "明天安排一个 25 分钟专注时段，只做最重要的一件事", "order": 2},
-            ]})
-        if "严格 JSON" in system:
-            if has_high_risk_signal(last):
-                return '{"emotion":"HIGH_RISK","emotionScore":4.0,"risk":"HIGH","confidence":0.95,"summary":"检测到明确高风险表达"}'
-            if has_consult_signal(last):
-                return '{"emotion":"ANXIETY","emotionScore":2.5,"risk":"LOW","confidence":0.72,"summary":"检测到压力或情绪求助表达"}'
-            return '{"emotion":"NORMAL","emotionScore":0.0,"risk":"LOW","confidence":0.66,"summary":"未检测到明显风险信号"}'
+                {"content": content, "order": order} for order, content in enumerate(FALLBACK_ITEMS)
+            ]}, ensure_ascii=False)
         if "意图分类器" in system:
             if has_high_risk_signal(last):
                 return "RISK"
@@ -453,15 +438,13 @@ class AiClient:
                 return "CONSULT"
             return "CHAT"
         if "当前由 CounselorAgent" in system:
-            return "我听到你最近压力很大，还影响到了睡眠，这种状态确实会让人很消耗。你可以先做两件小事：今晚把最担心的事情写成清单，先只选一个最小步骤处理；睡前 30 分钟把手机和学习任务放远一点，用缓慢呼吸或热水澡帮身体放松。如果这种失眠持续一周以上，建议联系适用的专业支持资源一起评估。"
+            return "我听到了你的困扰。如果现在方便，可以先用一分钟写下最担心的一件事，或者在不影响当前事务时轻轻放松肩膀。也可以暂时不行动，继续说说你的感受。如果困扰持续影响生活，可以联系适用的专业支持资源一起评估。"
         if "评审员" in system:
             return '{"empathy":3,"safety":4,"actionability":3,"boundary":4,"empathy_reason":"mock judge","safety_reason":"mock judge","actionability_reason":"mock judge","boundary_reason":"mock judge"}'
         if "当前由 CompanionAgent" in system:
             return "我在。这个问题可以直接拆开来看，我们先从你最想解决的那一部分开始。"
-        if "KnowledgeAgent" in system and "SUFFICIENT" in system:
-            return "SUFFICIENT"
         if "KnowledgeAgent" in system:
-            return last[:40] or "校园心理支持"
+            return last[:40] or "通用心理健康支持"
         return "我在。先把你现在最具体的困扰说出来，我们可以一步一步拆开。如果情况已经影响安全，请马上联系身边可信任的人、当地紧急服务或部署方提供的专业支持资源。"
 
 

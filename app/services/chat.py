@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import json
+import threading
 import uuid
 from contextlib import aclosing
 from dataclasses import dataclass
 from typing import Callable
 
+import httpx
+from anyio import CancelScope
 from sqlalchemy.orm import Session
 
 from app.agents.factory import create_agent_runtime
@@ -73,7 +76,14 @@ class PendingReviewError(ValueError):
     """The conversation is paused until its review has completed."""
 
 
+class SessionBusyError(ValueError):
+    """Another response still owns this conversation in the current process."""
+
+
 class ChatService:
+    _active_sessions: set[str] = set()
+    _activity_lock = threading.Lock()
+
     def __init__(
         self,
         db: Session,
@@ -94,8 +104,43 @@ class ChatService:
         self.report_dispatcher = dependencies.report_dispatcher
         self.observe_run = dependencies.observe_run
         self.turns = SupportTurnTransaction(db, settings)
+        self._active_session_id: str | None = None
 
     async def stream_chat(self, user: UserAccount, request: ChatRequest):
+        """Return a readable failure event while diagnostics retain the failing stage."""
+        try:
+            async with aclosing(self._stream_chat(user, request)) as stream:
+                async for chunk in stream:
+                    yield chunk
+        except SessionBusyError:
+            with diagnostics.execution("chat.rejected", session_id=request.sessionId):
+                diagnostics.emit("chat.blocked", reason_code="SESSION_BUSY")
+            yield sse("error", ChatStreamEvent(
+                type="error", sessionId=request.sessionId,
+                message="该会话正在生成回复，请等待完成后重试。", code="SESSION_BUSY",
+            ).model_dump())
+        except httpx.TimeoutException:
+            yield sse("error", ChatStreamEvent(
+                type="error", sessionId=request.sessionId,
+                message="回复生成超时，请稍后重试。", code="MODEL_TIMEOUT",
+            ).model_dump())
+        except httpx.HTTPError:
+            yield sse("error", ChatStreamEvent(
+                type="error", sessionId=request.sessionId,
+                message="模型服务暂时不可用，请稍后重试。", code="MODEL_UNAVAILABLE",
+            ).model_dump())
+        except Exception:
+            yield sse("error", ChatStreamEvent(
+                type="error", sessionId=request.sessionId,
+                message="消息处理失败，请稍后重试。", code="CHAT_FAILED",
+            ).model_dump())
+        finally:
+            if self._active_session_id is not None:
+                with self._activity_lock:
+                    self._active_sessions.remove(self._active_session_id)
+                self._active_session_id = None
+
+    async def _stream_chat(self, user: UserAccount, request: ChatRequest):
         """Stream business events while observing the entire request, including graph-external work."""
         with diagnostics.execution("chat.request", session_id=request.sessionId):
             with diagnostics.stage("chat.prepare"):
@@ -129,13 +174,21 @@ class ChatService:
                     async for token in stream:
                         assistant.append(token)
                         yield sse("token", ChatStreamEvent(type="token", sessionId=session_id, content=token).model_dump())
-            if assistant:
-                self.save_message(user, prepared.session, MessageRole.ASSISTANT, "".join(assistant))
+            reply = "".join(assistant)
+            if reply.strip():
+                self.save_message(user, prepared.session, MessageRole.ASSISTANT, reply)
+            else:
+                diagnostics.degraded("chat.stream", "empty_model_response")
             if prepared.report_id is not None:
                 error = await self._dispatch_report(prepared.report_id, prepared.risk_level)
                 if error:
                     yield sse("error", ChatStreamEvent(type="error", sessionId=session_id, message=error).model_dump())
                     return
+            if not reply.strip():
+                yield sse("error", ChatStreamEvent(
+                    type="error", sessionId=session_id, message="回复生成未返回内容，请重试。",
+                ).model_dump())
+                return
             yield sse("done", ChatStreamEvent(type="done", sessionId=session_id).model_dump())
 
     async def prepare(self, user: UserAccount, request: ChatRequest) -> PreparedChat:
@@ -150,15 +203,23 @@ class ChatService:
         with diagnostics.stage("chat.session"):
             session = self.resolve_session(user, request.sessionId, text, request.noMemory)
         diagnostics.bind(session_id=session.public_id, thread_id=session.public_id)
+        # Own the thread before entering its graph. stream_chat releases it only
+        # after streaming, persistence and resource cleanup have all finished.
+        with self._activity_lock:
+            if session.public_id in self._active_sessions:
+                raise SessionBusyError()
+            self._active_sessions.add(session.public_id)
+            self._active_session_id = session.public_id
         with diagnostics.stage("runtime.create"):
             runtime = self.runtime_factory(self.db, self.settings)
         try:
-            agent_run = await runtime.run(user, session, text, model_input)
+            agent_run = await runtime.run(user, session, model_input)
         finally:
             close = getattr(runtime, "aclose", None)
             if close is not None:
-                with diagnostics.stage("runtime.close"):
-                    await close()
+                with CancelScope(shield=True):
+                    with diagnostics.stage("runtime.close"):
+                        await close()
         self.observe_run(agent_run)
         if agent_run.trajectory_rising:
             handoff_reason = "RISK_TRAJECTORY_RISING"
@@ -204,7 +265,7 @@ class ChatService:
                 await self.report_dispatcher.dispatch(report_id, risk_level)
         except ReportDispatchError as exc:
             diagnostics.degraded("chat.dispatch", "report_dispatch_failed", exc, report_id=report_id)
-            return f"报告后处理失败：{exc}"
+            return "消息已保存，后续处理暂未完成。请稍后查看状态或联系授权审核人员。"
         return None
 
     def resolve_session(

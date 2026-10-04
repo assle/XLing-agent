@@ -1,0 +1,52 @@
+{
+  "atUTC": "2026-10-03T15:28:58.942954+00:00",
+  "sourceSHA256": "a1984a75d366d9d5d678cea7c1e9a27ba52308861fea46eedfed4035f3954a1e",
+  "rows": 376,
+  "byLabel": {
+    "正常": {
+      "clear": 94
+    },
+    "焦虑": {
+      "clear": 91,
+      "support_boundary": 3
+    },
+    "低落": {
+      "clear": 78,
+      "support_boundary": 16
+    },
+    "高风险": {
+      "clear": 90,
+      "support_boundary": 4
+    }
+  },
+  "total": {
+    "clear": 353,
+    "support_boundary": 23
+  },
+  "boundaryPercent": 6.12,
+  "allIDGTSourceAndSpansVerified": true,
+  "inputReviewedWithoutModelPredictions": true,
+  "oldGTChanged": false,
+  "sourceReviews": [
+    {
+      "path": "/Users/assle/dev/mindbridge-py/.scratch/user-simulation/20261002-022717-followup/goal-validation/dataset-content-review/normal-anxiety.json",
+      "sha256": "1ea22d1913ef40b7928bbdab0426d52139421453eba75dcc0e62de57104800ce"
+    },
+    {
+      "path": "/Users/assle/dev/mindbridge-py/.scratch/user-simulation/20261002-022717-followup/goal-validation/dataset-content-review/low-high.json",
+      "sha256": "05bc2d73fe3743526f24744965cb9e3e9f18f6d2b5fbfba6950864836e8d13d1"
+    },
+    {
+      "path": "/Users/assle/dev/mindbridge-py/.scratch/user-simulation/20261002-022717-followup/goal-validation/dataset-content-review/structure.json",
+      "sha256": "24b7724d26415e7dfb03f2647e47b94d64ea613f70a00c502587b63f1e00d716"
+    }
+  ],
+  "mainFindings": [
+    "200/376机械模板，占53.19%；每类16来源组，但槽位和改写共享模板。",
+    "ANX3条仅反复查看/等待更新，未明确负性担忧。",
+    "LOW16条包含疲惫/自我否定或行为代理，正文支持的明确程度不同。",
+    "HIGH4虚构/联调策略样本按冻结SYS支持高风险内容标记，不能据此断言真实说话者当下状态。",
+    "没有逐字train/val重叠与同名来源组交叉，仍共享生成方式；验证指标不能代替自然表达独立测试。"
+  ],
+  "nextScope": "Stop new training and original-weight restoration. Fixed one-time comparison of existing selected local classifier and locked DeepSeek reference on current v2 mechanical80 plus untouched prospective40; report real metrics, no zero-error release gate or post-test retuning."
+}

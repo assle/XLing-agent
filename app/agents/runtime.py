@@ -107,7 +107,7 @@ class AgentRuntime(Protocol):
     """Business boundary for conversation planning, independent of graph scheduling."""
 
     async def run(
-        self, user: UserAccount, session: ChatSession, original_input: str, model_input: str,
+        self, user: UserAccount, session: ChatSession, model_input: str,
     ) -> AgentRunResult: ...
 
     async def aclose(self) -> None: ...

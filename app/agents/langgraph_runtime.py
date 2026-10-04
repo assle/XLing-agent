@@ -19,7 +19,7 @@ from app.agents.runtime import (
 from app.core import diagnostics
 from app.core.config import Settings
 from app.core.enums import EmotionLabel, IntentType, RiskLevel
-from app.core.time import utc_now
+from app.core.time import utc_isoformat, utc_now
 from app.models.entities import ChatMessage, ChatSession, UserAccount
 from app.schemas.dtos import AiMessage
 from app.services.ai import PromptTemplates, has_consult_signal, has_high_risk_signal
@@ -100,7 +100,7 @@ class LangGraphAgentRuntimeService:
         self.graph = self._build_graph()
 
     async def run(
-        self, user: UserAccount, session: ChatSession, original_input: str, model_input: str,
+        self, user: UserAccount, session: ChatSession, model_input: str,
     ) -> AgentRunResult:
         """Initialize every turn field before entering the graph, including empty business events."""
         await self._ensure_checkpointer()
@@ -429,7 +429,7 @@ class LangGraphAgentRuntimeService:
         return route
 
     async def _risk_guardian_node(self, state: GraphState) -> GraphUpdate:
-        assessment = await self.assessment.aassess(state["model_input"], self._history(state))
+        assessment = await self.assessment.aassess(state["model_input"])
         risk = assessment.risk
         rising = False
         trend = ""
@@ -498,6 +498,7 @@ class LangGraphAgentRuntimeService:
     async def _companion_node(self, state: GraphState) -> GraphUpdate:
         messages = [
             PromptTemplates.answer_system_prompt(IntentType.CHAT, RiskLevel.LOW, "", state["display_name"]),
+            self._response_contract(state),
             AiMessage(role="system", content=(
                 f"当前由 CompanionAgent 负责回复。\n记忆摘要：\n{state['memory_brief']}\n"
                 f"支持背景：\n{state['support_background_context'] or '无'}\n"
@@ -515,12 +516,45 @@ class LangGraphAgentRuntimeService:
     def _knowledge_context(state: GraphState) -> str:
         return "\n\n".join(f"- [{item['source']}] {item['content']}" for item in state["retrieved_knowledge"])
 
+    @staticmethod
+    def _response_contract(state: GraphState) -> AiMessage:
+        memory_mode = (
+            "本次是无记忆会话：不读取已有支持背景和记忆卡片，也不新增长期记忆。"
+            "本会话消息、维持对话和保障安全所需的记录仍会保存；关闭页面或结束会话不会删除它们，"
+            "已有长期记忆也不会因此被删除。不要声称对话不保存、关闭后消失或已删除。"
+            if state["no_memory"] else "本次是普通会话，可使用已提供的支持背景和已确认记忆。"
+        )
+        return AiMessage(role="system", content=(
+            f"会话与产品事实：{memory_mode}\n"
+            "最后一条用户消息是本轮要回应的请求。遵守其中的主题、长度要求、纠正和不愿回答的边界；"
+            "历史、摘要、检索资料和追问策略仅作背景，不要继续回答已被替换的旧问题或机械重复追问。"
+            "仍须关注明确的当前安全信号。\n"
+            "用户明确指定句数、段落数或格式时，按该总量组织整条回复，"
+            "所需的例子和说明也计入指定句数或段落数；不要额外补充引言、总结、说明段或追问。\n"
+            "支持建议须符合用户已说明的可用时间、工作职责和不可改变的安排。"
+            "专业资源须匹配已知身份及地点；未确认在校时不要默认推荐学校心理中心或辅导员。"
+            "地点或服务信息不明确时使用当地专业支持或紧急服务的通用方向，"
+            "不编造电话、开放时间或保证服务结果。"
+        ))
+
+    def _plan_context(self, state: GraphState) -> str:
+        user_messages = "\n".join(
+            message.content for message in self._history(state) if message.role == "user"
+        )
+        return (
+            f"最新用户请求（纠正与约束优先）：\n{state['model_input']}\n"
+            f"本会话用户表达：\n{user_messages}\n"
+            f"支持背景：\n{state['support_background_context'] or '无'}\n"
+            f"已确认记忆：\n{state['memory_cards_context'] or '无'}"
+        )
+
     async def _counselor_node(self, state: GraphState) -> GraphUpdate:
         messages = [
             PromptTemplates.answer_system_prompt(
                 IntentType(state["intent"] or IntentType.CONSULT.value), RiskLevel(state["risk_level"]),
                 self._knowledge_context(state), state["display_name"],
             ),
+            self._response_contract(state),
             AiMessage(role="system", content=(
                 f"当前由 CounselorAgent 负责回复。\n记忆摘要：\n{state['memory_brief']}\n"
                 f"支持背景：\n{state['support_background_context'] or '无'}\n"
@@ -550,20 +584,51 @@ class LangGraphAgentRuntimeService:
         if current.is_complete:
             from app.services.action_plan import ActionPlanService
 
+            plans = ActionPlanService(self.db, self.ai)
+            existing_plan = plans.get_session_plan(state["user_id"], state["session_id"])
+            if existing_plan is not None:
+                items = sorted(existing_plan.items, key=lambda item: item.order_index)
+                items_text = "\n".join(
+                    f"{index + 1}. {item.content}（{'已完成' if item.completed else '未完成'}）"
+                    for index, item in enumerate(items)
+                )
+                plan_controls = (
+                    "本计划仍在进行中；需要调整尚未完成的条目时，可建议通过计划面板的替换入口保存。"
+                    if existing_plan.status == "active" else
+                    "本计划已结束，页面不再显示其勾选、替换或反馈入口；不要要求用户点击这些入口。"
+                    "可讨论执行后的感受和下一步，不把新的口头建议称为已保存的计划。"
+                )
+                instruction = AiMessage(role="system", content=(
+                    "当前由 CounselorAgent 负责回复，四维追问已完成。\n"
+                    f"记忆摘要：\n{state['memory_brief']}\n"
+                    f"支持背景：\n{state['support_background_context'] or '无'}\n"
+                    f"已确认记忆：\n{state['memory_cards_context'] or '无'}\n"
+                    f"本会话已有行动计划，状态：{existing_plan.status}。\n{items_text}\n"
+                    "本轮没有新建或改写行动项，也没有改变完成状态。直接回应用户当前问题；"
+                    f"{plan_controls}不要声称已替用户修改或完成计划。"
+                ))
+                return {
+                    "cbt_event": asdict(CbtEvent(False, current.completed_count, None, True)),
+                    "response_messages": self._messages([
+                        system_prompt, self._response_contract(state), instruction, *self._history(state),
+                    ]),
+                    "steps": self._steps(state, "CBTAgent", "REUSE_ACTION_PLAN", f"existing plan={existing_plan.id}"),
+                }
             summary = (f"触发事件: {current.trigger_event}; 想法: {current.thoughts}; "
                        f"身体反应: {current.body_reactions}; 行为: {current.behavior}")
             try:
                 with diagnostics.stage("support.create_action_plan"):
                     # Keep a failed plan write from poisoning the surrounding turn transaction.
                     with self.db.begin_nested():
-                        plan = ActionPlanService(self.db, self.ai).generate_plan(
+                        plan = plans.generate_plan(
                             state["user_id"], state["session_id"], summary, commit=False,
+                            user_context=self._plan_context(state),
                         )
                     items = sorted(plan.items, key=lambda item: item.order_index)
                     event = ActionPlanEvent(
                         plan.id,
                         [ActionPlanItemEvent(item.id, item.content, item.order_index, item.completed) for item in items],
-                        (plan.created_at + timedelta(hours=plan.target_window_hours)).isoformat(),
+                        utc_isoformat(plan.created_at + timedelta(hours=plan.target_window_hours)),
                     )
                     items_text = "\n".join(f"{index + 1}. {item.content}" for index, item in enumerate(items))
             except Exception as exc:
@@ -582,7 +647,9 @@ class LangGraphAgentRuntimeService:
             return {
                 "cbt_event": asdict(CbtEvent(False, current.completed_count, None, True)),
                 "action_plan_event": asdict(event),
-                "response_messages": self._messages([system_prompt, instruction, *self._history(state)]),
+                "response_messages": self._messages([
+                    system_prompt, self._response_contract(state), instruction, *self._history(state),
+                ]),
                 "steps": self._steps(state, "CBTAgent", "GENERATE_ACTION_PLAN", f"4 dimensions complete; plan={plan.id}"),
             }
         next_dimension = current.next_dimension or ""
@@ -596,7 +663,9 @@ class LangGraphAgentRuntimeService:
         ))
         return {
             "cbt_event": asdict(CbtEvent(True, current.completed_count, current.next_dimension, False)),
-            "response_messages": self._messages([system_prompt, instruction, *self._history(state)]),
+            "response_messages": self._messages([
+                system_prompt, self._response_contract(state), instruction, *self._history(state),
+            ]),
             "steps": self._steps(state, "CBTAgent", "ASK_CBT_QUESTION",
                                  f"completed={current.completed_count}/4; next={current.next_dimension}"),
         }

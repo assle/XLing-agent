@@ -9,6 +9,10 @@ from app.services.risk_calibration import (
 
 
 def test_temperature_scaling_reduces_negative_log_likelihood():
+    """准备含过度自信错误的原始分数。
+
+    检查选出的温度降低平均损失，转换后的概率总和仍为一。
+    """
     logits = [
         [8.0, 0.0, 0.0],
         [7.0, 0.0, 0.0],
@@ -27,6 +31,10 @@ def test_temperature_scaling_reduces_negative_log_likelihood():
 
 
 def test_class_conditional_conformal_prediction_returns_safe_label_sets():
+    """用三类校准样本拟合候选集合阈值。
+
+    清晰低风险应只有低等级，模糊概率不得排除高风险。
+    """
     calibration_probabilities = [
         [0.90, 0.08, 0.02],
         [0.80, 0.15, 0.05],
@@ -47,6 +55,10 @@ def test_class_conditional_conformal_prediction_returns_safe_label_sets():
 
 
 def test_calibrated_risk_engine_marks_ambiguous_or_high_predictions_for_review():
+    """比较明确低风险、高风险及显式高风险覆盖三种预测。
+
+    检查审核标志、高风险固定概率和校准版本输出。
+    """
     scaler = TemperatureScaler(1.0)
     conformal = ClassConditionalConformalPredictor(
         alpha=0.1,

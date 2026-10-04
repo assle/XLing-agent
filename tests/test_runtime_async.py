@@ -31,7 +31,7 @@ def _user_session(public_id="test-native-runtime-001"):
 def test_langgraph_runtime_chat():
     runtime = _setup_runtime()
     user, session = _user_session("native-chat")
-    result = asyncio.run(runtime.run(user, session, "帮我写一段 Python 代码", "帮我写一段 Python 代码"))
+    result = asyncio.run(runtime.run(user, session, "帮我写一段 Python 代码"))
     assert result.intent == IntentType.CHAT
     assert result.risk_level == RiskLevel.LOW
     assert result.response_messages
@@ -42,7 +42,7 @@ def test_langgraph_runtime_chat():
 def test_langgraph_runtime_consult():
     runtime = _setup_runtime()
     user, session = _user_session("native-support")
-    result = asyncio.run(runtime.run(user, session, "最近压力很大，很焦虑", "最近压力很大，很焦虑"))
+    result = asyncio.run(runtime.run(user, session, "最近压力很大，很焦虑"))
     assert result.intent == IntentType.CONSULT
     assert result.assessment is not None
     assert result.response_messages
@@ -52,7 +52,7 @@ def test_langgraph_runtime_consult():
 def test_langgraph_runtime_risk_keyword():
     runtime = _setup_runtime()
     user, session = _user_session("native-risk")
-    result = asyncio.run(runtime.run(user, session, "我不想活了", "我不想活了"))
+    result = asyncio.run(runtime.run(user, session, "我不想活了"))
     assert result.intent == IntentType.RISK
     assert result.risk_level == RiskLevel.HIGH
     assert result.pending_review
@@ -65,10 +65,10 @@ def test_new_turn_resets_native_state_and_business_events():
     user, session = _user_session("native-turn-isolation")
 
     async def scenario():
-        support = await runtime.run(user, session, "最近压力很大，很焦虑", "最近压力很大，很焦虑")
+        support = await runtime.run(user, session, "最近压力很大，很焦虑")
         assert support.assessment is not None
         assert support.cbt_event is not None
-        chat = await runtime.run(user, session, "帮我写一段 Python 代码", "帮我写一段 Python 代码")
+        chat = await runtime.run(user, session, "帮我写一段 Python 代码")
         snapshot = await runtime.aget_state(session.public_id)
         return chat, snapshot
 
