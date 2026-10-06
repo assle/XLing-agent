@@ -2,6 +2,7 @@
   "version": "current-classifier-evaluation-1",
   "completedAtUTC": "2026-10-03T15:44:56.134759+00:00",
   "status": "completed",
+  "qualificationStatus": "experimental-human-review-pending",
   "provenance": {
     "contentReview": [
       {
@@ -55,7 +56,7 @@
         "sha256": "2252e2d9e3b814e769e5d15a8765da9aff1fa2a948f0209ffd9b2d61408da3cc"
       },
       {
-        "path": "finetune/scripts/train_general_classifier.py",
+        "path": "finetune/reports/current-classifier/training/trainer-snapshot.py",
         "sha256": "1db76e43f97786064540d89dacd08ca3161b8d6c0e654bb5aaf28bb220de62c7"
       },
       {
@@ -200,6 +201,8 @@
       ],
       "contentReview": {
         "completed": true,
+        "reviewerType": "engineering-agent",
+        "humanReviewComplete": false,
         "inputReviewedWithoutModelPredictions": true,
         "allIDGTSourceAndSpansVerified": true,
         "clear": 353,
@@ -325,7 +328,7 @@
       "selectedEpoch": 2,
       "registeredAsOllamaModel": false,
       "trainer": {
-        "path": "finetune/scripts/train_general_classifier.py",
+        "path": "finetune/reports/current-classifier/training/trainer-snapshot.py",
         "sha256": "1db76e43f97786064540d89dacd08ca3161b8d6c0e654bb5aaf28bb220de62c7"
       },
       "weightAvailability": {
@@ -1020,11 +1023,8 @@
     "furtherModelAttemptsAfterThisBenchmark": 0
   },
   "businessModelSelection": {
-    "environmentVariable": "OLLAMA_CLASSIFIER_MODEL",
-    "currentLocalEnvTag": "xling-general-cls-05b:latest",
-    "codeDefaultTag": "xling-cls-3b-ft:latest",
-    "selectedAdapterReplacedBusinessModel": false,
-    "localCandidateMergedQuantizedOrRegisteredDuringBenchmark": false
+    "reference": "finetune/reports/model-repair-evaluation.json",
+    "meaning": "Current runtime selection and activation are maintained in the referenced report; this file preserves the original fixed offline evaluation."
   },
   "historicalSources": {
     "v1Data": [

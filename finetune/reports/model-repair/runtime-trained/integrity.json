@@ -1,0 +1,25 @@
+{
+  "runtimeCases": 120,
+  "allPredictionsMatchFrozenTrainedHF": true,
+  "allPredictionsMatchPreviousSelectedRuntime": true,
+  "allPromptTokenCountsMatchFrozenTrainedHF": true,
+  "allInputSHA256MatchFrozenTrainedHF": true,
+  "errorIDs": [
+    "872b3071fb391510",
+    "0c47121395108533",
+    "73c2179f9f94b48f",
+    "230f2f6922ee6231"
+  ],
+  "artifactFingerprints": {
+    "adapterSHA256": "845f8bd7cbf00081b9389bd68c6bb60e4bfee7200d5d8e0ba1192474d712da7a",
+    "mergedModelSHA256": "48c808679fb61f19ab9a56fa1a92e044e2002afb6963a8ac816fc20655beefbb",
+    "registeredManifestSHA256": "3e3b07b840c29bf9eb42f0fec06550fe6e3f328c4cc0ea4604643fb4008566b9",
+    "registeredGGUFModelSHA256": "6554df21c9934b73be4178a887473868f2b2ba065b2be96a4cafe71e4c4be68a",
+    "registeredGGUFBytes": 994762880
+  },
+  "newBlindCases": 0,
+  "optimizerUpdatesDuringRuntime": 0,
+  "actualAttempts": 120,
+  "actualGeneratedTokens": 304,
+  "generationTokenCap": 720
+}

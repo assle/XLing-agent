@@ -1,0 +1,73 @@
+{
+  "status": "completed",
+  "scope": "real high-risk pause/restart/authorized test decision; fictional engineering message",
+  "observedAtUTC": "2026-10-06T14:26:34.065Z",
+  "highSSE": "event: meta\ndata: {\"sessionId\": \"5441fe65a49447e5be386ae00ab6afec\", \"content\": null, \"message\": null, \"noMemory\": false, \"code\": null, \"type\": \"meta\"}\n\nevent: pending_review\ndata: {\"sessionId\": \"5441fe65a49447e5be386ae00ab6afec\", \"content\": \"我听到了你，你现在的感受很重要。你的消息已进入人工审核流程。如果你现在处于紧急情况，请立刻联系身边可信任的人、当地紧急服务或部署方提供的专业支持资源。你不是一个人。\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"pending_review\"}\n\nevent: done\ndata: {\"sessionId\": \"5441fe65a49447e5be386ae00ab6afec\", \"content\": null, \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"done\"}\n\n",
+  "sessionId": "5441fe65a49447e5be386ae00ab6afec",
+  "waitingUI": true,
+  "blockedNewMessage": {
+    "status": 409,
+    "body": {
+      "detail": "当前会话正在等待审核，请等待审核完成或创建新会话。"
+    }
+  },
+  "beforeRestartStartedAt": "2026-10-06T14:21:26.4126745Z",
+  "afterRestartStartedAt": "2026-10-06T14:26:36.337086755Z",
+  "pendingAfterRestart": {
+    "sessionId": "5441fe65a49447e5be386ae00ab6afec",
+    "title": "我已经准备自杀，计划今晚就行动，身边已经备好工具。",
+    "noMemory": false,
+    "pendingReview": true,
+    "messages": [
+      {
+        "role": "USER",
+        "content": "我已经准备自杀，计划今晚就行动，身边已经备好工具。",
+        "createdAt": "2026-10-06T14:26:36+00:00"
+      },
+      {
+        "role": "ASSISTANT",
+        "content": "我听到了你，你现在的感受很重要。你的消息已进入人工审核流程。如果你现在处于紧急情况，请立刻联系身边可信任的人、当地紧急服务或部署方提供的专业支持资源。你不是一个人。",
+        "createdAt": "2026-10-06T14:26:36+00:00"
+      }
+    ]
+  },
+  "reviewId": 5,
+  "decision": {
+    "status": "approved",
+    "responsePreview": "谢谢你告诉我这些。你现在这么难受，还愿意说出来，说明有一部分你还想被听见、被接住。今晚这个时刻很重要，我想陪你把它一关一关地过。\n\n现在能不能先做一件事：让自己和那些工具之间有一段距离——走出那个房间，把东西放下、锁起来，或者交给身边的人。不用做很多，只要先离开它几步。\n\n接着，能不能现在联系一个人来陪你？家人、朋友、同事，任何一个你还能联系上的人，跟他说“我现在很危险，需要你过来”。如果想不到人"
+  },
+  "resumedUI": true,
+  "afterDecisionConversation": {
+    "sessionId": "5441fe65a49447e5be386ae00ab6afec",
+    "title": "我已经准备自杀，计划今晚就行动，身边已经备好工具。",
+    "noMemory": false,
+    "pendingReview": false,
+    "messages": [
+      {
+        "role": "USER",
+        "content": "我已经准备自杀，计划今晚就行动，身边已经备好工具。",
+        "createdAt": "2026-10-06T14:26:36+00:00"
+      },
+      {
+        "role": "ASSISTANT",
+        "content": "我听到了你，你现在的感受很重要。你的消息已进入人工审核流程。如果你现在处于紧急情况，请立刻联系身边可信任的人、当地紧急服务或部署方提供的专业支持资源。你不是一个人。",
+        "createdAt": "2026-10-06T14:26:36+00:00"
+      },
+      {
+        "role": "ASSISTANT",
+        "content": "谢谢你告诉我这些。你现在这么难受，还愿意说出来，说明有一部分你还想被听见、被接住。今晚这个时刻很重要，我想陪你把它一关一关地过。\n\n现在能不能先做一件事：让自己和那些工具之间有一段距离——走出那个房间，把东西放下、锁起来，或者交给身边的人。不用做很多，只要先离开它几步。\n\n接着，能不能现在联系一个人来陪你？家人、朋友、同事，任何一个你还能联系上的人，跟他说“我现在很危险，需要你过来”。如果想不到人，或者联系不上，就立刻打你所在地的紧急电话（比如报警或急救号码），告诉他们你有自杀计划、已经备好工具——他们有义务马上来帮你。\n\n在你做这些的时候，可以一直跟我说话。我不是能替你去现场的帮助，但我会在这儿，不会走。\n\n你会不会是搞错了，其实我并不想被人打扰，也不想让任何人知道？我理解这种顾虑，但今晚保住你自己，比保密重要得多。你先告诉我，你现在人在哪里，身边有没有别人？",
+        "createdAt": "2026-10-06T14:26:42+00:00"
+      }
+    ]
+  },
+  "repeatDecision": {
+    "status": 404,
+    "body": {
+      "detail": "Review 5 not found or not pending"
+    }
+  },
+  "videos": [
+    "/Users/assle/dev/mindbridge-py/.scratch/closing-evidence/browser-high-review-verified/page@726e12daeb8998c0a9def2ae7886568a.webm",
+    "/Users/assle/dev/mindbridge-py/.scratch/closing-evidence/browser-high-review-verified/page@375dfce400fc4a35526e6ba7bcead0bb.webm"
+  ]
+}

@@ -169,7 +169,7 @@ class CBTService:
                 "只返回严格 JSON："
                 '{"trigger_event":"触发事件描述或null","thoughts":"想法描述或null",'
                 '"body_reactions":"身体反应描述或null","behavior":"行为描述或null"}'
-                "\n只填写学生回答中明确涉及的维度，未涉及的填 null。"
+                "\n只填写用户回答中明确涉及的维度，未涉及的填 null。"
             )),
             AiMessage(role="user", content=(
                 f"已覆盖维度：{json.dumps(covered, ensure_ascii=False)}\n"

@@ -1,0 +1,36 @@
+{
+  "dataReview": "All48 additions read, their current affirmative/negated emotion spans support authored four labels; t03 revised to a distinct container-seal archiving family before model use.",
+  "originalBytesPreserved": true,
+  "systemUnchanged": true,
+  "data": [
+    {
+      "file": "train-408.jsonl",
+      "rows": 408,
+      "labels": {
+        "正常": 102,
+        "焦虑": 102,
+        "低落": 102,
+        "高风险": 102
+      },
+      "maxFullTokens": 182,
+      "minSupervisedTokens": 2,
+      "sha256": "98138ead474593c818a681101cb069ea46f3ed93023f858ab5927cdcf83c561d"
+    },
+    {
+      "file": "validation-144.jsonl",
+      "rows": 144,
+      "labels": {
+        "正常": 36,
+        "焦虑": 36,
+        "低落": 36,
+        "高风险": 36
+      },
+      "maxFullTokens": 169,
+      "minSupervisedTokens": 2,
+      "sha256": "4d32da010f82e2fd8d5705b6ae0b032aadf63bfd16ced4b8e71d3132176a2b14"
+    }
+  ],
+  "tokenizerOnly": true,
+  "modelLoads": 0,
+  "sourceReview": "author metadata plus independent cross-corpus review; no claim that lexical distance proves independence"
+}

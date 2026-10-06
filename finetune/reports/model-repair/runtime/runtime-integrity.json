@@ -1,0 +1,13 @@
+{
+  "standardRuntimeCases": 120,
+  "allPredictionsMatchFrozenHF": true,
+  "allPromptTokenCountsMatchFrozenHF": true,
+  "allSafeInputHashesMatchFrozenHF": true,
+  "all120RenderedChatMLPromptsMatchHFTemplate": true,
+  "failedExperimentalRequests": 120,
+  "failedExperimentalGeneratedTokens": 0,
+  "successfulRuntimeRequests": 240,
+  "datasetsAndGTChanged": false,
+  "baselineCandidateGGUFQuantization": "F16",
+  "originalProfileRerun": false
+}

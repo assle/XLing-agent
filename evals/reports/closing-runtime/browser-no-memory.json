@@ -1,0 +1,303 @@
+{
+  "status": "completed",
+  "observedAtUTC": "2026-10-06T14:25:24.093Z",
+  "scope": "real UI and models; synthetic memory marker; structural trace checked separately",
+  "turns": [
+    {
+      "name": "normal-memory",
+      "state": {
+        "sessionId": "053e153f11ef4410a7d9635ad1d3d6d8",
+        "title": "我的已确认记忆卡片中的工程验收代号是什么？只回答代号，如果不知道就说不知",
+        "noMemory": false,
+        "pendingReview": false,
+        "messages": [
+          {
+            "role": "USER",
+            "content": "我的已确认记忆卡片中的工程验收代号是什么？只回答代号，如果不知道就说不知道。",
+            "createdAt": "2026-10-06T14:25:26+00:00"
+          },
+          {
+            "role": "ASSISTANT",
+            "content": "蓝帆-7821",
+            "createdAt": "2026-10-06T14:25:27+00:00"
+          }
+        ]
+      },
+      "stream": "event: meta\ndata: {\"sessionId\": \"053e153f11ef4410a7d9635ad1d3d6d8\", \"content\": null, \"message\": null, \"noMemory\": false, \"code\": null, \"type\": \"meta\"}\n\nevent: token\ndata: {\"sessionId\": \"053e153f11ef4410a7d9635ad1d3d6d8\", \"content\": \"蓝\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"053e153f11ef4410a7d9635ad1d3d6d8\", \"content\": \"帆\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"053e153f11ef4410a7d9635ad1d3d6d8\", \"content\": \"-\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"053e153f11ef4410a7d9635ad1d3d6d8\", \"content\": \"782\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"053e153f11ef4410a7d9635ad1d3d6d8\", \"content\": \"1\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: done\ndata: {\"sessionId\": \"053e153f11ef4410a7d9635ad1d3d6d8\", \"content\": null, \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"done\"}\n\n"
+    },
+    {
+      "name": "no-long-memory",
+      "state": {
+        "sessionId": "18b0e7898653448d8421de2f40516e61",
+        "title": "我的已确认记忆卡片中的工程验收代号是什么？只回答代号，如果不知道就说不知",
+        "noMemory": true,
+        "pendingReview": false,
+        "messages": [
+          {
+            "role": "USER",
+            "content": "我的已确认记忆卡片中的工程验收代号是什么？只回答代号，如果不知道就说不知道。",
+            "createdAt": "2026-10-06T14:25:27+00:00"
+          },
+          {
+            "role": "ASSISTANT",
+            "content": "不知道。",
+            "createdAt": "2026-10-06T14:25:28+00:00"
+          }
+        ]
+      },
+      "stream": "event: meta\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": null, \"message\": null, \"noMemory\": true, \"code\": null, \"type\": \"meta\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"不知道\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"。\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: done\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": null, \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"done\"}\n\n"
+    },
+    {
+      "name": "same-session-marker",
+      "state": {
+        "sessionId": "18b0e7898653448d8421de2f40516e61",
+        "title": "我的已确认记忆卡片中的工程验收代号是什么？只回答代号，如果不知道就说不知",
+        "noMemory": true,
+        "pendingReview": false,
+        "messages": [
+          {
+            "role": "USER",
+            "content": "我的已确认记忆卡片中的工程验收代号是什么？只回答代号，如果不知道就说不知道。",
+            "createdAt": "2026-10-06T14:25:27+00:00"
+          },
+          {
+            "role": "ASSISTANT",
+            "content": "不知道。",
+            "createdAt": "2026-10-06T14:25:28+00:00"
+          },
+          {
+            "role": "USER",
+            "content": "本次会话的临时标记是青灯-4612。请记住这个本次对话标记。",
+            "createdAt": "2026-10-06T14:25:32+00:00"
+          },
+          {
+            "role": "ASSISTANT",
+            "content": "好的，本次会话中我会沿用「青灯-4612」这个临时标记；但我无法把它写入长期记忆。",
+            "createdAt": "2026-10-06T14:25:34+00:00"
+          }
+        ]
+      },
+      "stream": "event: meta\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": null, \"message\": null, \"noMemory\": true, \"code\": null, \"type\": \"meta\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"好的\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"，\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"本次\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"会话\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"中\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"我会\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"沿用\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"「\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"青\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"灯\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"-\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"461\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"2\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"」\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"这个\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"临时\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"标记\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"；\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"但我\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"无法\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"把它\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"写入\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"长期\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"记忆\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"。\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: done\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": null, \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"done\"}\n\n"
+    },
+    {
+      "name": "same-session-history",
+      "state": {
+        "sessionId": "18b0e7898653448d8421de2f40516e61",
+        "title": "我的已确认记忆卡片中的工程验收代号是什么？只回答代号，如果不知道就说不知",
+        "noMemory": true,
+        "pendingReview": false,
+        "messages": [
+          {
+            "role": "USER",
+            "content": "我的已确认记忆卡片中的工程验收代号是什么？只回答代号，如果不知道就说不知道。",
+            "createdAt": "2026-10-06T14:25:27+00:00"
+          },
+          {
+            "role": "ASSISTANT",
+            "content": "不知道。",
+            "createdAt": "2026-10-06T14:25:28+00:00"
+          },
+          {
+            "role": "USER",
+            "content": "本次会话的临时标记是青灯-4612。请记住这个本次对话标记。",
+            "createdAt": "2026-10-06T14:25:32+00:00"
+          },
+          {
+            "role": "ASSISTANT",
+            "content": "好的，本次会话中我会沿用「青灯-4612」这个临时标记；但我无法把它写入长期记忆。",
+            "createdAt": "2026-10-06T14:25:34+00:00"
+          },
+          {
+            "role": "USER",
+            "content": "我在本次对话中刚才给的临时标记是什么？只回答标记。",
+            "createdAt": "2026-10-06T14:25:38+00:00"
+          },
+          {
+            "role": "ASSISTANT",
+            "content": "青灯-4612",
+            "createdAt": "2026-10-06T14:25:41+00:00"
+          }
+        ]
+      },
+      "stream": "event: meta\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": null, \"message\": null, \"noMemory\": true, \"code\": null, \"type\": \"meta\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"青\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"灯\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"-\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"461\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: token\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": \"2\", \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"token\"}\n\nevent: done\ndata: {\"sessionId\": \"18b0e7898653448d8421de2f40516e61\", \"content\": null, \"message\": null, \"noMemory\": null, \"code\": null, \"type\": \"done\"}\n\n"
+    }
+  ],
+  "card": {
+    "id": 2,
+    "content": "工程验收代号是蓝帆-7821。此卡片仅用于工程隔离验证。",
+    "source": "user",
+    "confirmed": true,
+    "createdAt": "2026-10-06T14:25:25+00:00",
+    "updatedAt": "2026-10-06T14:25:25+00:00"
+  },
+  "video": "/Users/assle/dev/mindbridge-py/.scratch/closing-evidence/browser-no-memory/page@6fc626d395bd662e9168961583504a93.webm",
+  "traceProof": {
+    "status": "passed",
+    "runs": [
+      {
+        "threadId": "053e153f11ef4410a7d9635ad1d3d6d8",
+        "runId": "8f6aa0f91f204a0e89014bffb8da3f49",
+        "noMemory": false,
+        "events": [
+          "runtime.create.start",
+          "runtime.create.end",
+          "graph.run.start",
+          "node.quick_safety.start",
+          "safety.checked",
+          "node.quick_safety.end",
+          "node.memory.start",
+          "memory.support_background.start",
+          "memory.support_background.end",
+          "memory.confirmed_cards.start",
+          "memory.confirmed_cards.end",
+          "node.memory.end",
+          "node.supervisor.start",
+          "classification.completed",
+          "node.supervisor.end",
+          "branch.selected",
+          "node.companion.start",
+          "node.companion.end",
+          "graph.run.end",
+          "graph.completed",
+          "runtime.close.start",
+          "runtime.close.end",
+          "support_turn.save.start",
+          "support_turn.persisted",
+          "support_turn.save.end",
+          "chat.prepare.end",
+          "chat.stream.start",
+          "ai.stream.start",
+          "ai.stream.end",
+          "chat.stream.end",
+          "chat.save.start",
+          "chat.persisted",
+          "chat.save.end",
+          "chat.request.end"
+        ]
+      },
+      {
+        "threadId": "18b0e7898653448d8421de2f40516e61",
+        "runId": "168a6e8298a4435c83e1b767ecacf44f",
+        "noMemory": true,
+        "events": [
+          "runtime.create.start",
+          "runtime.create.end",
+          "graph.run.start",
+          "node.quick_safety.start",
+          "safety.checked",
+          "node.quick_safety.end",
+          "node.memory.start",
+          "node.memory.end",
+          "node.supervisor.start",
+          "classification.completed",
+          "node.supervisor.end",
+          "branch.selected",
+          "node.companion.start",
+          "node.companion.end",
+          "graph.run.end",
+          "graph.completed",
+          "runtime.close.start",
+          "runtime.close.end",
+          "support_turn.save.start",
+          "support_turn.persisted",
+          "support_turn.save.end",
+          "chat.prepare.end",
+          "chat.stream.start",
+          "ai.stream.start",
+          "ai.stream.end",
+          "chat.stream.end",
+          "chat.save.start",
+          "chat.persisted",
+          "chat.save.end",
+          "chat.request.end"
+        ]
+      },
+      {
+        "threadId": "18b0e7898653448d8421de2f40516e61",
+        "runId": "232c6c41974d484ab899350e3fb62192",
+        "noMemory": true,
+        "events": [
+          "runtime.create.start",
+          "runtime.create.end",
+          "graph.run.start",
+          "node.quick_safety.start",
+          "safety.checked",
+          "node.quick_safety.end",
+          "node.memory.start",
+          "model.summarize_memory.start",
+          "ai.complete.start",
+          "ai.complete.end",
+          "model.summarize_memory.end",
+          "node.memory.end",
+          "node.supervisor.start",
+          "model.classify.start",
+          "ai.complete.start",
+          "ai.complete.end",
+          "model.classify.end",
+          "classification.completed",
+          "node.supervisor.end",
+          "branch.selected",
+          "node.companion.start",
+          "node.companion.end",
+          "graph.run.end",
+          "graph.completed",
+          "runtime.close.start",
+          "runtime.close.end",
+          "support_turn.save.start",
+          "support_turn.persisted",
+          "support_turn.save.end",
+          "chat.prepare.end",
+          "chat.stream.start",
+          "ai.stream.start",
+          "ai.stream.end",
+          "chat.stream.end",
+          "chat.save.start",
+          "chat.persisted",
+          "chat.save.end",
+          "chat.request.end"
+        ]
+      },
+      {
+        "threadId": "18b0e7898653448d8421de2f40516e61",
+        "runId": "a8277d51508d4537bce20969349bfe12",
+        "noMemory": true,
+        "events": [
+          "runtime.create.start",
+          "runtime.create.end",
+          "graph.run.start",
+          "node.quick_safety.start",
+          "safety.checked",
+          "node.quick_safety.end",
+          "node.memory.start",
+          "model.summarize_memory.start",
+          "ai.complete.start",
+          "ai.complete.end",
+          "model.summarize_memory.end",
+          "node.memory.end",
+          "node.supervisor.start",
+          "classification.completed",
+          "node.supervisor.end",
+          "branch.selected",
+          "node.companion.start",
+          "node.companion.end",
+          "graph.run.end",
+          "graph.completed",
+          "runtime.close.start",
+          "runtime.close.end",
+          "support_turn.save.start",
+          "support_turn.persisted",
+          "support_turn.save.end",
+          "chat.prepare.end",
+          "chat.stream.start",
+          "ai.stream.start",
+          "ai.stream.end",
+          "chat.stream.end",
+          "chat.save.start",
+          "chat.persisted",
+          "chat.save.end",
+          "chat.request.end"
+        ]
+      }
+    ]
+  }
+}

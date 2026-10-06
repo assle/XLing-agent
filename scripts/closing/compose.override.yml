@@ -1,0 +1,29 @@
+services:
+  mysql:
+    environment:
+      MYSQL_ROOT_PASSWORD: closing-root-only
+      MYSQL_DATABASE: xling_closing_test
+      MYSQL_USER: xling_closing
+      MYSQL_PASSWORD: closing-local-only
+  app:
+    ports:
+      - "127.0.0.1:18381:8080"
+    environment:
+      AI_PROVIDER: openai
+      AI_MAX_TOKENS: "4096"
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      OLLAMA_CLASSIFIER_MODEL: xling-general-cls-05b:quoted-f16
+      CLASSIFIER_INPUT_FORMAT: quoted
+      DATABASE_URL: mysql+pymysql://xling_closing:closing-local-only@mysql:3306/xling_closing_test?charset=utf8mb4
+      KNOWLEDGE_VECTOR_ENABLED: "true"
+      KNOWLEDGE_VECTOR_REQUIRED: "true"
+      ALERT_EMAIL_DELIVERY_MODE: log
+      ALERT_EMAIL_FROM: closing-sender@example.test
+      ALERT_EMAIL_TO: closing-review@example.test
+      SMTP_HOST: ""
+      EXCEL_PATH: /app/data/closing-risk-ledger.xlsx
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+      http_proxy: ""
+      https_proxy: ""

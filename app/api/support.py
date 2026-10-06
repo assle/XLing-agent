@@ -50,7 +50,7 @@ async def chat_stream(
     # request 提供消息和会话信息；管理员账号在此被拒绝。
     # 返回流式响应对象，消息处理和内容生成由聊天服务在流被读取时推进。
     if "ROLE_ADMIN" in user.roles:
-        raise HTTPException(403, "管理员账号只能查看后台记录，不能发起学生对话。")
+        raise HTTPException(403, "管理员账号只能查看后台记录，不能发起用户对话。")
     settings = get_settings()
     service = ChatService(db, settings)
     try:

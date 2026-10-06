@@ -6,9 +6,11 @@ import hashlib
 import json
 import math
 import random
+import sys
 import time
 from collections import Counter
 from pathlib import Path
+from typing import Literal
 
 import torch
 from peft import LoraConfig, get_peft_model, get_peft_model_state_dict, set_peft_model_state_dict
@@ -16,8 +18,11 @@ from torch.utils.data import DataLoader, Dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer, get_cosine_schedule_with_warmup
 
 ROOT = Path(__file__).resolve().parents[2]
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(ROOT))
 LABELS = ("正常", "焦虑", "低落", "高风险")
 SYSTEM_PROMPT = "你是心理健康支持消息分类器。只输出一个标签：正常、焦虑、低落、高风险。分类只用于分流和安全信号，不作诊断。"
+INPUT_FORMAT: Literal["plain", "quoted"] = "plain"
 
 
 def parse_args() -> argparse.Namespace:
@@ -46,6 +51,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sanity", action="store_true")
     parser.add_argument("--training-only", action="store_true", help="保存验证集选出的适配器，不读取测试集")
     parser.add_argument("--system-prompt-file", default="", help="固定训练与评估使用的系统提示文件")
+    parser.add_argument("--input-format", choices=("plain", "quoted"), default="plain", help="与注册分类器一致的用户输入格式")
     return parser.parse_args()
 
 
@@ -83,15 +89,17 @@ def stratified_sample(rows: list[dict], limit: int, seed: int) -> list[dict]:
     return selected
 
 
-def prompt_text(tokenizer, text: str) -> str:
+def prompt_text(tokenizer, text: str, input_format: Literal["plain", "quoted"] | None = None) -> str:
     """使用模型分词器提供的聊天模板组装分类请求。
 
     返回尚未编码的文本，并添加模型开始回答所需的提示标记。
     """
+    from app.core.classifier_contract import classifier_user_content
+
     return tokenizer.apply_chat_template(
         [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": text},
+            {"role": "user", "content": classifier_user_content(text, input_format or INPUT_FORMAT)},
         ],
         tokenize=False,
         add_generation_prompt=True,
@@ -166,7 +174,9 @@ def device_name() -> str:
     return "cpu"
 
 
-def generate_label(model, tokenizer, text: str, device: str, max_length: int) -> tuple[str, str]:
+def generate_label(
+    model, tokenizer, text: str, device: str, max_length: int, metadata: dict | None = None,
+) -> tuple[str, str]:
     """关闭梯度计算，以确定性生成取得一个中文分类标签。
 
     输入按最大长度截断，输出只解码新增部分；严格属于四类才接受，否则标为无效并保留原文。
@@ -194,6 +204,12 @@ def generate_label(model, tokenizer, text: str, device: str, max_length: int) ->
             eos_token_id=tokenizer.eos_token_id,
         )
     raw = tokenizer.decode(generated[0, input_ids.shape[1]:], skip_special_tokens=True).strip()
+    if metadata is not None:
+        metadata.update(
+            generatedTokens=int(generated.shape[1] - input_ids.shape[1]),
+            promptTokens=int(input_ids.shape[1]),
+            finishReason="eos" if int(generated[0, -1]) == tokenizer.eos_token_id else "length",
+        )
     return (raw if raw in LABELS else "__INVALID__"), raw
 
 
@@ -281,8 +297,9 @@ def main() -> None:
     健全性和 training-only 模式检查训练损失下降，不读取测试集；正式模式在参数选定后比较基础模型与微调模型。
     保存增量参数、训练记录和替换门槛结果，不自动激活模型。
     """
-    global SYSTEM_PROMPT
+    global SYSTEM_PROMPT, INPUT_FORMAT
     args = parse_args()
+    INPUT_FORMAT = args.input_format
     if args.system_prompt_file:
         SYSTEM_PROMPT = (ROOT / args.system_prompt_file).read_text(encoding="utf-8").strip()
         if not SYSTEM_PROMPT:

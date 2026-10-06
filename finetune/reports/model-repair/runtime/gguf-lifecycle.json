@@ -1,0 +1,66 @@
+{
+  "status": "completed",
+  "createdAtUTC": "2026-10-04T04:11:58.438264+00:00",
+  "model": "xling-boundary-v3-baseline-gguf:latest",
+  "modelAttemptsCap": 120,
+  "retries": 0,
+  "previousExperimentalRequests": 120,
+  "previousExperimentalGeneratedTokens": 0,
+  "sourceFingerprints": [
+    {
+      "path": "/Users/assle/dev/mindbridge-py/finetune/scripts/register_runtime_classifier.py",
+      "sha256": "4b0f2635f3622ddd35051c9695047df999c505cb57b3ee42bbd748863f00bc66"
+    },
+    {
+      "path": "/Users/assle/dev/mindbridge-py/finetune/scripts/evaluate_runtime_classifier.py",
+      "sha256": "bad72a04746cc26a43c4d9c43591f257f5ab74f0d9a35d8918b856b584b23c65"
+    },
+    {
+      "path": "/Users/assle/dev/mindbridge-py/.scratch/model-repair-20261004/runtime/run_gguf_baseline.py",
+      "sha256": "b274d18047c22511b98bc05e03ff7f05bedca8ea6c9b4739965260ad2dd5d92e"
+    },
+    {
+      "path": "/Users/assle/dev/mindbridge-py/.scratch/model-repair-20261004/runtime/merged/model.safetensors",
+      "sha256": "770ae0eb99d29b0697ea75a2830e1f59a40954a93d35b0dc3c7e64c511c25eb0"
+    },
+    {
+      "path": "/Users/assle/dev/mindbridge-py/.scratch/model-repair-20261004/runtime/merged/tokenizer.json",
+      "sha256": "9c5ae00e602b8860cbd784ba82a8aa14e8feecec692e7076590d014d7b7fdafa"
+    }
+  ],
+  "servicePid": 74562,
+  "registrationCommand": [
+    "/Users/assle/dev/mindbridge-py/.venv/bin/python",
+    "/Users/assle/dev/mindbridge-py/finetune/scripts/register_runtime_classifier.py",
+    "--model-directory",
+    "/Users/assle/dev/mindbridge-py/.scratch/model-repair-20261004/runtime/merged",
+    "--system-prompt-file",
+    "/Users/assle/dev/mindbridge-py/finetune/reports/current-classifier/training/system-prompt.txt",
+    "--model",
+    "xling-boundary-v3-baseline-gguf:latest",
+    "--base-url",
+    "http://127.0.0.1:11435",
+    "--output",
+    "/Users/assle/dev/mindbridge-py/.scratch/model-repair-20261004/runtime/gguf-registration"
+  ],
+  "evaluationCommand": [
+    "/Users/assle/dev/mindbridge-py/.venv/bin/python",
+    "/Users/assle/dev/mindbridge-py/finetune/scripts/evaluate_runtime_classifier.py",
+    "--model",
+    "xling-boundary-v3-baseline-gguf:latest",
+    "--base-url",
+    "http://127.0.0.1:11435",
+    "--input-format",
+    "quoted",
+    "--output",
+    "/Users/assle/dev/mindbridge-py/.scratch/model-repair-20261004/runtime/candidate-gguf-results.json",
+    "--dataset",
+    "/Users/assle/dev/mindbridge-py/finetune/data/general-routing-v2/general-test.jsonl",
+    "--dataset",
+    "/Users/assle/dev/mindbridge-py/finetune/data/current-classifier/natural-v12-r2-40.jsonl"
+  ],
+  "candidateUnloaded": true,
+  "serviceStopped": true,
+  "protectedFilesUnchanged": true,
+  "finishedAtUTC": "2026-10-04T04:12:24.972949+00:00"
+}

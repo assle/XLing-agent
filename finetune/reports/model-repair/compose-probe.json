@@ -1,0 +1,6 @@
+{
+  "composeSyntax": "PASS",
+  "configuredClassifierInputFormat": "quoted",
+  "configuredModel": "xling-boundary-v3-baseline-gguf:latest",
+  "businessEnvReadOrWritten": false
+}

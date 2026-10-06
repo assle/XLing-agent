@@ -1,0 +1,72 @@
+{
+  "frozenAtUTC": "2026-10-04T04:36:19.297975+00:00",
+  "trainingRunsCap": 1,
+  "maximumEpochs": 4,
+  "maximumOptimizerUpdates": 204,
+  "trainRows": 408,
+  "validationRows": 144,
+  "trainLabelsPerClass": 102,
+  "validationLabelsPerClass": 36,
+  "onlyTrainingFactorChanged": "32/16 data augmentation; original base, rank/LR/seed/input format/selection unchanged",
+  "testDataUsedForEpochSelection": false,
+  "epochSelection": "max validation144 macroF1; first tie",
+  "modelSelection": "valid completed runtime profiles; require high-risk recall and output validity no worse than current registered model; rank matched-set macroF1, then accuracy, false-high count and latency; report each set and any tradeoffs; no zero-error requirement",
+  "command": [
+    ".venv/bin/python",
+    "finetune/scripts/train_general_classifier.py",
+    "--model",
+    "/Users/assle/dev/mindbridge-py/.scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate/recovered-merged-base",
+    "--train",
+    "finetune/data/boundary-v3/train-408.jsonl",
+    "--validation",
+    "finetune/data/boundary-v3/validation-144.jsonl",
+    "--test",
+    "/Users/assle/dev/mindbridge-py/.scratch/model-repair-20261004/training/FORBIDDEN-TEST.jsonl",
+    "--output-dir",
+    "/Users/assle/dev/mindbridge-py/.scratch/model-repair-20261004/training/output",
+    "--result",
+    "/Users/assle/dev/mindbridge-py/.scratch/model-repair-20261004/training/result.json",
+    "--epochs",
+    "4",
+    "--learning-rate",
+    "5e-5",
+    "--batch-size",
+    "1",
+    "--gradient-accumulation",
+    "8",
+    "--max-length",
+    "256",
+    "--lora-rank",
+    "8",
+    "--seed",
+    "42",
+    "--local-files-only",
+    "--training-only",
+    "--system-prompt-file",
+    "finetune/reports/current-classifier/training/system-prompt.txt",
+    "--input-format",
+    "quoted"
+  ],
+  "files": [
+    {
+      "path": "finetune/scripts/train_general_classifier.py",
+      "sha256": "c8dd0ad149c5519066248a2e3ea5d71b2035a858679f737abdf0dfa4fb63b7cf"
+    },
+    {
+      "path": "app/core/classifier_contract.py",
+      "sha256": "34cc4cc2fdd358734476474c44cb840d73573f029e6893d9e5c0ef199712adac"
+    },
+    {
+      "path": "finetune/data/boundary-v3/train-408.jsonl",
+      "sha256": "98138ead474593c818a681101cb069ea46f3ed93023f858ab5927cdcf83c561d"
+    },
+    {
+      "path": "finetune/data/boundary-v3/validation-144.jsonl",
+      "sha256": "4d32da010f82e2fd8d5705b6ae0b032aadf63bfd16ced4b8e71d3132176a2b14"
+    },
+    {
+      "path": "finetune/reports/current-classifier/training/system-prompt.txt",
+      "sha256": "a6d981d29f3cfe7f4edef11bb293a5c5ddf06a87d6205177746b5c4454d346ab"
+    }
+  ]
+}

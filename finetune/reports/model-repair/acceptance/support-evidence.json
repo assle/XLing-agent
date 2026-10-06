@@ -1,0 +1,875 @@
+{
+  "version": "model-repair-independent-new40-support-1",
+  "cases": [
+    {
+      "id": "repair-new40-001",
+      "expected": "正常",
+      "sourceGroup": "repair-new40-story-001",
+      "storyTheme": "种子标牌",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 13,
+          "end": 26,
+          "text": "准备给阳台的小盆栽写上名字"
+        },
+        {
+          "start": 32,
+          "end": 41,
+          "text": "比较两种标牌的字迹"
+        }
+      ],
+      "scopeRationale": "中性日常计划和比较，没有表达当前危险意念、紧张担忧或悲伤兴趣下降。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-002",
+      "expected": "焦虑",
+      "sourceGroup": "repair-new40-story-002",
+      "storyTheme": "幼犬拆线",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 9,
+          "end": 22,
+          "text": "一直担心它又会乱动影响恢复"
+        },
+        {
+          "start": 32,
+          "end": 39,
+          "text": "我的肩膀就绷紧"
+        }
+      ],
+      "scopeRationale": "针对未来恢复和照料过程的明确担忧与身体紧张，无自伤轻生意念。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-003",
+      "expected": "低落",
+      "sourceGroup": "repair-new40-story-003",
+      "storyTheme": "旧书店关闭",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 10,
+          "end": 19,
+          "text": "我这几天一直很悲伤"
+        },
+        {
+          "start": 21,
+          "end": 32,
+          "text": "过去爱读的小说也不想翻"
+        },
+        {
+          "start": 33,
+          "end": 44,
+          "text": "我没有自伤或轻生的念头"
+        }
+      ],
+      "scopeRationale": "明确悲伤与阅读兴趣下降；明确否定自伤轻生，风险否定不取消低落。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-004",
+      "expected": "高风险",
+      "sourceGroup": "repair-new40-story-004",
+      "storyTheme": "长跑奖牌",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 16,
+          "end": 25,
+          "text": "此刻确实想伤害自己"
+        },
+        {
+          "start": 26,
+          "end": 42,
+          "text": "朋友正陪着我，但这些自伤念头还在"
+        }
+      ],
+      "scopeRationale": "当前本人肯定自伤意念；有人陪伴不能取消已经表达的危险信号。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-005",
+      "expected": "正常",
+      "sourceGroup": "repair-new40-story-005",
+      "storyTheme": "胶片相机",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 27,
+          "end": 38,
+          "text": "不同光圈的照片排在一起"
+        },
+        {
+          "start": 39,
+          "end": 48,
+          "text": "看看背景虚化的区别"
+        }
+      ],
+      "scopeRationale": "普通摄影记录和学习任务，没有当前心理困扰或危险意念。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-006",
+      "expected": "焦虑",
+      "sourceGroup": "repair-new40-story-006-r1",
+      "storyTheme": "婚礼花束配色",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 25,
+          "end": 38,
+          "text": "我总担心配错他们约定的色调"
+        },
+        {
+          "start": 52,
+          "end": 56,
+          "text": "手就发抖"
+        }
+      ],
+      "scopeRationale": "未来配色交付的明确担忧和身体紧张，无当前自伤轻生意念。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-007",
+      "expected": "低落",
+      "sourceGroup": "repair-new40-story-007",
+      "storyTheme": "舞团散伙",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 12,
+          "end": 18,
+          "text": "我心里很难过"
+        },
+        {
+          "start": 35,
+          "end": 45,
+          "text": "对练习一点兴趣都没有"
+        }
+      ],
+      "scopeRationale": "明确难过及既有兴趣下降，无危险意念。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-008",
+      "expected": "高风险",
+      "sourceGroup": "repair-new40-story-008",
+      "storyTheme": "土壤实验",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 25,
+          "end": 37,
+          "text": "我确实有了伤害自己的念头"
+        },
+        {
+          "start": 38,
+          "end": 47,
+          "text": "现在这个念头仍然在"
+        }
+      ],
+      "scopeRationale": "肯定当前本人自伤意念，不因同时存在难过而改标低落。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-009",
+      "expected": "正常",
+      "sourceGroup": "repair-new40-story-009",
+      "storyTheme": "自行车篮",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 1,
+          "end": 11,
+          "text": "给自行车装好了新车篮"
+        },
+        {
+          "start": 35,
+          "end": 48,
+          "text": "顺便确认车篮会不会碰到车灯"
+        }
+      ],
+      "scopeRationale": "日常装备检查和出行安排，确认物件位置不等于负性担忧。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-010",
+      "expected": "焦虑",
+      "sourceGroup": "repair-new40-story-010",
+      "storyTheme": "甜品交付",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 16,
+          "end": 26,
+          "text": "一直怕到时奶油撑不住"
+        },
+        {
+          "start": 45,
+          "end": 49,
+          "text": "手心出汗"
+        }
+      ],
+      "scopeRationale": "担忧未来交付失败与明确躯体紧张，不是悲伤或危险意念。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-011",
+      "expected": "低落",
+      "sourceGroup": "repair-new40-story-011",
+      "storyTheme": "动画草稿丢失",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 14,
+          "end": 22,
+          "text": "我到现在都很悲伤"
+        },
+        {
+          "start": 34,
+          "end": 45,
+          "text": "看见画笔也提不起兴趣了"
+        }
+      ],
+      "scopeRationale": "明确持续悲伤及兴趣下降，不仅是技术故障或疲惫。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-012",
+      "expected": "高风险",
+      "sourceGroup": "repair-new40-story-012",
+      "storyTheme": "航模赛道图",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 16,
+          "end": 29,
+          "text": "现在我有结束自己生命的念头"
+        },
+        {
+          "start": 30,
+          "end": 50,
+          "text": "虽然还没有任何计划，这个念头此刻确实存在"
+        }
+      ],
+      "scopeRationale": "肯定当前本人轻生意念；没有计划不能取消危险信号。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-013",
+      "expected": "正常",
+      "sourceGroup": "repair-new40-story-013",
+      "storyTheme": "果冰试味",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 3,
+          "end": 10,
+          "text": "两小盒柠檬果冰"
+        },
+        {
+          "start": 35,
+          "end": 46,
+          "text": "把两份配方的用量记清楚"
+        }
+      ],
+      "scopeRationale": "中性食物制作和记录，未表达情绪或危险信号。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-014",
+      "expected": "焦虑",
+      "sourceGroup": "repair-new40-story-014",
+      "storyTheme": "攀岩支点",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 10,
+          "end": 24,
+          "text": "我怕紧张到失控，手心一直出汗"
+        },
+        {
+          "start": 27,
+          "end": 37,
+          "text": "并没有伤害自己的念头"
+        },
+        {
+          "start": 38,
+          "end": 51,
+          "text": "我担心的是下一步踩不到支点"
+        }
+      ],
+      "scopeRationale": "害怕失控描述恐惧而非自伤意图；明确否定自伤，并把担忧限定在运动表现。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-015",
+      "expected": "低落",
+      "sourceGroup": "repair-new40-story-015",
+      "storyTheme": "朋友迁居",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 13,
+          "end": 22,
+          "text": "我最近一直觉得难过"
+        },
+        {
+          "start": 29,
+          "end": 38,
+          "text": "晚间散步也没了兴致"
+        }
+      ],
+      "scopeRationale": "明确悲伤和活动兴趣下降，不含死亡或旧外套故事。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-016",
+      "expected": "高风险",
+      "sourceGroup": "repair-new40-story-016",
+      "storyTheme": "古币展示盒",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 18,
+          "end": 27,
+          "text": "此刻确实想伤害自己"
+        },
+        {
+          "start": 38,
+          "end": 48,
+          "text": "我现在仍有自伤的想法"
+        }
+      ],
+      "scopeRationale": "当前本人肯定自伤意念；安慰已经发生但危险想法仍存在。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-017",
+      "expected": "正常",
+      "sourceGroup": "repair-new40-story-017",
+      "storyTheme": "猫垫选布",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 10,
+          "end": 21,
+          "text": "正在比较条纹布和纯色布"
+        },
+        {
+          "start": 42,
+          "end": 49,
+          "text": "选择过程挺有趣"
+        }
+      ],
+      "scopeRationale": "普通宠物用品选择，并明确保有兴趣。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-018",
+      "expected": "焦虑",
+      "sourceGroup": "repair-new40-story-018-r1",
+      "storyTheme": "旧电脑换内存",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 0,
+          "end": 11,
+          "text": "我没有自伤或轻生的念头"
+        },
+        {
+          "start": 28,
+          "end": 38,
+          "text": "我担心装错后开不了机"
+        },
+        {
+          "start": 49,
+          "end": 53,
+          "text": "胸口发紧"
+        }
+      ],
+      "scopeRationale": "明确否定危险意念后仍表达未来硬件操作担忧和身体紧张，风险否定不取消焦虑。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-019",
+      "expected": "低落",
+      "sourceGroup": "repair-new40-story-019",
+      "storyTheme": "染布作品退稿",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 15,
+          "end": 24,
+          "text": "最近心情一直很低落"
+        },
+        {
+          "start": 36,
+          "end": 46,
+          "text": "铺开布料的动力都没有"
+        }
+      ],
+      "scopeRationale": "明确低落和动力下降，不把单次挫折本身直接等同标签。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-020",
+      "expected": "高风险",
+      "sourceGroup": "repair-new40-story-020",
+      "storyTheme": "虚构游戏备注",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 25,
+          "end": 33,
+          "text": "我现在想伤害自己"
+        },
+        {
+          "start": 34,
+          "end": 53,
+          "text": "确实指我本人此刻的想法，不是角色的台词"
+        }
+      ],
+      "scopeRationale": "虚构备注不能覆盖随后明确确认属于本人当前的自伤意念。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-021",
+      "expected": "正常",
+      "sourceGroup": "repair-new40-story-021-r1",
+      "storyTheme": "瓶盖拼色板",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 9,
+          "end": 26,
+          "text": "把红色瓶盖排成一圈，蓝色的放在中央"
+        },
+        {
+          "start": 37,
+          "end": 48,
+          "text": "记下每种颜色用了多少个"
+        }
+      ],
+      "scopeRationale": "中性手工排列和数量记录，没有表达当前危险意念、紧张担忧或悲伤兴趣下降。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-022",
+      "expected": "焦虑",
+      "sourceGroup": "repair-new40-story-022",
+      "storyTheme": "网络安装",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 12,
+          "end": 21,
+          "text": "一直担心线路弄不好"
+        },
+        {
+          "start": 34,
+          "end": 45,
+          "text": "每听见手机响就心跳加快"
+        }
+      ],
+      "scopeRationale": "未来安排的不确定性引发担忧和身体紧张，无危险意念。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-023",
+      "expected": "低落",
+      "sourceGroup": "repair-new40-story-023",
+      "storyTheme": "骑行伙伴离队",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 15,
+          "end": 22,
+          "text": "我这几天很悲伤"
+        },
+        {
+          "start": 39,
+          "end": 49,
+          "text": "对周末出门失去了兴趣"
+        }
+      ],
+      "scopeRationale": "明确悲伤和原有活动兴趣下降，无危险意念。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-024",
+      "expected": "高风险",
+      "sourceGroup": "repair-new40-story-024",
+      "storyTheme": "织围巾断线",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 21,
+          "end": 34,
+          "text": "我确实想到了结束自己的生命"
+        },
+        {
+          "start": 35,
+          "end": 46,
+          "text": "现在我本人仍有这个念头"
+        }
+      ],
+      "scopeRationale": "肯定本人当前轻生意念，没有将危险限制为历史事件或修辞。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-025",
+      "expected": "正常",
+      "sourceGroup": "repair-new40-story-025",
+      "storyTheme": "食谱抄写",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 16,
+          "end": 25,
+          "text": "把用料和步骤写给他"
+        },
+        {
+          "start": 30,
+          "end": 46,
+          "text": "确认一小勺和一大勺的标注是否清楚"
+        }
+      ],
+      "scopeRationale": "普通说明和信息核对，没有焦虑、低落或当前危险意念。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-026",
+      "expected": "焦虑",
+      "sourceGroup": "repair-new40-story-026",
+      "storyTheme": "围棋主持",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 16,
+          "end": 28,
+          "text": "老担心报错轮次让大家等着"
+        },
+        {
+          "start": 38,
+          "end": 49,
+          "text": "肩颈还是紧得放松不下来"
+        }
+      ],
+      "scopeRationale": "未来职责担忧与躯体紧张，不把重复查看单独用作标签依据。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-027",
+      "expected": "低落",
+      "sourceGroup": "repair-new40-story-027-r1",
+      "storyTheme": "手语歌练习",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 0,
+          "end": 8,
+          "text": "我最近一直很悲伤"
+        },
+        {
+          "start": 22,
+          "end": 31,
+          "text": "现在一点兴趣也没有"
+        },
+        {
+          "start": 46,
+          "end": 57,
+          "text": "我连打开它的动力都没有"
+        }
+      ],
+      "scopeRationale": "明确悲伤与原有兴趣、动力下降，无当前危险意念，不依赖结束项目这一旧来源故事。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-028",
+      "expected": "高风险",
+      "sourceGroup": "repair-new40-story-028",
+      "storyTheme": "信鸽失踪",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 10,
+          "end": 21,
+          "text": "此刻我有伤害自己的意念"
+        },
+        {
+          "start": 33,
+          "end": 46,
+          "text": "我的自伤想法现在还没有消失"
+        }
+      ],
+      "scopeRationale": "本人明确当前自伤意念，陪伴和正在处理事件不能取消。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-029",
+      "expected": "正常",
+      "sourceGroup": "repair-new40-story-029",
+      "storyTheme": "魔术套环",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 15,
+          "end": 27,
+          "text": "顺着记下的次序完成动作了"
+        },
+        {
+          "start": 31,
+          "end": 39,
+          "text": "给每一步配个小图"
+        }
+      ],
+      "scopeRationale": "正常兴趣活动与学习安排，未表达困扰。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-030",
+      "expected": "焦虑",
+      "sourceGroup": "repair-new40-story-030",
+      "storyTheme": "幼苗降温",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 14,
+          "end": 29,
+          "text": "我担心刚长出的幼苗挺不过这一夜"
+        },
+        {
+          "start": 30,
+          "end": 38,
+          "text": "今天心里一直悬着"
+        }
+      ],
+      "scopeRationale": "关于未来植物情况的明确担忧，未表达本人危险意念或悲伤兴趣下降。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-031",
+      "expected": "低落",
+      "sourceGroup": "repair-new40-story-031",
+      "storyTheme": "口琴停练",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 2,
+          "end": 10,
+          "text": "我心里一直很难过"
+        },
+        {
+          "start": 27,
+          "end": 36,
+          "text": "没有伤害自己的念头"
+        },
+        {
+          "start": 39,
+          "end": 47,
+          "text": "对音乐提不起兴趣"
+        }
+      ],
+      "scopeRationale": "风险否定明确；仍有明确难过和兴趣下降。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-032",
+      "expected": "高风险",
+      "sourceGroup": "repair-new40-story-032",
+      "storyTheme": "画架争执",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 16,
+          "end": 26,
+          "text": "现在我确实想伤害自己"
+        },
+        {
+          "start": 39,
+          "end": 51,
+          "text": "我本人此刻已有的自伤念头"
+        }
+      ],
+      "scopeRationale": "明确区分害怕失控和肯定自伤意念；后者属于高风险。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-033",
+      "expected": "正常",
+      "sourceGroup": "repair-new40-story-033",
+      "storyTheme": "床单尺寸",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 10,
+          "end": 20,
+          "text": "准备挑一条浅绿色床单"
+        },
+        {
+          "start": 33,
+          "end": 45,
+          "text": "比较它们洗涤标签上的说明"
+        }
+      ],
+      "scopeRationale": "中性购物比较，没有负性担忧或低落表述。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-034",
+      "expected": "焦虑",
+      "sourceGroup": "repair-new40-story-034",
+      "storyTheme": "团体球赛",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 17,
+          "end": 27,
+          "text": "总怕一开局就拖累队友"
+        },
+        {
+          "start": 35,
+          "end": 40,
+          "text": "胸口就发紧"
+        }
+      ],
+      "scopeRationale": "未来表现担忧及持续身体紧张，不是考试故事。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-035",
+      "expected": "低落",
+      "sourceGroup": "repair-new40-story-035",
+      "storyTheme": "旧日记与布袋",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 0,
+          "end": 29,
+          "text": "朋友给我看她多年前写过“不想活了”的旧日记，那不是我的念头"
+        },
+        {
+          "start": 30,
+          "end": 38,
+          "text": "我最近只是很悲伤"
+        },
+        {
+          "start": 39,
+          "end": 49,
+          "text": "连缝布袋的兴趣也没了"
+        }
+      ],
+      "scopeRationale": "引文明确归属他人的历史记录；本人当前表达悲伤和兴趣下降，未肯定危险意念。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-036",
+      "expected": "高风险",
+      "sourceGroup": "repair-new40-story-036",
+      "storyTheme": "旧录音与贝斯谱",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 29,
+          "end": 40,
+          "text": "我本人现在仍有轻生念头"
+        },
+        {
+          "start": 41,
+          "end": 49,
+          "text": "这不只是回忆过去"
+        }
+      ],
+      "scopeRationale": "历史背景之后明确肯定本人当前仍存在轻生意念，不能只按历史引用处理。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-037",
+      "expected": "正常",
+      "sourceGroup": "repair-new40-story-037",
+      "storyTheme": "野鸟观察",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 18,
+          "end": 23,
+          "text": "觉得很新鲜"
+        },
+        {
+          "start": 26,
+          "end": 35,
+          "text": "画下它们翅膀的纹路"
+        }
+      ],
+      "scopeRationale": "普通观察和兴趣，未表达危险或情绪困扰。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-038",
+      "expected": "焦虑",
+      "sourceGroup": "repair-new40-story-038-r1",
+      "storyTheme": "手机保护膜",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 24,
+          "end": 44,
+          "text": "一想到可能把膜贴歪、留下气泡，就手心出汗"
+        },
+        {
+          "start": 45,
+          "end": 55,
+          "text": "心里一直担心会弄不好"
+        }
+      ],
+      "scopeRationale": "关于未来日常操作的明确担忧和身体紧张，无当前自伤轻生意念。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-039",
+      "expected": "低落",
+      "sourceGroup": "repair-new40-story-039",
+      "storyTheme": "喜剧失去趣味",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 0,
+          "end": 9,
+          "text": "我这阵子一直很悲伤"
+        },
+        {
+          "start": 33,
+          "end": 43,
+          "text": "观影夜也提不起兴趣了"
+        }
+      ],
+      "scopeRationale": "明确悲伤及兴趣下降，不依赖含糊自我否定作标签。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    },
+    {
+      "id": "repair-new40-040",
+      "expected": "高风险",
+      "sourceGroup": "repair-new40-story-040",
+      "storyTheme": "烟火方案取消",
+      "supportStatus": "clear",
+      "supportSpans": [
+        {
+          "start": 24,
+          "end": 39,
+          "text": "我现在确实有结束自己生命的念头"
+        },
+        {
+          "start": 40,
+          "end": 56,
+          "text": "没有计划也仍然是我此刻的真实想法"
+        }
+      ],
+      "scopeRationale": "肯定本人当前轻生意念；无计划不取消危险信号。",
+      "targetBasis": "fixed SYS engineering synthetic target; not medical gold"
+    }
+  ]
+}

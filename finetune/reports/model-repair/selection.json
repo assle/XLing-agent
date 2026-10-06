@@ -1,0 +1,261 @@
+{
+  "selectedModel": "xling-general-cls-05b:quoted-f16",
+  "selectedAdapterSHA256": "39312e62bae612295d46153242b6159e15e0b5196ba4e3906df779e87f770efd",
+  "inputFormat": "quoted",
+  "modelType": "GGUF F16",
+  "selectedManifestSHA256": "78c2a6424ad51583a0eb8b45be3d7712a08453384c47d88f6e1d59c135a9d25b",
+  "reason": "Both candidate profiles have identical160 predictions. No prediction improvement from the one data-only retraining; retain the previously selected adapter with verified actual runtime equivalence. Latency from separate staged runs is descriptive, not a statistical winner claim.",
+  "newTrainingRetainedAsNonImprovingExperiment": true,
+  "metrics": {
+    "current": {
+      "totalCases": 160,
+      "accuracy": 0.8625,
+      "macroF1": 0.8994159096757364,
+      "perClass": {
+        "正常": {
+          "precision": 0.9666666666666667,
+          "recall": 0.725,
+          "f1": 0.8285714285714285
+        },
+        "焦虑": {
+          "precision": 0.9444444444444444,
+          "recall": 0.85,
+          "f1": 0.8947368421052632
+        },
+        "低落": {
+          "precision": 0.9512195121951219,
+          "recall": 0.975,
+          "f1": 0.9629629629629629
+        },
+        "高风险": {
+          "precision": 0.9230769230769231,
+          "recall": 0.9,
+          "f1": 0.9113924050632911
+        }
+      },
+      "confusionMatrix": {
+        "正常": {
+          "正常": 29,
+          "焦虑": 0,
+          "低落": 0,
+          "高风险": 0
+        },
+        "焦虑": {
+          "正常": 0,
+          "焦虑": 34,
+          "低落": 1,
+          "高风险": 3
+        },
+        "低落": {
+          "正常": 0,
+          "焦虑": 0,
+          "低落": 39,
+          "高风险": 0
+        },
+        "高风险": {
+          "正常": 1,
+          "焦虑": 2,
+          "低落": 1,
+          "高风险": 36
+        }
+      },
+      "highRiskRecall": 0.9,
+      "falseHighCount": 3,
+      "outputValidity": 0.9125,
+      "invalidReasons": {
+        "non_label_or_unfinished": 11,
+        "length": 3
+      },
+      "latencyP50Ms": 131.0672920080833,
+      "latencyP95Ms": 146.13249996909872,
+      "generatedTokens": 441,
+      "promptTokens": 12577
+    },
+    "selected": {
+      "totalCases": 160,
+      "accuracy": 0.975,
+      "macroF1": 0.974937343358396,
+      "perClass": {
+        "正常": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "焦虑": {
+          "precision": 1.0,
+          "recall": 0.9,
+          "f1": 0.9473684210526316
+        },
+        "低落": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "高风险": {
+          "precision": 0.9090909090909091,
+          "recall": 1.0,
+          "f1": 0.9523809523809523
+        }
+      },
+      "confusionMatrix": {
+        "正常": {
+          "正常": 40,
+          "焦虑": 0,
+          "低落": 0,
+          "高风险": 0
+        },
+        "焦虑": {
+          "正常": 0,
+          "焦虑": 36,
+          "低落": 0,
+          "高风险": 4
+        },
+        "低落": {
+          "正常": 0,
+          "焦虑": 0,
+          "低落": 40,
+          "高风险": 0
+        },
+        "高风险": {
+          "正常": 0,
+          "焦虑": 0,
+          "低落": 0,
+          "高风险": 40
+        }
+      },
+      "highRiskRecall": 1.0,
+      "falseHighCount": 4,
+      "outputValidity": 1.0,
+      "invalidReasons": {},
+      "latencyP50Ms": 151.76758298184723,
+      "latencyP95Ms": 178.6185840028338,
+      "generatedTokens": 404,
+      "promptTokens": 23137
+    },
+    "trained": {
+      "totalCases": 160,
+      "accuracy": 0.975,
+      "macroF1": 0.974937343358396,
+      "perClass": {
+        "正常": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "焦虑": {
+          "precision": 1.0,
+          "recall": 0.9,
+          "f1": 0.9473684210526316
+        },
+        "低落": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "高风险": {
+          "precision": 0.9090909090909091,
+          "recall": 1.0,
+          "f1": 0.9523809523809523
+        }
+      },
+      "confusionMatrix": {
+        "正常": {
+          "正常": 40,
+          "焦虑": 0,
+          "低落": 0,
+          "高风险": 0
+        },
+        "焦虑": {
+          "正常": 0,
+          "焦虑": 36,
+          "低落": 0,
+          "高风险": 4
+        },
+        "低落": {
+          "正常": 0,
+          "焦虑": 0,
+          "低落": 40,
+          "高风险": 0
+        },
+        "高风险": {
+          "正常": 0,
+          "焦虑": 0,
+          "低落": 0,
+          "高风险": 40
+        }
+      },
+      "highRiskRecall": 1.0,
+      "falseHighCount": 4,
+      "outputValidity": 1.0,
+      "invalidReasons": {},
+      "latencyP50Ms": 148.36579200346023,
+      "latencyP95Ms": 160.95704201143235,
+      "generatedTokens": 404,
+      "promptTokens": 23137
+    },
+    "remote": {
+      "totalCases": 160,
+      "accuracy": 0.99375,
+      "macroF1": 0.9937490232848882,
+      "perClass": {
+        "正常": {
+          "precision": 1.0,
+          "recall": 0.975,
+          "f1": 0.9873417721518987
+        },
+        "焦虑": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "低落": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "高风险": {
+          "precision": 0.975609756097561,
+          "recall": 1.0,
+          "f1": 0.9876543209876543
+        }
+      },
+      "confusionMatrix": {
+        "正常": {
+          "正常": 39,
+          "焦虑": 0,
+          "低落": 0,
+          "高风险": 1
+        },
+        "焦虑": {
+          "正常": 0,
+          "焦虑": 40,
+          "低落": 0,
+          "高风险": 0
+        },
+        "低落": {
+          "正常": 0,
+          "焦虑": 0,
+          "低落": 40,
+          "高风险": 0
+        },
+        "高风险": {
+          "正常": 0,
+          "焦虑": 0,
+          "低落": 0,
+          "高风险": 40
+        }
+      },
+      "highRiskRecall": 1.0,
+      "falseHighCount": 1,
+      "outputValidity": 1.0,
+      "invalidReasons": {},
+      "latencyP50Ms": 745.1074169948697,
+      "latencyP95Ms": 1092.0875830342993,
+      "generatedTokens": 800,
+      "promptTokens": 31316
+    }
+  },
+  "rawModelOnly": true,
+  "businessKeywordPolicyUnchanged": true,
+  "originalTagPreserved": true
+}

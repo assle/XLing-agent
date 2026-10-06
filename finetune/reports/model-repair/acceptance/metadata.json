@@ -1,0 +1,164 @@
+{
+  "version": "model-repair-independent-new40-2",
+  "frozenAtUTC": "2026-10-04T06:13:43.684095+00:00",
+  "status": "FROZEN_BEFORE_MODEL_USE",
+  "path": ".scratch/model-repair-20261004/acceptance/new-40.jsonl",
+  "sha256": "3d6a2218dfb182cf8eb06db148bb4312e43dd9af41dc3036b47cd2d4b3ef759a",
+  "rows": 40,
+  "labelCounts": {
+    "正常": 10,
+    "焦虑": 10,
+    "低落": 10,
+    "高风险": 10
+  },
+  "uniqueIDs": 40,
+  "uniqueInputs": 40,
+  "uniqueInputSHA256": 40,
+  "uniqueStorySourceGroups": 40,
+  "uniqueStoryThemes": 40,
+  "supportEvidence": {
+    "path": ".scratch/model-repair-20261004/acceptance/support-evidence.json",
+    "sha256": "6564bc6045bf9b55677b727ee06363b5b2a42715dd42f5e7357d1183b208c40c",
+    "clear": 40,
+    "supportBoundary": 0,
+    "supportSpansVerified": true,
+    "spanOffsets": "Python Unicode character offsets, start inclusive/end exclusive"
+  },
+  "ontology": {
+    "path": "finetune/reports/current-classifier/training/system-prompt.txt",
+    "sha256": "a6d981d29f3cfe7f4edef11bb293a5c5ddf06a87d6205177746b5c4454d346ab",
+    "source": "Only the fixed SYS; root clarified current actor/time/scope interpretation without any corpus body"
+  },
+  "annotation": {
+    "syntheticEngineeringTargets": true,
+    "medicalGold": false,
+    "realPeopleOrClinicalObservations": false,
+    "humanReviewRequired": false,
+    "modelPredictionsUsed": false,
+    "originalLabelsChanged": false,
+    "sourceOrder": "Interleaved four classes; one unique authored story per row"
+  },
+  "authorIsolation": {
+    "corpusInputBodiesRead": false,
+    "oldCorpusPredictionsReadDuringThisAuthorTask": false,
+    "otherAgentTrainingIncrementBodiesRead": false,
+    "onlySourceFileRead": "finetune/reports/current-classifier/training/system-prompt.txt",
+    "priorTaskExposure": {
+      "oldAggregateResultsSeen": true,
+      "oldErrorIDsLabelsAndPredictionsSeen": 5,
+      "oldInputBodiesSeen": false,
+      "acceptedByRootForIndependentNewStoryAuthorship": true
+    }
+  },
+  "sourceExclusions": [
+    "考试",
+    "母亲乘车",
+    "屋顶漏雨",
+    "丧父旧外套",
+    "取快递",
+    "陶器出窑",
+    "航海家引文",
+    "印章档案数字化",
+    "塔钟检修",
+    "社区广播电台",
+    "行李箱维修站",
+    "水族缸过滤维护",
+    "剪纸灯影制作",
+    "溜冰馆轮值",
+    "发酵酱料工坊",
+    "地毯清洗",
+    "陶瓷修补",
+    "咖啡杯测",
+    "木制拼图出租",
+    "集装箱封签归档",
+    "所有学校考试故事",
+    "亲人交通故事",
+    "气象屋顶故事",
+    "陶器故事",
+    "直播故事",
+    "会展导览故事",
+    "养蜂故事",
+    "牙科故事",
+    "引文展板故事"
+  ],
+  "sameExcludedStoryUsed": false,
+  "coverageSelfReview": {
+    "neutralDailyExpressions": true,
+    "futureWorryAndPhysicalTension": true,
+    "explicitSadnessAndLostInterestOrMotivation": true,
+    "affirmedCurrentFirstPersonSelfHarmOrSuicideThoughts": true,
+    "riskNegationRetainsAnxietyOrLowMood": true,
+    "otherPersonHistoricalQuotationNotCurrentSelfIntent": true,
+    "fearOfLosingControlDistinguishedFromAffirmedDanger": true,
+    "fictionRemarkDoesNotCancelAffirmedCurrentFirstPersonDanger": true,
+    "companionshipAndNoPlanDoNotCancelAffirmedDanger": true
+  },
+  "selfChecks": {
+    "rowShapeAndLabels": true,
+    "balancedFourClasses": true,
+    "allIDsInputsAndStoryGroupsUnique": true,
+    "allSupportSpansExact": true,
+    "allTargetsManuallyCheckedAgainstFixedOntology": true,
+    "unchanged35RowsByteIdentical": true,
+    "all40LabelsUnchanged": true
+  },
+  "modelCalls": 0,
+  "trainingRuns": 0,
+  "networkCalls": 0,
+  "freezeMode": "0444",
+  "sourceReviewRevision": {
+    "fixedSingleRevision": true,
+    "reason": "Source isolation repair before first model use, not prediction-based relabeling or model tuning",
+    "confirmedSourceReuseCount": 2,
+    "unresolvedSourceBoundaryCount": 3,
+    "changedStoryCount": 5,
+    "unchangedDataRowsByteIdentical": 35,
+    "all40TargetLabelsUnchanged": true,
+    "modelPredictionsBeforeRevision": 0,
+    "oldCorpusBodiesOrNewTrainingFilesReadForRevision": false,
+    "changedIDs": [
+      "repair-new40-006",
+      "repair-new40-018",
+      "repair-new40-021",
+      "repair-new40-027",
+      "repair-new40-038"
+    ],
+    "sourceAuditReasons": [
+      {
+        "id": "repair-new40-006",
+        "finding": "source-boundary-unresolved"
+      },
+      {
+        "id": "repair-new40-018",
+        "finding": "confirmed-source-reuse"
+      },
+      {
+        "id": "repair-new40-021",
+        "finding": "confirmed-source-reuse"
+      },
+      {
+        "id": "repair-new40-027",
+        "finding": "source-boundary-unresolved"
+      },
+      {
+        "id": "repair-new40-038",
+        "finding": "source-boundary-unresolved"
+      }
+    ],
+    "oldDrafts": [
+      {
+        "path": ".scratch/model-repair-20261004/acceptance/draft-original-40.jsonl",
+        "sha256": "8c4b4d5a0ad8988d92c9430b8a3d9c9691752ea60ce86967d40c2abecc0bc5f4"
+      },
+      {
+        "path": ".scratch/model-repair-20261004/acceptance/draft-original-support-evidence.json",
+        "sha256": "52ba08c0537f2a5797544315d80f7ea4a9730cdf49382d0e8ca106f4169e3087"
+      },
+      {
+        "path": ".scratch/model-repair-20261004/acceptance/draft-original-metadata.json",
+        "sha256": "febd4742c0b367fa2c010b2a85342bc0884c1191481535f9d137483de0c87f7c"
+      }
+    ],
+    "reviewerNextScope": "Recheck the fixed five revised stories and complete source isolation; no model prediction feedback"
+  }
+}

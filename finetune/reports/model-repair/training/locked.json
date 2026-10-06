@@ -1,0 +1,18 @@
+{
+  "status": "trained-and-locked",
+  "execSessionID": 39091,
+  "observedExitCode": 0,
+  "trainingRuns": 1,
+  "optimizerUpdates": 204,
+  "selectedBatch": 816,
+  "epoch": 2,
+  "adapterSHA256": "845f8bd7cbf00081b9389bd68c6bb60e4bfee7200d5d8e0ba1192474d712da7a",
+  "testDataRead": false,
+  "sourceFingerprintsMatch": true,
+  "datasetsNotYetUsedForModelSelection": [
+    "mechanical80",
+    "oldnatural40",
+    "new40"
+  ],
+  "noFurtherTraining": true
+}

@@ -1,0 +1,5 @@
+assets/closing-videos/*.webm -text
+.scratch export-ignore
+# Preserve captured model Markdown line breaks and command output bytes.
+evals/reports/closing-rag/answers.review.html whitespace=-blank-at-eol
+evals/reports/closing-runtime/mysql-transactions.log whitespace=-blank-at-eol

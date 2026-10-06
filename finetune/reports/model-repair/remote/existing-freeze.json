@@ -1,0 +1,32 @@
+{
+  "provider": "deepseek-json",
+  "model": "deepseek-v4-flash-vision-exp",
+  "baseURL": "https://api.deepseek.com",
+  "thinking": "disabled",
+  "maxTokens": 2048,
+  "temperature": 0,
+  "responseFormat": "json_object",
+  "parseContract": "exact unique label; four Chinese values; finish_reason stop",
+  "modelAttempts": 120,
+  "retries": 0,
+  "datasetsAlreadyExposed": true,
+  "sources": [
+    {
+      "path": ".scratch/model-repair-20261004/remote/existing-runner-snapshot.py",
+      "sha256": "0679a671188737d2ed4d0eee71160516d099e5ff4f4ae8ff373624e125349f10",
+      "originalPath": "finetune/scripts/evaluate_runtime_classifier.py"
+    },
+    {
+      "path": "finetune/reports/current-classifier/remote-profile/system-prompt.txt",
+      "sha256": "66decc150313465f089726ee35a353cb28090d9fd5ff56c013409d0cae5fb2cf"
+    },
+    {
+      "path": "finetune/data/general-routing-v2/general-test.jsonl",
+      "sha256": "9e4ad6492e2cb6784b66e90a79acdbe08b37b2e8a9a58917bd58c788b0f848bd"
+    },
+    {
+      "path": "finetune/data/current-classifier/natural-v12-r2-40.jsonl",
+      "sha256": "e0b78f203c5c9e9592422ff22d9bc9660f3848c9302b1bc8b083926c84c04f04"
+    }
+  ]
+}

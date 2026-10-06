@@ -8,9 +8,29 @@ from __future__ import annotations
 
 import asyncio
 
+import pytest
+
 from app.core.config import Settings
 from app.schemas.dtos import AiMessage
 from app.services.ai import AiClient
+
+
+@pytest.mark.parametrize("usage", [None, {"completion_tokens_details": None}])
+def test_optional_remote_metadata_does_not_interrupt_valid_reply(usage):
+    client = AiClient(_mock_settings())
+    reply = client._openai_content({"model": "test-alias", "usage": usage,
+                                   "choices": [{"finish_reason": "stop", "message": {"content": "valid reply"}}]})
+    assert reply == "valid reply"
+    assert client.last_completion_metadata["finishReason"] == "stop"
+    assert client.last_completion_metadata["reasoningTokens"] is None
+
+
+@pytest.mark.parametrize("reason", ["stop", "length"])
+def test_local_completion_preserves_end_reason_for_comparison_gate(reason):
+    client = AiClient(_mock_settings())
+    assert client._ollama_content({"model": "local-tag", "done_reason": reason, "eval_count": 20,
+                                   "message": {"content": "some output"}}) == "some output"
+    assert client.last_completion_metadata["finishReason"] == reason
 
 
 def _mock_settings() -> Settings:

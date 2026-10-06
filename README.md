@@ -11,7 +11,7 @@ Xling 是一个通用的心理健康支持与咨询辅助系统，帮助医院�
 - 专业支持与人工审核：高风险消息暂停常规自动支持并发送固定安全提示，进入医生或心理健康专业人员负责的处理路径；系统记录批准辅助、拒绝、转介或后续关注决定，并准确显示等待状态。
 - 认知行为四维追问：使用 CBT（认知行为方法，通过事件、想法、身体反应和行为四方面梳理困扰）逐步理解用户当前处境。
 - 24 小时行动计划与次日反馈：四方面信息完整后生成可逐项执行的计划；次日反馈没有改善或情况恶化时可再次进入人工审核。
-- 知识增强回答：使用 RAG（先检索知识库，再让模型依据相关内容回答）提供更稳定的心理健康支持信息。
+- 知识增强回答：使用 RAG（先检索知识库，再让模型依据相关内容回答）提供心理健康支持信息；机构热线和预约资源可通过后台知识上传提供，回答保留测试标识及预约快照的适用限制。
 - 用户可控记忆：分别管理当前会话、用户主动填写的支持背景和用户确认的长期记忆卡片；无记忆会话不会读取或新增长期记忆。
 - 自愿量表筛查：提供 PHQ-9（抑郁相关筛查问卷）和 GAD-7（焦虑相关筛查问卷），结果只用于筛查与趋势参考，不作为诊断。
 - 管理后台：查看安全评估、人工审核、对话、知识库、任务执行记录和失败任务。
@@ -57,12 +57,12 @@ flowchart LR
 | `RiskGuardianAgent` | 判断低、中、高风险，并结合近期记录识别持续上升趋势 | 明确规则、分类模型、风险轨迹 |
 | `KnowledgeAgent` | 改写检索词并查找相关知识内容 | 向量检索，失败时使用本地混合检索 |
 | `CBTAgent` | 完成四维追问；信息完整后生成 24 小时行动计划 | 结构化状态与模型生成 |
-| `CompanionAgent` | 回答日常学习、编程和普通生活问题 | 通用对话模型 |
+| `CompanionAgent` | 回答日常学习、编程和普通生活问题；回答经过既有分流的机构资源查询 | 通用对话模型；资源查询读取知识库 |
 | `CounselorAgent` | 生成非诊断性的心理支持回复；高风险时只在人工批准后继续 | 检索知识、明确图状态和模型生成 |
 
 这些名称表示编排流程中的专职角色，不表示八个独立模型。回复模型、分类模型、数据库和知识库由这些角色按职责共享使用。
 
-开发和实际联调采用“远程回答模型 + 本地风险分类器”的分工：日常回答、心理支持回复和结构化内容由兼容 OpenAI 的远程接口生成；安全风险分类由本机 Ollama 中的分类模型完成。两者相互独立，远程回答接口不可替代本地风险分类器。`mock` 模式会同时模拟这两部分，只用于无外部依赖的演示和自动测试。
+开发和实际联调采用“远程回答模型 + 本地风险分类器”的分工：日常回答、心理支持回复和结构化内容由兼容 OpenAI 的远程接口生成；安全分流先检查既有风险词规则，未命中时调用本机 Ollama 分类模型。两者相互独立，远程回答接口不可替代本地风险分类器。`mock` 模式会同时模拟这两部分，只用于无外部依赖的演示和自动测试。
 
 ## 编排流程
 
@@ -88,6 +88,8 @@ flowchart TD
     FollowUp --> End
 
     Gate -- 低风险或中风险 --> Knowledge[KnowledgeAgent<br/>检索支持知识]
+    Gate -- 非高风险资源查询 --> Resource[CompanionAgent<br/>检索机构资源并回答]
+    Resource --> End
     Knowledge --> CBT[CBTAgent<br/>更新四维追问状态]
     CBT --> Complete{四方面是否完整}
     Complete -- 否 --> Question[提出下一条自然追问]
@@ -208,14 +210,19 @@ OPENAI_API_KEY=在本机填写有效密钥
 OPENAI_MODEL=gpt-4o-mini
 
 OLLAMA_BASE_URL=http://host.docker.internal:11434
-OLLAMA_CLASSIFIER_MODEL=xling-cls-3b-ft:latest
+OLLAMA_CLASSIFIER_MODEL=xling-general-cls-05b:quoted-f16
+CLASSIFIER_INPUT_FORMAT=quoted
 ```
 
 - `AI_PROVIDER=openai` 表示回答走兼容 OpenAI 的远程 API（应用程序接口）。
 - `AI_MAX_TOKENS` 是单次回答允许生成的最大模型计量单位数，默认 2048；调高会增加响应时间和模型费用。
 - `OPENAI_BASE_URL`、`OPENAI_API_KEY` 和 `OPENAI_MODEL` 必须属于同一个远程服务。
 - `OLLAMA_BASE_URL` 是容器访问 Mac 上 Ollama 的地址；直接在 Mac 上运行应用时使用 `http://localhost:11434`。
-- `OLLAMA_CLASSIFIER_MODEL` 必须是 `ollama list` 中已存在的本地分类器版本。通用分类器的数据、训练配置与固定评测结果见 [finetune/README.md](finetune/README.md)；切换模型时核对请求契约并完成应用回归，训练和评测脚本不会自动替换当前配置。
+- `OLLAMA_CLASSIFIER_MODEL` 必须是 `ollama list` 中已存在的本地分类器版本，`CLASSIFIER_INPUT_FORMAT` 与其训练输入契约对应。本机已选用上面的 `quoted-f16` 与 `quoted` 配置，原 `xling-general-cls-05b:latest` 保留；权重仅存本机。数据、输入包装与固定评测结果见 [finetune/README.md](finetune/README.md)，当前选择与配置证据见 [model-repair-evaluation.json](finetune/reports/model-repair-evaluation.json)。
+
+Docker Compose 已传递分类器输入格式。模型分数直接评价分类输出，实际客户端接入、既有风险词规则与完整业务流程分别验证；固定小样本的真实 RAG 对照及复跑入口见 [RAG 评测](evals/rag/README.md)。
+
+工程冻结版本的成功录屏、所测依赖及完整复跑入口见 [工程验证与交付](docs/project-validation.md)。
 
 如需启用真实知识向量检索，还需配置：
 

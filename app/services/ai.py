@@ -7,6 +7,7 @@ from typing import Iterable
 import httpx
 
 from app.core import diagnostics
+from app.core.classifier_contract import classifier_user_content
 from app.core.config import Settings
 from app.core.enums import IntentType, RiskLevel
 from app.schemas.dtos import AiMessage
@@ -45,6 +46,11 @@ class PromptTemplates:
                 "不要主动做心理测评，不要输出风险等级、心理标签、诊断结论或报告口吻。"
                 f"用户显示名：{display_name}"
             )
+            if context:
+                content += (
+                    "\n根据以下检索资料回答；资料不足时明确说明，不编造机构电话或可用时段。"
+                    "保留资料中的测试标识与快照限制，不把测试配置当成真实服务。\n检索资料：\n" + context
+                )
             return AiMessage(role="system", content=content)
         crisis_rule = ""
         if risk == RiskLevel.HIGH:
@@ -112,6 +118,7 @@ class AiClient:
         初始化不建立长期网络连接，也不加载本地模型文件。
         """
         self.settings = settings
+        self.last_completion_metadata: dict | None = None
 
     def complete(self, messages: list[AiMessage]) -> str:
         """按配置同步获取完整模型回复。
@@ -136,7 +143,7 @@ class AiClient:
             provider = self.settings.ai_provider.lower()
             if provider == "mock":
                 return self._mock_classify(text)
-            return self._ollama_classify([AiMessage(role="user", content=text)])
+            return self._ollama_classify(text)
 
     async def aclassify(self, text: str) -> str:
         """异步调用本地分类模型，模拟模式直接执行关键词规则。
@@ -147,7 +154,7 @@ class AiClient:
             provider = self.settings.ai_provider.lower()
             if provider == "mock":
                 return self._mock_classify(text)
-            return await self._ollama_classify_async([AiMessage(role="user", content=text)])
+            return await self._ollama_classify_async(text)
 
     def generate_sub_queries(self, query: str, n: int = 3) -> list[str]:
         """调用模型生成替代查询，并检查返回值是否为字符串列表。
@@ -242,33 +249,44 @@ class AiClient:
         }
         response = httpx.post(f"{self.settings.ollama_base_url}/api/chat", json=payload, timeout=60)
         response.raise_for_status()
-        return response.json()["message"]["content"]
+        return self._ollama_content(response.json())
 
-    def _ollama_classify(self, messages: list[AiMessage]) -> str:
+    def _ollama_content(self, data: dict) -> str:
+        content = data["message"]["content"]
+        self.last_completion_metadata = {
+            "modelReturned": data.get("model", self.settings.ollama_model),
+            "finishReason": data.get("done_reason"), "completionTokens": data.get("eval_count"),
+            "reasoningTokens": None, "outputCharacters": len(content) if isinstance(content, str) else None,
+        }
+        return content
+
+    def _classifier_payload(self, text: str) -> dict:
+        return {
+            "model": self.settings.ollama_classifier_model,
+            "messages": [{
+                "role": "user",
+                "content": classifier_user_content(text, self.settings.classifier_input_format),
+            }],
+            "stream": False,
+        }
+
+    def _ollama_classify(self, text: str) -> str:
         """同步请求本地专用分类模型。
 
         系统提示和生成参数由注册分类器的 Modelfile 提供，避免覆盖训练契约。
         30 秒超时；返回去掉首尾空白的模型文本，不在此验证标签。
         """
-        payload = {
-            "model": self.settings.ollama_classifier_model,
-            "messages": [m.model_dump() for m in messages],
-            "stream": False,
-        }
+        payload = self._classifier_payload(text)
         response = httpx.post(f"{self.settings.ollama_base_url}/api/chat", json=payload, timeout=30)
         response.raise_for_status()
         return self._classifier_response(response)
 
-    async def _ollama_classify_async(self, messages: list[AiMessage]) -> str:
+    async def _ollama_classify_async(self, text: str) -> str:
         """用异步客户端请求本地分类模型。
 
         参数与同步分类一致；上下文管理器在请求结束或失败后关闭客户端。
         """
-        payload = {
-            "model": self.settings.ollama_classifier_model,
-            "messages": [m.model_dump() for m in messages],
-            "stream": False,
-        }
+        payload = self._classifier_payload(text)
         async with httpx.AsyncClient(timeout=30) as client:
             response = await client.post(f"{self.settings.ollama_base_url}/api/chat", json=payload)
             response.raise_for_status()
@@ -309,7 +327,7 @@ class AiClient:
         async with httpx.AsyncClient(timeout=120) as client:
             response = await client.post(f"{self.settings.ollama_base_url}/api/chat", json=payload)
             response.raise_for_status()
-            return response.json()["message"]["content"]
+            return self._ollama_content(response.json())
 
     async def _ollama_stream(self, messages: list[AiMessage]):
         """逐行读取本地模型的流式响应并提取非空文本片段。
@@ -349,7 +367,19 @@ class AiClient:
         }
         response = httpx.post(f"{self.settings.openai_base_url}/chat/completions", headers=headers, json=payload, timeout=120)
         response.raise_for_status()
-        return response.json()["choices"][0]["message"]["content"]
+        return self._openai_content(response.json())
+
+    def _openai_content(self, data: dict) -> str:
+        choice = data["choices"][0]
+        content = choice["message"]["content"]
+        usage = data.get("usage") or {}
+        self.last_completion_metadata = {
+            "modelReturned": data.get("model"), "finishReason": choice.get("finish_reason"),
+            "completionTokens": usage.get("completion_tokens"),
+            "reasoningTokens": (usage.get("completion_tokens_details") or {}).get("reasoning_tokens"),
+            "outputCharacters": len(content) if isinstance(content, str) else None,
+        }
+        return content
 
     async def _openai_async(self, messages: list[AiMessage]) -> str:
         """异步请求远程模型的一次完整回复。
@@ -367,7 +397,7 @@ class AiClient:
         async with httpx.AsyncClient(timeout=120) as client:
             response = await client.post(f"{self.settings.openai_base_url}/chat/completions", headers=headers, json=payload)
             response.raise_for_status()
-            return response.json()["choices"][0]["message"]["content"]
+            return self._openai_content(response.json())
 
     async def _openai_stream(self, messages: list[AiMessage]):
         """从远程服务持续推送的数据行中提取回复增量。

@@ -1,0 +1,5319 @@
+{
+  "status": "completed",
+  "observedAtUTC": "2026-10-06T14:22:47.115Z",
+  "scope": "real UI and models; fictional engineering persona",
+  "scenes": [
+    {
+      "name": "daily",
+      "message": "请用两句话说明 Python 的列表和元组有什么不同。",
+      "badge": "DONE",
+      "visibleText": "\n    \n    我\n    请用两句话说明 Python 的列表和元组有什么不同。\n  \n    Xling\n    列表是可变的（mutable），创建后可以增删改元素，用方括号表示；元组是不可变的（immutable），一旦创建就不能修改，用圆括号表示。因此元组通常用于存放固定不变的数据，速度略快且能作为字典的键，而列表更适合需要频繁改动的有序数据集合。\n  "
+    },
+    {
+      "name": "support-first-turn",
+      "message": "最近工作汇报让我有些紧张，想到明天要向团队介绍进展就担心表达不清。",
+      "badge": "DONE",
+      "visibleText": "\n    \n    我\n    最近工作汇报让我有些紧张，想到明天要向团队介绍进展就担心表达不清。\n  \n    Xling\n    听起来明天要在团队面前讲进展，这种“怕表达不清”的紧张很容易让人反复预演、越想越绷。我们可以先不急着解决全部问题，我想更了解你一点：以前遇到类似的紧张时，你通常会怎么做？有没有一些习惯性的应对方式，比如反复改稿、拖到最后一刻、找人演练、深呼吸，或者干脆回避？知道这些后，我们再一起看哪些方式对明天可能更有帮助。\n  "
+    },
+    {
+      "name": "support-dimensions",
+      "message": "触发事件是明天的团队汇报；我的想法是担心准备不够、表达不好；身体反应是心跳快、手心出汗；我的行为是反复修改幻灯片、暂时回避打开提纲。",
+      "badge": "DONE",
+      "visibleText": "\n    \n    我\n    最近工作汇报让我有些紧张，想到明天要向团队介绍进展就担心表达不清。\n  \n    Xling\n    听起来明天要在团队面前讲进展，这种“怕表达不清”的紧张很容易让人反复预演、越想越绷。我们可以先不急着解决全部问题，我想更了解你一点：以前遇到类似的紧张时，你通常会怎么做？有没有一些习惯性的应对方式，比如反复改稿、拖到最后一刻、找人演练、深呼吸，或者干脆回避？知道这些后，我们再一起看哪些方式对明天可能更有帮助。\n  \n    我\n    触发事件是明天的团队汇报；我的想法是担心准备不够、表达不好；身体反应是心跳快、手心出汗；我的行为是反复修改幻灯片、暂时回避打开提纲。\n  \n    Xling\n    你把这四部分理得很清楚：触发是明天的团队汇报，想法是“准备不够、表达不好”，身体上是心跳快、手心出汗，行为上是反复改幻灯片、又暂时不去打开提纲。这几样常常会互相加码——越紧张越想改得完美，越不去打开提纲，心里越没底，身体也就越紧绷。所以计划不追求“明天讲得完美”，而是先把顺序和节奏稳下来。可以这样试：\n\n1. 用5分钟打开提纲，只写三行：当前进展、关键数据、下一步需要团队配合什么；先不打开幻灯片。\n2. 给幻灯片修改设10分钟计时，只检查标题、结论页和关键数字；时间一到就关闭文件，不再反复改。\n3. 找安静处用2分钟小声演练开场和结尾，各说一遍，重点是说清楚第一句和最后一句。\n4. 心跳快或手心出汗时，做3轮缓慢呼吸：吸气4秒、呼气6秒，喝几口水，然后回到提纲看下一句话。\n5. 睡前在便签上写明天汇报前要做的3件小事，并写一句应急话术：“我先概括一下目前的关键进展。”\n\n这五步按顺序做，通常比“再改一版幻灯片”更能减轻那种心里悬着的感觉。你觉得从哪一步开始最不费劲？如果某一步对你明天的实际时间安排不合适，我们可以一起把它调短或换个做法。\n  "
+    }
+  ],
+  "chats": [
+    {
+      "status": 200,
+      "events": [
+        {
+          "event": "meta",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": null,
+            "message": null,
+            "noMemory": false,
+            "code": null,
+            "type": "meta"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "列表",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "是可",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "变的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "（",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "m",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "utable",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "），",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "创建",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "后",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "可以",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "增",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "删",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "改",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "元素",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "用",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "方",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "括号",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "表示",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "；",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "元",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "组",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "是不可",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "变的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "（",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "imm",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "utable",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "），",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "一旦",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "创建",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "就不能",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "修改",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "用",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "圆",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "括号",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "表示",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "因此",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "元",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "组",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "通常",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "用于",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "存放",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "固定",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "不变",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "的数据",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "速度",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "略",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "快",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "且",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "能",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "作为",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "字典",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "键",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "而",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "列表",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "更适合",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "需要",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "频繁",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "改",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "动的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "有序",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "数据",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "集合",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "done",
+          "data": {
+            "sessionId": "920fc20ac4be4a4191191f280b56230e",
+            "content": null,
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "done"
+          }
+        }
+      ]
+    },
+    {
+      "status": 200,
+      "events": [
+        {
+          "event": "meta",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": null,
+            "message": null,
+            "noMemory": false,
+            "code": null,
+            "type": "meta"
+          }
+        },
+        {
+          "event": "cbt",
+          "data": {
+            "type": "cbt",
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "active": true,
+            "completedCount": 3,
+            "nextDimension": "behavior",
+            "complete": false
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "听起来",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "明天",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "要在",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "团队",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "面前",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "讲",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "进展",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "这种",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "“",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "怕",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "表达",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "不清",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "”",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "紧张",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "很容易",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "让人",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "反复",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "预",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "演",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "越想",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "越",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "绷",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "我们可以",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "先",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "不",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "急着",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "解决",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "全部",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "问题",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "我想",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "更",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "了解",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "你",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "一点",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "：",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "以前",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "遇到",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "类似的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "紧张",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "时",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "你",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "通常会",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "怎么做",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "？",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "有没有",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "一些",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "习惯",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "性的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "应对",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "方式",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "比如",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "反复",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "改",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "稿",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "拖",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "到",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "最后一",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "刻",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "找人",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "演练",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "深呼吸",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "或者",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "干脆",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "回避",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "？",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "知道",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "这些",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "后",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "我们再",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "一起",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "看",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "哪些",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "方式",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "对",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "明天",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "可能",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "更有",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "帮助",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "done",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": null,
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "done"
+          }
+        }
+      ]
+    },
+    {
+      "status": 200,
+      "events": [
+        {
+          "event": "meta",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": null,
+            "message": null,
+            "noMemory": false,
+            "code": null,
+            "type": "meta"
+          }
+        },
+        {
+          "event": "cbt",
+          "data": {
+            "type": "cbt",
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "active": false,
+            "completedCount": 4,
+            "nextDimension": null,
+            "complete": true
+          }
+        },
+        {
+          "event": "action_plan",
+          "data": {
+            "type": "action_plan",
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "planId": 3,
+            "feedbackDueAt": "2026-10-07T14:23:17+00:00",
+            "feedbackAvailable": true,
+            "items": [
+              {
+                "id": 9,
+                "content": "用5分钟打开提纲，只写三行：当前进展、关键数据、下一步需要团队配合什么；先不打开幻灯片。",
+                "order": 0,
+                "completed": false
+              },
+              {
+                "id": 10,
+                "content": "给幻灯片修改设10分钟计时，只检查标题、结论页和关键数字；时间一到就关闭文件，不再反复改。",
+                "order": 1,
+                "completed": false
+              },
+              {
+                "id": 11,
+                "content": "找安静处用2分钟小声演练开场和结尾，各说一遍，重点是说清楚第一句和最后一句。",
+                "order": 2,
+                "completed": false
+              },
+              {
+                "id": 12,
+                "content": "心跳快或手心出汗时，做3轮缓慢呼吸：吸气4秒、呼气6秒，喝几口水，然后回到提纲看下一句话。",
+                "order": 3,
+                "completed": false
+              },
+              {
+                "id": 13,
+                "content": "睡前在便签上写明天汇报前要做的3件小事，并写一句应急话术：“我先概括一下目前的关键进展。”",
+                "order": 4,
+                "completed": false
+              }
+            ]
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "你",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "把这",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "四",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "部分",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "理",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "得很",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "清楚",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "：",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "触发",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "明天的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "团队",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "汇报",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "想法",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "“",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "准备",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "不够",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "表达",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "不好",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "”，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "身体",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "上是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "心跳",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "快",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "手心",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "出汗",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "行为",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "上是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "反复",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "改",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "幻灯片",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "又",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "暂时",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "不去",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "打开",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "提纲",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "这几",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "样",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "常常",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "会",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "互相",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "加",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "码",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "——",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "越",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "紧张",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "越想",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "改",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "得",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "完美",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "越",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "不去",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "打开",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "提纲",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "心里",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "越",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "没",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "底",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "身体",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "也就",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "越",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "紧绷",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "所以",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "计划",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "不",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "追求",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "“",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "明天",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "讲",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "得",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "完美",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "”，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "而是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "先把",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "顺序",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "和",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "节奏",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "稳",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "下来",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "可以",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "这样",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "试",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "：\n\n",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "1",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": ".",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": " ",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "用",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "5",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "分钟",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "打开",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "提纲",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "只",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "写",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "三",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "行",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "：",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "当前",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "进展",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "关键",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "数据",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "下一步",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "需要",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "团队",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "配合",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "什么",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "；",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "先",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "不",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "打开",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "幻灯片",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "。\n",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "2",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": ".",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": " ",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "给",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "幻灯片",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "修改",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "设",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "10",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "分钟",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "计时",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "只",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "检查",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "标题",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "结论",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "页",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "和",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "关键",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "数字",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "；",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "时间",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "一到",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "就",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "关闭",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "文件",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "不再",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "反复",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "改",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "。\n",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "3",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": ".",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": " ",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "找",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "安静",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "处",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "用",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "2",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "分钟",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "小声",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "演练",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "开场",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "和",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "结尾",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "各",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "说",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "一遍",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "重点",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "是说",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "清楚",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "第一",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "句",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "和",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "最后",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "一句",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "。\n",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "4",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": ".",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": " ",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "心跳",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "快",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "或",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "手心",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "出汗",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "时",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "做",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "3",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "轮",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "缓慢",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "呼吸",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "：",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "吸气",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "4",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "秒",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "呼气",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "6",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "秒",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "喝",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "几",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "口水",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "然后",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "回到",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "提纲",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "看",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "下一",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "句话",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "。\n",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "5",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": ".",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": " ",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "睡前",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "在",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "便",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "签",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "上",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "写",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "明天",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "汇报",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "前",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "要",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "做的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "3",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "件",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "小事",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "并",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "写",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "一句",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "应急",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "话",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "术",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "：“",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "我先",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "概括",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "一下",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "目前",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "的关键",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "进展",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "。”\n\n",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "这",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "五",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "步",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "按",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "顺序",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "做",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "通常",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "比",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "“",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "再",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "改",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "一",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "版",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "幻灯片",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "”",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "更能",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "减轻",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "那种",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "心里",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "悬",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "着",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "的感觉",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "你觉得",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "从",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "哪",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "一步",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "开始",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "最",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "不",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "费",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "劲",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "？",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "如果",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "某",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "一步",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "对你",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "明天的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "实际",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "时间",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "安排",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "不合适",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "我们可以",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "一起",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "把它",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "调",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "短",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "或",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "换个",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "做法",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "done",
+          "data": {
+            "sessionId": "2e55f9c1aec64a5d9a56b96d9756ec9a",
+            "content": null,
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "done"
+          }
+        }
+      ]
+    }
+  ],
+  "planText": "\n          \n            \n              行动计划\n              24 小时行动计划\n            \n            0/5 已完成\n          \n          \n          用5分钟打开提纲，只写三行：当前进展、关键数据、下一步需要团队配合什么；先不打开幻灯片。替换给幻灯片修改设10分钟计时，只检查标题、结论页和关键数字；时间一到就关闭文件，不再反复改。替换找安静处用2分钟小声演练开场和结尾，各说一遍，重点是说清楚第一句和最后一句。替换心跳快或手心出汗时，做3轮缓慢呼吸：吸气4秒、呼气6秒，喝几口水，然后回到提纲看下一句话。替换睡前在便签上写明天汇报前要做的3件小事，并写一句应急话术：“我先概括一下目前的关键进展。”替换\n          \n            提前反馈：计划执行得怎么样？（次日再反馈也可以）\n            \n              和计划前相比，你现在的状态：\n              \n                好转了\n                差不多\n                更糟了\n              \n              \n              \n                提交反馈\n                取消\n              \n              \n            \n          \n        ",
+  "feedback": {
+    "id": 3,
+    "planId": 3,
+    "improvementStatus": "improved",
+    "notes": "工程复现中提前反馈：完成了一个小步骤，压力有所缓解。",
+    "itemsSnapshot": [
+      {
+        "id": 9,
+        "completed": true
+      },
+      {
+        "id": 10,
+        "completed": false
+      },
+      {
+        "id": 11,
+        "completed": false
+      },
+      {
+        "id": 12,
+        "completed": false
+      },
+      {
+        "id": 13,
+        "completed": false
+      }
+    ],
+    "submittedAt": "2026-10-06T14:23:22+00:00",
+    "escalated": false
+  },
+  "video": "/Users/assle/dev/mindbridge-py/.scratch/closing-evidence/browser-support-verified/page@16135fa59b16ba9f7a37c70da0ee2b68.webm"
+}

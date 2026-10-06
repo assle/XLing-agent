@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -11,6 +12,7 @@ class Settings(BaseSettings):
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "xling-qwen2.5-7b-ft:latest"
     ollama_classifier_model: str = "xling-cls-3b-ft:latest"
+    classifier_input_format: Literal["plain", "quoted"] = "plain"
     finetuned_model_name: str = "xling-qwen2.5-7b-ft:latest"
     finetuned_model_dir: str = "models/xling-qwen2.5-7b-ft"
     finetuned_model_file: str = "xling-qwen2.5-7b-ft-q4_k_m.gguf"

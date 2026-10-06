@@ -1,0 +1,79 @@
+{
+  "freezeDate": "2026-10-06",
+  "scope": "Observed local replay dependencies, not a portable model-weight distribution",
+  "host": {
+    "hostPython": "3.12.14",
+    "hostPackages": {
+      "fastapi": "0.115.6",
+      "langgraph": "0.4.3",
+      "langgraph-checkpoint-sqlite": "2.0.11",
+      "sqlalchemy": "2.0.36",
+      "redis": "5.2.1",
+      "chromadb": "0.5.23",
+      "httpx": "0.28.1",
+      "pydantic": "2.13.4",
+      "mcp": "2.1.1",
+      "openpyxl": "3.1.5",
+      "pytest": "9.1.1",
+      "ruff": "0.16.5",
+      "mypy": "1.20.2"
+    },
+    "node": "v24.19.0",
+    "playwrightCore": "1.62.1",
+    "edge": "154.0.4258.62",
+    "ffmpegInstallDirectory": ".scratch/closing-runtime/playwright",
+    "platform": "macOS arm64"
+  },
+  "container": {
+    "python": "3.12.14",
+    "packages": {
+      "fastapi": "0.115.6",
+      "langgraph": "0.4.3",
+      "langgraph-checkpoint-sqlite": "2.0.11",
+      "sqlalchemy": "2.0.36",
+      "redis": "5.2.1",
+      "chromadb": "0.5.23",
+      "httpx": "0.28.1",
+      "pydantic": "2.13.5",
+      "mcp": "2.1.1",
+      "openpyxl": "3.1.5"
+    }
+  },
+  "classifier": {
+    "ollamaVersion": "0.30.8",
+    "tag": "xling-general-cls-05b:quoted-f16",
+    "manifestDigest": "78c2a6424ad51583a0eb8b45be3d7712a08453384c47d88f6e1d59c135a9d25b",
+    "details": {
+      "parent_model": "",
+      "format": "gguf",
+      "family": "qwen2",
+      "families": [
+        "qwen2"
+      ],
+      "parameter_size": "494.03M",
+      "quantization_level": "F16",
+      "context_length": 32768,
+      "embedding_length": 896
+    },
+    "weightsIncluded": false,
+    "privateModelStore": ".scratch/closing-runtime/models",
+    "serverBinary": ".scratch/closing-runtime/ollama-0.30.8/ollama",
+    "baseURL": "http://127.0.0.1:11434"
+  },
+  "answerProvider": {
+    "requestedAlias": "deepseek-v4-flash-vision-exp",
+    "servedIdentifierObserved": "deepseek-flash",
+    "maxTokens": 4096,
+    "credentialLocation": ".env (not included)",
+    "immutableWeightIdentityAvailable": false
+  },
+  "embedding": {
+    "requestedModel": "qwen3.7-text-embedding-flash",
+    "credentialLocation": ".env (not included)"
+  },
+  "requiredExternalServices": [
+    "Docker Desktop",
+    "MySQL and Redis from isolated Compose project",
+    "Configured compatible answer and embedding endpoints"
+  ]
+}

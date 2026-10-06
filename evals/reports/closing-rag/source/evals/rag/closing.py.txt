@@ -1,0 +1,410 @@
+"""Evidence-span retrieval comparison and paired answers for a reviewed small corpus."""
+
+from __future__ import annotations
+
+import argparse
+import asyncio
+import hashlib
+import html
+import json
+import math
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+from urllib.parse import urlsplit
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from app.core.bootstrap import create_schema, seed_data
+from app.core.config import Settings
+from app.core.enums import IntentType, RiskLevel
+from app.models.entities import KnowledgeChunk
+from app.schemas.dtos import AiMessage
+from app.services.ai import AiClient, PromptTemplates
+from app.services.knowledge import KnowledgeService, SearchResult
+
+ROOT = Path(__file__).resolve().parents[2]
+RUBRIC_PATH = ROOT / "evals/rag/closing-answer-rubric.json"
+
+
+def fingerprint(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def knowledge_fingerprints() -> dict[str, str]:
+    return {p.name: fingerprint(p) for p in sorted((ROOT / "app/knowledge").glob("*.md"))}
+
+
+def load_cases(path: Path) -> list[dict[str, Any]]:
+    cases = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+    if not cases or len({case["id"] for case in cases}) != len(cases):
+        raise ValueError("Evaluation needs nonempty cases with unique IDs")
+    for case in cases:
+        if not isinstance(case["answerable"], bool) or case["answerable"] != bool(case["expectedEvidence"]):
+            raise ValueError("Answerability must agree with frozen evidence")
+    return cases
+
+
+def require_review(review: dict, cases: list[dict], dataset_sha: str, sources: dict[str, str]) -> None:
+    if review.get("reviewStatus") != "approved" or review.get("reviewerType") != "human":
+        raise ValueError("Human evidence review is required before model evaluation")
+    if set(review.get("reviewedCaseIDs", [])) != {case["id"] for case in cases}:
+        raise ValueError("The review must cover every case")
+    if review.get("datasetSHA256") != dataset_sha or review.get("knowledgeSourceSHA256") != sources:
+        raise ValueError("Dataset or knowledge changed after review")
+
+
+def normalized(text: str) -> str:
+    return "".join(text.split()).casefold()
+
+
+def evidence_matches(item: SearchResult, evidence: dict) -> bool:
+    spans = evidence["requiredSpans"]
+    return (
+        item.source == evidence["source"] and bool(spans)
+        and all(normalized(span) in normalized(item.content) for span in spans)
+    )
+
+
+def score_case(case: dict, results: list[SearchResult], top_k: int) -> dict:
+    retrieved = []
+    first = None
+    for rank, item in enumerate(results[:top_k], 1):
+        relevant = any(evidence_matches(item, evidence) for evidence in case["expectedEvidence"])
+        if relevant and first is None:
+            first = rank
+        retrieved.append({"rank": rank, "chunkID": item.chunk_id, "source": item.source,
+                          "content": item.content, "score": item.score, "relevant": relevant})
+    return {"id": case["id"], "answerable": case["answerable"], "safetyCritical": case["safetyCritical"],
+            "hit": first is not None, "firstRelevantRank": first,
+            "reciprocalRank": 1 / first if first else 0, "retrieved": retrieved}
+
+
+def summarize(results: list[dict]) -> dict:
+    answerable = [row for row in results if row["answerable"]]
+    critical = [row for row in answerable if row["safetyCritical"]]
+    unknown = [row for row in results if not row["answerable"]]
+    latency = sorted(row["latencyMs"] for row in results)
+    return {
+        "totalCases": len(results), "answerableCases": len(answerable),
+        "hitAt4": sum(row["hit"] for row in answerable) / len(answerable) if answerable else None,
+        "mrr": sum(row["reciprocalRank"] for row in answerable) / len(answerable) if answerable else None,
+        "safetyCriticalCases": len(critical),
+        "safetyEvidenceMissRate": sum(not row["hit"] for row in critical) / len(critical) if critical else None,
+        "unanswerableCases": len(unknown),
+        "unanswerableWithRetrievedContent": sum(bool(row["retrieved"]) for row in unknown),
+        "failedCases": sum(row.get("errorType") is not None for row in results),
+        "latencyP50Ms": latency[math.ceil(len(latency) * .5) - 1] if latency else None,
+        "latencyP95Ms": latency[math.ceil(len(latency) * .95) - 1] if latency else None,
+    }
+
+
+def write_report(path: Path, report: dict) -> None:
+    path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
+
+
+def run_retrieval(settings: Settings, dataset: Path, review_path: Path, output: Path,
+                  resource_package: Path | None = None) -> None:
+    cases = load_cases(dataset)
+    review = json.loads(review_path.read_text())
+    sources = knowledge_fingerprints()
+    resource = None
+    if resource_package is not None:
+        if resource_package.suffix != ".md" or resource_package.name in sources:
+            raise ValueError("Deployment resource package must be a distinct Markdown source")
+        resource = {"path": str(resource_package.resolve().relative_to(ROOT)),
+                    "source": resource_package.name, "sha256": fingerprint(resource_package)}
+        sources[resource_package.name] = resource["sha256"]
+    require_review(review, cases, fingerprint(dataset), sources)
+    output.mkdir(parents=True, exist_ok=False)
+    report: dict[str, Any] = {
+        "status": "preparing", "createdAtUTC": datetime.now(timezone.utc).isoformat(),
+        "scope": "fixed-query retrieval component; not complete support workflow",
+        "datasetSHA256": fingerprint(dataset), "knowledgeSourceSHA256": sources,
+        "reviewSHA256": fingerprint(review_path), "topK": 4, "cases": cases,
+        "deploymentResourcePackage": resource,
+        "embeddingModelRequested": settings.openai_embedding_model,
+        "effectiveConfiguration": {
+            "chunkSize": settings.knowledge_chunk_size, "chunkOverlap": settings.knowledge_chunk_overlap,
+            "neighborExpansion": "only first ranked chunk; previous and next source index",
+            "embeddingEndpointHost": urlsplit(settings.embedding_base_url or settings.openai_base_url).hostname,
+        },
+        "sourceSHA256": {str(p.relative_to(ROOT)): fingerprint(p) for p in [
+            Path(__file__), ROOT / "app/services/knowledge.py", ROOT / "app/services/vector_store.py",
+        ]}, "results": {"vector": [], "local": []},
+    }
+    report_path = output / "retrieval.json"
+    write_report(report_path, report)
+    engine = create_engine(f"sqlite:///{(output / 'evaluation.db').resolve()}")
+    try:
+        create_schema(engine)
+        factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+        seed_settings = settings.model_copy(update={"knowledge_vector_enabled": False, "knowledge_vector_required": False})
+        with factory() as db:
+            seed_data(db, seed_settings)
+            if resource_package is not None:
+                KnowledgeService(db, seed_settings).ensure_source(resource_package.name, resource_package.read_text())
+            chunks = db.query(KnowledgeChunk).order_by(KnowledgeChunk.source, KnowledgeChunk.source_index).all()
+            report["actualCorpus"] = [
+                {"chunkID": chunk.id, "source": chunk.source, "sourceIndex": chunk.source_index,
+                 "contentSHA256": hashlib.sha256(chunk.content.encode()).hexdigest()}
+                for chunk in chunks
+            ]
+            local = KnowledgeService(db, seed_settings)
+            vector_settings = settings.model_copy(update={
+                "knowledge_vector_enabled": True, "knowledge_vector_required": True,
+                "chroma_persist_dir": str((output / "chroma").resolve()), "chroma_collection_name": "closing_reviewed",
+            })
+            vector = KnowledgeService(db, vector_settings)
+            if not vector.vector_store.can_embed:
+                raise ValueError("Real vector path is unavailable")
+            started = time.perf_counter()
+            vector._ensure_vector_index()
+            report["indexPreparationMs"] = (time.perf_counter() - started) * 1000
+            report["vectorIndex"] = {
+                "collectionName": vector_settings.chroma_collection_name,
+                "directory": vector_settings.chroma_persist_dir,
+                "indexedChunks": vector.vector_store.collection.count(),
+                "metadata": vector.vector_store.collection.metadata,
+            }
+            if report["vectorIndex"]["indexedChunks"] != len(chunks):
+                raise ValueError("Vector index must contain the complete evaluation corpus")
+            db.commit()
+            report["status"] = "running"
+            write_report(report_path, report)
+            for case in cases:
+                for name, service in [("vector", vector), ("local", local)]:
+                    started = time.perf_counter()
+                    error_type = None
+                    try:
+                        if name == "vector":
+                            found = service._expand_best(service._retrieve_vector(case["question"], 4), 4)
+                        else:
+                            found = service._retrieve_hybrid(case["question"], 4)
+                    except Exception as exc:
+                        found = []
+                        error_type = type(exc).__name__
+                    row = score_case(case, found, 4)
+                    row.update(actualBackend=name, latencyMs=(time.perf_counter() - started) * 1000,
+                               errorType=error_type, fallbackAllowed=False)
+                    report["results"][name].append(row)
+                write_report(report_path, report)
+                print(json.dumps({"completedQuestions": len(report["results"]["vector"])}), flush=True)
+            report["summaries"] = {name: summarize(rows) for name, rows in report["results"].items()}
+            report["comparisonEligible"] = all(item["failedCases"] == 0 for item in report["summaries"].values())
+            report["status"] = "completed"
+            report["completedAtUTC"] = datetime.now(timezone.utc).isoformat()
+    except Exception as exc:
+        report.update(status="failed", errorType=type(exc).__name__)
+        raise
+    finally:
+        try:
+            write_report(report_path, report)
+        finally:
+            engine.dispose()
+
+
+def answer_messages(question: str, context: str, deployment_resources: str = "") -> list[AiMessage]:
+    system = PromptTemplates.answer_system_prompt(IntentType.CONSULT, RiskLevel.LOW, context, "工程评测用户")
+    if deployment_resources:
+        system.content += "\n部署资源配置（两组对照均可使用；测试信息不得当作真实服务）：\n" + deployment_resources
+    return [system, AiMessage(role="user", content=question)]
+
+
+async def run_answers(settings: Settings, retrieval_path: Path, output: Path) -> None:
+    provider = settings.ai_provider.lower()
+    if provider not in {"openai", "ollama"}:
+        raise ValueError("Paired answers require supported real provider openai or ollama")
+    if output.exists():
+        raise FileExistsError("Answer report must not overwrite an existing result")
+    retrieval = json.loads(retrieval_path.read_text())
+    if retrieval["status"] != "completed" or not retrieval["comparisonEligible"]:
+        raise ValueError("Paired answers require completed comparable retrieval")
+    sources = knowledge_fingerprints()
+    deployment_resources = ""
+    resource = retrieval.get("deploymentResourcePackage")
+    if resource is not None:
+        resource_path = ROOT / resource["path"]
+        if fingerprint(resource_path) != resource["sha256"]:
+            raise ValueError("Deployment resources changed after retrieval")
+        sources[resource["source"]] = resource["sha256"]
+        deployment_resources = resource_path.read_text()
+    if retrieval["knowledgeSourceSHA256"] != sources:
+        raise ValueError("Knowledge changed after retrieval")
+    rows = {row["id"]: row for row in retrieval["results"]["vector"]}
+    report: dict[str, Any] = {
+        "status": "running", "createdAtUTC": datetime.now(timezone.utc).isoformat(),
+        "scope": "fixed LOW-risk answer component; only knowledge context differs between arms",
+        "retrievalSHA256": fingerprint(retrieval_path),
+        "modelRequested": settings.openai_model if provider == "openai" else settings.ollama_model,
+        "returnedModelIdentifiers": [], "modelIdentityLimit": "Provider model identifiers are not immutable weight identities",
+        "provider": provider, "temperature": settings.ai_temperature, "maxTokens": settings.ai_max_tokens,
+        "deploymentResourcePackage": resource,
+        "deploymentResourcesIdenticalAcrossArms": True,
+        "answerEndpointHost": urlsplit(settings.openai_base_url if provider == "openai" else settings.ollama_base_url).hostname,
+        "rubricSHA256": fingerprint(RUBRIC_PATH), "rubric": json.loads(RUBRIC_PATH.read_text()),
+        "humanAnswerReviewStatus": "pending", "attempts": 0, "pairs": [],
+        "sourceSHA256": {str(p.relative_to(ROOT)): fingerprint(p) for p in [Path(__file__), ROOT / "app/services/ai.py"]},
+    }
+    client = AiClient(settings)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    write_report(output, report)
+    try:
+        for case in [case for case in retrieval["cases"] if case["pairedAnswer"]]:
+            context = "\n\n".join(f"来源：{item['source']}\n{item['content']}" for item in rows[case["id"]]["retrieved"])
+            order = ["withoutRag", "withRag"]
+            if hashlib.sha256(case["id"].encode()).digest()[0] % 2:
+                order.reverse()
+            pair: dict[str, Any] = {"id": case["id"], "question": case["question"], "answerable": case["answerable"],
+                    "expectedEvidence": case["expectedEvidence"], "insufficientEvidenceReason": case["insufficientEvidenceReason"],
+                    "context": context, "contextSHA256": hashlib.sha256(context.encode()).hexdigest(),
+                    "reviewMapping": dict(zip(["A", "B"], order)), "arms": {}}
+            report["pairs"].append(pair)
+            for arm in order:
+                messages = answer_messages(case["question"], context if arm == "withRag" else "", deployment_resources)
+                started = time.perf_counter()
+                report["attempts"] += 1
+                pair["arms"][arm] = {"status": "started", "messages": [m.model_dump() for m in messages]}
+                write_report(output, report)
+                result: dict[str, Any]
+                try:
+                    client.last_completion_metadata = None
+                    reply = await client.acomplete(messages)
+                    result = {"status": "completed" if reply.strip() else "empty-response", "reply": reply, "errorType": None}
+                except Exception as exc:
+                    result = {"status": "failed", "reply": "", "errorType": type(exc).__name__}
+                result.update(latencyMs=(time.perf_counter() - started) * 1000,
+                              generationMetadata=client.last_completion_metadata,
+                              messages=[message.model_dump() for message in messages])
+                if result["status"] == "completed" and client.last_completion_metadata is not None:
+                    if client.last_completion_metadata.get("finishReason") != "stop":
+                        result["status"] = "incomplete-response"
+                if client.last_completion_metadata is not None:
+                    model = client.last_completion_metadata.get("modelReturned")
+                    if model and model not in report["returnedModelIdentifiers"]:
+                        report["returnedModelIdentifiers"].append(model)
+                pair["arms"][arm] = result
+                write_report(output, report)
+            print(json.dumps({"completedPairs": len(report["pairs"]), "attempts": report["attempts"]}), flush=True)
+    except BaseException as exc:
+        report.update(status="interrupted", errorType=type(exc).__name__)
+        write_report(output, report)
+        raise
+    report["comparisonEligible"] = len(report["returnedModelIdentifiers"]) <= 1 and all(
+        arm["status"] == "completed" for pair in report["pairs"] for arm in pair["arms"].values()
+    )
+    report.update(status="completed" if report["comparisonEligible"] else "invalid-generation",
+                  completedAtUTC=datetime.now(timezone.utc).isoformat())
+    write_report(output, report)
+    if not report["comparisonEligible"]:
+        raise RuntimeError("Complete nonempty generations are required before answer comparison")
+    write_answer_review(output, report)
+
+
+def write_answer_review(answer_path: Path, report: dict) -> None:
+    cards = []
+    for pair in report["pairs"]:
+        sections = []
+        for letter, arm in pair["reviewMapping"].items():
+            result = pair["arms"][arm]
+            sections.append(f"<section><h3>{letter}</h3><p>状态：{html.escape(result['status'])}</p><pre>{html.escape(result['reply'])}</pre></section>")
+        gold = "\n\n".join(evidence["excerpt"] for evidence in pair["expectedEvidence"])
+        if not gold:
+            gold = pair["insufficientEvidenceReason"]
+        cards.append(f"<article data-case='{html.escape(pair['id'], quote=True)}'><p>{html.escape(pair['id'])}</p><h2>{html.escape(pair['question'])}</h2>" + "".join(sections)
+                     + f"<details><summary>参考证据或知识不足条件</summary><pre>{html.escape(gold)}</pre></details>"
+                     + "<label>判断 <select><option value=''>请选择</option><option>A</option><option>B</option>"
+                     + "<option>tie</option><option>both-failed</option></select></label>"
+                     + "<label>理由 <textarea placeholder='按安全、事实、知识不足处理和可用性记录理由'></textarea></label></article>")
+    rubric = html.escape(json.dumps(report["rubric"], ensure_ascii=False, indent=2))
+    identity = json.dumps({"answersSHA256": fingerprint(answer_path), "rubricSHA256": report["rubricSHA256"]})
+    script = """<script>
+const identity = IDENTITY;
+document.querySelector('#exportReview').onclick = () => {
+  const judgements = [...document.querySelectorAll('article')].map(card => ({
+    id: card.dataset.case, winner: card.querySelector('select').value,
+    reason: card.querySelector('textarea').value.trim()
+  }));
+  if (judgements.some(row => !row.winner || !row.reason) || !document.querySelector('#attest').checked) {
+    alert('请逐对填写判断和理由，并确认本人已完成复核。'); return;
+  }
+  const review = {...identity, reviewStatus: 'approved', reviewerType: 'human',
+    reviewedAtUTC: new Date().toISOString(), judgements};
+  const text = JSON.stringify(review, null, 2);
+  document.querySelector('#reviewExport').value = text;
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(new Blob([text], {type: 'application/json'}));
+  link.download = 'closing-answer-review.json'; link.click();
+  URL.revokeObjectURL(link.href);
+};
+</script>""".replace("IDENTITY", identity)
+    document = ("<!doctype html><html lang='zh-CN'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+                "<title>RAG 配对回答复核</title><style>body{font-family:system-ui;line-height:1.7;max-width:960px;margin:auto;padding:24px}"
+                "article,section{border:1px solid #ddd;padding:16px;margin:16px 0}pre{white-space:pre-wrap}h2{font-size:18px}"
+                "label{display:block;margin:12px 0}textarea{display:block;width:95%;min-height:80px}button{padding:12px}</style>"
+                f"<h1>RAG 配对回答复核</h1><p>每对填写 A、B、tie 或 both-failed，并记录理由。A/B 隐去方法名称。</p><pre>{rubric}</pre>"
+                + "".join(cards) + "<label><input id='attest' type='checkbox'>本人已逐对复核全部回答并填写理由</label>"
+                + "<button id='exportReview'>导出本人复核结果</button><p>也可复制下方 JSON 回传。</p><textarea id='reviewExport' readonly></textarea>"
+                + script + "</html>")
+    answer_path.with_suffix(".review.html").write_text(document)
+
+
+def summarize_answer_review(answers: dict, review: dict, answers_sha: str) -> dict:
+    if answers.get("status") != "completed":
+        raise ValueError("Answer generation must be completed")
+    if review.get("reviewStatus") != "approved" or review.get("reviewerType") != "human":
+        raise ValueError("Human answer review is required")
+    if review.get("answersSHA256") != answers_sha or review.get("rubricSHA256") != answers["rubricSHA256"]:
+        raise ValueError("Answers or rubric changed after review")
+    pairs = {pair["id"]: pair for pair in answers["pairs"]}
+    judgements = review.get("judgements", [])
+    if len(judgements) != len(pairs) or {row["id"] for row in judgements} != set(pairs):
+        raise ValueError("Review must cover every pair exactly once")
+    counts = dict.fromkeys(["withRag", "withoutRag", "tie", "both-failed"], 0)
+    for row in judgements:
+        winner = row.get("winner")
+        reason = row.get("reason")
+        if winner not in {"A", "B", "tie", "both-failed"} or not isinstance(reason, str) or not reason.strip():
+            raise ValueError("Each pair requires a valid judgement and reason")
+        outcome = pairs[row["id"]]["reviewMapping"][winner] if winner in {"A", "B"} else winner
+        counts[outcome] += 1
+    return {"reviewerType": "human", "reviewedPairs": len(pairs), "counts": counts,
+            "attempts": answers["attempts"], "successfulReplies": sum(
+                arm["status"] == "completed" for pair in pairs.values() for arm in pair["arms"].values()),
+            "scope": answers["scope"], "rubricSHA256": answers["rubricSHA256"], "answersSHA256": answers_sha,
+            "reviewedAtUTC": review.get("reviewedAtUTC"), "judgements": judgements}
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("mode", choices=["retrieval", "answers", "review"])
+    parser.add_argument("--dataset", type=Path, default=ROOT / "evals/rag/closing-40.jsonl")
+    parser.add_argument("--review", type=Path)
+    parser.add_argument("--resource-package", type=Path)
+    parser.add_argument("--retrieval-report", type=Path)
+    parser.add_argument("--answers-report", type=Path)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    settings = Settings()
+    if args.mode == "retrieval":
+        if args.review is None:
+            parser.error("retrieval requires --review")
+        run_retrieval(settings, args.dataset, args.review, args.output, args.resource_package)
+    elif args.mode == "answers":
+        if args.retrieval_report is None:
+            parser.error("answers requires --retrieval-report")
+        asyncio.run(run_answers(settings, args.retrieval_report, args.output))
+    else:
+        if args.answers_report is None or args.review is None:
+            parser.error("review requires --answers-report and --review")
+        if args.output.exists():
+            raise FileExistsError("Review summary must not overwrite an existing result")
+        summary = summarize_answer_review(json.loads(args.answers_report.read_text()),
+                                          json.loads(args.review.read_text()), fingerprint(args.answers_report))
+        write_report(args.output, summary)
+
+
+if __name__ == "__main__":
+    main()

@@ -37,6 +37,14 @@ GENERAL_TASK_WORDS = [
 ]
 
 
+def is_deployment_resource_question(text: str) -> bool:
+    """Identify resource-query wording; this predicate is not a safety decision."""
+    neutral_text = text.replace("心理", "").replace("咨询", "")
+    return (any(word in text for word in ("部署", "机构"))
+            and any(word in text for word in ("热线", "预约"))
+            and not has_consult_signal(neutral_text) and not has_high_risk_signal(text))
+
+
 class GraphState(TypedDict):
     """Primitive checkpoint values for one conversation turn; nodes return field updates."""
 
@@ -341,7 +349,7 @@ class LangGraphAgentRuntimeService:
         graph.add_edge("risk_guardian", "risk_guardian_gate")
         graph.add_conditional_edges(
             "risk_guardian_gate", self._route_after_gate,
-            {"approved": "counselor", "rejected": END, "support": "knowledge"},
+            {"approved": "counselor", "rejected": END, "support": "knowledge", "resources": "companion"},
         )
         graph.add_edge("knowledge", "cbt")
         graph.add_conditional_edges("cbt", self._route_after_cbt, {"handled": END, "skip": "counselor"})
@@ -478,7 +486,9 @@ class LangGraphAgentRuntimeService:
         return {"review_decision": "approved" if decision["approved"] else "rejected"}
 
     def _route_after_gate(self, state: GraphState) -> str:
-        route = state["review_decision"] or "support"
+        route = state["review_decision"] or (
+            "resources" if is_deployment_resource_question(state["model_input"]) else "support"
+        )
         diagnostics.emit("branch.selected", route=route, risk_level=state["risk_level"],
                          requires_review=state["risk_level"] == RiskLevel.HIGH.value)
         return route
@@ -496,8 +506,18 @@ class LangGraphAgentRuntimeService:
         }
 
     async def _companion_node(self, state: GraphState) -> GraphUpdate:
+        results: list[SearchResult] = []
+        steps = state["steps"]
+        if is_deployment_resource_question(state["model_input"]):
+            async_retrieve = getattr(self.knowledge, "aretrieve", None)
+            results = (self.knowledge.retrieve(state["model_input"], self.settings.knowledge_top_k)
+                       if async_retrieve is None else
+                       await async_retrieve(state["model_input"], self.settings.knowledge_top_k))
+            diagnostics.emit("knowledge.retrieved", retrieval_count=len(results))
+            steps = self._steps(state, "KnowledgeAgent", "RETRIEVE_KNOWLEDGE", f"deployment resources; retrieved={len(results)}")
+        context = "\n\n".join(f"- [{item.source}] {item.content}" for item in results)
         messages = [
-            PromptTemplates.answer_system_prompt(IntentType.CHAT, RiskLevel.LOW, "", state["display_name"]),
+            PromptTemplates.answer_system_prompt(IntentType.CHAT, RiskLevel.LOW, context, state["display_name"]),
             self._response_contract(state),
             AiMessage(role="system", content=(
                 f"当前由 CompanionAgent 负责回复。\n记忆摘要：\n{state['memory_brief']}\n"
@@ -508,8 +528,10 @@ class LangGraphAgentRuntimeService:
             *self._history(state),
         ]
         return {
+            "knowledge_query": state["model_input"] if results else "",
+            "retrieved_knowledge": [asdict(item) for item in results],
             "response_messages": self._messages(messages),
-            "steps": self._steps(state, "CompanionAgent", "PLAN_RESPONSE", "normal companion response planned"),
+            "steps": [*steps, asdict(AgentStep(len(steps) + 1, "CompanionAgent", "PLAN_RESPONSE", "normal companion response planned"))],
         }
 
     @staticmethod

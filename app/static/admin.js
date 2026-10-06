@@ -97,7 +97,7 @@ function renderReports(reports) {
   els.reports.innerHTML = "";
   reportSessions.clear();
   if (!reports.length) {
-    els.reports.innerHTML = `<div class="empty small"><strong>暂无报告</strong><p>学生咨询或风险场景会在这里沉淀记录。</p></div>`;
+    els.reports.innerHTML = `<div class="empty small"><strong>暂无报告</strong><p>用户心理支持或风险场景会在这里沉淀记录。</p></div>`;
     return;
   }
   for (const item of reports) {
@@ -293,7 +293,7 @@ function renderConversation(conversation) {
  */
 function roleLabel(role) {
   const value = (role || "").toUpperCase();
-  if (value === "USER") return "学生";
+  if (value === "USER") return "用户";
   if (value === "ASSISTANT") return "Xling";
   if (value === "SYSTEM") return "系统";
   return role || "未知角色";

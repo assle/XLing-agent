@@ -1,0 +1,73 @@
+{
+  "status": "completed",
+  "createdAtUTC": "2026-10-04T06:13:46.204673+00:00",
+  "budget": {
+    "modelAttemptsCap": 120,
+    "maxGenerationTokens": 6,
+    "generationTokensCap": 720,
+    "retries": 0,
+    "trainingUpdates": 0,
+    "newBlindCases": 0
+  },
+  "packageCommand": [
+    "/Users/assle/dev/mindbridge-py/.venv/bin/python",
+    "/Users/assle/dev/mindbridge-py/finetune/scripts/package_general_classifier.py",
+    "--shadow",
+    "--local-files-only",
+    "--model",
+    "/Users/assle/dev/mindbridge-py/.scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate/recovered-merged-base",
+    "--adapter",
+    "/Users/assle/dev/mindbridge-py/.scratch/model-repair-20261004/training/output/adapter",
+    "--results",
+    "/Users/assle/dev/mindbridge-py/.scratch/model-repair-20261004/training/result.json",
+    "--output",
+    "/Users/assle/dev/mindbridge-py/.scratch/model-repair-20261004/runtime-trained/merged"
+  ],
+  "mergeExitCode": 0,
+  "mergedSHA256": "48c808679fb61f19ab9a56fa1a92e044e2002afb6963a8ac816fc20655beefbb",
+  "servicePid": 79397,
+  "registrationCommand": [
+    "/Users/assle/dev/mindbridge-py/.venv/bin/python",
+    "/Users/assle/dev/mindbridge-py/finetune/scripts/register_runtime_classifier.py",
+    "--model-directory",
+    "/Users/assle/dev/mindbridge-py/.scratch/model-repair-20261004/runtime-trained/merged",
+    "--system-prompt-file",
+    "/Users/assle/dev/mindbridge-py/finetune/reports/current-classifier/training/system-prompt.txt",
+    "--model",
+    "xling-boundary-v3-trained:latest",
+    "--base-url",
+    "http://127.0.0.1:11435",
+    "--output",
+    "/Users/assle/dev/mindbridge-py/.scratch/model-repair-20261004/runtime-trained/registration"
+  ],
+  "registeredDetails": {
+    "parent_model": "",
+    "format": "gguf",
+    "family": "qwen2",
+    "families": [
+      "qwen2"
+    ],
+    "parameter_size": "494.03M",
+    "quantization_level": "F16"
+  },
+  "evaluationCommand": [
+    "/Users/assle/dev/mindbridge-py/.venv/bin/python",
+    "/Users/assle/dev/mindbridge-py/finetune/scripts/evaluate_runtime_classifier.py",
+    "--model",
+    "xling-boundary-v3-trained:latest",
+    "--base-url",
+    "http://127.0.0.1:11435",
+    "--input-format",
+    "quoted",
+    "--output",
+    "/Users/assle/dev/mindbridge-py/.scratch/model-repair-20261004/runtime-trained/existing-results.json",
+    "--dataset",
+    "/Users/assle/dev/mindbridge-py/finetune/data/general-routing-v2/general-test.jsonl",
+    "--dataset",
+    "/Users/assle/dev/mindbridge-py/finetune/data/current-classifier/natural-v12-r2-40.jsonl"
+  ],
+  "candidateUnloaded": true,
+  "serviceStopped": true,
+  "protectedFilesUnchanged": true,
+  "finishedAtUTC": "2026-10-04T06:14:13.556360+00:00"
+}
