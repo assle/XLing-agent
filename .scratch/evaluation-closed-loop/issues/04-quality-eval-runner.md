@@ -1,4 +1,6 @@
-Status: ready-for-agent
+Record: historical
+
+> 历史质量评测任务记录，保留当时的源码路径与执行步骤。现行需求见[重建端到端与回复质量评测](https://github.com/assle/XLing-agent/issues/29)，当前任务状态从 [规划入口](../../../docs/agents/issue-tracker.md) 查询。
 
 ## Parent
 

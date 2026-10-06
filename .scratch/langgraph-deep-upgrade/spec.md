@@ -1,4 +1,6 @@
-Status: ready-for-agent
+Record: historical
+
+> 2026-07-15 实施前的规格记录，正文保留当时的需求和运行方式。当前编排约束见 [ADR-0012](../../docs/adr/0012-langgraph-runtime-and-local-diagnostics.md)，任务状态从 [规划入口](../../docs/agents/issue-tracker.md) 查询。
 
 # PRD: LangGraph 深度改造（Checkpointer + 人审中断 + 异步化）
 

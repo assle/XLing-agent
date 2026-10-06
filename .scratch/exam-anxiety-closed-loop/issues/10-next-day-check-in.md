@@ -1,4 +1,6 @@
-Status: ready-for-agent
+Record: historical
+
+> 历史任务与实施记录，原检查清单和评论反映当时的状态。现行要求见[通用心理健康支持主规格](https://github.com/assle/XLing-agent/issues/14)，当前任务状态从 [规划入口](../../../docs/agents/issue-tracker.md) 查询。
 
 # 10: 次日 check-in 与正常闭环完成/调整
 

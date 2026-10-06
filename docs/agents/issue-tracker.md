@@ -2,6 +2,15 @@
 
 本项目的问题和产品需求存放在 GitHub 仓库 `assle/XLing-agent`，所有操作使用 `gh` 命令行工具。
 
+## Planning entry
+
+开始规划、规格维护或任务验收时，从以下入口读取相关正文和决议。任务状态及依赖在 GitHub 中查询；本文件集中维护导航和追踪器操作约定。
+
+- 主规格：[Xling 通用心理健康支持与咨询辅助系统主规格](https://github.com/assle/XLing-agent/issues/14)。
+- 规划与决策：[SDD 规划与文档基线：统一事实来源、规格与验收](https://github.com/assle/XLing-agent/issues/38)。
+
+校准过时要求或查阅本地历史材料时，读取路线图中的相关校准决议；判断验收证据和关闭条件时，读取对应的验收标准决议。
+
 ## Conventions
 
 - 创建问题：`gh issue create --title "..." --body "..."`

@@ -42,7 +42,7 @@ evidence-supported hypotheses in rank order and the observation that would disti
 
 ### Issue tracker
 
-问题和产品需求统一存放在 GitHub 仓库 `assle/XLing-agent`。参见 `docs/agents/issue-tracker.md`。
+规划、规格维护和任务验收先读取 `docs/agents/issue-tracker.md`，从其入口定位 GitHub 中的现行需求、路线图和任务。
 
 ### Triage labels
 

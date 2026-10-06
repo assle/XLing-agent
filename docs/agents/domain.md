@@ -4,7 +4,7 @@
 
 ## Before exploring, read these
 
-- 根目录的 `CONTEXT.md`：项目术语表。
+- 根目录的 `CONTEXT.md`：项目术语表；项目定位与技术概览见根目录 `README.md`。
 - `docs/adr/`：与当前修改区域相关的架构决策文档。
 - 如果将来出现 `CONTEXT-MAP.md`，先通过它找到与当前任务相关的术语表。
 
@@ -30,4 +30,4 @@
 
 ## Flag ADR conflicts
 
-如果计划修改的内容与现有架构决策冲突，必须明确指出，不能静默覆盖。
+如果计划修改的内容与现有架构决策冲突，必须明确指出，不能静默覆盖。校准现行规格或解释历史材料时，从 [Issue tracker](issue-tracker.md) 入口读取相关决议。
