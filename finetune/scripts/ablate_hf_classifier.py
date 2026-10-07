@@ -94,7 +94,7 @@ def main() -> None:
     if args.output.exists():
         raise FileExistsError("Ablation output must be a new file")
     frozen_path = ROOT / "finetune/reports/current-classifier/training/freeze.json"
-    selected_path = ROOT / "finetune/reports/model-repair-evaluation.json"
+    selected_path = ROOT / "finetune/reports/classifier-selection.json"
     system_path = ROOT / "finetune/reports/current-classifier/training/system-prompt.txt"
     frozen = json.loads(frozen_path.read_text())
     selected = json.loads(selected_path.read_text())["runtimeSelection"]

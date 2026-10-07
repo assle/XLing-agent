@@ -1,6 +1,0 @@
-{
-  "originalRowsCompared": 376,
-  "exactPromptMatches": 376,
-  "source": ".scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate-epochs4/wrapper.py",
-  "comparison": "structured messages and chat-template arguments; no model loaded"
-}

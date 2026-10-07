@@ -161,9 +161,7 @@ flowchart TD
 ├── Caddyfile                     # HTTPS 和请求转发规则
 ├── requirements*.txt             # 运行、开发和可选检索依赖
 ├── pyproject.toml                # 测试、代码检查和类型检查配置
-├── CONTEXT.md                    # 项目统一领域术语
-├── MANIFEST.md                   # 研究与模型产物登记
-└── EXPERIMENT_AUDIT.*             # 2026-09-01 分类器实验完整性审计
+└── CONTEXT.md                    # 项目统一领域术语
 ```
 
 规格、路线图与相关决议的统一入口见 [Issue tracker](docs/agents/issue-tracker.md)，任务状态和依赖在 GitHub 中维护。阅读代码可先查看 [项目地图](reference/xling-project-map.html)；领域术语以 [CONTEXT.md](CONTEXT.md) 为准，架构决策见 [docs/adr/](docs/adr/)，部署步骤见 [部署指南](docs/deployment-guide.md)。分类器当前实验入口统一在 [finetune/README.md](finetune/README.md)。
@@ -218,7 +216,7 @@ CLASSIFIER_INPUT_FORMAT=quoted
 - `AI_MAX_TOKENS` 是单次回答允许生成的最大模型计量单位数，默认 2048；调高会增加响应时间和模型费用。
 - `OPENAI_BASE_URL`、`OPENAI_API_KEY` 和 `OPENAI_MODEL` 必须属于同一个远程服务。
 - `OLLAMA_BASE_URL` 是容器访问 Mac 上 Ollama 的地址；直接在 Mac 上运行应用时使用 `http://localhost:11434`。
-- `OLLAMA_CLASSIFIER_MODEL` 必须是 `ollama list` 中已存在的本地分类器版本，`CLASSIFIER_INPUT_FORMAT` 与其训练输入契约对应。本机已选用上面的 `quoted-f16` 与 `quoted` 配置，原 `xling-general-cls-05b:latest` 保留；权重仅存本机。数据、输入包装与固定评测结果见 [finetune/README.md](finetune/README.md)，当前选择与配置证据见 [model-repair-evaluation.json](finetune/reports/model-repair-evaluation.json)。
+- `OLLAMA_CLASSIFIER_MODEL` 必须是 `ollama list` 中已存在的本地分类器版本，`CLASSIFIER_INPUT_FORMAT` 与其训练输入契约对应。本机已选用上面的 `quoted-f16` 与 `quoted` 配置，原 `xling-general-cls-05b:latest` 保留；权重仅存本机。数据、输入包装与固定评测结果见 [finetune/README.md](finetune/README.md)，当前选择与配置证据见 [classifier-selection.json](finetune/reports/classifier-selection.json)。
 
 Docker Compose 已传递分类器输入格式。模型分数直接评价分类输出，实际客户端接入、既有风险词规则与完整业务流程分别验证；固定小样本的真实 RAG 对照及复跑入口见 [RAG 评测](evals/rag/README.md)。
 
