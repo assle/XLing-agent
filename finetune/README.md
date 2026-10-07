@@ -70,6 +70,32 @@ DeepSeek 请求别名固定为 `deepseek-v4-flash-vision-exp`，120 次响应的
 
 实验性 safetensors 导入曾在 MLX 加载阶段因不支持 `Qwen2ForCausalLM` 失败；120 次加载失败请求没有进入生成，单独记录为基础设施失败。标准导入后的完整观测、保护指纹与服务停止终态见 [runtime-integrity.json](reports/model-repair/runtime/runtime-integrity.json)、[gguf-lifecycle.json](reports/model-repair/runtime/gguf-lifecycle.json) 与[边界候选 integrity](reports/model-repair/runtime-trained/integrity.json)。
 
+### 已选 LoRA 的增量消融
+
+对当前历史 376 条训练适配器进行了同条件配对消融：在同一个未合并的 PEFT 模型内，逐题关闭／开启该适配器。实际训练基座权重 SHA256 为 `b7e394c3e19caa695885ac475882b702b825653d1dee1fca52c11ea3e1c368f7`，适配器 SHA256 为 `39312e62bae612295d46153242b6159e15e0b5196ba4e3906df779e87f770efd`。Tokenizer、系统提示、quoted 输入、MPS、float16 基座、PEFT 默认适配器 dtype、贪心生成及 256／6 token 上限均相同，只有适配器开关改变。两组按预定顺序交错执行，共 320 次真实推理，0 训练、0 重试；运行前后权重文件指纹未变。
+
+| 同条件 HF/MPS 方案 | 正确数／160 | 准确率 | 宏 F1 | 高风险召回 | 高风险误报 | 输出有效率 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 实际历史基座，不启用这次 LoRA | 129 | 80.625% | 0.822445 | 40/40 | 13 | 152/160（95%） |
+| 同基座，启用已选 376 LoRA | 156 | 97.5% | 0.974937 | 40/40 | 4 | 160/160（100%） |
+
+在这组固定回归条件下，该适配器的准确率增量为 **16.875 个百分点**：28 条改对、1 条改错、128 条两组均正确、3 条两组均错误。8 条改对来自输出协议对齐：基座输出“紧张”“沮丧”“悲伤”等同义词，未符合约定的四个枚举，按冻结规则计为无效，不能全部解释为语义理解错误。两组均有效的 152 条条件子集中，准确率为 84.868% 对 97.368%；该条件子集只辅助解释，不替代全 160 条分母。开启适配器后的 160 条预测与已有已选 GGUF/F16 报告逐题一致。
+
+该消融隔离的是**这次新增 LoRA 在其实际历史已合并基座上的贡献**。基座已含更早的合并微调，不是干净原始 Qwen；160 条均是已经曝光的工程合成回归问题，人工分类标签复核仍未完成。因此不外推为全部 LoRA 相对原始基座的收益、全新独立测试或真实用户／临床效果。延迟只作当次运行描述，不作为部署速度提升结论。预先冻结的条件见 [protocol.json](reports/lora-ablation-20261007/protocol.json)，逐题原始输出、状态、版本与指标见 [paired.json](reports/lora-ablation-20261007/paired.json)，复核与解释见 [summary.json](reports/lora-ablation-20261007/summary.json)。原面试冻结标签和当前部署模型保持原版本。
+
+复跑使用[增量消融入口](scripts/ablate_hf_classifier.py)，输出文件须为新文件；本机权重路径准备好后执行：
+
+```bash
+TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 \
+  .venv/bin/python finetune/scripts/ablate_hf_classifier.py \
+  --model .scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate/recovered-merged-base \
+  --adapter .scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate-epochs4/training-output/adapter \
+  --dataset finetune/data/general-routing-v2/general-test.jsonl \
+  --dataset finetune/data/current-classifier/natural-v12-r2-40.jsonl \
+  --dataset finetune/data/boundary-v3/acceptance-40.jsonl \
+  --output .scratch/lora-ablation-replay/paired.json
+```
+
 ## 包装
 
 两适配器均完成了独立端口上的 GGUF/F16 影子对照。已选历史 376 训练适配器注册为独立运行 tag `xling-general-cls-05b:quoted-f16`，保持实验性身份；本机 `.env` 已配置该 tag 与 `CLASSIFIER_INPUT_FORMAT=quoted`，原 `xling-general-cls-05b:latest` 保留。Compose 已传递输入格式，实际 `AiClient` 四类同步/异步调用已通过；当前完整隔离业务环境的运行与复跑见 [工程验证](../docs/project-validation.md)。历史激活时的配置、tag 指纹与探针见 [主报告](reports/model-repair-evaluation.json)、[activation.json](reports/model-repair/activation.json) 和 [docker-probe.json](reports/model-repair/docker-probe.json)。

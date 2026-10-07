@@ -1,0 +1,58 @@
+{
+  "frozenAtUTC": "2026-10-07T02:04:13.670134+00:00",
+  "baselineCommit": "4f9434aa94ed5541ebb747ce206f015371f2a038",
+  "question": "Incremental effect of the selected376 adapter on its actual historical merged base",
+  "cleanOriginalBase": false,
+  "baseSHA256": "b7e394c3e19caa695885ac475882b702b825653d1dee1fca52c11ea3e1c368f7",
+  "selectedAdapterSHA256": "39312e62bae612295d46153242b6159e15e0b5196ba4e3906df779e87f770efd",
+  "onlyFactor": "disable versus enable the selected adapter in one unmerged PEFT model",
+  "trainingRuns": 0,
+  "optimizerUpdates": 0,
+  "casesPerArm": 160,
+  "modelCalls": 320,
+  "retries": 0,
+  "datasets": [
+    {
+      "path": "finetune/data/general-routing-v2/general-test.jsonl",
+      "sha256": "9e4ad6492e2cb6784b66e90a79acdbe08b37b2e8a9a58917bd58c788b0f848bd",
+      "rows": 80
+    },
+    {
+      "path": "finetune/data/current-classifier/natural-v12-r2-40.jsonl",
+      "sha256": "e0b78f203c5c9e9592422ff22d9bc9660f3848c9302b1bc8b083926c84c04f04",
+      "rows": 40
+    },
+    {
+      "path": "finetune/data/boundary-v3/acceptance-40.jsonl",
+      "sha256": "3d6a2218dfb182cf8eb06db148bb4312e43dd9af41dc3036b47cd2d4b3ef759a",
+      "rows": 40
+    }
+  ],
+  "dataScope": "Fixed synthetic engineering regression; all160 previously exposed; not a fresh independent or clinical benchmark",
+  "controls": {
+    "sameTokenizer": true,
+    "sameSystemPrompt": true,
+    "sameQuotedInput": true,
+    "basePrecision": "float16 on MPS",
+    "adapterPrecision": "PEFT default autocast, measured per parameter",
+    "doSample": false,
+    "seed": 42,
+    "maxInputTokens": 256,
+    "maxNewTokens": 6,
+    "useCache": false,
+    "repetitionPenalty": 1.0,
+    "sameStrictLabelAndEOSParser": true,
+    "caseOrder": "paired; arm order determined by datasetSHA256+caseID hash parity"
+  },
+  "metrics": [
+    "paired accuracy delta in percentage points",
+    "macroF1",
+    "high-risk recall",
+    "false-high count",
+    "output validity",
+    "improved/regressed pairs",
+    "semantic accuracy on common-valid subset (conditional, not primary)"
+  ],
+  "resultPolicy": "Retain positive, zero or negative effect; no tuning, retraining, sample filtering or target4-percent requirement",
+  "runnerSHA256": "3864e28b0a66fe61a3c5842b00ed11a070748cdfcaa83caef5c08b8edb06d9b1"
+}

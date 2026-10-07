@@ -1,0 +1,32 @@
+{
+  "status": "verified",
+  "scope": "Incremental effect of the selected376 LoRA on its actual historical merged base",
+  "accuracyWithout": 0.80625,
+  "accuracyWith": 0.975,
+  "accuracyDeltaPercentagePoints": 16.875,
+  "improvedCases": 28,
+  "regressedCases": 1,
+  "invalidOutputCorrections": 8,
+  "protocolContributionPercentagePoints": 5.0,
+  "commonValidCases": 152,
+  "commonValidAccuracy": {
+    "withoutSelectedLora": 0.8486842105263158,
+    "withSelectedLora": 0.9736842105263158
+  },
+  "interpretation": "Only the selected376 adapter was toggled. Eight synonyms outside the four-label protocol were invalid without LoRA; do not describe all27 net corrections as semantic understanding gains. Common-valid subset is conditional and not the primary denominator.",
+  "baselineContainsHistoricalMergedAdaptation": true,
+  "freshIndependentTest": false,
+  "humanReviewedClassifierLabels": false,
+  "optimizerUpdates": 0,
+  "attempts": 320,
+  "weightsUnchanged": true,
+  "selectedServingPredictionAgreement": "160/160 on this fixed corpus; no all-input/backend equivalence claim",
+  "limitations": [
+    "Historical base already contains earlier merged fine-tuning",
+    "Fixed synthetic engineering corpus; 120 old cases exposed,40 previously tested",
+    "Single HF run; no population/clinical generalization or new independent test claim",
+    "Latency is descriptive, not a statistically controlled serving benchmark"
+  ],
+  "report": "paired.json",
+  "protocol": "protocol.json"
+}
