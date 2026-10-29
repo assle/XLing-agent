@@ -1,18 +1,23 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import heapq
 import json
 import math
 import re
 from dataclasses import dataclass
 
+import numpy as np
 from pypdf import PdfReader
 from sqlalchemy.orm import Session
 
 from app.core import diagnostics
 from app.core.config import Settings
-from app.models.entities import KnowledgeChunk
+from app.models.entities import KnowledgeChunk, KnowledgeSource
 from app.services.bge_retrieval import BgeRetrieverUnavailable
+from app.services.chunking import chunk_text, semantic_chunk_text
+from app.services.lexical_index import lexical_index, tokenize
 from app.services.vector_store import FALLBACK_RETRIEVAL_LABEL, PRIMARY_RETRIEVAL_LABEL, ChromaKnowledgeStore
 
 
@@ -45,25 +50,50 @@ class KnowledgeService:
         """
         return self.db.query(KnowledgeChunk).count()
 
-    def ensure_source(self, source: str, content: str) -> int:
-        """检查某来源的当前切片是否与数据库一致，必要时重新导入。
+    def _source_fingerprint(self, content: str, semantic: bool) -> str:
+        identity = ["semantic-sentence-v1" if semantic else "structural-sentence-v1", content,
+                    self.settings.knowledge_chunk_size, self.settings.knowledge_chunk_overlap]
+        if semantic:
+            identity.extend([self.settings.openai_embedding_model,
+                             self.settings.embedding_base_url or self.settings.openai_base_url])
+        return hashlib.sha256(json.dumps(identity, ensure_ascii=False).encode()).hexdigest()
 
-        内容和顺序相同时复用记录，并在向量可用时检查索引；否则完整替换该来源。
+    @staticmethod
+    def _ingestion_fingerprint(source_fingerprint: str, chunks: list[str]) -> str:
+        return hashlib.sha256(json.dumps([source_fingerprint, chunks], ensure_ascii=False).encode()).hexdigest()
+
+    def _split_content(self, content: str) -> tuple[list[str], str]:
+        size, overlap = self.settings.knowledge_chunk_size, self.settings.knowledge_chunk_overlap
+        if self.vector_store.can_embed:
+            try:
+                chunks = semantic_chunk_text(content, size, overlap, self.vector_store.embed_texts)
+                return chunks, self._source_fingerprint(content, True)
+            except Exception as exc:
+                self._handle_vector_error("chunk", exc)
+        return chunk_text(content, size, overlap), self._source_fingerprint(content, False)
+
+    def ensure_source(self, source: str, content: str) -> int:
+        """Reuse unchanged segmentation; keep checking vector index integrity.
+
+        The derived source fingerprint is saved in the same SQL transaction as its
+        chunks. Old installations without fingerprints re-ingest built-in sources.
         """
-        chunks = chunk_text(content, self.settings.knowledge_chunk_size, self.settings.knowledge_chunk_overlap)
-        existing = [
-            chunk.content
-            for chunk in self.db.query(KnowledgeChunk)
-            .filter(KnowledgeChunk.source == source)
-            .order_by(KnowledgeChunk.source_index.asc())
-            .all()
-        ]
-        # 同时比较片段内容和顺序；仅来源名称相同不足以判断正文未变。
-        if existing == chunks:
+        existing = [row.content for row in self.db.query(KnowledgeChunk)
+                    .filter(KnowledgeChunk.source == source).order_by(KnowledgeChunk.source_index).all()]
+        record = self.db.get(KnowledgeSource, source)
+        expected = self._source_fingerprint(content, self.vector_store.can_embed)
+        if record is not None and record.fingerprint == self._ingestion_fingerprint(expected, existing):
             if self.vector_store.can_embed:
                 self._ensure_vector_index()
             return len(existing)
-        return self.ingest(source, content)
+        chunks, fingerprint = self._split_content(content)
+        if existing == chunks:
+            self.db.merge(KnowledgeSource(source=source, fingerprint=self._ingestion_fingerprint(fingerprint, chunks)))
+            if self.vector_store.can_embed:
+                self._ensure_vector_index()
+            self.db.commit()
+            return len(existing)
+        return self._replace_source(source, chunks, fingerprint)
 
     def status(self) -> dict:
         """汇总知识库规模、向量配置及组件错误信息。
@@ -108,23 +138,21 @@ class KnowledgeService:
         return len(rows)
 
     def ingest(self, source: str, content: str) -> int:
-        """按来源替换知识正文及片段，并尝试建立对应向量索引。
+        """Replace a source with semantic passages, or structural passages offline."""
+        chunks, fingerprint = self._split_content(content)
+        return self._replace_source(source, chunks, fingerprint)
 
-        先移除旧来源索引和数据库片段，再生成新片段、取得编号并提交；外部向量库与数据库不共享事务。
-        """
-        chunks = chunk_text(content, self.settings.knowledge_chunk_size, self.settings.knowledge_chunk_overlap)
-        # 外部索引先删除旧来源；它与下面的数据库替换没有共同提交边界。
+    def _replace_source(self, source: str, chunks: list[str], fingerprint: str) -> int:
+        # External vector writes do not share the SQL transaction.
         self._delete_vector_source(source)
         self.db.query(KnowledgeChunk).filter(KnowledgeChunk.source == source).delete()
-        rows = []
-        for index, chunk in enumerate(chunks):
-            row = KnowledgeChunk(source=source, source_index=index, content=chunk)
-            self.db.add(row)
-            rows.append(row)
+        rows = [KnowledgeChunk(source=source, source_index=i, content=chunk) for i, chunk in enumerate(chunks)]
+        self.db.add_all(rows)
         self.db.flush()
         self._index_vector_chunks(rows)
+        self.db.merge(KnowledgeSource(source=source, fingerprint=self._ingestion_fingerprint(fingerprint, chunks)))
         self.db.commit()
-        return len(chunks)
+        return len(rows)
 
     def ingest_file(self, filename: str, data: bytes) -> int:
         """从上传字节提取正文并按文件名导入知识库。
@@ -158,15 +186,33 @@ class KnowledgeService:
             return self._retrieve_current(query, top_k)
 
     def _retrieve_current(self, query: str, top_k: int) -> list[SearchResult]:
-        """先尝试向量检索，有结果时扩展最佳片段，否则采用本地混合评分。
-
-        向量检索正常但结果为空也会进入本地路径，不仅限于连接失败。
-        """
-        # 先走向量路径；结果为空或可回退的错误才让后面的本地评分接手。
-        vector_results = self._retrieve_vector(query, top_k)
-        if vector_results:
-            return self._expand_best(vector_results, top_k)
-        return self._retrieve_hybrid(query, top_k)
+        """Fuse complementary dense/BM25 scores over the union, then expand once."""
+        pool = top_k * 3
+        dense, query_vector = self._search_vector(query, pool)
+        if not dense:
+            return self._retrieve_hybrid(query, top_k)
+        rows, index = self._lexical_snapshot()
+        sparse_scores = index.scores(query)
+        sparse_ids = heapq.nsmallest(pool, (i for i in sparse_scores if sparse_scores[i] > 0),
+                                    key=lambda i: (-sparse_scores[i], i))
+        candidate_ids = {row.chunk_id for row in dense} | {rows[i].id for i in sparse_ids}
+        candidates = self.db.query(KnowledgeChunk).filter(KnowledgeChunk.id.in_(candidate_ids)).order_by(KnowledgeChunk.id).all()
+        # Complement missing dense scores using the same query and persisted passage
+        # embeddings, not zero scores for passages absent from the dense top-pool.
+        try:
+            vectors = np.asarray([parse_embedding(row.embedding_json) for row in candidates], dtype=np.float32)
+            q = np.asarray(query_vector, dtype=np.float32)
+            cosine = vectors @ q / np.maximum(np.linalg.norm(vectors, axis=1) * np.linalg.norm(q), 1e-12)
+            by_id = {rows[i].id: score for i, score in sparse_scores.items()}
+            lexical = np.asarray([by_id.get(row.id, 0.0) for row in candidates])
+            scores = normalized_fusion(cosine, lexical)
+        except (TypeError, ValueError) as exc:
+            self._handle_vector_error("fusion", exc)
+            return self._retrieve_hybrid(query, top_k)
+        ranked = sorted([SearchResult(row.id, row.source, row.content, float(score))
+                         for row, score in zip(candidates, scores, strict=True)],
+                        key=lambda row: (-row.score, row.chunk_id))
+        return self._expand_best(ranked[:top_k], top_k)
 
     async def aretrieve(
         self,
@@ -203,51 +249,82 @@ class KnowledgeService:
         merged = sorted(seen.values(), key=lambda r: r.score, reverse=True)
         return self._expand_best(merged[:top_k], top_k)
 
+    def retrieve_hyde(self, query: str, top_k: int | None = None) -> list[SearchResult]:
+        """用原问题与 HyDE 两路向量结果做 RRF；失败时保留原问题检索。
+
+        假设性文字只参与检索，不会进入回答上下文。该入口供离线对照使用，
+        不改变当前在线默认的 dense + BM25 归一化融合。
+        """
+        top_k = top_k or self.settings.knowledge_top_k
+        pool = top_k * 3
+        direct = self._retrieve_vector(query, pool)
+        if not direct:
+            return self._retrieve_hybrid(query, top_k)
+        rankings = [direct]
+        if self.ai_client is not None:
+            try:
+                document = self.ai_client.generate_hyde_document(query)
+                if document:
+                    hypothetical = self._retrieve_vector(f"{query}\n{document}", pool)
+                    if hypothetical:
+                        rankings.append(hypothetical)
+            except Exception as exc:
+                diagnostics.degraded("knowledge.hyde", "hyde_unavailable", exc)
+        fused = self._rrf_fuse(rankings, pool)
+        return self._expand_best(fused, top_k)
+
+    @staticmethod
+    def _cliff_cutoff(
+        ranked: list[SearchResult],
+        top_k: int,
+        *,
+        min_results: int = 3,
+        absolute_gap: float = 0.5,
+        relative_gap: float = 0.25,
+    ) -> list[SearchResult]:
+        """在最低保留数之后寻找首个明显分数落差，并最多返回 top_k 项。"""
+        upper = min(max(0, top_k), len(ranked))
+        lower = min(max(1, min_results), upper)
+        cutoff = upper
+        for index in range(lower - 1, upper - 1):
+            current = ranked[index].score
+            following = ranked[index + 1].score
+            gap = current - following
+            if gap >= absolute_gap or gap / (abs(current) + 1e-6) >= relative_gap:
+                cutoff = index + 1
+                break
+        return ranked[:cutoff]
+
     def retrieve_hybrid_rrf(self, query: str, top_k: int | None = None) -> list[SearchResult]:
         """分别取得向量或备用结果及关键词结果，再按名次融合。
 
-        两路检索在代码中顺序执行；每路候选数量为 top_k 的三倍。
+        离线 RRF 对照每路候选数量为 top_k 的三倍；向量不可用时直接回退，不重复融合词法信号。
         融合使用排名倒数加权，避免直接比较不同评分方法的原始数值。
         """
         top_k = top_k or self.settings.knowledge_top_k
         pool = top_k * 3
         vector_results = self._retrieve_vector(query, pool)
         if not vector_results:
-            vector_results = self._retrieve_hybrid(query, pool)
+            return self._retrieve_hybrid(query, top_k)
         # 关键词通道同样参与排序融合，不因向量通道已有结果而跳过。
         bm25_results = self._retrieve_bm25(query, pool)
         fused = self._rrf_fuse([vector_results, bm25_results], top_k)
         return self._expand_best(fused, top_k)
-
-
-
     def _retrieve_bm25(self, query: str, top_k: int) -> list[SearchResult]:
-        """使用 BM25（依据词频和文档长度排序的方法）检索数据库片段。
+        """Reuse content-keyed BM25 weights and visit only query term postings.
 
-        每次按当前片段构建词项集合，缺少依赖或无片段时返回空列表，仅保留正分结果。
+        Read current scalar columns so ingestion by another session/process changes
+        the cache key immediately, without holding stale ORM objects or embeddings.
         """
-        chunks = self.db.query(KnowledgeChunk).order_by(
+        rows, index = self._lexical_snapshot()
+        return [SearchResult(rows[i].id, rows[i].source, rows[i].content, score)
+                for i, score in index.search(query, top_k)]
+
+    def _lexical_snapshot(self):
+        rows = self.db.query(KnowledgeChunk.id, KnowledgeChunk.source, KnowledgeChunk.content).order_by(
             KnowledgeChunk.source.asc(), KnowledgeChunk.source_index.asc()
         ).all()
-        if not chunks:
-            return []
-        corpus = [tokenize(chunk.content) for chunk in chunks]
-        try:
-            from rank_bm25 import BM25Okapi
-        except ImportError as exc:
-            diagnostics.degraded("knowledge.bm25", "bm25_unavailable", exc)
-            return []
-        bm25 = BM25Okapi(corpus)
-        scores = bm25.get_scores(tokenize(query))
-        # 使用评分数组中的分数排序，同时保留原片段位置。
-        ranked = sorted(enumerate(scores), key=lambda pair: pair[1], reverse=True)
-        results = []
-        for chunk_idx, score in ranked[:top_k]:
-            if score <= 0:
-                continue
-            chunk = chunks[chunk_idx]
-            results.append(SearchResult(chunk.id, chunk.source, chunk.content, float(score)))
-        return results
+        return rows, lexical_index(tuple(row.content for row in rows))
 
     @staticmethod
     def _rrf_fuse(result_lists: list[list[SearchResult]], top_k: int, k: int = 60) -> list[SearchResult]:
@@ -286,23 +363,29 @@ class KnowledgeService:
         return self._expand_best(ranked[:top_k], top_k)
 
     def _retrieve_vector(self, query: str, top_k: int) -> list[SearchResult]:
+        """Dense-only control retained for reproducible offline comparisons."""
+        return self._search_vector(query, top_k)[0]
+
+    def _search_vector(self, query: str, top_k: int) -> tuple[list[SearchResult], list[float]]:
         """确保索引可用后将查询转换为向量并查找相近片段。
 
         匹配编号存在于数据库时优先使用数据库当前正文；向量操作错误按强制配置抛出或返回空列表。
         """
         with diagnostics.stage("knowledge.vector.retrieve"):
             if not self.vector_store.can_embed:
-                return []
+                return [], []
             try:
                 self._ensure_vector_index()
                 query_embedding = self.vector_store.embed_texts([query])[0]
                 hits = self.vector_store.query(query_embedding, top_k)
             except Exception as exc:
                 self._handle_vector_error("retrieve", exc)
-                return []
+                return [], []
+            ids = [hit.chunk_id for hit in hits if hit.chunk_id is not None]
+            current = {row.id: row for row in self.db.query(KnowledgeChunk).filter(KnowledgeChunk.id.in_(ids)).all()}
             results = []
             for hit in hits:
-                chunk = self.db.get(KnowledgeChunk, hit.chunk_id) if hit.chunk_id is not None else None
+                chunk = current.get(hit.chunk_id) if hit.chunk_id is not None else None
                 results.append(
                     SearchResult(
                         chunk.id if chunk is not None else hit.chunk_id,
@@ -311,7 +394,7 @@ class KnowledgeService:
                         hit.score,
                     )
                 )
-            return results
+            return results, query_embedding
 
     def _ensure_vector_index(self) -> None:
         """检查索引数量、数据库向量及片段编号集合是否完整。
@@ -411,16 +494,25 @@ class KnowledgeService:
     def _expand_best(self, ranked: list[SearchResult], top_k: int) -> list[SearchResult]:
         """只为排名第一的片段补充相邻内容，再附上其余结果。
 
-        保持最佳片段编号和分数，避免再次加入同编号片段；结果最多取 top_k 项。
+        保持最佳片段编号和分数，避免重复编号；最多 top_k 项、3072 字。
         """
         if not ranked:
             return []
-        best = ranked[0]
-        expanded = self._expand(best)
-        results = [expanded]
-        for item in ranked[1:]:
-            if item.chunk_id != expanded.chunk_id and len(results) < top_k:
-                results.append(item)
+        results = []
+        remaining = 3072
+        seen = set()
+        for rank, item in enumerate(ranked):
+            if item.chunk_id in seen:
+                continue
+            expanded = self._expand(item) if rank == 0 else item
+            content = expanded.content if len(expanded.content) <= remaining else item.content[:remaining]
+            if not content:
+                break
+            results.append(SearchResult(item.chunk_id, item.source, content, item.score))
+            remaining -= len(content)
+            seen.add(item.chunk_id)
+            if len(results) == top_k:
+                break
         return results
 
     def _expand(self, result: SearchResult) -> SearchResult:
@@ -444,22 +536,14 @@ class KnowledgeService:
         return SearchResult(chunk.id, chunk.source, "\n\n".join(item.content for item in neighbors), result.score)
 
 
-def chunk_text(content: str, size: int, overlap: int) -> list[str]:
-    """压缩正文空白后按固定长度和重叠量切片。
-
-    size 为片段长度，overlap 为重叠字符数；步长至少为一，避免重叠过大导致循环不前进。
-    """
-    text = re.sub(r"\s+", " ", content or "").strip()
-    if not text:
-        return []
-    chunks = []
-    start = 0
-    # 重叠减少每次前进距离；至少前进一个字符，保证循环能结束。
-    step = max(1, size - overlap)
-    while start < len(text):
-        chunks.append(text[start:start + size])
-        start += step
-    return chunks
+def normalized_fusion(dense: np.ndarray, sparse: np.ndarray, alpha: float = .98) -> np.ndarray:
+    """Min-max convex combination on fully scored candidates (Bruch et al.)."""
+    def normalize(values: np.ndarray) -> np.ndarray:
+        if not np.isfinite(values).all():
+            raise ValueError("Retrieval scores must be finite")
+        low, high = float(values.min()), float(values.max())
+        return (values - low) / (high - low) if high > low else np.zeros_like(values)
+    return alpha * normalize(dense) + (1 - alpha) * normalize(sparse)
 
 
 def hybrid_score(query: str, content: str) -> float:
@@ -486,18 +570,6 @@ def parse_embedding(raw: str | None) -> list[float] | None:
     if not all(isinstance(item, (int, float)) for item in data):
         return None
     return [float(item) for item in data]
-
-
-def tokenize(text: str) -> list[str]:
-    """把文本拆成英文数字词、中文单字和中文相邻双字组合。
-
-    中文双字组合基于移除非中文字符后的文本，提供不依赖额外分词库的粗略匹配特征。
-    """
-    words = re.findall(r"[a-zA-Z0-9_]+|[\u4e00-\u9fff]", text.lower())
-    grams = words[:]
-    compact = "".join(ch for ch in text.lower() if "\u4e00" <= ch <= "\u9fff")
-    grams.extend(compact[i:i + 2] for i in range(max(0, len(compact) - 1)))
-    return [item for item in grams if item.strip()]
 
 
 def token_cosine(left: str, right: str) -> float:

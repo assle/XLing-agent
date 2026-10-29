@@ -238,14 +238,14 @@ class ToolOrchestrationService:
                 "Xling 检测到一条高风险安全预警，请尽快由授权审核团队安排跟进。",
                 "",
                 f"报告ID：{report.id}",
-                f"学生：{display_name} ({username})" if display_name else f"学生：{username}",
+                f"用户：{display_name} ({username})" if display_name else f"用户：{username}",
                 f"风险等级：{report.risk_level}",
                 f"情绪标签：{report.emotion}",
                 f"置信度：{report.confidence}",
                 f"摘要：{report.summary}",
                 f"创建时间：{report.created_at.isoformat()}",
                 "",
-                "学生原始消息：",
+                "用户原始消息：",
                 report.content,
             ]
         )

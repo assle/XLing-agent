@@ -1,7 +1,7 @@
 // 用户聊天：消息收发、流式事件解析、认知行为四维追问进度、无记忆会话。
 
 import { state, api, setPill, isAdmin } from "/app.js";
-import { handlePlanEvent, resetPlanPanel, loadActionPlans } from "/action-plan.js";
+import { handlePlanEvent, resetPlanPanel, loadActionPlans, bindActionPlanObjectSender } from "/action-plan.js";
 
 const els = {};
 let reviewTimer = null;
@@ -24,6 +24,7 @@ export function initChat() {
 
   els.chatForm.addEventListener("submit", sendMessage);
   els.newSession.addEventListener("click", startNewSession);
+  bindActionPlanObjectSender(sendActionPlanObject);
   // 示例语填入输入框：用事件委托，动态渲染的开场白卡片也能响应
   // 点击示例按钮或其内部元素时，定位最近的示例入口并填入输入框。
   document.addEventListener("click", (event) => {
@@ -249,16 +250,23 @@ function parseSse(buffer, onEvent) {
  */
 async function sendMessage(event) {
   event.preventDefault();
-  if (state.sending || (state.sessionId && state.pendingReview) || isAdmin(state.profile)) return;
   const message = els.messageInput.value.trim();
-  if (!message) return;
+  if (message) await sendChatMessage(message, message);
+}
+
+export async function sendActionPlanObject(message) {
+  await sendChatMessage(message, `选择了 24 小时行动计划 #${message.id}`);
+}
+
+async function sendChatMessage(message, displayText) {
+  if (state.sending || (state.sessionId && state.pendingReview) || isAdmin(state.profile)) return;
   state.sending = true;
   const wasNewSession = !state.sessionId;
   els.sendButton.disabled = true;
   hideCbtTag();
   setPill(els.sessionBadge, "THINKING", "warn");
-  els.messageInput.value = "";
-  addMessage("user", message);
+  if (typeof message === "string") els.messageInput.value = "";
+  addMessage("user", displayText);
   const assistant = addMessage("assistant", "");
   let raw = "";
   let pendingReview = false;
@@ -313,6 +321,7 @@ async function sendMessage(event) {
     if (!streamFailed && !pendingReview) {
       if (raw.trim()) {
         setPill(els.sessionBadge, "DONE", "ok");
+        await loadActionPlans();
       } else {
         assistant.textContent = "回复生成未返回内容，请重试。";
         setPill(els.sessionBadge, "ERROR", "danger");

@@ -9,7 +9,7 @@ from app.core import diagnostics
 from app.core.config import Settings
 from app.models.entities import KnowledgeChunk
 
-PRIMARY_RETRIEVAL_LABEL = "Chroma + OpenAI text-embedding-3-small"
+PRIMARY_RETRIEVAL_LABEL = "Chroma dense + BM25 normalized fusion"
 FALLBACK_RETRIEVAL_LABEL = "local hybrid_score"
 # DashScope 的同步兼容接口按模型限制为 10、20 或 25 条；10 条也适用于 OpenAI。
 _EMBEDDING_BATCH_SIZE = 10
@@ -53,8 +53,8 @@ class ChromaKnowledgeStore:
             import chromadb
         except ImportError as exc:
             if settings.knowledge_vector_required:
-                raise VectorStoreUnavailable("缺少 chromadb 依赖，无法启用 Chroma + text-embedding-3-small 主检索方案") from exc
-            self.error = "缺少 chromadb 依赖，Chroma + text-embedding-3-small 不可用，已回退到本地 hybrid_score 检索"
+                raise VectorStoreUnavailable("缺少 chromadb 依赖，无法启用向量与 BM25 融合检索") from exc
+            self.error = "缺少 chromadb 依赖，已回退到本地 hybrid_score 检索"
             return
 
         persist_dir = self._resolve_path(settings.chroma_persist_dir)
@@ -153,7 +153,7 @@ class ChromaKnowledgeStore:
         不可用时抛出记录的原因；成功结果应与输入文本顺序对应。
         """
         if not self.can_embed:
-            raise VectorStoreUnavailable(self.error or "Chroma + text-embedding-3-small 主检索方案不可用")
+            raise VectorStoreUnavailable(self.error or "Chroma 向量服务不可用")
         return self._embed(texts)
 
     def count(self) -> int:
@@ -217,6 +217,3 @@ class ChromaKnowledgeStore:
         固定前缀便于跨两种存储对应同一片段。
         """
         return f"knowledge-chunk-{chunk_id}"
-
-
-ChromaKnowledgeVectorStore = ChromaKnowledgeStore

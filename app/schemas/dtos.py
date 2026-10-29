@@ -3,15 +3,22 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Annotated, Any, Optional
 
-from pydantic import BaseModel, Field, PlainSerializer
+from pydantic import BaseModel, Field, PlainSerializer, StringConstraints
 
 from app.core.time import utc_isoformat
 
 UtcDateTime = Annotated[datetime, PlainSerializer(utc_isoformat, return_type=str, when_used="json")]
 
 
+class ActionPlanObjectMessage(BaseModel):
+    type: str = Field(pattern="^action_plan$")
+    id: int = Field(gt=0)
+    title: str = Field(min_length=1, max_length=500)
+    properties: dict[str, Any] = Field(default_factory=dict)
+
+
 class ChatRequest(BaseModel):
-    message: str = Field(min_length=1)
+    message: Annotated[str, StringConstraints(min_length=1)] | ActionPlanObjectMessage
     sessionId: Optional[str] = None
     noMemory: Optional[bool] = None
 

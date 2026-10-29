@@ -17,7 +17,7 @@ from app.core import diagnostics
 from app.core.config import Settings
 from app.core.enums import MessageRole
 from app.models.entities import ChatMessage, ChatSession, ReviewRequest, UserAccount
-from app.schemas.dtos import AiMessage, ChatRequest, ChatStreamEvent
+from app.schemas.dtos import ActionPlanObjectMessage, AiMessage, ChatRequest, ChatStreamEvent
 from app.services.ai import AiClient, PromptTemplates
 from app.services.memory import RedisShortTermMemoryStore
 from app.services.privacy import PrivacySanitizer
@@ -39,6 +39,7 @@ class PreparedChat:
     pending_review: bool
     cbt_event: dict | None
     action_plan_event: dict | None
+    direct_response: str | None = None
 
 
 RuntimeFactory = Callable[[Session, Settings], AgentRuntime]
@@ -152,7 +153,7 @@ class ChatService:
                 ChatStreamEvent(type="meta", sessionId=session_id, noMemory=prepared.session.no_memory).model_dump(),
             )
             if prepared.pending_review:
-                ack = PromptTemplates.crisis_acknowledgment()
+                ack = prepared.direct_response or PromptTemplates.crisis_acknowledgment()
                 self.save_message(user, prepared.session, MessageRole.ASSISTANT, ack)
                 diagnostics.emit("chat.waiting_review", requires_review=True)
                 yield sse("pending_review", ChatStreamEvent(
@@ -169,11 +170,18 @@ class ChatService:
             if prepared.action_plan_event is not None:
                 yield sse("action_plan", {"type": "action_plan", "sessionId": session_id, **prepared.action_plan_event})
             assistant = []
-            with diagnostics.stage("chat.stream"):
-                async with aclosing(self.ai.stream(prepared.messages)) as stream:
-                    async for token in stream:
-                        assistant.append(token)
-                        yield sse("token", ChatStreamEvent(type="token", sessionId=session_id, content=token).model_dump())
+            if prepared.direct_response is not None:
+                with diagnostics.stage("chat.stream"):
+                    assistant.append(prepared.direct_response)
+                    yield sse("token", ChatStreamEvent(
+                        type="token", sessionId=session_id, content=prepared.direct_response,
+                    ).model_dump())
+            else:
+                with diagnostics.stage("chat.stream"):
+                    async with aclosing(self.ai.stream(prepared.messages)) as stream:
+                        async for token in stream:
+                            assistant.append(token)
+                            yield sse("token", ChatStreamEvent(type="token", sessionId=session_id, content=token).model_dump())
             reply = "".join(assistant)
             if reply.strip():
                 self.save_message(user, prepared.session, MessageRole.ASSISTANT, reply)
@@ -198,8 +206,12 @@ class ChatService:
         数据库保存成功后才追加短期记忆，返回后续推送需要的明确字段。
         """
         self.ensure_chat_available(user, request.sessionId)
-        text = request.message.strip()
-        model_input = self.privacy.sanitize(text)
+        if isinstance(request.message, ActionPlanObjectMessage):
+            text = f"选择了 24 小时行动计划 #{request.message.id}"
+            model_input = request.message
+        else:
+            text = request.message.strip()
+            model_input = self.privacy.sanitize(text)
         with diagnostics.stage("chat.session"):
             session = self.resolve_session(user, request.sessionId, text, request.noMemory)
         diagnostics.bind(session_id=session.public_id, thread_id=session.public_id)
@@ -253,6 +265,7 @@ class ChatService:
             action_plan_event=(
                 _action_plan_payload(agent_run.action_plan_event) if agent_run.action_plan_event else None
             ),
+            direct_response=agent_run.direct_response,
         )
 
     async def _dispatch_report(self, report_id: int, risk_level: str | None) -> str | None:

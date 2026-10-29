@@ -1,0 +1,36 @@
+{
+  "model": "xling-general-cls-05b:quoted-f16",
+  "inputFormat": "quoted",
+  "provider": "openai",
+  "attempts": 8,
+  "passed": true,
+  "cases": [
+    {
+      "expected": "正常",
+      "sync": "正常",
+      "async": "正常",
+      "inputSHA256": "7a16014f4b8196e28fd14ef4375adb9377d5a2a7b0a6d3f2ad43499c1e614871"
+    },
+    {
+      "expected": "焦虑",
+      "sync": "焦虑",
+      "async": "焦虑",
+      "inputSHA256": "b862f268b3629633d6124c1124c8b90d5e5192bb10afade2ad595b5d01c25789"
+    },
+    {
+      "expected": "低落",
+      "sync": "低落",
+      "async": "低落",
+      "inputSHA256": "da685d2d1a375b419fc04b4ea877aa1f35931a754185dafe4598127681372297"
+    },
+    {
+      "expected": "高风险",
+      "sync": "高风险",
+      "async": "高风险",
+      "inputSHA256": "5a9eb037a8a8d2777e04bb2f9a570695d0ecaf8031a884bfc8b9d7a4955d31f9"
+    }
+  ],
+  "observedAtUTC": "2026-10-06T13:56:01.990029+00:00",
+  "scope": "Actual isolated business container AiClient; four synthetic engineering texts; not model quality or clinical evaluation",
+  "container": "xling-closing-app-1"
+}

@@ -1,0 +1,2873 @@
+{
+  "schemaVersion": 2,
+  "reviewedAtUTC": "2026-10-04T06:17:50.284165+00:00",
+  "result": "PASS",
+  "reviewMeaning": "The fixed source-isolation correction is complete before first new40 model use:5 revised cases are clear with new concrete story families,35 original data rows and all40 targets are unchanged, and all40 current rows pass the declared complete source checks. PASS concerns synthetic text/annotation/source construction, not model accuracy or clinical validity.",
+  "inputSnapshots": [
+    {
+      "path": ".scratch/model-repair-20261004/acceptance/new-40.jsonl",
+      "bytes": 9829,
+      "sha256": "3d6a2218dfb182cf8eb06db148bb4312e43dd9af41dc3036b47cd2d4b3ef759a",
+      "mode": "0o444"
+    },
+    {
+      "path": ".scratch/model-repair-20261004/acceptance/support-evidence.json",
+      "bytes": 26591,
+      "sha256": "6564bc6045bf9b55677b727ee06363b5b2a42715dd42f5e7357d1183b208c40c",
+      "mode": "0o444"
+    },
+    {
+      "path": ".scratch/model-repair-20261004/acceptance/metadata.json",
+      "bytes": 5523,
+      "sha256": "1105789019dd87c234f9cc6b8ae75c1e2bc6281eb23de973723242ae2699e841",
+      "mode": "0o444"
+    }
+  ],
+  "systemPrompt": {
+    "path": "finetune/reports/current-classifier/training/system-prompt.txt",
+    "sha256": "a6d981d29f3cfe7f4edef11bb293a5c5ddf06a87d6205177746b5c4454d346ab",
+    "unchanged": true
+  },
+  "initialReviewPreserved": {
+    "path": ".scratch/model-repair-20261004/acceptance/draft-review-original.json",
+    "bytes": 96407,
+    "sha256": "cd140ac69acd159db621172438ae36c7fc2fd76c87ea3e7b0461dc25855e72b1",
+    "initialResult": "FAIL_SOURCE_ISOLATION_REQUIRES_PRE_MODEL_REVISION",
+    "historicalConfirmedSourceReuse": 2,
+    "historicalUnresolvedSourceFamilies": 3,
+    "notPlagiarismClaim": true,
+    "oldFailureNotOverwritten": true
+  },
+  "originalDraftSnapshots": [
+    {
+      "path": ".scratch/model-repair-20261004/acceptance/draft-original-40.jsonl",
+      "sha256": "8c4b4d5a0ad8988d92c9430b8a3d9c9691752ea60ce86967d40c2abecc0bc5f4"
+    },
+    {
+      "path": ".scratch/model-repair-20261004/acceptance/draft-original-support-evidence.json",
+      "sha256": "52ba08c0537f2a5797544315d80f7ea4a9730cdf49382d0e8ca106f4169e3087"
+    },
+    {
+      "path": ".scratch/model-repair-20261004/acceptance/draft-original-metadata.json",
+      "sha256": "febd4742c0b367fa2c010b2a85342bc0884c1191481535f9d137483de0c87f7c"
+    }
+  ],
+  "referenceSnapshots": [
+    {
+      "corpus": "current-train408",
+      "path": "finetune/data/boundary-v3/train-408.jsonl",
+      "rows": 408,
+      "bytes": 272678,
+      "sha256": "98138ead474593c818a681101cb069ea46f3ed93023f858ab5927cdcf83c561d"
+    },
+    {
+      "corpus": "current-val144",
+      "path": "finetune/data/boundary-v3/validation-144.jsonl",
+      "rows": 144,
+      "bytes": 89545,
+      "sha256": "4d32da010f82e2fd8d5705b6ae0b032aadf63bfd16ced4b8e71d3132176a2b14"
+    },
+    {
+      "corpus": "mechanical80",
+      "path": "finetune/data/general-routing-v2/general-test.jsonl",
+      "rows": 80,
+      "bytes": 38212,
+      "sha256": "9e4ad6492e2cb6784b66e90a79acdbe08b37b2e8a9a58917bd58c788b0f848bd"
+    },
+    {
+      "corpus": "natural40",
+      "path": "finetune/data/current-classifier/natural-v12-r2-40.jsonl",
+      "rows": 40,
+      "bytes": 45214,
+      "sha256": "e0b78f203c5c9e9592422ff22d9bc9660f3848c9302b1bc8b083926c84c04f04"
+    }
+  ],
+  "counts": {
+    "newRows": 40,
+    "referenceRows": 672,
+    "fullNewReferencePairs": 26880,
+    "withinNewPairs": 780,
+    "changedCaseLabelReviews": 5,
+    "unchangedByteRowsRetained": 35,
+    "allTargetLabelsUnchanged": 40,
+    "labelClear": 40,
+    "labelBoundary": 0,
+    "labelConflict": 0,
+    "currentConfirmedStoryReuse": 0,
+    "currentUnresolvedSourceFamilies": 0
+  },
+  "operations": {
+    "modelCalls": 0,
+    "predictionReads": 0,
+    "training": 0,
+    "network": 0,
+    "serviceOperations": 0,
+    "testRuns": 0,
+    "trainingSourceWrites": 0,
+    "originalGroundTruthWrites": 0,
+    "new40DataWrites": 0
+  },
+  "modelExposureBoundary": "Root reports0 predictions on new40 in this run; completed training selected using validation only. This reviewer read no training/validation predictions or model results. Source correction is not score-driven relabeling.",
+  "independenceDisclosure": {
+    "reviewerDidNotAuthorNew40": true,
+    "reviewerAuthoredBoundaryV3Increment": true,
+    "initialReviewerCorpusExposure": {
+      "reviewerAuthoredBoundaryV3Increment": true,
+      "reviewerDidNotAuthorNew40": true,
+      "modelPredictionsUsed": false,
+      "reviewerOldCorporaReadForThisAudit": true,
+      "authorPriorExposureDisclosedInMetadata": {
+        "oldAggregateResultsSeen": true,
+        "oldErrorIDsLabelsAndPredictionsSeen": 5,
+        "oldInputBodiesSeen": false,
+        "acceptedByRootForIndependentNewStoryAuthorship": true
+      },
+      "new40BodiesAndLabelListNotSentToRoot": true,
+      "thisReviewDoesNotClaimReviewerBlindToTrainingBodies": true
+    },
+    "new40AuthorExposureFromMetadata": {
+      "corpusInputBodiesRead": false,
+      "oldCorpusPredictionsReadDuringThisAuthorTask": false,
+      "otherAgentTrainingIncrementBodiesRead": false,
+      "onlySourceFileRead": "finetune/reports/current-classifier/training/system-prompt.txt",
+      "priorTaskExposure": {
+        "oldAggregateResultsSeen": true,
+        "oldErrorIDsLabelsAndPredictionsSeen": 5,
+        "oldInputBodiesSeen": false,
+        "acceptedByRootForIndependentNewStoryAuthorship": true
+      }
+    },
+    "new40BodiesOrTargetListNotSentToRoot": true
+  },
+  "revisionPreservationChecks": {
+    "exactChangedIDs": [
+      "repair-new40-006",
+      "repair-new40-018",
+      "repair-new40-021",
+      "repair-new40-027",
+      "repair-new40-038"
+    ],
+    "all35OtherDataLinesByteIdenticalIncludingNewlines": true,
+    "all40GTUnchanged": true,
+    "oldDraftThreeHashesVerified": true,
+    "currentFrozenThreeHashesVerified": true,
+    "allSupportIDsTargetsSourcesAndSpansMatch": true,
+    "referenceFilesAndNew40FilesUnchangedAfterReview": true
+  },
+  "manualMethod": {
+    "scope": "Only the selected5 revised stories received new label/actor/time/negation-scope review. The unchanged35 retain their original complete review; no new clinical or error-free requirement was added.",
+    "sourceMethod": "For all40 current stories, retained the original concrete actor/task/artifact/trigger catalogue from all original reference bodies plus the4 corrected container-archive additions, compared5 new stories to the complete catalogue, and inspected full current lexical-nearest candidates. All672 current reference rows participated in full exact/normalized/ID/sourceGroup/near-duplicate calculations. Broad domain or label-contract overlap is distinguished from same distinctive story episodes.",
+    "notASemanticProxy": "SourceGroup names, Jaccard and SequenceMatcher are retrieval aids only. The five event/role/artifact checks recorded in revisedCaseReviews are actual narrative judgments, not mathematical proof of global originality.",
+    "priorMotives": "Exactly2 confirmed reuse findings and3 unresolved neighboring families from initial review motivated the pre-model single revision. These historical dispositions remain in the archived review; no old scored dataset label was changed."
+  },
+  "literalSpanChecks": [
+    {
+      "id": "repair-new40-001",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-002",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-003",
+      "spanCount": 3,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-004",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-005",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-006",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-007",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-008",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-009",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-010",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-011",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-012",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-013",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-014",
+      "spanCount": 3,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-015",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-016",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-017",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-018",
+      "spanCount": 3,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-019",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-020",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-021",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-022",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-023",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-024",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-025",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-026",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-027",
+      "spanCount": 3,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-028",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-029",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-030",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-031",
+      "spanCount": 3,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-032",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-033",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-034",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-035",
+      "spanCount": 3,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-036",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-037",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-038",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-039",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    },
+    {
+      "id": "repair-new40-040",
+      "spanCount": 2,
+      "allLiteralSpansExact": true
+    }
+  ],
+  "programmaticChecks": {
+    "all40IDsInputsSourceGroupsUnique": true,
+    "labelCountsMatchMetadata": true,
+    "versusEachCorpus": [
+      {
+        "corpus": "current-train408",
+        "idOverlap": [],
+        "namedSourceGroupOverlap": [],
+        "exactInputOverlap": [],
+        "normalizedInputOverlap": []
+      },
+      {
+        "corpus": "current-val144",
+        "idOverlap": [],
+        "namedSourceGroupOverlap": [],
+        "exactInputOverlap": [],
+        "normalizedInputOverlap": []
+      },
+      {
+        "corpus": "mechanical80",
+        "idOverlap": [],
+        "namedSourceGroupOverlap": [],
+        "exactInputOverlap": [],
+        "normalizedInputOverlap": []
+      },
+      {
+        "corpus": "natural40",
+        "idOverlap": [],
+        "namedSourceGroupOverlap": [],
+        "exactInputOverlap": [],
+        "normalizedInputOverlap": []
+      }
+    ],
+    "allExactNormalizedIDNamedSourceChecksZero": true,
+    "normalization": "Unicode NFKC; remove whitespace and Unicode punctuation.",
+    "nearDuplicateMeasures": [
+      "Python SequenceMatcher character ratio with autojunk=False",
+      "character3gram Jaccard after declared normalization"
+    ],
+    "maximumSequenceRatioVsReferences": 0.423729,
+    "maximumChar3gramJaccardVsReferences": 0.136842,
+    "withinNewMaxSequence": {
+      "ratio": 0.574074,
+      "ids": [
+        "repair-new40-008",
+        "repair-new40-024"
+      ]
+    },
+    "withinNewMaxJaccard": {
+      "ratio": 0.115385,
+      "ids": [
+        "repair-new40-003",
+        "repair-new40-018"
+      ]
+    },
+    "noLexicalScoreAloneUsedAsPassGate": true
+  },
+  "nearestReferenceCandidates": [
+    {
+      "newID": "repair-new40-001",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "mechanical80",
+          "id": "a8c5329796982fd0",
+          "sourceGroup": "正常-facts-v2-template-08",
+          "sequenceRatio": 0.25641,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "mechanical80",
+          "id": "9bca032801637502",
+          "sourceGroup": "正常-facts-v2-template-08",
+          "sequenceRatio": 0.25641,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "mechanical80",
+          "id": "a62ba2e670f235e9",
+          "sourceGroup": "正常-facts-v2-template-08",
+          "sequenceRatio": 0.253165,
+          "character3gramJaccard": 0.0
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-n2-carillon-inventory-03",
+          "sourceGroup": "temporal-v06-20261003-n2-carillon-inventory",
+          "sequenceRatio": 0.153846,
+          "character3gramJaccard": 0.017857
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-005",
+          "sourceGroup": "v12-independent-oral_history_editor",
+          "sequenceRatio": 0.14966,
+          "character3gramJaccard": 0.015625
+        },
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-正常-ordinary_planning_requests-02",
+          "sourceGroup": "natural-v08-正常-ordinary_planning_requests",
+          "sequenceRatio": 0.15,
+          "character3gramJaccard": 0.014706
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-002",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t02-tower-clock-overhaul-2",
+          "sourceGroup": "boundary-v3-t02-tower-clock-overhaul",
+          "sequenceRatio": 0.325203,
+          "character3gramJaccard": 0.028571
+        },
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-焦虑-future_branch_internal_dialogue-03",
+          "sourceGroup": "natural-v08-焦虑-future_branch_internal_dialogue",
+          "sequenceRatio": 0.266667,
+          "character3gramJaccard": 0.012987
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-038",
+          "sourceGroup": "v12-independent-sibling_surgery_wait",
+          "sequenceRatio": 0.25,
+          "character3gramJaccard": 0.025641
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "natural-v08-焦虑-changed_environment_attention_diary-01",
+          "sourceGroup": "natural-v08-焦虑-changed_environment_attention_diary",
+          "sequenceRatio": 0.247191,
+          "character3gramJaccard": 0.054795
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t02-tower-clock-overhaul-2",
+          "sourceGroup": "boundary-v3-t02-tower-clock-overhaul",
+          "sequenceRatio": 0.325203,
+          "character3gramJaccard": 0.028571
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t06-paper-cut-light-art-2",
+          "sourceGroup": "boundary-v3-t06-paper-cut-light-art",
+          "sequenceRatio": 0.220472,
+          "character3gramJaccard": 0.027778
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-003",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t01-seal-archive-digitization-3",
+          "sourceGroup": "boundary-v3-t01-seal-archive-digitization",
+          "sequenceRatio": 0.378378,
+          "character3gramJaccard": 0.102273
+        },
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v03-coffee-cupping-log-3",
+          "sourceGroup": "boundary-v3-v03-coffee-cupping-log",
+          "sequenceRatio": 0.376068,
+          "character3gramJaccard": 0.040404
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-r2-20261003-l3-beekeeper-rounds-01",
+          "sourceGroup": "temporal-v06-r2-20261003-l3-beekeeper-rounds",
+          "sequenceRatio": 0.373832,
+          "character3gramJaccard": 0.120482
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-r2-20261003-l3-beekeeper-rounds-01",
+          "sourceGroup": "temporal-v06-r2-20261003-l3-beekeeper-rounds",
+          "sequenceRatio": 0.373832,
+          "character3gramJaccard": 0.120482
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-l-t3-unexplained-voice-note-tears-01",
+          "sourceGroup": "v10-l-t3-unexplained-voice-note-tears",
+          "sequenceRatio": 0.329897,
+          "character3gramJaccard": 0.105263
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t01-seal-archive-digitization-3",
+          "sourceGroup": "boundary-v3-t01-seal-archive-digitization",
+          "sequenceRatio": 0.378378,
+          "character3gramJaccard": 0.102273
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-004",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t03-container-seal-trace-archive-4",
+          "sourceGroup": "boundary-v3-t03-container-seal-trace-archive",
+          "sequenceRatio": 0.423729,
+          "character3gramJaccard": 0.106383
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-h-t2-directed-at-self-not-others-02",
+          "sourceGroup": "v10-h-t2-directed-at-self-not-others",
+          "sequenceRatio": 0.344828,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-h-t1-plan-denial-scope-correction-04",
+          "sourceGroup": "v10-h-t1-plan-denial-scope-correction",
+          "sequenceRatio": 0.344086,
+          "character3gramJaccard": 0.04
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "v10-inc-h-v2-past-page-current-entry-01",
+          "sourceGroup": "v10-h-v2-past-page-current-entry",
+          "sequenceRatio": 0.258065,
+          "character3gramJaccard": 0.125
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t03-container-seal-trace-archive-4",
+          "sourceGroup": "boundary-v3-t03-container-seal-trace-archive",
+          "sequenceRatio": 0.423729,
+          "character3gramJaccard": 0.106383
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t07-roller-rink-duty-4",
+          "sourceGroup": "boundary-v3-t07-roller-rink-duty",
+          "sequenceRatio": 0.280374,
+          "character3gramJaccard": 0.068966
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-005",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-h1-seed-lending-03",
+          "sourceGroup": "temporal-v06-20261003-h1-seed-lending",
+          "sequenceRatio": 0.201681,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-h-t1-plan-denial-scope-correction-03",
+          "sourceGroup": "v10-h-t1-plan-denial-scope-correction",
+          "sequenceRatio": 0.196078,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t01-seal-archive-digitization-1",
+          "sourceGroup": "boundary-v3-t01-seal-archive-digitization",
+          "sequenceRatio": 0.19469,
+          "character3gramJaccard": 0.010101
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "natural40",
+          "id": "v12-017",
+          "sourceGroup": "v12-independent-plumber_accidental_scratch",
+          "sequenceRatio": 0.181818,
+          "character3gramJaccard": 0.017544
+        },
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-正常-stable_state_reflection-04",
+          "sourceGroup": "natural-v08-正常-stable_state_reflection",
+          "sequenceRatio": 0.138889,
+          "character3gramJaccard": 0.016393
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t01-seal-archive-digitization-1",
+          "sourceGroup": "boundary-v3-t01-seal-archive-digitization",
+          "sequenceRatio": 0.19469,
+          "character3gramJaccard": 0.010101
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-006",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "v10-inc-a-v2-rent-cash-timing-gap-01",
+          "sourceGroup": "v10-a-v2-rent-cash-timing-gap",
+          "sequenceRatio": 0.214286,
+          "character3gramJaccard": 0.010309
+        },
+        {
+          "corpus": "current-val144",
+          "id": "natural-v08-高风险-reported_ideation_seeking_help-01",
+          "sourceGroup": "natural-v08-高风险-reported_ideation_seeking_help",
+          "sequenceRatio": 0.206186,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-val144",
+          "id": "natural-v08-低落-social_disconnect_reported_dialogue-02",
+          "sourceGroup": "natural-v08-低落-social_disconnect_reported_dialogue",
+          "sequenceRatio": 0.2,
+          "character3gramJaccard": 0.0
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "1f60a54e85c7fd73",
+          "sourceGroup": "焦虑-template-01",
+          "sequenceRatio": 0.159091,
+          "character3gramJaccard": 0.027027
+        },
+        {
+          "corpus": "current-train408",
+          "id": "94aa11868fbc07c9",
+          "sourceGroup": "焦虑-template-01",
+          "sequenceRatio": 0.159091,
+          "character3gramJaccard": 0.027027
+        },
+        {
+          "corpus": "current-train408",
+          "id": "a664e5981bec86ed",
+          "sourceGroup": "焦虑-template-01",
+          "sequenceRatio": 0.155556,
+          "character3gramJaccard": 0.026316
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-007",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "natural-v08-低落-unfulfilled_positive_event_reflection-02",
+          "sourceGroup": "natural-v08-低落-unfulfilled_positive_event_reflection",
+          "sequenceRatio": 0.288889,
+          "character3gramJaccard": 0.026316
+        },
+        {
+          "corpus": "current-train408",
+          "id": "b1d98443d5c987ff",
+          "sourceGroup": "低落-template-01",
+          "sequenceRatio": 0.285714,
+          "character3gramJaccard": 0.015152
+        },
+        {
+          "corpus": "current-train408",
+          "id": "769492778b194a08",
+          "sourceGroup": "低落-template-01",
+          "sequenceRatio": 0.285714,
+          "character3gramJaccard": 0.015152
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-l-t2-repaired-receipt-self-worth-01",
+          "sourceGroup": "v10-l-t2-repaired-receipt-self-worth",
+          "sequenceRatio": 0.245283,
+          "character3gramJaccard": 0.044944
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-l-t1-bereavement-memento-01",
+          "sourceGroup": "v10-l-t1-bereavement-memento",
+          "sequenceRatio": 0.24,
+          "character3gramJaccard": 0.035714
+        },
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-低落-sustained_disengagement_narrative-03",
+          "sourceGroup": "natural-v08-低落-sustained_disengagement_narrative",
+          "sequenceRatio": 0.166667,
+          "character3gramJaccard": 0.028169
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-008",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-r2-20261003-h2-surname-registry-03",
+          "sourceGroup": "temporal-v06-r2-20261003-h2-surname-registry",
+          "sequenceRatio": 0.346457,
+          "character3gramJaccard": 0.076923
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t03-container-seal-trace-archive-4",
+          "sourceGroup": "boundary-v3-t03-container-seal-trace-archive",
+          "sequenceRatio": 0.325581,
+          "character3gramJaccard": 0.036364
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-h3-coastal-observation-01",
+          "sourceGroup": "temporal-v06-20261003-h3-coastal-observation",
+          "sequenceRatio": 0.314815,
+          "character3gramJaccard": 0.068182
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-r2-20261003-h2-surname-registry-03",
+          "sourceGroup": "temporal-v06-r2-20261003-h2-surname-registry",
+          "sequenceRatio": 0.346457,
+          "character3gramJaccard": 0.076923
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-h3-coastal-observation-01",
+          "sourceGroup": "temporal-v06-20261003-h3-coastal-observation",
+          "sequenceRatio": 0.314815,
+          "character3gramJaccard": 0.068182
+        },
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-高风险-expressed_ideation_with_support_person-01",
+          "sourceGroup": "natural-v08-高风险-expressed_ideation_with_support_person",
+          "sequenceRatio": 0.234043,
+          "character3gramJaccard": 0.064935
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-009",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "v10-inc-n-v2-bicycle-puncture-observation-01",
+          "sourceGroup": "v10-n-v2-bicycle-puncture-observation",
+          "sequenceRatio": 0.204082,
+          "character3gramJaccard": 0.011765
+        },
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-焦虑-anticipated_evaluation_body_narrative-04",
+          "sourceGroup": "natural-v08-焦虑-anticipated_evaluation_body_narrative",
+          "sequenceRatio": 0.2,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-val144",
+          "id": "natural-v08-焦虑-changed_environment_attention_diary-01",
+          "sourceGroup": "natural-v08-焦虑-changed_environment_attention_diary",
+          "sequenceRatio": 0.188235,
+          "character3gramJaccard": 0.013699
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "v10-inc-n-v2-bicycle-puncture-observation-03",
+          "sourceGroup": "v10-n-v2-bicycle-puncture-observation",
+          "sequenceRatio": 0.141414,
+          "character3gramJaccard": 0.02381
+        },
+        {
+          "corpus": "current-val144",
+          "id": "natural-v08-焦虑-changed_environment_attention_diary-01",
+          "sourceGroup": "natural-v08-焦虑-changed_environment_attention_diary",
+          "sequenceRatio": 0.188235,
+          "character3gramJaccard": 0.013699
+        },
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-焦虑-future_branch_internal_dialogue-03",
+          "sourceGroup": "natural-v08-焦虑-future_branch_internal_dialogue",
+          "sequenceRatio": 0.139535,
+          "character3gramJaccard": 0.013514
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-010",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "natural40",
+          "id": "v12-002",
+          "sourceGroup": "v12-independent-conference_interpreting",
+          "sequenceRatio": 0.231884,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v03-coffee-cupping-log-2",
+          "sourceGroup": "boundary-v3-v03-coffee-cupping-log",
+          "sequenceRatio": 0.229508,
+          "character3gramJaccard": 0.019231
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t06-paper-cut-light-art-2",
+          "sourceGroup": "boundary-v3-t06-paper-cut-light-art",
+          "sequenceRatio": 0.225806,
+          "character3gramJaccard": 0.009259
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v03-coffee-cupping-log-2",
+          "sourceGroup": "boundary-v3-v03-coffee-cupping-log",
+          "sequenceRatio": 0.229508,
+          "character3gramJaccard": 0.019231
+        },
+        {
+          "corpus": "current-train408",
+          "id": "c4c0750d0b55d398",
+          "sourceGroup": "高风险-template-02",
+          "sequenceRatio": 0.133333,
+          "character3gramJaccard": 0.015625
+        },
+        {
+          "corpus": "current-train408",
+          "id": "e0405045e322cd8c",
+          "sourceGroup": "高风险-template-02",
+          "sequenceRatio": 0.133333,
+          "character3gramJaccard": 0.015625
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-011",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v02-ceramic-joint-restoration-3",
+          "sourceGroup": "boundary-v3-v02-ceramic-joint-restoration",
+          "sequenceRatio": 0.245614,
+          "character3gramJaccard": 0.041667
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t03-container-seal-trace-archive-3",
+          "sourceGroup": "boundary-v3-t03-container-seal-trace-archive",
+          "sequenceRatio": 0.244275,
+          "character3gramJaccard": 0.017544
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t04-luggage-wheel-repair-3",
+          "sourceGroup": "boundary-v3-t04-luggage-wheel-repair",
+          "sequenceRatio": 0.237288,
+          "character3gramJaccard": 0.019802
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "6ab22c5de1f74bf1",
+          "sourceGroup": "neggen-20261003-f05-debate-argument-disengagement",
+          "sequenceRatio": 0.222222,
+          "character3gramJaccard": 0.04386
+        },
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v02-ceramic-joint-restoration-3",
+          "sourceGroup": "boundary-v3-v02-ceramic-joint-restoration",
+          "sequenceRatio": 0.245614,
+          "character3gramJaccard": 0.041667
+        },
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v01-carpet-cleaning-workshop-3",
+          "sourceGroup": "boundary-v3-v01-carpet-cleaning-workshop",
+          "sequenceRatio": 0.206897,
+          "character3gramJaccard": 0.040816
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-012",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "e74668825d56e460",
+          "sourceGroup": "neggen-20261003-f08-language-exchange-support-disclosure",
+          "sequenceRatio": 0.344828,
+          "character3gramJaccard": 0.120879
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-h1-seed-lending-02",
+          "sourceGroup": "temporal-v06-20261003-h1-seed-lending",
+          "sequenceRatio": 0.309091,
+          "character3gramJaccard": 0.031915
+        },
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-高风险-fictitious_annotated_ideation-03",
+          "sourceGroup": "natural-v08-高风险-fictitious_annotated_ideation",
+          "sequenceRatio": 0.307692,
+          "character3gramJaccard": 0.082192
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "3e4ef8ecade0c3f6",
+          "sourceGroup": "neggen-20261003-f08-language-exchange-support-disclosure",
+          "sequenceRatio": 0.283582,
+          "character3gramJaccard": 0.121495
+        },
+        {
+          "corpus": "current-train408",
+          "id": "e74668825d56e460",
+          "sourceGroup": "neggen-20261003-f08-language-exchange-support-disclosure",
+          "sequenceRatio": 0.344828,
+          "character3gramJaccard": 0.120879
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-l-t3-unexplained-voice-note-tears-04",
+          "sourceGroup": "v10-l-t3-unexplained-voice-note-tears",
+          "sequenceRatio": 0.261682,
+          "character3gramJaccard": 0.094118
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-013",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-高风险-expressed_ideation_without_plan-02",
+          "sourceGroup": "natural-v08-高风险-expressed_ideation_without_plan",
+          "sequenceRatio": 0.219512,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v04-wooden-puzzle-rental-1",
+          "sourceGroup": "boundary-v3-v04-wooden-puzzle-rental",
+          "sequenceRatio": 0.217822,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-032",
+          "sourceGroup": "v12-independent-lab_instrument_technician",
+          "sequenceRatio": 0.206349,
+          "character3gramJaccard": 0.0
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "0a6bb78b8bf264c4",
+          "sourceGroup": "正常-facts-v2-template-02",
+          "sequenceRatio": 0.194444,
+          "character3gramJaccard": 0.016667
+        },
+        {
+          "corpus": "current-train408",
+          "id": "27a13b2540c15993",
+          "sourceGroup": "正常-facts-v2-template-02",
+          "sequenceRatio": 0.194444,
+          "character3gramJaccard": 0.016667
+        },
+        {
+          "corpus": "current-train408",
+          "id": "bb814eba4a44b6b1",
+          "sourceGroup": "正常-facts-v2-template-02",
+          "sequenceRatio": 0.191781,
+          "character3gramJaccard": 0.016393
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-014",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "v10-r2-inc-a-t1-elevator-confinement-uncertainty-01",
+          "sourceGroup": "v10-r2-a-t1-elevator-confinement-uncertainty",
+          "sequenceRatio": 0.368932,
+          "character3gramJaccard": 0.047059
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-a1-theatre-lottery-02",
+          "sourceGroup": "temporal-v06-20261003-a1-theatre-lottery",
+          "sequenceRatio": 0.352,
+          "character3gramJaccard": 0.058824
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-l-t1-bereavement-memento-04",
+          "sourceGroup": "v10-l-t1-bereavement-memento",
+          "sequenceRatio": 0.333333,
+          "character3gramJaccard": 0.081395
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "v10-r2-inc-a-t1-elevator-confinement-uncertainty-04",
+          "sourceGroup": "v10-r2-a-t1-elevator-confinement-uncertainty",
+          "sequenceRatio": 0.314815,
+          "character3gramJaccard": 0.082353
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-h3-coastal-observation-01",
+          "sourceGroup": "temporal-v06-20261003-h3-coastal-observation",
+          "sequenceRatio": 0.320755,
+          "character3gramJaccard": 0.082353
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-l-t1-bereavement-memento-04",
+          "sourceGroup": "v10-l-t1-bereavement-memento",
+          "sequenceRatio": 0.333333,
+          "character3gramJaccard": 0.081395
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-015",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "57707c8263c39f9f",
+          "sourceGroup": "正常-facts-v2-template-01",
+          "sequenceRatio": 0.293333,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t01-seal-archive-digitization-3",
+          "sourceGroup": "boundary-v3-t01-seal-archive-digitization",
+          "sequenceRatio": 0.247788,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-train408",
+          "id": "ab8257075c0edf37",
+          "sourceGroup": "正常-facts-v2-template-01",
+          "sequenceRatio": 0.246575,
+          "character3gramJaccard": 0.0
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "natural40",
+          "id": "v12-023",
+          "sourceGroup": "v12-independent-choir_member",
+          "sequenceRatio": 0.181818,
+          "character3gramJaccard": 0.026316
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-035",
+          "sourceGroup": "v12-independent-sports_coach_offseason",
+          "sequenceRatio": 0.229008,
+          "character3gramJaccard": 0.017391
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-015",
+          "sourceGroup": "v12-independent-divorce_bookbinder",
+          "sequenceRatio": 0.208955,
+          "character3gramJaccard": 0.017241
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-016",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t03-container-seal-trace-archive-4",
+          "sourceGroup": "boundary-v3-t03-container-seal-trace-archive",
+          "sequenceRatio": 0.370968,
+          "character3gramJaccard": 0.078431
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-h3-coastal-observation-01",
+          "sourceGroup": "temporal-v06-20261003-h3-coastal-observation",
+          "sequenceRatio": 0.349515,
+          "character3gramJaccard": 0.084337
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-h-t2-directed-at-self-not-others-02",
+          "sourceGroup": "v10-h-t2-directed-at-self-not-others",
+          "sequenceRatio": 0.301075,
+          "character3gramJaccard": 0.0125
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "v10-inc-h-v2-past-page-current-entry-01",
+          "sourceGroup": "v10-h-v2-past-page-current-entry",
+          "sequenceRatio": 0.262626,
+          "character3gramJaccard": 0.101266
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-h3-coastal-observation-01",
+          "sourceGroup": "temporal-v06-20261003-h3-coastal-observation",
+          "sequenceRatio": 0.349515,
+          "character3gramJaccard": 0.084337
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t03-container-seal-trace-archive-4",
+          "sourceGroup": "boundary-v3-t03-container-seal-trace-archive",
+          "sequenceRatio": 0.370968,
+          "character3gramJaccard": 0.078431
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-017",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-l-t3-unexplained-voice-note-tears-01",
+          "sourceGroup": "v10-l-t3-unexplained-voice-note-tears",
+          "sequenceRatio": 0.196078,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-l-t2-repaired-receipt-self-worth-02",
+          "sourceGroup": "v10-l-t2-repaired-receipt-self-worth",
+          "sequenceRatio": 0.192982,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-val144",
+          "id": "v10-inc-h-v1-ordinary-booking-coexisting-intent-01",
+          "sourceGroup": "v10-h-v1-ordinary-booking-coexisting-intent",
+          "sequenceRatio": 0.188679,
+          "character3gramJaccard": 0.0
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-焦虑-uncertainty_rechecking_loop-01",
+          "sourceGroup": "natural-v08-焦虑-uncertainty_rechecking_loop",
+          "sequenceRatio": 0.16092,
+          "character3gramJaccard": 0.013514
+        },
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-焦虑-future_branch_internal_dialogue-03",
+          "sourceGroup": "natural-v08-焦虑-future_branch_internal_dialogue",
+          "sequenceRatio": 0.114943,
+          "character3gramJaccard": 0.013333
+        },
+        {
+          "corpus": "current-val144",
+          "id": "v10-inc-l-v2-pay-disclosure-comparative-worth-01",
+          "sourceGroup": "v10-l-v2-pay-disclosure-comparative-worth",
+          "sequenceRatio": 0.132075,
+          "character3gramJaccard": 0.01087
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-018",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-h3-coastal-observation-02",
+          "sourceGroup": "temporal-v06-20261003-h3-coastal-observation",
+          "sequenceRatio": 0.288288,
+          "character3gramJaccard": 0.065217
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-h3-coastal-observation-01",
+          "sourceGroup": "temporal-v06-20261003-h3-coastal-observation",
+          "sequenceRatio": 0.277778,
+          "character3gramJaccard": 0.021505
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-r2-20261003-h2-surname-registry-03",
+          "sourceGroup": "temporal-v06-r2-20261003-h2-surname-registry",
+          "sequenceRatio": 0.267717,
+          "character3gramJaccard": 0.046296
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-r2-20261003-l3-beekeeper-rounds-01",
+          "sourceGroup": "temporal-v06-r2-20261003-l3-beekeeper-rounds",
+          "sequenceRatio": 0.206897,
+          "character3gramJaccard": 0.096774
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-l-t3-unexplained-voice-note-tears-01",
+          "sourceGroup": "v10-l-t3-unexplained-voice-note-tears",
+          "sequenceRatio": 0.226415,
+          "character3gramJaccard": 0.094118
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-a1-theatre-lottery-01",
+          "sourceGroup": "temporal-v06-20261003-a1-theatre-lottery",
+          "sequenceRatio": 0.192,
+          "character3gramJaccard": 0.088235
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-019",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t04-luggage-wheel-repair-3",
+          "sourceGroup": "boundary-v3-t04-luggage-wheel-repair",
+          "sequenceRatio": 0.285714,
+          "character3gramJaccard": 0.019608
+        },
+        {
+          "corpus": "current-train408",
+          "id": "9921b227599bdd34",
+          "sourceGroup": "neggen-20261003-f05-debate-argument-disengagement",
+          "sequenceRatio": 0.27907,
+          "character3gramJaccard": 0.036364
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-l2-weaving-courtyard-03",
+          "sourceGroup": "temporal-v06-20261003-l2-weaving-courtyard",
+          "sequenceRatio": 0.266667,
+          "character3gramJaccard": 0.009615
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "natural40",
+          "id": "v12-003",
+          "sourceGroup": "v12-independent-retired_postal_worker",
+          "sequenceRatio": 0.160584,
+          "character3gramJaccard": 0.043103
+        },
+        {
+          "corpus": "current-train408",
+          "id": "9921b227599bdd34",
+          "sourceGroup": "neggen-20261003-f05-debate-argument-disengagement",
+          "sequenceRatio": 0.27907,
+          "character3gramJaccard": 0.036364
+        },
+        {
+          "corpus": "current-train408",
+          "id": "c9a3182370c55da5",
+          "sourceGroup": "neggen-20261003-f06-breakfast-delivery-disengagement",
+          "sequenceRatio": 0.206897,
+          "character3gramJaccard": 0.032
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-020",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-高风险-fictitious_annotated_ideation-01",
+          "sourceGroup": "natural-v08-高风险-fictitious_annotated_ideation",
+          "sequenceRatio": 0.285714,
+          "character3gramJaccard": 0.026667
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-h-t2-directed-at-self-not-others-02",
+          "sourceGroup": "v10-h-t2-directed-at-self-not-others",
+          "sequenceRatio": 0.285714,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-n-t1-editorial-term-scope-04",
+          "sourceGroup": "v10-n-t1-editorial-term-scope",
+          "sequenceRatio": 0.277778,
+          "character3gramJaccard": 0.044944
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "natural40",
+          "id": "v12-032",
+          "sourceGroup": "v12-independent-lab_instrument_technician",
+          "sequenceRatio": 0.240602,
+          "character3gramJaccard": 0.055046
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-a1-theatre-lottery-02",
+          "sourceGroup": "temporal-v06-20261003-a1-theatre-lottery",
+          "sequenceRatio": 0.23622,
+          "character3gramJaccard": 0.048544
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-h-t2-directed-at-self-not-others-01",
+          "sourceGroup": "v10-h-t2-directed-at-self-not-others",
+          "sequenceRatio": 0.264151,
+          "character3gramJaccard": 0.046512
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-021",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "0a6bb78b8bf264c4",
+          "sourceGroup": "正常-facts-v2-template-02",
+          "sequenceRatio": 0.246914,
+          "character3gramJaccard": 0.029851
+        },
+        {
+          "corpus": "current-train408",
+          "id": "27a13b2540c15993",
+          "sourceGroup": "正常-facts-v2-template-02",
+          "sequenceRatio": 0.246914,
+          "character3gramJaccard": 0.029851
+        },
+        {
+          "corpus": "current-train408",
+          "id": "bb814eba4a44b6b1",
+          "sourceGroup": "正常-facts-v2-template-02",
+          "sequenceRatio": 0.243902,
+          "character3gramJaccard": 0.029412
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "0a6bb78b8bf264c4",
+          "sourceGroup": "正常-facts-v2-template-02",
+          "sequenceRatio": 0.246914,
+          "character3gramJaccard": 0.029851
+        },
+        {
+          "corpus": "current-train408",
+          "id": "27a13b2540c15993",
+          "sourceGroup": "正常-facts-v2-template-02",
+          "sequenceRatio": 0.246914,
+          "character3gramJaccard": 0.029851
+        },
+        {
+          "corpus": "current-train408",
+          "id": "bb814eba4a44b6b1",
+          "sourceGroup": "正常-facts-v2-template-02",
+          "sequenceRatio": 0.243902,
+          "character3gramJaccard": 0.029412
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-022",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "natural40",
+          "id": "v12-026",
+          "sourceGroup": "v12-independent-workshop_lease",
+          "sequenceRatio": 0.242857,
+          "character3gramJaccard": 0.024793
+        },
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v04-wooden-puzzle-rental-2",
+          "sourceGroup": "boundary-v3-v04-wooden-puzzle-rental",
+          "sequenceRatio": 0.222222,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t06-paper-cut-light-art-2",
+          "sourceGroup": "boundary-v3-t06-paper-cut-light-art",
+          "sequenceRatio": 0.217054,
+          "character3gramJaccard": 0.027273
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t06-paper-cut-light-art-2",
+          "sourceGroup": "boundary-v3-t06-paper-cut-light-art",
+          "sequenceRatio": 0.217054,
+          "character3gramJaccard": 0.027273
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-026",
+          "sourceGroup": "v12-independent-workshop_lease",
+          "sequenceRatio": 0.242857,
+          "character3gramJaccard": 0.024793
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-002",
+          "sourceGroup": "v12-independent-conference_interpreting",
+          "sequenceRatio": 0.167832,
+          "character3gramJaccard": 0.024194
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-023",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v02-ceramic-joint-restoration-3",
+          "sourceGroup": "boundary-v3-v02-ceramic-joint-restoration",
+          "sequenceRatio": 0.288136,
+          "character3gramJaccard": 0.009709
+        },
+        {
+          "corpus": "current-train408",
+          "id": "d1c8f8ceac3bbf13",
+          "sourceGroup": "低落-template-01",
+          "sequenceRatio": 0.261905,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t01-seal-archive-digitization-3",
+          "sourceGroup": "boundary-v3-t01-seal-archive-digitization",
+          "sequenceRatio": 0.258621,
+          "character3gramJaccard": 0.009901
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-低落-flattened_everyday_experience-03",
+          "sourceGroup": "natural-v08-低落-flattened_everyday_experience",
+          "sequenceRatio": 0.206897,
+          "character3gramJaccard": 0.041096
+        },
+        {
+          "corpus": "current-train408",
+          "id": "64598375b00e54f4",
+          "sourceGroup": "neggen-20261003-f05-debate-argument-disengagement",
+          "sequenceRatio": 0.258065,
+          "character3gramJaccard": 0.028037
+        },
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-高风险-fictitious_annotated_ideation-02",
+          "sourceGroup": "natural-v08-高风险-fictitious_annotated_ideation",
+          "sequenceRatio": 0.137931,
+          "character3gramJaccard": 0.027397
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-024",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t08-fermented-sauce-workshop-4",
+          "sourceGroup": "boundary-v3-t08-fermented-sauce-workshop",
+          "sequenceRatio": 0.347826,
+          "character3gramJaccard": 0.063158
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-028",
+          "sourceGroup": "v12-independent-community_bus_driver",
+          "sequenceRatio": 0.3125,
+          "character3gramJaccard": 0.067308
+        },
+        {
+          "corpus": "current-val144",
+          "id": "v10-inc-h-v1-ordinary-booking-coexisting-intent-01",
+          "sourceGroup": "v10-h-v1-ordinary-booking-coexisting-intent",
+          "sequenceRatio": 0.309091,
+          "character3gramJaccard": 0.054945
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "e874f060e02c9f9d",
+          "sourceGroup": "高风险-template-06",
+          "sequenceRatio": 0.258824,
+          "character3gramJaccard": 0.072464
+        },
+        {
+          "corpus": "current-val144",
+          "id": "71fb32f105e35122",
+          "sourceGroup": "高风险-template-06",
+          "sequenceRatio": 0.258824,
+          "character3gramJaccard": 0.072464
+        },
+        {
+          "corpus": "current-val144",
+          "id": "274f6a18f1bee4a5",
+          "sourceGroup": "高风险-template-06",
+          "sequenceRatio": 0.252874,
+          "character3gramJaccard": 0.070423
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-025",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-n3-darkroom-paper-01",
+          "sourceGroup": "temporal-v06-20261003-n3-darkroom-paper",
+          "sequenceRatio": 0.198198,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-高风险-expressed_ideation_without_plan-02",
+          "sourceGroup": "natural-v08-高风险-expressed_ideation_without_plan",
+          "sequenceRatio": 0.195122,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-train408",
+          "id": "2a640eb7257c2f3e",
+          "sourceGroup": "neggen-20261003-f08-language-exchange-support-disclosure",
+          "sequenceRatio": 0.189655,
+          "character3gramJaccard": 0.009804
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-n-t2-administrative-form-reading-04",
+          "sourceGroup": "v10-n-t2-administrative-form-reading",
+          "sequenceRatio": 0.18,
+          "character3gramJaccard": 0.022727
+        },
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v01-carpet-cleaning-workshop-1",
+          "sourceGroup": "boundary-v3-v01-carpet-cleaning-workshop",
+          "sequenceRatio": 0.183486,
+          "character3gramJaccard": 0.021277
+        },
+        {
+          "corpus": "current-train408",
+          "id": "4f577bc18ed4cb7d",
+          "sourceGroup": "neggen-r2-20261003-f02-code-listening-practice",
+          "sequenceRatio": 0.126126,
+          "character3gramJaccard": 0.020833
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-026",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "natural40",
+          "id": "v12-018",
+          "sourceGroup": "v12-independent-offshore_examiner",
+          "sequenceRatio": 0.233577,
+          "character3gramJaccard": 0.008333
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-002",
+          "sourceGroup": "v12-independent-conference_interpreting",
+          "sequenceRatio": 0.231884,
+          "character3gramJaccard": 0.008197
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-006",
+          "sourceGroup": "v12-independent-dental_appointment",
+          "sequenceRatio": 0.217054,
+          "character3gramJaccard": 0.027273
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "natural40",
+          "id": "v12-006",
+          "sourceGroup": "v12-independent-dental_appointment",
+          "sequenceRatio": 0.217054,
+          "character3gramJaccard": 0.027273
+        },
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-焦虑-anticipated_evaluation_body_narrative-03",
+          "sourceGroup": "natural-v08-焦虑-anticipated_evaluation_body_narrative",
+          "sequenceRatio": 0.157303,
+          "character3gramJaccard": 0.026316
+        },
+        {
+          "corpus": "current-val144",
+          "id": "natural-v08-焦虑-conversation_continuity_worry_questions-01",
+          "sourceGroup": "natural-v08-焦虑-conversation_continuity_worry_questions",
+          "sequenceRatio": 0.155556,
+          "character3gramJaccard": 0.025974
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-027",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "9921b227599bdd34",
+          "sourceGroup": "neggen-20261003-f05-debate-argument-disengagement",
+          "sequenceRatio": 0.314286,
+          "character3gramJaccard": 0.050847
+        },
+        {
+          "corpus": "current-train408",
+          "id": "64598375b00e54f4",
+          "sourceGroup": "neggen-20261003-f05-debate-argument-disengagement",
+          "sequenceRatio": 0.30303,
+          "character3gramJaccard": 0.017391
+        },
+        {
+          "corpus": "current-train408",
+          "id": "c9a3182370c55da5",
+          "sourceGroup": "neggen-20261003-f06-breakfast-delivery-disengagement",
+          "sequenceRatio": 0.294872,
+          "character3gramJaccard": 0.037313
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "9921b227599bdd34",
+          "sourceGroup": "neggen-20261003-f05-debate-argument-disengagement",
+          "sequenceRatio": 0.314286,
+          "character3gramJaccard": 0.050847
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-003",
+          "sourceGroup": "v12-independent-retired_postal_worker",
+          "sequenceRatio": 0.094595,
+          "character3gramJaccard": 0.039683
+        },
+        {
+          "corpus": "current-train408",
+          "id": "c9a3182370c55da5",
+          "sourceGroup": "neggen-20261003-f06-breakfast-delivery-disengagement",
+          "sequenceRatio": 0.294872,
+          "character3gramJaccard": 0.037313
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-028",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-h3-coastal-observation-04",
+          "sourceGroup": "temporal-v06-20261003-h3-coastal-observation",
+          "sequenceRatio": 0.327586,
+          "character3gramJaccard": 0.030612
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-r2-20261003-l3-beekeeper-rounds-02",
+          "sourceGroup": "temporal-v06-r2-20261003-l3-beekeeper-rounds",
+          "sequenceRatio": 0.325203,
+          "character3gramJaccard": 0.039216
+        },
+        {
+          "corpus": "current-train408",
+          "id": "ce21b568c86a6fcb",
+          "sourceGroup": "neggen-20261003-f07-orienteering-feedback-disclosure",
+          "sequenceRatio": 0.318584,
+          "character3gramJaccard": 0.052632
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-高风险-expressed_ideation_with_support_person-01",
+          "sourceGroup": "natural-v08-高风险-expressed_ideation_with_support_person",
+          "sequenceRatio": 0.229885,
+          "character3gramJaccard": 0.070423
+        },
+        {
+          "corpus": "current-val144",
+          "id": "e99e5212ea9061d5",
+          "sourceGroup": "焦虑-template-07",
+          "sequenceRatio": 0.292683,
+          "character3gramJaccard": 0.058824
+        },
+        {
+          "corpus": "current-val144",
+          "id": "058cddac46d068af",
+          "sourceGroup": "焦虑-template-07",
+          "sequenceRatio": 0.292683,
+          "character3gramJaccard": 0.058824
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-029",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "mechanical80",
+          "id": "fa8aa20528d1694d",
+          "sourceGroup": "正常-facts-v2-template-08",
+          "sequenceRatio": 0.25974,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "mechanical80",
+          "id": "6e86d7dbf6c0d3a8",
+          "sourceGroup": "正常-facts-v2-template-08",
+          "sequenceRatio": 0.25974,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "mechanical80",
+          "id": "a8c5329796982fd0",
+          "sourceGroup": "正常-facts-v2-template-08",
+          "sequenceRatio": 0.24,
+          "character3gramJaccard": 0.0
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-正常-stable_state_reflection-04",
+          "sourceGroup": "natural-v08-正常-stable_state_reflection",
+          "sequenceRatio": 0.169014,
+          "character3gramJaccard": 0.016667
+        },
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-正常-ordinary_planning_requests-01",
+          "sourceGroup": "natural-v08-正常-ordinary_planning_requests",
+          "sequenceRatio": 0.186667,
+          "character3gramJaccard": 0.015873
+        },
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-正常-ordinary_planning_requests-04",
+          "sourceGroup": "natural-v08-正常-ordinary_planning_requests",
+          "sequenceRatio": 0.106667,
+          "character3gramJaccard": 0.015625
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-030",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v03-coffee-cupping-log-2",
+          "sourceGroup": "boundary-v3-v03-coffee-cupping-log",
+          "sequenceRatio": 0.264463,
+          "character3gramJaccard": 0.039604
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-a-t2-storm-alert-overnight-roof-03",
+          "sourceGroup": "v10-a-t2-storm-alert-overnight-roof",
+          "sequenceRatio": 0.228571,
+          "character3gramJaccard": 0.022222
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-r2-010",
+          "sourceGroup": "v12-r2-independent-fish_farm_cold_transport",
+          "sequenceRatio": 0.222222,
+          "character3gramJaccard": 0.007407
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v03-coffee-cupping-log-2",
+          "sourceGroup": "boundary-v3-v03-coffee-cupping-log",
+          "sequenceRatio": 0.264463,
+          "character3gramJaccard": 0.039604
+        },
+        {
+          "corpus": "current-val144",
+          "id": "natural-v08-低落-unfulfilled_positive_event_reflection-02",
+          "sourceGroup": "natural-v08-低落-unfulfilled_positive_event_reflection",
+          "sequenceRatio": 0.193548,
+          "character3gramJaccard": 0.025316
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-a-t2-storm-alert-overnight-roof-03",
+          "sourceGroup": "v10-a-t2-storm-alert-overnight-roof",
+          "sequenceRatio": 0.228571,
+          "character3gramJaccard": 0.022222
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-031",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-l-t1-bereavement-memento-01",
+          "sourceGroup": "v10-l-t1-bereavement-memento",
+          "sequenceRatio": 0.372549,
+          "character3gramJaccard": 0.072289
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-l2-weaving-courtyard-02",
+          "sourceGroup": "temporal-v06-20261003-l2-weaving-courtyard",
+          "sequenceRatio": 0.352941,
+          "character3gramJaccard": 0.084211
+        },
+        {
+          "corpus": "current-train408",
+          "id": "9921b227599bdd34",
+          "sourceGroup": "neggen-20261003-f05-debate-argument-disengagement",
+          "sequenceRatio": 0.338462,
+          "character3gramJaccard": 0.036036
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v03-coffee-cupping-log-3",
+          "sourceGroup": "boundary-v3-v03-coffee-cupping-log",
+          "sequenceRatio": 0.333333,
+          "character3gramJaccard": 0.092784
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-r2-inc-a-t1-elevator-confinement-uncertainty-04",
+          "sourceGroup": "v10-r2-a-t1-elevator-confinement-uncertainty",
+          "sequenceRatio": 0.288462,
+          "character3gramJaccard": 0.085366
+        },
+        {
+          "corpus": "current-train408",
+          "id": "temporal-v06-20261003-h3-coastal-observation-01",
+          "sourceGroup": "temporal-v06-20261003-h3-coastal-observation",
+          "sequenceRatio": 0.254902,
+          "character3gramJaccard": 0.085366
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-032",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-h-t2-directed-at-self-not-others-02",
+          "sourceGroup": "v10-h-t2-directed-at-self-not-others",
+          "sequenceRatio": 0.3125,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v04-wooden-puzzle-rental-2",
+          "sourceGroup": "boundary-v3-v04-wooden-puzzle-rental",
+          "sequenceRatio": 0.308943,
+          "character3gramJaccard": 0.028571
+        },
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t07-roller-rink-duty-4",
+          "sourceGroup": "boundary-v3-t07-roller-rink-duty",
+          "sequenceRatio": 0.293103,
+          "character3gramJaccard": 0.085106
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t07-roller-rink-duty-4",
+          "sourceGroup": "boundary-v3-t07-roller-rink-duty",
+          "sequenceRatio": 0.293103,
+          "character3gramJaccard": 0.085106
+        },
+        {
+          "corpus": "current-val144",
+          "id": "v10-inc-h-v2-past-page-current-entry-01",
+          "sourceGroup": "v10-h-v2-past-page-current-entry",
+          "sequenceRatio": 0.196078,
+          "character3gramJaccard": 0.084337
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-h-t2-directed-at-self-not-others-01",
+          "sourceGroup": "v10-h-t2-directed-at-self-not-others",
+          "sequenceRatio": 0.269231,
+          "character3gramJaccard": 0.070588
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-033",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "0a6bb78b8bf264c4",
+          "sourceGroup": "正常-facts-v2-template-02",
+          "sequenceRatio": 0.197183,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-train408",
+          "id": "27a13b2540c15993",
+          "sourceGroup": "正常-facts-v2-template-02",
+          "sequenceRatio": 0.197183,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-val144",
+          "id": "natural-v08-高风险-self_harm_signal_after_prior_coping-03",
+          "sourceGroup": "natural-v08-高风险-self_harm_signal_after_prior_coping",
+          "sequenceRatio": 0.195122,
+          "character3gramJaccard": 0.0
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "mechanical80",
+          "id": "44797b63ff98fe6e",
+          "sourceGroup": "正常-facts-v2-template-09",
+          "sequenceRatio": 0.186667,
+          "character3gramJaccard": 0.015625
+        },
+        {
+          "corpus": "mechanical80",
+          "id": "5d203775c1dc9f7c",
+          "sourceGroup": "正常-facts-v2-template-09",
+          "sequenceRatio": 0.186667,
+          "character3gramJaccard": 0.015625
+        },
+        {
+          "corpus": "mechanical80",
+          "id": "e13a47140d107664",
+          "sourceGroup": "正常-facts-v2-template-09",
+          "sequenceRatio": 0.184211,
+          "character3gramJaccard": 0.015385
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-034",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "boundary-v3-t07-roller-rink-duty-2",
+          "sourceGroup": "boundary-v3-t07-roller-rink-duty",
+          "sequenceRatio": 0.252101,
+          "character3gramJaccard": 0.009804
+        },
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v04-wooden-puzzle-rental-2",
+          "sourceGroup": "boundary-v3-v04-wooden-puzzle-rental",
+          "sequenceRatio": 0.247934,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-026",
+          "sourceGroup": "v12-independent-workshop_lease",
+          "sequenceRatio": 0.207407,
+          "character3gramJaccard": 0.0
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-正常-stable_state_reflection-04",
+          "sourceGroup": "natural-v08-正常-stable_state_reflection",
+          "sequenceRatio": 0.164384,
+          "character3gramJaccard": 0.016393
+        },
+        {
+          "corpus": "current-train408",
+          "id": "55687f16f01a1c4f",
+          "sourceGroup": "正常-facts-v2-template-01",
+          "sequenceRatio": 0.133333,
+          "character3gramJaccard": 0.015873
+        },
+        {
+          "corpus": "current-train408",
+          "id": "27a13b2540c15993",
+          "sourceGroup": "正常-facts-v2-template-02",
+          "sequenceRatio": 0.16,
+          "character3gramJaccard": 0.015873
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-035",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "natural40",
+          "id": "v12-027",
+          "sourceGroup": "v12-independent-former_selfharm_current_sadness",
+          "sequenceRatio": 0.240602,
+          "character3gramJaccard": 0.017544
+        },
+        {
+          "corpus": "current-train408",
+          "id": "natural-v08-低落-sustained_disengagement_narrative-02",
+          "sourceGroup": "natural-v08-低落-sustained_disengagement_narrative",
+          "sequenceRatio": 0.234043,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-005",
+          "sourceGroup": "v12-independent-oral_history_editor",
+          "sequenceRatio": 0.232877,
+          "character3gramJaccard": 0.016
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v04-wooden-puzzle-rental-2",
+          "sourceGroup": "boundary-v3-v04-wooden-puzzle-rental",
+          "sequenceRatio": 0.181818,
+          "character3gramJaccard": 0.04
+        },
+        {
+          "corpus": "current-train408",
+          "id": "67b5596b340dbd64",
+          "sourceGroup": "高风险-template-01",
+          "sequenceRatio": 0.181818,
+          "character3gramJaccard": 0.031746
+        },
+        {
+          "corpus": "current-train408",
+          "id": "05d999e7d7b96c0f",
+          "sourceGroup": "高风险-template-01",
+          "sequenceRatio": 0.181818,
+          "character3gramJaccard": 0.031746
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-036",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-n-t1-editorial-term-scope-03",
+          "sourceGroup": "v10-n-t1-editorial-term-scope",
+          "sequenceRatio": 0.299065,
+          "character3gramJaccard": 0.033708
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-l-t1-bereavement-memento-01",
+          "sourceGroup": "v10-l-t1-bereavement-memento",
+          "sequenceRatio": 0.288462,
+          "character3gramJaccard": 0.022989
+        },
+        {
+          "corpus": "current-val144",
+          "id": "v10-inc-a-v2-rent-cash-timing-gap-03",
+          "sourceGroup": "v10-a-v2-rent-cash-timing-gap",
+          "sequenceRatio": 0.283019,
+          "character3gramJaccard": 0.05814
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "v10-inc-a-v2-rent-cash-timing-gap-03",
+          "sourceGroup": "v10-a-v2-rent-cash-timing-gap",
+          "sequenceRatio": 0.283019,
+          "character3gramJaccard": 0.05814
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-n-t1-editorial-term-scope-02",
+          "sourceGroup": "v10-n-t1-editorial-term-scope",
+          "sequenceRatio": 0.254902,
+          "character3gramJaccard": 0.047619
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-n-t1-editorial-term-scope-03",
+          "sourceGroup": "v10-n-t1-editorial-term-scope",
+          "sequenceRatio": 0.299065,
+          "character3gramJaccard": 0.033708
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-037",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "v10-inc-l-v1-retirement-role-value-loss-01",
+          "sourceGroup": "v10-l-v1-retirement-role-value-loss",
+          "sequenceRatio": 0.210526,
+          "character3gramJaccard": 0.012346
+        },
+        {
+          "corpus": "current-train408",
+          "id": "efe543843cdf699a",
+          "sourceGroup": "低落-template-02",
+          "sequenceRatio": 0.207792,
+          "character3gramJaccard": 0.015152
+        },
+        {
+          "corpus": "current-train408",
+          "id": "40501214f08c1640",
+          "sourceGroup": "低落-template-02",
+          "sequenceRatio": 0.205128,
+          "character3gramJaccard": 0.014925
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "a19882a12f06e5af",
+          "sourceGroup": "低落-template-02",
+          "sequenceRatio": 0.186667,
+          "character3gramJaccard": 0.015625
+        },
+        {
+          "corpus": "current-train408",
+          "id": "3082f42c78b46e55",
+          "sourceGroup": "低落-template-02",
+          "sequenceRatio": 0.186667,
+          "character3gramJaccard": 0.015625
+        },
+        {
+          "corpus": "current-train408",
+          "id": "5aa2a8c08a77b7f7",
+          "sourceGroup": "低落-template-02",
+          "sequenceRatio": 0.181818,
+          "character3gramJaccard": 0.015152
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-038",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "703d5da954bae7d7",
+          "sourceGroup": "neggen-20261003-f04-shared-fridge-rotation",
+          "sequenceRatio": 0.210526,
+          "character3gramJaccard": 0.0
+        },
+        {
+          "corpus": "current-train408",
+          "id": "1f60a54e85c7fd73",
+          "sourceGroup": "焦虑-template-01",
+          "sequenceRatio": 0.206897,
+          "character3gramJaccard": 0.027778
+        },
+        {
+          "corpus": "current-train408",
+          "id": "94aa11868fbc07c9",
+          "sourceGroup": "焦虑-template-01",
+          "sequenceRatio": 0.206897,
+          "character3gramJaccard": 0.027778
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "v10-inc-a-v2-rent-cash-timing-gap-01",
+          "sourceGroup": "v10-a-v2-rent-cash-timing-gap",
+          "sequenceRatio": 0.198198,
+          "character3gramJaccard": 0.032258
+        },
+        {
+          "corpus": "current-train408",
+          "id": "1f60a54e85c7fd73",
+          "sourceGroup": "焦虑-template-01",
+          "sequenceRatio": 0.206897,
+          "character3gramJaccard": 0.027778
+        },
+        {
+          "corpus": "current-train408",
+          "id": "94aa11868fbc07c9",
+          "sourceGroup": "焦虑-template-01",
+          "sequenceRatio": 0.206897,
+          "character3gramJaccard": 0.027778
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-039",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "b1d98443d5c987ff",
+          "sourceGroup": "低落-template-01",
+          "sequenceRatio": 0.266667,
+          "character3gramJaccard": 0.015385
+        },
+        {
+          "corpus": "current-train408",
+          "id": "769492778b194a08",
+          "sourceGroup": "低落-template-01",
+          "sequenceRatio": 0.266667,
+          "character3gramJaccard": 0.015385
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-035",
+          "sourceGroup": "v12-independent-sports_coach_offseason",
+          "sequenceRatio": 0.265625,
+          "character3gramJaccard": 0.026786
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-val144",
+          "id": "boundary-v3-v03-coffee-cupping-log-3",
+          "sourceGroup": "boundary-v3-v03-coffee-cupping-log",
+          "sequenceRatio": 0.206897,
+          "character3gramJaccard": 0.05102
+        },
+        {
+          "corpus": "current-train408",
+          "id": "9921b227599bdd34",
+          "sourceGroup": "neggen-20261003-f05-debate-argument-disengagement",
+          "sequenceRatio": 0.253968,
+          "character3gramJaccard": 0.046729
+        },
+        {
+          "corpus": "natural40",
+          "id": "v12-003",
+          "sourceGroup": "v12-independent-retired_postal_worker",
+          "sequenceRatio": 0.19403,
+          "character3gramJaccard": 0.04386
+        }
+      ]
+    },
+    {
+      "newID": "repair-new40-040",
+      "top3SequenceCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-h-t1-plan-denial-scope-correction-02",
+          "sourceGroup": "v10-h-t1-plan-denial-scope-correction",
+          "sequenceRatio": 0.37037,
+          "character3gramJaccard": 0.043956
+        },
+        {
+          "corpus": "current-train408",
+          "id": "e74668825d56e460",
+          "sourceGroup": "neggen-20261003-f08-language-exchange-support-disclosure",
+          "sequenceRatio": 0.360656,
+          "character3gramJaccard": 0.136842
+        },
+        {
+          "corpus": "current-val144",
+          "id": "v10-inc-h-v2-past-page-current-entry-02",
+          "sourceGroup": "v10-h-v2-past-page-current-entry",
+          "sequenceRatio": 0.314815,
+          "character3gramJaccard": 0.105882
+        }
+      ],
+      "top3Char3gramCandidates": [
+        {
+          "corpus": "current-train408",
+          "id": "e74668825d56e460",
+          "sourceGroup": "neggen-20261003-f08-language-exchange-support-disclosure",
+          "sequenceRatio": 0.360656,
+          "character3gramJaccard": 0.136842
+        },
+        {
+          "corpus": "current-train408",
+          "id": "v10-inc-l-t3-unexplained-voice-note-tears-04",
+          "sourceGroup": "v10-l-t3-unexplained-voice-note-tears",
+          "sequenceRatio": 0.283186,
+          "character3gramJaccard": 0.11236
+        },
+        {
+          "corpus": "current-val144",
+          "id": "v10-inc-h-v2-past-page-current-entry-02",
+          "sourceGroup": "v10-h-v2-past-page-current-entry",
+          "sequenceRatio": 0.314815,
+          "character3gramJaccard": 0.105882
+        }
+      ]
+    }
+  ],
+  "revisedCaseReviews": {
+    "repair-new40-006": {
+      "priorFinding": "unresolved-near-story-family",
+      "scopeReview": "本人当前明确担心将来交付失误并有身体紧张，没有肯定危险意念；固定SYS目标清晰。",
+      "sourceReview": "婚礼桌面花束配色和交付验色为新具体故事。旧花盆照护/花坛布局属于个人园艺，非受托庆典配色交付；旧会展路线、触摸地图及当前封签核验均无相同角色任务和触发事件。",
+      "oldFindingResolved": true
+    },
+    "repair-new40-018": {
+      "priorFinding": "confirmed-story-family-reuse",
+      "scopeReview": "开头明确否认本人危险意念，后文仍明确表达将来操作出错担忧和身体紧张；否认范围不消除其当前担忧。",
+      "sourceReview": "给朋友旧电脑换内存并担心不能开机，非会议口译。旧设备技师自伤、手机/记录操作和维修职业只共享技术领域；不存在内存安装给朋友造成启动失败的同一事件家族。",
+      "oldFindingResolved": true
+    },
+    "repair-new40-021": {
+      "priorFinding": "confirmed-story-family-reuse",
+      "scopeReview": "本人当前中性手工排色和计数复原，没有当前负性情绪或危险意念，固定SYS目标清晰。",
+      "sourceReview": "瓶盖按颜色排形并记录数量是新的具体材料/动作。旧历史引文校对已完全移除；剪纸灯影安装、拼图出租清点或织布材料选择不同于瓶盖拼色复原。",
+      "oldFindingResolved": true
+    },
+    "repair-new40-027": {
+      "priorFinding": "unresolved-near-story-family",
+      "scopeReview": "本人当前悲伤、兴趣下降与动力下降均直接表达，没有危险意念肯定；不依赖项目结束推断状态。",
+      "sourceReview": "个人手语歌及已录练习视频无法开始观看，非蜂群观察。旧持续合唱兴趣下降是团体音乐排练，盲文课用于标签、电码课用于听辨，均不是手语歌的手势表达练习与个人录屏回看；共享兴趣下降机制不作同源证明。",
+      "oldFindingResolved": true
+    },
+    "repair-new40-038": {
+      "priorFinding": "unresolved-near-story-family",
+      "scopeReview": "本人对未来手机贴膜失误明确担忧且出汗，无危险意念肯定；固定SYS目标清晰。",
+      "sourceReview": "给朋友手机贴膜的贴歪/气泡操作事件与旧牙科预约完全不同。旧生活设备维修、前述内存安装只共享替朋友做操作的广义关系，材料、过程和失败后果不同；并非复制旧牙科或当前新增来源。",
+      "oldFindingResolved": true
+    }
+  },
+  "caseReviews": [
+    {
+      "id": "repair-new40-001",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人当前中性植物标牌比较；旧种子借还与园艺布局共享植物领域，但角色、任务与具体事件不同。"
+    },
+    {
+      "id": "repair-new40-002",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人担心将来宠物拆线后的恢复，有明确身体紧张；与亲属手术等待属于不同对象及兽医术后事件。"
+    },
+    {
+      "id": "repair-new40-003",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人当前悲伤并失去阅读兴趣，危险念头明确否认；旧装帧者离婚、档案员搬城不同于书店关门。"
+    },
+    {
+      "id": "repair-new40-004",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人现在肯定危险念头，朋友陪伴不能否定；丢跑步奖牌的事件在参照中未复用。"
+    },
+    {
+      "id": "repair-new40-005",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人现在中性比较相机光圈效果；旧暗房相纸选择与相机收藏兴趣下降是不同事件和状态。"
+    },
+    {
+      "id": "repair-new40-006",
+      "labelSupport": "clear",
+      "actorTimeNegationScopeChecked": true,
+      "supportSpansVerified": true,
+      "sourceReview": "distinct-concrete-story-pass",
+      "reviewScope": "five-revised-case-read",
+      "manualAssessment": {
+        "priorFinding": "unresolved-near-story-family",
+        "scopeReview": "本人当前明确担心将来交付失误并有身体紧张，没有肯定危险意念；固定SYS目标清晰。",
+        "sourceReview": "婚礼桌面花束配色和交付验色为新具体故事。旧花盆照护/花坛布局属于个人园艺，非受托庆典配色交付；旧会展路线、触摸地图及当前封签核验均无相同角色任务和触发事件。",
+        "oldFindingResolved": true
+      }
+    },
+    {
+      "id": "repair-new40-007",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人现在悲伤和失去舞曲/练习兴趣；小组散伙不同于旧持续合唱兴趣下降或店主情绪变化。"
+    },
+    {
+      "id": "repair-new40-008",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人此刻肯定危险念头，明确不是仅悲伤；土壤实验记录丢失不同于旧设备技师故意自伤事件。"
+    },
+    {
+      "id": "repair-new40-009",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人当前中性新车篮安排；旧补胎排查和骑行路线改变虽同领域，具体物件、动作和事件不同。"
+    },
+    {
+      "id": "repair-new40-010",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人对未来甜品结构失败担忧且出汗；与旧面包比例中性请求及酱料介绍不同。"
+    },
+    {
+      "id": "repair-new40-011",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人当前悲伤和绘画兴趣下降；动画文件恢复失败不同于旧研究资助被拒及泛化画本兴趣下降。"
+    },
+    {
+      "id": "repair-new40-012",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人此刻肯定危险念头，尚无计划不抵消；航模赛道方案被退回与旧地图稿交出后当前自伤均属绘图工作，触发事件和参与组织不同。"
+    },
+    {
+      "id": "repair-new40-013",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人当前中性食谱记录；旧吐司原料换算和备餐选择不同于家庭果冰配方对比。"
+    },
+    {
+      "id": "repair-new40-014",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人害怕紧张失控而非肯定危险意念；攀岩支点担忧与旧电梯困住、溜冰课堂指挥不同。"
+    },
+    {
+      "id": "repair-new40-015",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人当前持续悲伤与散步兴趣下降；朋友迁居这一具体关系事件未复用。"
+    },
+    {
+      "id": "repair-new40-016",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人此刻肯定危险念头，家人安慰不取消；古币展示盒损坏的事件未复用。"
+    },
+    {
+      "id": "repair-new40-017",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人当前中性比较宠物软垫且有兴趣；旧数据没有这一具体选布事件。"
+    },
+    {
+      "id": "repair-new40-018",
+      "labelSupport": "clear",
+      "actorTimeNegationScopeChecked": true,
+      "supportSpansVerified": true,
+      "sourceReview": "distinct-concrete-story-pass",
+      "reviewScope": "five-revised-case-read",
+      "manualAssessment": {
+        "priorFinding": "confirmed-story-family-reuse",
+        "scopeReview": "开头明确否认本人危险意念，后文仍明确表达将来操作出错担忧和身体紧张；否认范围不消除其当前担忧。",
+        "sourceReview": "给朋友旧电脑换内存并担心不能开机，非会议口译。旧设备技师自伤、手机/记录操作和维修职业只共享技术领域；不存在内存安装给朋友造成启动失败的同一事件家族。",
+        "oldFindingResolved": true
+      }
+    },
+    {
+      "id": "repair-new40-019",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人当前低落且染布动力下降；作品落选与旧研究申请落选共享拒绝机制，但手作展览制作角色/活动不同。"
+    },
+    {
+      "id": "repair-new40-020",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "作者明确澄清危险表达指当前本人，虚构备注不能取消；旧虚构角色/联调策略机制相同，但游戏草稿作者本人澄清的叙事来源不同。"
+    },
+    {
+      "id": "repair-new40-021",
+      "labelSupport": "clear",
+      "actorTimeNegationScopeChecked": true,
+      "supportSpansVerified": true,
+      "sourceReview": "distinct-concrete-story-pass",
+      "reviewScope": "five-revised-case-read",
+      "manualAssessment": {
+        "priorFinding": "confirmed-story-family-reuse",
+        "scopeReview": "本人当前中性手工排色和计数复原，没有当前负性情绪或危险意念，固定SYS目标清晰。",
+        "sourceReview": "瓶盖按颜色排形并记录数量是新的具体材料/动作。旧历史引文校对已完全移除；剪纸灯影安装、拼图出租清点或织布材料选择不同于瓶盖拼色复原。",
+        "oldFindingResolved": true
+      }
+    },
+    {
+      "id": "repair-new40-022",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人当前担忧未来网络安装影响工作及心跳反应；新居线路服务与旧工作室续租属于不同事件。"
+    },
+    {
+      "id": "repair-new40-023",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人当前悲伤及骑行规划兴趣下降；伙伴退队与旧自行车维修/路线调整事件不同。"
+    },
+    {
+      "id": "repair-new40-024",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人此刻肯定危险念头且排除气话；围巾受损不同于旧织布房迁址后的悲伤。"
+    },
+    {
+      "id": "repair-new40-025",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人中性家庭汤料步骤说明；旧面包配方/晚餐搭配为不同具体食品任务。"
+    },
+    {
+      "id": "repair-new40-026",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人未来活动担忧与身体紧张；围棋交流轮次管理不同于旧桌游结算说明及船员考核。"
+    },
+    {
+      "id": "repair-new40-027",
+      "labelSupport": "clear",
+      "actorTimeNegationScopeChecked": true,
+      "supportSpansVerified": true,
+      "sourceReview": "distinct-concrete-story-pass",
+      "reviewScope": "five-revised-case-read",
+      "manualAssessment": {
+        "priorFinding": "unresolved-near-story-family",
+        "scopeReview": "本人当前悲伤、兴趣下降与动力下降均直接表达，没有危险意念肯定；不依赖项目结束推断状态。",
+        "sourceReview": "个人手语歌及已录练习视频无法开始观看，非蜂群观察。旧持续合唱兴趣下降是团体音乐排练，盲文课用于标签、电码课用于听辨，均不是手语歌的手势表达练习与个人录屏回看；共享兴趣下降机制不作同源证明。",
+        "oldFindingResolved": true
+      }
+    },
+    {
+      "id": "repair-new40-028",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人此刻肯定危险念头且陪伴不取消；信鸽未归事件在参照中未复用。"
+    },
+    {
+      "id": "repair-new40-029",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人当前中性技巧记录；魔术套环图示动作不同于旧桌游讲规则和电码练习。"
+    },
+    {
+      "id": "repair-new40-030",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人未来幼苗降温损害担忧且身体紧张；旧鱼苗冷链运输同属生物降温主题，但运输与驻地种植的角色、事件不同。"
+    },
+    {
+      "id": "repair-new40-031",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人当前悲伤及音乐兴趣下降，危险念头否认；口琴练习与旧一般歌曲/合唱的具体行为不同。"
+    },
+    {
+      "id": "repair-new40-032",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人此刻肯定危险念头，明确不是可能失控恐惧；美术社搬画架争执不同于旧物业争执。"
+    },
+    {
+      "id": "repair-new40-033",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人中性床单尺寸与洗涤信息对比；旧收纳安排未复用此物件事件。"
+    },
+    {
+      "id": "repair-new40-034",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人未来赛事表现担忧并紧张；羽毛球首场发球与旧考试、汇报或溜冰课堂不同。"
+    },
+    {
+      "id": "repair-new40-035",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "危险旧日记属于朋友，非本人；本人当前悲伤兴趣下降，与旧本人历史危险已缓解的主体范围不同。"
+    },
+    {
+      "id": "repair-new40-036",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "旧危险录音不能替代当前状态，正文另肯定现在仍有危险念头；贝斯谱整理和过去肯定延续不同于旧日记过去否定到现在肯定。"
+    },
+    {
+      "id": "repair-new40-037",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人当前中性观察和绘图兴趣；旧观鸟小组无障碍路线设计为不同角色/任务。"
+    },
+    {
+      "id": "repair-new40-038",
+      "labelSupport": "clear",
+      "actorTimeNegationScopeChecked": true,
+      "supportSpansVerified": true,
+      "sourceReview": "distinct-concrete-story-pass",
+      "reviewScope": "five-revised-case-read",
+      "manualAssessment": {
+        "priorFinding": "unresolved-near-story-family",
+        "scopeReview": "本人对未来手机贴膜失误明确担忧且出汗，无危险意念肯定；固定SYS目标清晰。",
+        "sourceReview": "给朋友手机贴膜的贴歪/气泡操作事件与旧牙科预约完全不同。旧生活设备维修、前述内存安装只共享替朋友做操作的广义关系，材料、过程和失败后果不同；并非复制旧牙科或当前新增来源。",
+        "oldFindingResolved": true
+      }
+    },
+    {
+      "id": "repair-new40-039",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人当前持续悲伤及喜剧兴趣下降；旧档案员孤单并放弃电影和一般兴趣下降仅共享影视兴趣机制，没有同角色事件复用。"
+    },
+    {
+      "id": "repair-new40-040",
+      "labelSupport": "clear-retained-from-initial-review",
+      "originalDataRowBytesUnchanged": true,
+      "allTargetLabelsUnchanged": true,
+      "supportSpansVerified": true,
+      "sourceReview": "prior35-story-check-retained-plus-full-current-source-comparison",
+      "reviewScope": "unchanged35-carried-without-expanding-label-review",
+      "priorReviewAssessment": "本人此刻肯定危险念头，无计划不取消；庆典烟火设计取消的具体事件未复用。"
+    }
+  ],
+  "sourceIsolationIssues": [],
+  "resolvedSourceFindings": [
+    {
+      "id": "repair-new40-006",
+      "priorFinding": "unresolved-near-story-family",
+      "currentDisposition": "resolved-with-new-story-before-model-use"
+    },
+    {
+      "id": "repair-new40-018",
+      "priorFinding": "confirmed-story-family-reuse",
+      "currentDisposition": "resolved-with-new-story-before-model-use"
+    },
+    {
+      "id": "repair-new40-021",
+      "priorFinding": "confirmed-story-family-reuse",
+      "currentDisposition": "resolved-with-new-story-before-model-use"
+    },
+    {
+      "id": "repair-new40-027",
+      "priorFinding": "unresolved-near-story-family",
+      "currentDisposition": "resolved-with-new-story-before-model-use"
+    },
+    {
+      "id": "repair-new40-038",
+      "priorFinding": "unresolved-near-story-family",
+      "currentDisposition": "resolved-with-new-story-before-model-use"
+    }
+  ],
+  "remainingRequiredReview": [],
+  "limits": [
+    "Synthetic engineering content targets, not medical gold or actual clinical observations.",
+    "PASS does not predict classifier accuracy, justify changing old scored labels, or establish clinical deployment safety.",
+    "The reviewer is independent of the new40 author but has training-author and corpus-review exposure, explicitly disclosed.",
+    "All-source text comparisons and concrete narrative review support this finite construction boundary, not universal semantic originality."
+  ]
+}

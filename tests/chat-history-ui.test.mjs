@@ -51,10 +51,11 @@ const app = new SyntheticModule(["state", "api", "setPill", "isAdmin"], function
   this.setExport("isAdmin", () => false);
 });
 let historyLoaded;
-const plans = new SyntheticModule(["handlePlanEvent", "resetPlanPanel", "loadActionPlans"], function () {
+const plans = new SyntheticModule(["handlePlanEvent", "resetPlanPanel", "loadActionPlans", "bindActionPlanObjectSender"], function () {
   this.setExport("handlePlanEvent", () => {});
   this.setExport("resetPlanPanel", () => {});
   this.setExport("loadActionPlans", async () => { historyLoaded(); });
+  this.setExport("bindActionPlanObjectSender", () => {});
 });
 const module = new SourceTextModule(await readFile(new URL("../app/static/chat.js", import.meta.url), "utf8"));
 await module.link((path) => path === "/app.js" ? app : plans);

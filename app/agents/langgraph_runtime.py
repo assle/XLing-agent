@@ -21,7 +21,7 @@ from app.core.config import Settings
 from app.core.enums import EmotionLabel, IntentType, RiskLevel
 from app.core.time import utc_isoformat, utc_now
 from app.models.entities import ChatMessage, ChatSession, UserAccount
-from app.schemas.dtos import AiMessage
+from app.schemas.dtos import ActionPlanObjectMessage, AiMessage, CheckInSubmitRequest
 from app.services.ai import PromptTemplates, has_consult_signal, has_high_risk_signal
 from app.services.assessment import PsychologyAssessment
 from app.services.cbt import DIMENSION_LABELS, CBTService, CBTState
@@ -35,6 +35,14 @@ GENERAL_TASK_WORDS = [
     "前端", "后端", "项目", "接口", "bug", "报错", "作业", "论文", "翻译", "总结", "解释",
     "怎么写", "如何", "是什么", "为什么", "给我", "帮我", "推荐", "查询", "天气", "路线",
 ]
+
+
+def is_deployment_resource_question(text: str) -> bool:
+    """Identify resource-query wording; this predicate is not a safety decision."""
+    neutral_text = text.replace("心理", "").replace("咨询", "")
+    return (any(word in text for word in ("部署", "机构"))
+            and any(word in text for word in ("热线", "预约"))
+            and not has_consult_signal(neutral_text) and not has_high_risk_signal(text))
 
 
 class GraphState(TypedDict):
@@ -64,6 +72,13 @@ class GraphState(TypedDict):
     review_decision: str | None
     cbt_event: dict[str, Any] | None
     action_plan_event: dict[str, Any] | None
+    direct_response: str | None
+    object_message: dict[str, Any] | None
+    focused_object: dict[str, Any] | None
+    checkin_task: str | None
+    checkin_slots: list[str]
+    checkin_values: dict[str, Any]
+    awaiting_review: bool
 
 
 GraphUpdate = dict[str, Any]
@@ -100,29 +115,40 @@ class LangGraphAgentRuntimeService:
         self.graph = self._build_graph()
 
     async def run(
-        self, user: UserAccount, session: ChatSession, model_input: str,
+        self, user: UserAccount, session: ChatSession, model_input: str | ActionPlanObjectMessage,
     ) -> AgentRunResult:
-        """Initialize every turn field before entering the graph, including empty business events."""
+        """Reset turn-local values and restore only declared object-interaction state."""
         await self._ensure_checkpointer()
+        config = {"configurable": {"thread_id": session.public_id}}
+        previous = await self.graph.aget_state(config)
+        restored = {
+            key: previous.values.get(key, default)
+            for key, default in (
+                ("focused_object", None), ("checkin_task", None),
+                ("checkin_slots", []), ("checkin_values", {}),
+            )
+        }
+        object_message = model_input.model_dump() if isinstance(model_input, ActionPlanObjectMessage) else None
         state: GraphState = {
             "user_id": user.id, "session_id": session.id, "thread_id": session.public_id,
             "display_name": user.display_name, "no_memory": bool(session.no_memory),
-            "model_input": model_input,
+            "model_input": model_input if isinstance(model_input, str) else "",
             "original_run_id": diagnostics.current_run_id() or str(uuid4()),
             "quick_risk_flagged": False, "intent": None, "risk_level": RiskLevel.LOW.value,
             "assessment": None, "memory_brief": "无相关历史记忆。",
             "support_background_context": "", "memory_cards_context": "", "model_history": [],
             "knowledge_query": "", "retrieved_knowledge": [], "response_messages": [], "steps": [],
             "trajectory_rising": False, "trajectory_trend": "", "review_decision": None,
-            "cbt_event": None, "action_plan_event": None,
+            "cbt_event": None, "action_plan_event": None, "direct_response": None,
+            "object_message": object_message, "awaiting_review": False,
+            **restored,
         }
-        config = {"configurable": {"thread_id": session.public_id}}
         with diagnostics.stage("graph.run"):
             await self.graph.ainvoke(state, config=config)
             await self._record_checkpoint_activity(session.public_id)
             snapshot = await self.graph.aget_state(config)
-        pending_review = bool(snapshot.next)
-        diagnostics.emit("graph.interrupted" if pending_review else "graph.completed", requires_review=pending_review)
+        pending_review = bool(snapshot.next) or snapshot.values["awaiting_review"]
+        diagnostics.emit("graph.interrupted" if snapshot.next else "graph.completed", requires_review=pending_review)
         return self._result(snapshot.values, pending_review=pending_review)
 
     def get_state(self, thread_id: str) -> RuntimeStateSnapshot:
@@ -205,6 +231,7 @@ class LangGraphAgentRuntimeService:
                 feedback_due_at=plan["feedback_due_at"],
             ) if plan else None,
             quick_safety_checked=True, quick_risk_flagged=state["quick_risk_flagged"],
+            direct_response=state["direct_response"],
         )
 
     def _make_checkpointer(self):
@@ -320,6 +347,7 @@ class LangGraphAgentRuntimeService:
 
         graph = StateGraph(GraphState)
         nodes = {
+            "object_entry": self._object_message_node,
             "quick_safety": self._quick_safety_node,
             "memory": self._memory_node,
             "supervisor": self._supervisor_node,
@@ -332,7 +360,10 @@ class LangGraphAgentRuntimeService:
         }
         for name, node in nodes.items():
             graph.add_node(name, self._observed_node(name, node))
-        graph.set_entry_point("quick_safety")
+        graph.set_entry_point("object_entry")
+        graph.add_conditional_edges(
+            "object_entry", self._route_after_object_message, {"handled": END, "text": "quick_safety"},
+        )
         graph.add_edge("quick_safety", "memory")
         graph.add_edge("memory", "supervisor")
         graph.add_conditional_edges(
@@ -341,7 +372,7 @@ class LangGraphAgentRuntimeService:
         graph.add_edge("risk_guardian", "risk_guardian_gate")
         graph.add_conditional_edges(
             "risk_guardian_gate", self._route_after_gate,
-            {"approved": "counselor", "rejected": END, "support": "knowledge"},
+            {"approved": "counselor", "rejected": END, "support": "knowledge", "resources": "companion"},
         )
         graph.add_edge("knowledge", "cbt")
         graph.add_conditional_edges("cbt", self._route_after_cbt, {"handled": END, "skip": "counselor"})
@@ -369,6 +400,113 @@ class LangGraphAgentRuntimeService:
     @staticmethod
     def _messages(messages: list[AiMessage]) -> list[dict[str, str]]:
         return [{"role": item.role, "content": item.content} for item in messages]
+
+    @staticmethod
+    def _is_checkin_start(text: str) -> bool:
+        return "次日反馈" in text and any(word in text for word in ("提交", "填写", "开始", "我要", "我想"))
+
+    @staticmethod
+    def _improvement_status(text: str) -> str | None:
+        normalized = text.strip().lower()
+        if normalized in {"改善", "改善了", "有改善", "好转", "好转了", "improved"}:
+            return "improved"
+        if normalized in {"无变化", "没变化", "没有变化", "unchanged"}:
+            return "unchanged"
+        if normalized in {"恶化", "恶化了", "更严重", "更严重了", "变差", "变差了", "worsened"}:
+            return "worsened"
+        return None
+
+    async def _object_message_node(self, state: GraphState) -> GraphUpdate:
+        message = state["object_message"]
+        text = state["model_input"]
+        if message is None and state["checkin_task"] is None and not self._is_checkin_start(text):
+            return {}
+        if self._is_checkin_start(text):
+            return self._start_checkin(state)
+        if message is not None and state["checkin_task"] == "checkin" and "plan_id" in state["checkin_slots"]:
+            return self._fill_checkin_plan(state, message)
+        if message is not None and state["checkin_task"] is None:
+            saved_cbt = self.memory.load_cbt_state(state["thread_id"])
+            if saved_cbt and not CBTState.from_dict(saved_cbt).is_complete:
+                return {"direct_response": "这份计划已保留。请继续当前的支持追问，完成后再决定下一步。"}
+        if state["checkin_task"] == "checkin":
+            status = self._improvement_status(text) if message is None else None
+            if message is None and status is None:
+                return {}
+            if status is not None and "improvement_status" in state["checkin_slots"] and "plan_id" not in state["checkin_slots"]:
+                return self._submit_checkin(state, status)
+            prompt = "请先选择要反馈的 24 小时行动计划。" if "plan_id" in state["checkin_slots"] else "请告诉我执行后是有改善、没有变化，还是恶化了。"
+            return {"direct_response": prompt}
+        if message is not None:
+            plan = self._object_plan(state, message)
+            if plan is not None:
+                return {
+                    "focused_object": {"type": "action_plan", "id": plan.id},
+                    "direct_response": "已选择这份 24 小时行动计划。你希望我为你做什么？",
+                }
+        return {"direct_response": "无法使用这份 24 小时行动计划，请选择当前会话中属于你的计划。"}
+
+    @staticmethod
+    def _route_after_object_message(state: GraphState) -> str:
+        route = "handled" if state["direct_response"] is not None else "text"
+        diagnostics.emit("branch.selected", route=route, object_message=state["object_message"] is not None)
+        return route
+
+    def _latest_checkin_plan(self, state: GraphState):
+        from app.services.action_plan import ActionPlanService
+
+        plan = ActionPlanService(self.db).get_session_plan(state["user_id"], state["session_id"])
+        return plan if plan is not None and plan.status == "active" else None
+
+    def _object_plan(self, state: GraphState, message: dict[str, Any]):
+        from app.services.action_plan import ActionPlanService
+
+        if message["type"] != "action_plan":
+            return None
+        plan = ActionPlanService(self.db).get_plan(state["user_id"], message["id"])
+        return plan if plan is not None and plan.session_id == state["session_id"] else None
+
+    @staticmethod
+    def _plan_event(plan) -> dict[str, Any]:
+        items = sorted(plan.items, key=lambda item: item.order_index)
+        return asdict(ActionPlanEvent(
+            plan.id,
+            [ActionPlanItemEvent(item.id, item.content, item.order_index, item.completed) for item in items],
+            utc_isoformat(plan.created_at + timedelta(hours=plan.target_window_hours)),
+        ))
+
+    def _start_checkin(self, state: GraphState) -> GraphUpdate:
+        plan = self._latest_checkin_plan(state)
+        if plan is None:
+            return {"direct_response": "当前会话没有可反馈的 24 小时行动计划。"}
+        return {
+            "checkin_task": "checkin", "checkin_slots": ["plan_id", "improvement_status"], "checkin_values": {},
+            "action_plan_event": self._plan_event(plan),
+            "direct_response": "请选择要反馈的 24 小时行动计划，然后告诉我执行后的改善状态。",
+        }
+
+    def _fill_checkin_plan(self, state: GraphState, message: dict[str, Any]) -> GraphUpdate:
+        plan = self._object_plan(state, message)
+        if plan is None or plan.status != "active":
+            return {"direct_response": "这份 24 小时行动计划不存在、已结束或不属于当前会话，请选择当前会话中的计划。"}
+        focused = {"type": "action_plan", "id": plan.id}
+        return {
+            "focused_object": focused,
+            "checkin_values": {"plan_id": plan.id}, "checkin_slots": ["improvement_status"],
+            "direct_response": f"已选择 24 小时行动计划 #{plan.id}。执行后是有改善、没有变化，还是恶化了？",
+        }
+
+    def _submit_checkin(self, state: GraphState, status: str) -> GraphUpdate:
+        from app.services.checkin import submit_checkin_application
+
+        user = self.db.get(UserAccount, state["user_id"])
+        request = CheckInSubmitRequest(planId=state["checkin_values"]["plan_id"], improvementStatus=status)
+        _, safety_message = submit_checkin_application(self.db, user, request, self.settings)
+        confirmation = safety_message or "次日反馈已提交，谢谢你的反馈。"
+        return {
+            "checkin_task": None, "checkin_slots": [], "checkin_values": {},
+            "direct_response": confirmation, "awaiting_review": bool(safety_message),
+        }
 
     async def _quick_safety_node(self, state: GraphState) -> GraphUpdate:
         flagged = has_high_risk_signal(state["model_input"])
@@ -478,7 +616,9 @@ class LangGraphAgentRuntimeService:
         return {"review_decision": "approved" if decision["approved"] else "rejected"}
 
     def _route_after_gate(self, state: GraphState) -> str:
-        route = state["review_decision"] or "support"
+        route = state["review_decision"] or (
+            "resources" if is_deployment_resource_question(state["model_input"]) else "support"
+        )
         diagnostics.emit("branch.selected", route=route, risk_level=state["risk_level"],
                          requires_review=state["risk_level"] == RiskLevel.HIGH.value)
         return route
@@ -496,8 +636,18 @@ class LangGraphAgentRuntimeService:
         }
 
     async def _companion_node(self, state: GraphState) -> GraphUpdate:
+        results: list[SearchResult] = []
+        steps = state["steps"]
+        if is_deployment_resource_question(state["model_input"]):
+            async_retrieve = getattr(self.knowledge, "aretrieve", None)
+            results = (self.knowledge.retrieve(state["model_input"], self.settings.knowledge_top_k)
+                       if async_retrieve is None else
+                       await async_retrieve(state["model_input"], self.settings.knowledge_top_k))
+            diagnostics.emit("knowledge.retrieved", retrieval_count=len(results))
+            steps = self._steps(state, "KnowledgeAgent", "RETRIEVE_KNOWLEDGE", f"deployment resources; retrieved={len(results)}")
+        context = "\n\n".join(f"- [{item.source}] {item.content}" for item in results)
         messages = [
-            PromptTemplates.answer_system_prompt(IntentType.CHAT, RiskLevel.LOW, "", state["display_name"]),
+            PromptTemplates.answer_system_prompt(IntentType.CHAT, RiskLevel.LOW, context, state["display_name"]),
             self._response_contract(state),
             AiMessage(role="system", content=(
                 f"当前由 CompanionAgent 负责回复。\n记忆摘要：\n{state['memory_brief']}\n"
@@ -508,8 +658,10 @@ class LangGraphAgentRuntimeService:
             *self._history(state),
         ]
         return {
+            "knowledge_query": state["model_input"] if results else "",
+            "retrieved_knowledge": [asdict(item) for item in results],
             "response_messages": self._messages(messages),
-            "steps": self._steps(state, "CompanionAgent", "PLAN_RESPONSE", "normal companion response planned"),
+            "steps": [*steps, asdict(AgentStep(len(steps) + 1, "CompanionAgent", "PLAN_RESPONSE", "normal companion response planned"))],
         }
 
     @staticmethod

@@ -47,6 +47,44 @@ services:
       retries: 30
     restart: unless-stopped
 
+  ollama:
+    image: ${OLLAMA_IMAGE:-docker.1ms.run/ollama/ollama:0.1.48}
+    profiles: [models]
+    environment:
+      NO_PROXY: localhost,127.0.0.1,::1,0.0.0.0,ollama
+      no_proxy: localhost,127.0.0.1,::1,0.0.0.0,ollama
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  ollama-init:
+    image: ${OLLAMA_IMAGE:-docker.1ms.run/ollama/ollama:0.1.48}
+    profiles: [models]
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      NO_PROXY: localhost,127.0.0.1,::1,0.0.0.0,ollama
+      no_proxy: localhost,127.0.0.1,::1,0.0.0.0,ollama
+      OLLAMA_HOST: http://ollama:11434
+      AI_PROVIDER: ${AI_PROVIDER:-ollama}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-xling-qwen2.5-7b-ft:latest}
+      OLLAMA_CLASSIFIER_MODEL: ${OLLAMA_CLASSIFIER_MODEL:-xling-cls-3b-ft:latest}
+      OLLAMA_CLASSIFIER_MODEL_DIR: ${OLLAMA_CLASSIFIER_MODEL_DIR:-}
+      OLLAMA_CLASSIFIER_MODEL_FILE: ${OLLAMA_CLASSIFIER_MODEL_FILE:-Modelfile}
+      OLLAMA_ANSWER_MODEL_DIR: ${OLLAMA_ANSWER_MODEL_DIR:-}
+      OLLAMA_ANSWER_MODEL_FILE: ${OLLAMA_ANSWER_MODEL_FILE:-Modelfile}
+    entrypoint: ["/bin/sh", "/usr/local/bin/init-models"]
+    volumes:
+      - ./models:/models:ro
+      - ./scripts/docker-ollama-init.sh:/usr/local/bin/init-models:ro
+      - ollama-data:/root/.ollama
+
   mysql-test:
     image: mysql:8.0
     profiles: [test]
@@ -66,7 +104,7 @@ services:
       timeout: 3s
       retries: 30
 
-  mysql-tests:
+  mysql-tests: &test-service
     profiles: [test]
     build:
       context: .
@@ -79,9 +117,14 @@ services:
       DATABASE_URL: mysql+pymysql://xling_test:test-only@mysql-test:3306/xling_test?charset=utf8mb4
       AI_PROVIDER: mock
       KNOWLEDGE_VECTOR_ENABLED: "false"
+    command: ["python", "-m", "pytest", "tests/test_support_turn_mysql.py", "-q"]
     volumes:
       - ./tests:/app/tests:ro
       - ./pyproject.toml:/app/pyproject.toml:ro
+
+  tests:
+    <<: *test-service
+    command: ["python", "-m", "pytest", "-q"]
 
   app:
     build: .
@@ -91,11 +134,18 @@ services:
       redis:
         condition: service_healthy
     environment:
-      AI_PROVIDER: ${AI_PROVIDER:-ollama}
+      HTTP_PROXY: ${HTTP_PROXY:-http://host.docker.internal:7897}
+      HTTPS_PROXY: ${HTTPS_PROXY:-http://host.docker.internal:7897}
+      http_proxy: ${http_proxy:-http://host.docker.internal:7897}
+      https_proxy: ${https_proxy:-http://host.docker.internal:7897}
+      NO_PROXY: localhost,127.0.0.1,::1,0.0.0.0,ollama,mysql,redis,caddy,host.docker.internal
+      no_proxy: localhost,127.0.0.1,::1,0.0.0.0,ollama,mysql,redis,caddy,host.docker.internal
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
       AI_MAX_TOKENS: ${AI_MAX_TOKENS:-2048}
-      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_BASE_URL: http://ollama:11434
       OLLAMA_MODEL: ${OLLAMA_MODEL:-xling-qwen2.5-7b-ft:latest}
       OLLAMA_CLASSIFIER_MODEL: ${OLLAMA_CLASSIFIER_MODEL:-xling-cls-3b-ft:latest}
+      CLASSIFIER_INPUT_FORMAT: ${CLASSIFIER_INPUT_FORMAT:-plain}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
@@ -130,6 +180,7 @@ services:
 volumes:
   mysql-data:
   redis-data:
+  ollama-data:
   app-data:
   caddy-data:
   caddy-config:

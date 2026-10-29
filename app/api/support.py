@@ -11,7 +11,7 @@ from app.core import diagnostics
 from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.security import current_user
-from app.models.entities import ChatSession, UserAccount
+from app.models.entities import UserAccount
 from app.schemas.dtos import (
     ChatRequest,
     CheckInSubmitRequest,
@@ -19,10 +19,8 @@ from app.schemas.dtos import (
 )
 from app.services.action_plan import ActionPlanService
 from app.services.chat import ChatService, PendingReviewError, sse
-from app.services.checkin import CheckInService
-from app.services.escalation import EscalationService
+from app.services.checkin import CheckInService, submit_checkin_application
 from app.services.report import ReportService
-from app.services.review import ReviewService
 
 router = APIRouter()
 
@@ -50,7 +48,7 @@ async def chat_stream(
     # request 提供消息和会话信息；管理员账号在此被拒绝。
     # 返回流式响应对象，消息处理和内容生成由聊天服务在流被读取时推进。
     if "ROLE_ADMIN" in user.roles:
-        raise HTTPException(403, "管理员账号只能查看后台记录，不能发起学生对话。")
+        raise HTTPException(403, "管理员账号只能查看后台记录，不能发起用户对话。")
     settings = get_settings()
     service = ChatService(db, settings)
     try:
@@ -126,57 +124,15 @@ def submit_checkin(
     # 保存行动计划的次日反馈，并在首次提交后检查是否需要安全升级。
     # 请求包含改善情况、备注和逐项完成状态；非法内容由服务层拒绝并转换为 400。
     # 重复提交更新已有反馈，不重复执行首次提交后的安全升级检查。
-    checkins = CheckInService(db)
-    # 先记住本次是否首次提交，保存后已有记录的判断结果会发生变化。
-    first_submission = checkins.get_by_plan(request.planId) is None
     try:
-        checkin = checkins.submit_checkin(
-            user.id,
-            request.planId,
-            request.improvementStatus,
-            request.notes or "",
-            request.itemStates,
-        )
+        checkin, safety_message = submit_checkin_application(db, user, request, get_settings())
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
-    response = checkins.to_response(checkin)
-    # 反馈保存成功后才检查安全升级；重复提交不再次创建相同处理。
-    safety_message = (
-        _maybe_escalate_checkin(db, user, request)
-        if first_submission
-        else ""
-    )
+    response = CheckInService(db).to_response(checkin)
     response["escalated"] = bool(safety_message)
     if safety_message:
         response["safetyMessage"] = safety_message
     return response
-
-
-def _maybe_escalate_checkin(
-    db: Session,
-    user: UserAccount,
-    request: CheckInSubmitRequest,
-) -> str:
-    """根据次日反馈的恶化情况关联原会话并检查人工审核需要。
-
-    db、user、request 提供数据库、归属和反馈内容；仅在确实生成审核记录时返回安全提示，否则返回空字符串。
-    """
-    plan = ActionPlanService(db).get_plan(user.id, request.planId)
-    session = db.get(ChatSession, plan.session_id) if plan and plan.session_id else None
-    result = EscalationService(
-        db,
-        ReviewService(db, get_settings()),
-    ).check_checkin_escalation(
-        user_id=user.id,
-        session_id=session.id if session else None,
-        report_id=None,
-        thread_id=session.public_id if session else "",
-        improvement_status=request.improvementStatus,
-        current_difficulty=request.notes or "",
-    )
-    if result.should_escalate and result.review_id is not None:
-        return result.user_message
-    return ""
 
 
 @router.get("/api/check-ins")

@@ -1,0 +1,13 @@
+....                                                                     [100%]
+=============================== warnings summary ===============================
+../usr/local/lib/python3.12/site-packages/starlette/testclient.py:40
+  /usr/local/lib/python3.12/site-packages/starlette/testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+4 passed, 1 warning in 0.51s
+ Container xling-mysql-test-1 Running 
+ Container xling-mysql-test-1 Waiting 
+ Container xling-mysql-test-1 Healthy 
+ Container xling-mysql-tests-run-597a49930bd3 Creating 
+ Container xling-mysql-tests-run-597a49930bd3 Created 

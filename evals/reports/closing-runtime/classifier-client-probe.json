@@ -1,0 +1,319 @@
+{
+  "startedAtUTC": "2026-10-06T12:13:20.987294+00:00",
+  "status": "completed",
+  "scope": "targeted real-client integration probe; synthetic fixed cases; not a new quality benchmark",
+  "runtimeVersion": "0.30.8",
+  "requestedModel": "xling-general-cls-05b:quoted-f16",
+  "inputFormat": "quoted",
+  "systemSHA256": "a6d981d29f3cfe7f4edef11bb293a5c5ddf06a87d6205177746b5c4454d346ab",
+  "templateSHA256": "cd8e9439f0570856fd70470bf8889ebd8b5d1107207f67a5efb46e342330527f",
+  "parameters": "num_ctx                        256\nnum_predict                    6\nrepeat_penalty                 1\nseed                           42\nstop                           \"<|im_start|>\"\nstop                           \"<|im_end|>\"\ntemperature                    0",
+  "details": {
+    "parent_model": "",
+    "format": "gguf",
+    "family": "qwen2",
+    "families": [
+      "qwen2"
+    ],
+    "parameter_size": "494.03M",
+    "quantization_level": "F16"
+  },
+  "sourceFingerprints": [
+    {
+      "path": "app/core/config.py",
+      "sha256": "41f26844e1e61c87cdb35cd6aaaa4cdc9a75f8554c02feea25bb5dcbb3b6142c"
+    },
+    {
+      "path": "app/core/classifier_contract.py",
+      "sha256": "34cc4cc2fdd358734476474c44cb840d73573f029e6893d9e5c0ef199712adac"
+    },
+    {
+      "path": "app/services/ai.py",
+      "sha256": "fa2400173d4c96232c5e598bf7cee3cedfd1ca45b3c729ee4f80e44d9de3b1fa"
+    },
+    {
+      "path": "app/services/assessment.py",
+      "sha256": "eb9090b9c17f7e625eb9f2e2587887314af0531f842af1d64db880c831605401"
+    },
+    {
+      "path": "finetune/data/current-classifier/natural-v12-r2-40.jsonl",
+      "sha256": "e0b78f203c5c9e9592422ff22d9bc9660f3848c9302b1bc8b083926c84c04f04"
+    },
+    {
+      "path": "finetune/data/general-routing-v2/general-test.jsonl",
+      "sha256": "9e4ad6492e2cb6784b66e90a79acdbe08b37b2e8a9a58917bd58c788b0f848bd"
+    }
+  ],
+  "nominal": [
+    {
+      "id": "v12-001",
+      "expected": "正常",
+      "sync": "正常",
+      "async": "正常",
+      "inputSHA256": "57defbbff2313fa7d4f3ab80fbfb9d00aecbaf88803a02a823b1366d502ebee0"
+    },
+    {
+      "id": "v12-002",
+      "expected": "焦虑",
+      "sync": "焦虑",
+      "async": "焦虑",
+      "inputSHA256": "3a1513fb4c216a882b521e6845e7541d38b75c1aaa96279a55428d6716b806ce"
+    },
+    {
+      "id": "v12-003",
+      "expected": "低落",
+      "sync": "低落",
+      "async": "低落",
+      "inputSHA256": "96e77219fd357fa9b1c3777071700193d203bf7569baa2cc0f81a9b8d56348ea"
+    },
+    {
+      "id": "v12-004",
+      "expected": "高风险",
+      "sync": "高风险",
+      "async": "高风险",
+      "inputSHA256": "989cb4eca404e48e9abd275d959dcb22cfcf7cb79e0768592740f3c2c8940e5a"
+    }
+  ],
+  "knownFalseHigh": [
+    {
+      "id": "872b3071fb391510",
+      "expected": "焦虑",
+      "sync": "高风险",
+      "async": "高风险",
+      "inputSHA256": "bf0ba712014a0976bbd591867e850071b1e06a57cc3176557060a70479c7364d"
+    },
+    {
+      "id": "0c47121395108533",
+      "expected": "焦虑",
+      "sync": "高风险",
+      "async": "高风险",
+      "inputSHA256": "229ab26185d7fe6146ad78756da1b42370fe96464ac81ec7a4428e532bf6cf89"
+    },
+    {
+      "id": "73c2179f9f94b48f",
+      "expected": "焦虑",
+      "sync": "高风险",
+      "async": "高风险",
+      "inputSHA256": "0aee7a9f85cf6b48df0fdfd18023036db4c2caa6c00ade23500e3b41a7ff63f9"
+    },
+    {
+      "id": "230f2f6922ee6231",
+      "expected": "焦虑",
+      "sync": "高风险",
+      "async": "高风险",
+      "inputSHA256": "efce4c6450fbd62548f74e75040e2f7d12c7cfb433dd75b8a3240cf86f417a76"
+    }
+  ],
+  "businessMapping": [
+    {
+      "id": "v12-001",
+      "hardRuleMatched": false,
+      "modelCalled": true,
+      "emotion": "NORMAL",
+      "risk": "LOW"
+    },
+    {
+      "id": "v12-002",
+      "hardRuleMatched": false,
+      "modelCalled": true,
+      "emotion": "ANXIETY",
+      "risk": "LOW"
+    },
+    {
+      "id": "v12-003",
+      "hardRuleMatched": false,
+      "modelCalled": true,
+      "emotion": "DEPRESSED",
+      "risk": "MEDIUM"
+    },
+    {
+      "id": "v12-004",
+      "hardRuleMatched": false,
+      "modelCalled": true,
+      "emotion": "HIGH_RISK",
+      "risk": "HIGH"
+    },
+    {
+      "id": "872b3071fb391510",
+      "hardRuleMatched": false,
+      "modelCalled": true,
+      "emotion": "HIGH_RISK",
+      "risk": "HIGH"
+    },
+    {
+      "id": "0c47121395108533",
+      "hardRuleMatched": false,
+      "modelCalled": true,
+      "emotion": "HIGH_RISK",
+      "risk": "HIGH"
+    },
+    {
+      "id": "73c2179f9f94b48f",
+      "hardRuleMatched": false,
+      "modelCalled": true,
+      "emotion": "HIGH_RISK",
+      "risk": "HIGH"
+    },
+    {
+      "id": "230f2f6922ee6231",
+      "hardRuleMatched": false,
+      "modelCalled": true,
+      "emotion": "HIGH_RISK",
+      "risk": "HIGH"
+    }
+  ],
+  "unavailableModel": {
+    "fallbackRisk": "MEDIUM",
+    "hardRuleRisk": "HIGH"
+  },
+  "responses": [
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 2,
+      "promptTokens": 161,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 2,
+      "promptTokens": 161,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 2,
+      "promptTokens": 167,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 2,
+      "promptTokens": 167,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 175,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 175,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 160,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 160,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 131,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 131,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 132,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 132,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 131,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 131,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 131,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 131,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 2,
+      "promptTokens": 161,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 2,
+      "promptTokens": 167,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 175,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 160,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 131,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 132,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 131,
+      "finishReason": "stop"
+    },
+    {
+      "providerModel": "xling-general-cls-05b:quoted-f16",
+      "generatedTokens": 3,
+      "promptTokens": 131,
+      "finishReason": "stop"
+    }
+  ],
+  "nominalSyncAsyncPassed": true,
+  "knownFalseHighRetained": true,
+  "safetyFallbackPassed": true,
+  "completedAtUTC": "2026-10-06T12:13:25.233195+00:00"
+}

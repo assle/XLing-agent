@@ -1,0 +1,11 @@
+services:
+  app:
+    environment:
+      ALERT_EMAIL_DELIVERY_MODE: smtp
+      SMTP_HOST: host.docker.internal
+      SMTP_PORT: "25265"
+      SMTP_USERNAME: ""
+      SMTP_PASSWORD: ""
+      SMTP_USE_TLS: "false"
+      SMTP_USE_SSL: "false"
+      TOOL_QUEUE_EMAIL_WORKERS: "1"

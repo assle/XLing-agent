@@ -83,6 +83,14 @@ assert.equal(state.activePlan.id, 4);
 assert.equal(state.pendingCheckInPlanId, 4);
 assert.equal(elements.get("#planPanel").hidden, false);
 
+// The existing plan card sends a real action_plan object through the chat seam.
+let sentObject = null;
+module.namespace.bindActionPlanObjectSender((message) => { sentObject = message; });
+await elements.get("#planObject").listeners.click();
+assert.deepEqual(sentObject, {
+  type: "action_plan", id: 4, title: "24 小时行动计划 #4", properties: { feedbackDueAt: null }
+});
+
 // Switching two support threads must fetch/display their own plan. A newer
 // completed second-thread plan must not hide the first thread's active plan.
 const firstThreadPlan = { id: 5, status: "active", items: [{ id: 50, content: "第一会话的行动", order: 0 }] };

@@ -1,7 +1,12 @@
 *
 !requirements.txt
+!docker-compose.yml
 !app/
 !app/**
+!evals/
+!evals/**
+!finetune/
+!finetune/**
 !models/
 models/*
 !models/xling-qwen2.5-7b-ft/

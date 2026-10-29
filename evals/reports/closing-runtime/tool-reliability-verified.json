@@ -1,0 +1,1119 @@
+{
+  "status": "completed",
+  "scope": "real public high-risk report, durable queue, Excel and local SMTP; first DATA deliberately rejected; synthetic messages only; no onward email delivery",
+  "observedAtUTC": "2026-10-06T14:17:34.999Z",
+  "observations": [
+    {
+      "observedAtUTC": "2026-10-06T14:17:37.106Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "PENDING",
+          "attempts": 0,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:37+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 0,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:37+00:00"
+        }
+      ],
+      "alerts": [],
+      "excel": []
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:38.118Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 0,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:40+00:00",
+          "lastError": "等待 Excel 台账写入成功后再发送预警",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        }
+      ],
+      "alerts": [],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:39.135Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 0,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:40+00:00",
+          "lastError": "等待 Excel 台账写入成功后再发送预警",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        }
+      ],
+      "alerts": [],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:40.226Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "RuntimeError: 高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:40+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:41.458Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "RuntimeError: 高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:40+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:42.488Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "RuntimeError: 高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:40+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:43.528Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "RuntimeError: 高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:40+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:44.573Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "RuntimeError: 高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:40+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:45.608Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "RuntimeError: 高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:40+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:46.641Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "RuntimeError: 高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:40+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:47.674Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "RuntimeError: 高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:40+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:48.711Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "RuntimeError: 高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:40+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:49.750Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "RuntimeError: 高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:40+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:50.789Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "RuntimeError: 高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:40+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:51.823Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "RuntimeError: 高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:40+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:52.841Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "RuntimeError: 高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:40+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:53.880Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "RuntimeError: 高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:40+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:54.904Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "PENDING",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "RuntimeError: 高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:40+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:55.937Z",
+      "jobs": [
+        {
+          "id": 11,
+          "reportId": 8,
+          "kind": "EXCEL_REPORT",
+          "status": "SUCCESS",
+          "attempts": 1,
+          "maxAttempts": 3,
+          "dependsOnJobId": null,
+          "runAfter": "2026-10-06T14:17:37+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:38+00:00"
+        },
+        {
+          "id": 12,
+          "reportId": 8,
+          "kind": "RISK_ALERT",
+          "status": "SUCCESS",
+          "attempts": 2,
+          "maxAttempts": 3,
+          "dependsOnJobId": 11,
+          "runAfter": "2026-10-06T14:17:55+00:00",
+          "lastError": "",
+          "createdAt": "2026-10-06T14:17:37+00:00",
+          "updatedAt": "2026-10-06T14:17:55+00:00"
+        }
+      ],
+      "alerts": [
+        {
+          "id": 6,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "高风险预警邮件已发送：reportId=8",
+          "createdAt": "2026-10-06T14:17:55+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        },
+        {
+          "id": 5,
+          "reportId": 8,
+          "status": "FAILED",
+          "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+          "createdAt": "2026-10-06T14:17:40+00:00",
+          "channel": "email",
+          "recipient": "closing-review@example.test",
+          "filePath": null
+        }
+      ],
+      "excel": [
+        {
+          "id": 8,
+          "reportId": 8,
+          "status": "SUCCESS",
+          "message": "Excel 台账已写入",
+          "createdAt": "2026-10-06T14:17:38+00:00",
+          "channel": null,
+          "recipient": null,
+          "filePath": "/app/data/closing-risk-ledger.xlsx"
+        }
+      ]
+    }
+  ],
+  "sessionId": "fa069fec7501445d9f8fd5f4f733f75f",
+  "reportId": 8,
+  "reviewId": 4,
+  "idempotency": {
+    "reportId": 8,
+    "jobIDs": [
+      11,
+      12
+    ],
+    "jobs": 2,
+    "excelSuccessRecords": 1,
+    "alertFailedRecords": 1,
+    "alertSuccessRecords": 1,
+    "workbookRowsForReport": 1
+  },
+  "smtpEvents": [
+    {
+      "observedAtUTC": "2026-10-06T14:17:40.154650+00:00",
+      "status": "rejected-451",
+      "recipient": "closing-review@example.test",
+      "bodySHA256": "9b8a412714666f2d8004c32d0c6baa23d4449f098c17e77e05ef9cd17c14aafa",
+      "bytes": 778
+    },
+    {
+      "observedAtUTC": "2026-10-06T14:17:55.259627+00:00",
+      "status": "accepted-locally",
+      "recipient": "closing-review@example.test",
+      "bodySHA256": "9b8a412714666f2d8004c32d0c6baa23d4449f098c17e77e05ef9cd17c14aafa",
+      "bytes": 778
+    }
+  ],
+  "finalState": {
+    "observedAtUTC": "2026-10-06T14:17:56.600Z",
+    "jobs": [
+      {
+        "id": 11,
+        "reportId": 8,
+        "kind": "EXCEL_REPORT",
+        "status": "SUCCESS",
+        "attempts": 1,
+        "maxAttempts": 3,
+        "dependsOnJobId": null,
+        "runAfter": "2026-10-06T14:17:37+00:00",
+        "lastError": "",
+        "createdAt": "2026-10-06T14:17:37+00:00",
+        "updatedAt": "2026-10-06T14:17:38+00:00"
+      },
+      {
+        "id": 12,
+        "reportId": 8,
+        "kind": "RISK_ALERT",
+        "status": "SUCCESS",
+        "attempts": 2,
+        "maxAttempts": 3,
+        "dependsOnJobId": 11,
+        "runAfter": "2026-10-06T14:17:55+00:00",
+        "lastError": "",
+        "createdAt": "2026-10-06T14:17:37+00:00",
+        "updatedAt": "2026-10-06T14:17:55+00:00"
+      }
+    ],
+    "alerts": [
+      {
+        "id": 6,
+        "reportId": 8,
+        "status": "SUCCESS",
+        "message": "高风险预警邮件已发送：reportId=8",
+        "createdAt": "2026-10-06T14:17:55+00:00",
+        "channel": "email",
+        "recipient": "closing-review@example.test",
+        "filePath": null
+      },
+      {
+        "id": 5,
+        "reportId": 8,
+        "status": "FAILED",
+        "message": "高风险预警邮件发送失败：SMTPDataError: (451, b'Deliberate one-time test rejection')",
+        "createdAt": "2026-10-06T14:17:40+00:00",
+        "channel": "email",
+        "recipient": "closing-review@example.test",
+        "filePath": null
+      }
+    ],
+    "excel": [
+      {
+        "id": 8,
+        "reportId": 8,
+        "status": "SUCCESS",
+        "message": "Excel 台账已写入",
+        "createdAt": "2026-10-06T14:17:38+00:00",
+        "channel": null,
+        "recipient": null,
+        "filePath": "/app/data/closing-risk-ledger.xlsx"
+      }
+    ]
+  },
+  "testReviewClosure": {
+    "status": "rejected",
+    "responsePreview": "人工审核已收到并重视你的消息。如果你现在需要帮助，请立刻联系身边可信任的人、当地紧急服务或部署方提供的专业支持资源。"
+  },
+  "video": "/Users/assle/dev/mindbridge-py/.scratch/closing-evidence/tool-reliability-verified/page@7995875bf1e9b1137256ef8e9e375d90.webm"
+}

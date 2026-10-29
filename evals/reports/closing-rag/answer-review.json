@@ -1,0 +1,21 @@
+{
+  "answersSHA256": "6c6b0cfff7600fb4e7a75d05315d4c8125ae4def56f54a14cfa92f1693367d33",
+  "rubricSHA256": "8777bc2b0b7fba0d4a7eb10bd261d5c5277a5ac2dfda65c7dfa7ee9f8936ae79",
+  "reviewStatus": "approved",
+  "reviewerType": "human",
+  "reviewedAtUTC": "2026-10-06T14:23:21.282Z",
+  "judgements": [
+    {"id":"closing-rag-002","winner":"A","reason":"系统支持不太够，应当给出更多的咨询建议，并将医生诊疗作为可选，在后面列出，选择权在用户"},
+    {"id":"closing-rag-004","winner":"B","reason":"准确，如果是工程配置就说是工程配置，如果是测试配置就说是测试配置"},
+    {"id":"closing-rag-005","winner":"A","reason":"这部分建议不用向用户透露细节，我们要做的是帮助，如果说明是测试环境，那就说明我们这个操作不真实可靠，也起不到安慰剂效应。"},
+    {"id":"closing-rag-009","winner":"tie","reason":"都挺好的"},
+    {"id":"closing-rag-013","winner":"tie","reason":"都挺好"},
+    {"id":"closing-rag-017","winner":"tie","reason":"都挺好的"},
+    {"id":"closing-rag-021","winner":"tie","reason":"都挺好的"},
+    {"id":"closing-rag-025","winner":"tie","reason":"都挺好的"},
+    {"id":"closing-rag-028","winner":"A","reason":"更加明确，且说明符合逻辑"},
+    {"id":"closing-rag-029","winner":"A","reason":"先给结论再给依据，能找到重点"},
+    {"id":"closing-rag-032","winner":"A","reason":"不要暴露项目细节，Xling 工程测试机构这种描述可能会泄露"},
+    {"id":"closing-rag-040","winner":"tie","reason":"都挺好的"}
+  ]
+}

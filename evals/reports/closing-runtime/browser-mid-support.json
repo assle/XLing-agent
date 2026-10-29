@@ -1,0 +1,6658 @@
+{
+  "status": "completed",
+  "observedAtUTC": "2026-10-06T14:23:59.990Z",
+  "scope": "real UI and models; fictional engineering persona",
+  "scenes": [
+    {
+      "name": "support-first-turn",
+      "message": "从邮局退休两个月了，我原来盼着能好好种花，现在却每天都觉得心里空落落的。花盆就放在阳台，我看着它们也提不起一点兴趣，连以前喜欢的邻里聊天都不想参加。不是忙不过来，是最近一直很低落。",
+      "badge": "DONE",
+      "visibleText": "\n    \n    我\n    从邮局退休两个月了，我原来盼着能好好种花，现在却每天都觉得心里空落落的。花盆就放在阳台，我看着它们也提不起一点兴趣，连以前喜欢的邻里聊天都不想参加。不是忙不过来，是最近一直很低落。\n  \n    Xling\n    从邮局退下来两个月——本来盼着终于能好好种花、和邻居多来往，结果现在连走到阳台看那些花盆都觉得没劲，连聊天都不想去。这种落差不是矫情，也不是你变懒了：几十年有固定节奏、有身份感的日子突然停下，空落落的感觉很多人都会遇到，只是落在自己身上特别难熬。\n\n我想陪你慢慢看清楚一点。当你站到阳台上，看着那几盆花的时候，脑子里会冒出什么念头吗？可能是“养了也没人看”“我这身子怕是弄不动了”，也可能是“这些花我根本照顾不好”，或者干脆是一片空白、什么都没想。哪种更接近你的感觉？\n\n还有，那种空落落最明显是在什么时候——早上刚醒、午后，还是傍晚一个人待着的时候？你愿意说多少就说多少，我们一点一点来。\n  "
+    },
+    {
+      "name": "support-dimensions",
+      "message": "触发事件是退休后没有固定工作安排；我的想法是觉得生活失去了节奏；身体反应是疲惫、睡觉时间变晚；我的行为是回避邻里聊天，也没去照料阳台的花。",
+      "badge": "DONE",
+      "visibleText": "\n    \n    我\n    从邮局退休两个月了，我原来盼着能好好种花，现在却每天都觉得心里空落落的。花盆就放在阳台，我看着它们也提不起一点兴趣，连以前喜欢的邻里聊天都不想参加。不是忙不过来，是最近一直很低落。\n  \n    Xling\n    从邮局退下来两个月——本来盼着终于能好好种花、和邻居多来往，结果现在连走到阳台看那些花盆都觉得没劲，连聊天都不想去。这种落差不是矫情，也不是你变懒了：几十年有固定节奏、有身份感的日子突然停下，空落落的感觉很多人都会遇到，只是落在自己身上特别难熬。\n\n我想陪你慢慢看清楚一点。当你站到阳台上，看着那几盆花的时候，脑子里会冒出什么念头吗？可能是“养了也没人看”“我这身子怕是弄不动了”，也可能是“这些花我根本照顾不好”，或者干脆是一片空白、什么都没想。哪种更接近你的感觉？\n\n还有，那种空落落最明显是在什么时候——早上刚醒、午后，还是傍晚一个人待着的时候？你愿意说多少就说多少，我们一点一点来。\n  \n    我\n    触发事件是退休后没有固定工作安排；我的想法是觉得生活失去了节奏；身体反应是疲惫、睡觉时间变晚；我的行为是回避邻里聊天，也没去照料阳台的花。\n  \n    Xling\n    你把这几件事理得很清楚，我顺着你说的复述一遍：起头是退休后没有了固定的工作安排；心里紧接着冒出的想法是“生活失去了节奏”；身体上是疲惫、睡得越来越晚；行为上就慢慢退到了回避——不去和邻居聊天，也不去阳台照料花。这四样是互相牵着的：节奏没了，人更累，越累越退，越退越空。这不是你的性格问题。\n\n下面这些小事先按顺序试试，每一条都只要求做到那一步为止。\n\n1. 今天只在阳台停留3分钟：给离门最近的一盆花检查土壤，土干就浇少量水，不干就摘一片枯叶；做完就离开，不追加任务。\n2. 设定一个固定的小锚点：今天起床后或午饭后，在常坐的椅子上做3次缓慢呼吸并喝一杯温水，用纸或手机记下“我完成了这个锚点”。\n3. 对邻里聊天采取最小接触：若在楼道或阳台遇到邻居，允许自己只点头、微笑或说“今天先不聊，我去看看花”，不超过1分钟；不想出门就不强迫自己参加。\n4. 睡前把上床时间比昨晚提前15分钟：提前30分钟调暗灯光、把手机放远，做3分钟缓慢呼吸；若暂时睡不着，只安静躺着，不责备自己。\n5. 睡前写一句今天做到的小事，例如“看了花”“喝了水”“没去聊天也可以”，放在看得见的地方，作为明天节奏的一个小参照。\n\n这些不是要你重新忙起来，只是给空下来的日子放几个能踩到的小点。如果你愿意，做完第一条后告诉我，你站在阳台那3分钟里，心里冒出来的是什么念头；也可以顺便说说，那种空落落最明显是早上、午后还是傍晚。要是这样的低落再持续几周，或者越来越压得你喘不过气，我们可以一起看看当地的专业支持资源。\n  "
+    }
+  ],
+  "chats": [
+    {
+      "status": 200,
+      "events": [
+        {
+          "event": "meta",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": null,
+            "message": null,
+            "noMemory": false,
+            "code": null,
+            "type": "meta"
+          }
+        },
+        {
+          "event": "cbt",
+          "data": {
+            "type": "cbt",
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "active": true,
+            "completedCount": 2,
+            "nextDimension": "thoughts",
+            "complete": false
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "从",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "邮",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "局",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "退",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "下来",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "两个月",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "——",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "本来",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "盼",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "着",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "终于",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "能",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "好好",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "种",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "花",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "和",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "邻居",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "多",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "来往",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "结果",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "现在",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "连",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "走到",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "阳台",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "看",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "那些",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "花",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "盆",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "都觉得",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "没",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "劲",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "连",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "聊天",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "都不",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "想去",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "这种",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "落差",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "不是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "矫",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "情",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "也不是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "你",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "变",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "懒",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "了",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "：",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "几十年",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "有",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "固定",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "节奏",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "有",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "身份",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "感",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "的日子",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "突然",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "停下",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "空",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "落",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "落",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "的感觉",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "很多人",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "都会",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "遇到",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "只是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "落在",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "自己",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "身上",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "特别",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "难",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "熬",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。\n\n",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "我想",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "陪你",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "慢慢",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "看清楚",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "一点",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "当你",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "站",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "到",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "阳",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "台上",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "看着",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "那",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "几",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "盆",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "花",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "的时候",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "脑子里",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "会",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "冒出",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "什么",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "念头",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "吗",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "？",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "可能是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "“",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "养",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "了",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "也没",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "人",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "看",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "”“",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "我这",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "身子",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "怕是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "弄",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "不动",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "了",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "”，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "也可能是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "“",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "这些",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "花",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "我",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "根本",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "照顾",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "不好",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "”，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "或者",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "干脆",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "是一片",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "空白",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "什么都没",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "想",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "哪种",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "更",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "接近",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "你的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "感觉",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "？\n\n",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "还有",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "那种",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "空",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "落",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "落",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "最",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "明显",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "是在",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "什么时候",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "——",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "早上",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "刚",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "醒",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "午后",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "还是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "傍晚",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "一个人",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "待",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "着",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "的时候",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "？",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "你",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "愿意",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "说",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "多少",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "就说",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "多少",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "我们",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "一点",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "一点",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "来",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "done",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": null,
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "done"
+          }
+        }
+      ]
+    },
+    {
+      "status": 200,
+      "events": [
+        {
+          "event": "meta",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": null,
+            "message": null,
+            "noMemory": false,
+            "code": null,
+            "type": "meta"
+          }
+        },
+        {
+          "event": "cbt",
+          "data": {
+            "type": "cbt",
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "active": false,
+            "completedCount": 4,
+            "nextDimension": null,
+            "complete": true
+          }
+        },
+        {
+          "event": "action_plan",
+          "data": {
+            "type": "action_plan",
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "planId": 4,
+            "feedbackDueAt": "2026-10-07T14:24:36+00:00",
+            "feedbackAvailable": true,
+            "items": [
+              {
+                "id": 14,
+                "content": "今天只在阳台停留3分钟：给离门最近的一盆花检查土壤，土干就浇少量水，不干就摘一片枯叶；做完就离开，不追加任务。",
+                "order": 0,
+                "completed": false
+              },
+              {
+                "id": 15,
+                "content": "设定一个固定的小锚点：今天起床后或午饭后，在常坐的椅子上做3次缓慢呼吸并喝一杯温水，用纸或手机记下“我完成了这个锚点”。",
+                "order": 1,
+                "completed": false
+              },
+              {
+                "id": 16,
+                "content": "对邻里聊天采取最小接触：若在楼道或阳台遇到邻居，允许自己只点头、微笑或说“今天先不聊，我去看看花”，不超过1分钟；不想出门就不强迫自己参加。",
+                "order": 2,
+                "completed": false
+              },
+              {
+                "id": 17,
+                "content": "睡前把上床时间比昨晚提前15分钟：提前30分钟调暗灯光、把手机放远，做3分钟缓慢呼吸；若暂时睡不着，只安静躺着，不责备自己。",
+                "order": 3,
+                "completed": false
+              },
+              {
+                "id": 18,
+                "content": "睡前写一句今天做到的小事，例如“看了花”“喝了水”“没去聊天也可以”，放在看得见的地方，作为明天节奏的一个小参照。",
+                "order": 4,
+                "completed": false
+              }
+            ]
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "你把",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "这几",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "件事",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "理",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "得很",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "清楚",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "我",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "顺着",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "你说的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "复",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "述",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "一遍",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "：",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "起",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "头",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "退休",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "后",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "没有了",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "固定的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "工作",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "安排",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "；",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "心里",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "紧接着",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "冒",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "出的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "想法",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "“",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "生活",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "失去了",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "节奏",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "”；",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "身体",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "上是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "疲惫",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "睡得",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "越来越",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "晚",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "；",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "行为",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "上",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "就",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "慢慢",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "退",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "到了",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "回避",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "——",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "不去",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "和",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "邻居",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "聊天",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "也不",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "去",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "阳台",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "照料",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "花",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "这",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "四",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "样",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "互相",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "牵",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "着的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "：",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "节奏",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "没了",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "人",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "更",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "累",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "越",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "累",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "越",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "退",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "越",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "退",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "越",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "空",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "这不是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "你的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "性格",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "问题",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。\n\n",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "下面",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "这些小",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "事先",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "按",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "顺序",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "试试",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "每",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "一条",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "都",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "只",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "要求",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "做到",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "那",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "一步",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "为止",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。\n\n",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "1",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": ".",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": " ",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "今天",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "只在",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "阳台",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "停留",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "3",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "分钟",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "：",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "给",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "离",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "门",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "最近",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "的一",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "盆",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "花",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "检查",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "土壤",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "土",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "干",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "就",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "浇",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "少量",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "水",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "不",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "干",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "就",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "摘",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "一片",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "枯",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "叶",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "；",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "做完",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "就",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "离开",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "不",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "追加",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "任务",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。\n",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "2",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": ".",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": " ",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "设定",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "一个",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "固定",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "的小",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "锚",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "点",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "：",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "今天",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "起床",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "后",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "或",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "午",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "饭后",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "在",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "常",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "坐",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "椅子上",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "做",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "3",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "次",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "缓慢",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "呼吸",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "并",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "喝",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "一杯",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "温水",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "用",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "纸",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "或",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "手机",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "记",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "下",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "“",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "我",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "完成了",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "这个",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "锚",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "点",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "”。\n",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "3",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": ".",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": " ",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "对",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "邻里",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "聊天",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "采取",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "最小",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "接触",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "：",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "若",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "在",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "楼道",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "或",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "阳台",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "遇到",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "邻居",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "允许",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "自己",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "只",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "点头",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "微笑",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "或",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "说",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "“",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "今天",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "先",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "不",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "聊",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "我去",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "看看",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "花",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "”，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "不超过",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "1",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "分钟",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "；",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "不想",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "出门",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "就不",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "强迫",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "自己",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "参加",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。\n",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "4",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": ".",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": " ",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "睡前",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "把",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "上床",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "时间",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "比",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "昨晚",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "提前",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "15",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "分钟",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "：",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "提前",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "30",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "分钟",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "调",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "暗",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "灯光",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "把",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "手机",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "放",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "远",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "做",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "3",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "分钟",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "缓慢",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "呼吸",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "；",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "若",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "暂时",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "睡不着",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "只",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "安静",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "躺着",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "不",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "责备",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "自己",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。\n",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "5",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": ".",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": " ",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "睡前",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "写",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "一句",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "今天",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "做到",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "的小",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "事",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "例如",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "“",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "看了",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "花",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "”“",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "喝了",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "水",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "”“",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "没",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "去",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "聊天",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "也可以",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "”，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "放在",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "看得",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "见",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "的地方",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "作为",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "明天",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "节奏",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "的一个",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "小",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "参照",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。\n\n",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "这些",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "不是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "要",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "你",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "重新",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "忙",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "起来",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "只是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "给",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "空",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "下来的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "日子",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "放",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "几个",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "能",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "踩",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "到",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "的小",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "点",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "如果你",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "愿意",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "做完",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "第一条",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "后",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "告诉我",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "你",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "站在",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "阳台",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "那",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "3",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "分钟",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "里",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "心里",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "冒",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "出来",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "的是什么",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "念头",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "；",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "也可以",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "顺便",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "说说",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "那种",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "空",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "落",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "落",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "最",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "明显",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "早上",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "、",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "午后",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "还是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "傍晚",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "要是",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "这样的",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "低落",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "再",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "持续",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "几",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "周",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "或者",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "越来越",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "压",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "得",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "你",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "喘",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "不过",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "气",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "，",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "我们可以",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "一起",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "看看",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "当地",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "的专业",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "支持",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "资源",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "token",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": "。",
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "token"
+          }
+        },
+        {
+          "event": "done",
+          "data": {
+            "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+            "content": null,
+            "message": null,
+            "noMemory": null,
+            "code": null,
+            "type": "done"
+          }
+        }
+      ]
+    }
+  ],
+  "planText": "\n          \n            \n              行动计划\n              24 小时行动计划\n            \n            0/5 已完成\n          \n          \n          今天只在阳台停留3分钟：给离门最近的一盆花检查土壤，土干就浇少量水，不干就摘一片枯叶；做完就离开，不追加任务。替换设定一个固定的小锚点：今天起床后或午饭后，在常坐的椅子上做3次缓慢呼吸并喝一杯温水，用纸或手机记下“我完成了这个锚点”。替换对邻里聊天采取最小接触：若在楼道或阳台遇到邻居，允许自己只点头、微笑或说“今天先不聊，我去看看花”，不超过1分钟；不想出门就不强迫自己参加。替换睡前把上床时间比昨晚提前15分钟：提前30分钟调暗灯光、把手机放远，做3分钟缓慢呼吸；若暂时睡不着，只安静躺着，不责备自己。替换睡前写一句今天做到的小事，例如“看了花”“喝了水”“没去聊天也可以”，放在看得见的地方，作为明天节奏的一个小参照。替换\n          \n            提前反馈：计划执行得怎么样？（次日再反馈也可以）\n            \n              和计划前相比，你现在的状态：\n              \n                好转了\n                差不多\n                更糟了\n              \n              \n              \n                提交反馈\n                取消\n              \n              \n            \n          \n        ",
+  "feedback": {
+    "id": 4,
+    "planId": 4,
+    "improvementStatus": "improved",
+    "notes": "工程复现中提前反馈：完成了一个小步骤，压力有所缓解。",
+    "itemsSnapshot": [
+      {
+        "id": 14,
+        "completed": true
+      },
+      {
+        "id": 15,
+        "completed": false
+      },
+      {
+        "id": 16,
+        "completed": false
+      },
+      {
+        "id": 17,
+        "completed": false
+      },
+      {
+        "id": 18,
+        "completed": false
+      }
+    ],
+    "submittedAt": "2026-10-06T14:24:41+00:00",
+    "escalated": false
+  },
+  "safetyReports": [
+    {
+      "id": 12,
+      "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+      "username": "student",
+      "displayName": "Demo User",
+      "content": "触发事件是退休后没有固定工作安排；我的想法是觉得生活失去了节奏；身体反应是疲惫、睡觉时间变晚；我的行为是回避邻里聊天，也没去照料阳台的花。",
+      "intent": "CONSULT",
+      "emotion": "DEPRESSED",
+      "emotionScore": 3,
+      "riskLevel": "MEDIUM",
+      "confidence": 0.8,
+      "summary": "分类器判定为低落",
+      "createdAt": "2026-10-06T14:24:36+00:00"
+    },
+    {
+      "id": 11,
+      "sessionId": "d39c1f13d9bc4ecaa5408dec0348bf73",
+      "username": "student",
+      "displayName": "Demo User",
+      "content": "从邮局退休两个月了，我原来盼着能好好种花，现在却每天都觉得心里空落落的。花盆就放在阳台，我看着它们也提不起一点兴趣，连以前喜欢的邻里聊天都不想参加。不是忙不过来，是最近一直很低落。",
+      "intent": "CONSULT",
+      "emotion": "DEPRESSED",
+      "emotionScore": 3,
+      "riskLevel": "MEDIUM",
+      "confidence": 0.8,
+      "summary": "分类器判定为低落",
+      "createdAt": "2026-10-06T14:24:11+00:00"
+    }
+  ],
+  "video": "/Users/assle/dev/mindbridge-py/.scratch/closing-evidence/browser-mid-support/page@905acbdb4667bbcf6706d836795eba36.webm"
+}

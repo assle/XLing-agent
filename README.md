@@ -11,7 +11,7 @@ Xling 是一个通用的心理健康支持与咨询辅助系统，帮助医院�
 - 专业支持与人工审核：高风险消息暂停常规自动支持并发送固定安全提示，进入医生或心理健康专业人员负责的处理路径；系统记录批准辅助、拒绝、转介或后续关注决定，并准确显示等待状态。
 - 认知行为四维追问：使用 CBT（认知行为方法，通过事件、想法、身体反应和行为四方面梳理困扰）逐步理解用户当前处境。
 - 24 小时行动计划与次日反馈：四方面信息完整后生成可逐项执行的计划；次日反馈没有改善或情况恶化时可再次进入人工审核。
-- 知识增强回答：使用 RAG（先检索知识库，再让模型依据相关内容回答）提供更稳定的心理健康支持信息。
+- 知识增强回答：使用 RAG（先检索知识库，再让模型依据相关内容回答）提供心理健康支持信息；机构热线和预约资源可通过后台知识上传提供，回答保留测试标识及预约快照的适用限制。
 - 用户可控记忆：分别管理当前会话、用户主动填写的支持背景和用户确认的长期记忆卡片；无记忆会话不会读取或新增长期记忆。
 - 自愿量表筛查：提供 PHQ-9（抑郁相关筛查问卷）和 GAD-7（焦虑相关筛查问卷），结果只用于筛查与趋势参考，不作为诊断。
 - 管理后台：查看安全评估、人工审核、对话、知识库、任务执行记录和失败任务。
@@ -55,14 +55,14 @@ flowchart LR
 | `MemoryAgent` | 读取当前会话、支持背景和已确认记忆卡片，并生成简短记忆摘要 | 短期存储、业务数据库、模型摘要 |
 | `SupervisorAgent` | 把消息分为日常对话、心理支持或明确风险 | 规则优先，模型补充 |
 | `RiskGuardianAgent` | 判断低、中、高风险，并结合近期记录识别持续上升趋势 | 明确规则、分类模型、风险轨迹 |
-| `KnowledgeAgent` | 改写检索词并查找相关知识内容 | 向量检索，失败时使用本地混合检索 |
+| `KnowledgeAgent` | 改写检索词并查找相关知识内容 | 向量与 BM25 分数融合，失败时使用本地混合检索 |
 | `CBTAgent` | 完成四维追问；信息完整后生成 24 小时行动计划 | 结构化状态与模型生成 |
-| `CompanionAgent` | 回答日常学习、编程和普通生活问题 | 通用对话模型 |
+| `CompanionAgent` | 回答日常学习、编程和普通生活问题；回答经过既有分流的机构资源查询 | 通用对话模型；资源查询读取知识库 |
 | `CounselorAgent` | 生成非诊断性的心理支持回复；高风险时只在人工批准后继续 | 检索知识、明确图状态和模型生成 |
 
 这些名称表示编排流程中的专职角色，不表示八个独立模型。回复模型、分类模型、数据库和知识库由这些角色按职责共享使用。
 
-开发和实际联调采用“远程回答模型 + 本地风险分类器”的分工：日常回答、心理支持回复和结构化内容由兼容 OpenAI 的远程接口生成；安全风险分类由本机 Ollama 中的分类模型完成。两者相互独立，远程回答接口不可替代本地风险分类器。`mock` 模式会同时模拟这两部分，只用于无外部依赖的演示和自动测试。
+开发和实际联调采用“远程回答模型 + 本地风险分类器”的分工：日常回答、心理支持回复和结构化内容由兼容 OpenAI 的远程接口生成；安全分流先检查既有风险词规则，未命中时调用本机 Ollama 分类模型。两者相互独立，远程回答接口不可替代本地风险分类器。`mock` 模式会同时模拟这两部分，只用于无外部依赖的演示和自动测试。
 
 ## 编排流程
 
@@ -88,6 +88,8 @@ flowchart TD
     FollowUp --> End
 
     Gate -- 低风险或中风险 --> Knowledge[KnowledgeAgent<br/>检索支持知识]
+    Gate -- 非高风险资源查询 --> Resource[CompanionAgent<br/>检索机构资源并回答]
+    Resource --> End
     Knowledge --> CBT[CBTAgent<br/>更新四维追问状态]
     CBT --> Complete{四方面是否完整}
     Complete -- 否 --> Question[提出下一条自然追问]
@@ -107,12 +109,16 @@ flowchart TD
 | LangGraph | 统一执行智能体流程，保存原生图状态，并支持高风险暂停与人工恢复 |
 | MySQL（关系型数据库） | 保存用户、会话、消息、筛查、计划、安全评估、审核和任务记录 |
 | Redis（高速缓存服务） | 保存有时限的短期对话记忆和四维追问进度；不可用时有进程内降级存储 |
-| Chroma（向量数据库） | 保存知识向量并执行相似内容检索；应用启动时检查数据库与向量索引是否一致并自动补齐，向量服务不可用时回退到本地关键词与文本相似度检索 |
+| Chroma（向量数据库） | 保存知识向量，与 BM25 候选合并后补齐两路分数并归一化融合；启动时核对并修复索引，向量不可用时回退到本地关键词与文本相似度检索 |
 | 兼容 OpenAI 的远程接口 | 提供回答模型；也可提供知识向量，或为知识向量单独配置另一服务商 |
 | Ollama（本地模型运行工具） | 运行本地风险分类器；仅在显式选择本地回答模式时同时承担回答模型 |
 | 后台任务队列 | 非阻塞地生成表格台账、发送通知、重试失败任务并记录最终失败 |
 | MCP | 模型上下文协议，用统一接口调用表格写入和风险通知工具；默认在线路径使用持久化队列 |
 | Caddy | 作为部署入口，处理 HTTPS（加密网页连接）和请求转发 |
+
+知识入库保留 Markdown 标题层级，在完整句子之间依据真实句向量的相邻距离选择语义边界；片段上限为 512 字。无法调用向量服务且允许回退时，使用保留标题和句界的结构分块。来源正文、分块配置与实际片段的指纹随数据库事务保存，避免未变化的内置知识在每次启动时重新编码；缺失或改动的片段仍会重新入库。
+
+在线检索每路取 Top-k 的三倍候选，在候选并集补齐余弦与 BM25 分数，使用 min-max 归一化和 0.98 的向量权重融合。BM25 词项贡献按语料内容缓存，查询只累加命中的倒排项；返回结果仍只扩展首位片段，总上下文不超过 3072 字。参数来自现有小样本对照，不表示跨语料普遍最优。方法依据、实测收益及限制见 [RAG 评测](evals/rag/README.md)。
 
 ## 目录结构
 
@@ -159,9 +165,7 @@ flowchart TD
 ├── Caddyfile                     # HTTPS 和请求转发规则
 ├── requirements*.txt             # 运行、开发和可选检索依赖
 ├── pyproject.toml                # 测试、代码检查和类型检查配置
-├── CONTEXT.md                    # 项目统一领域术语
-├── MANIFEST.md                   # 研究与模型产物登记
-└── EXPERIMENT_AUDIT.*             # 2026-09-01 分类器实验完整性审计
+└── CONTEXT.md                    # 项目统一领域术语
 ```
 
 规格、路线图与相关决议的统一入口见 [Issue tracker](docs/agents/issue-tracker.md)，任务状态和依赖在 GitHub 中维护。阅读代码可先查看 [项目地图](reference/xling-project-map.html)；领域术语以 [CONTEXT.md](CONTEXT.md) 为准，架构决策见 [docs/adr/](docs/adr/)，部署步骤见 [部署指南](docs/deployment-guide.md)。分类器当前实验入口统一在 [finetune/README.md](finetune/README.md)。
@@ -180,14 +184,14 @@ flowchart TD
 
 ## 快速启动
 
-需要 Docker（用容器打包和运行应用的工具）和 Docker Compose（同时启动多个容器的编排工具）：
+需要 Docker（用容器打包和运行应用的工具）和 Docker Compose（同时启动多个容器的编排工具）。常用启动、测试、日志及安全清理命令见 [Docker 操作指南](docs/docker-operations.md)。
 
 ```bash
 cp .env.example .env
 docker compose up -d --build
 ```
 
-`.env.example` 默认使用 `AI_PROVIDER=mock`，因此不需要先安装或连接真实模型。启动后访问 `https://localhost`；浏览器可能提示本地证书需要确认。
+`.env.example` 默认使用 `AI_PROVIDER=mock`，因此不需要先安装或连接真实模型。应用、MySQL、Redis 和 Caddy 都在 Docker 中运行，本机只需要 Docker 与 Docker Compose，不需要安装 Python、MySQL 或 Redis。启动后访问 `https://localhost`；浏览器可能提示本地证书需要确认。
 
 开发演示账号：
 
@@ -198,7 +202,13 @@ docker compose up -d --build
 
 ### 真实模型联调
 
-真实模型联调需要同时配置远程回答模型和本地风险分类器：
+真实模型联调需要同时配置远程回答模型和本地风险分类器。模型服务也在 Docker 中运行，使用 `models` profile 启动：
+
+```bash
+docker compose --profile models up -d --build
+```
+
+`ollama-init` 会把项目 `models/` 中的 GGUF 权重注册到 `ollama-data` 数据卷，原始模型目录只读挂载，不需要在宿主机安装或启动 Ollama。Ollama 镜像默认从国内镜像地址下载，可通过 `OLLAMA_IMAGE` 覆盖。默认注册 `xling-cls-3b-ft:latest`；使用其他已准备的模型定义时，可通过 `OLLAMA_CLASSIFIER_MODEL_DIR` 和 `OLLAMA_CLASSIFIER_MODEL_FILE` 指定。`AI_PROVIDER=ollama` 时还会注册回答模型。
 
 ```dotenv
 AI_PROVIDER=openai
@@ -207,15 +217,20 @@ OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_API_KEY=在本机填写有效密钥
 OPENAI_MODEL=gpt-4o-mini
 
-OLLAMA_BASE_URL=http://host.docker.internal:11434
-OLLAMA_CLASSIFIER_MODEL=xling-cls-3b-ft:latest
+OLLAMA_BASE_URL=http://ollama:11434
+OLLAMA_CLASSIFIER_MODEL=xling-general-cls-05b:quoted-f16
+OLLAMA_CLASSIFIER_MODEL_FILE=Modelfile.quoted-f16
+CLASSIFIER_INPUT_FORMAT=quoted
 ```
 
 - `AI_PROVIDER=openai` 表示回答走兼容 OpenAI 的远程 API（应用程序接口）。
 - `AI_MAX_TOKENS` 是单次回答允许生成的最大模型计量单位数，默认 2048；调高会增加响应时间和模型费用。
 - `OPENAI_BASE_URL`、`OPENAI_API_KEY` 和 `OPENAI_MODEL` 必须属于同一个远程服务。
-- `OLLAMA_BASE_URL` 是容器访问 Mac 上 Ollama 的地址；直接在 Mac 上运行应用时使用 `http://localhost:11434`。
-- `OLLAMA_CLASSIFIER_MODEL` 必须是 `ollama list` 中已存在的本地分类器版本。通用分类器的数据、训练配置与固定评测结果见 [finetune/README.md](finetune/README.md)；切换模型时核对请求契约并完成应用回归，训练和评测脚本不会自动替换当前配置。
+- `OLLAMA_BASE_URL` 是 Compose 网络中的模型服务地址。`OLLAMA_CLASSIFIER_MODEL` 必须与注册的分类器版本一致，`CLASSIFIER_INPUT_FORMAT` 与其训练输入契约对应；上面的 `quoted-f16` 使用 F16 权重及 `quoted` 输入。数据、输入包装与固定评测结果见 [finetune/README.md](finetune/README.md)，当前选择与配置证据见 [classifier-selection.json](finetune/reports/classifier-selection.json)。
+
+Docker Compose 已传递分类器输入格式。模型分数直接评价分类输出，实际客户端接入、既有风险词规则与完整业务流程分别验证；固定小样本的真实 RAG 对照及复跑入口见 [RAG 评测](evals/rag/README.md)。
+
+工程冻结版本的成功录屏、所测依赖及完整复跑入口见 [工程验证与交付](docs/project-validation.md)。
 
 如需启用真实知识向量检索，还需配置：
 
@@ -233,30 +248,27 @@ MySQL（关系型数据库）的管理员密码由 `MYSQL_ROOT_PASSWORD` 设置�
 
 ### MySQL 事务集成测试
 
-使用独立容器和 `xling_test` 数据库执行事务回滚测试：
+使用独立容器和 `xling_test` 数据库执行完整 Python 测试，包含此前在本机跳过的 4 项事务回滚测试：
 
 ```bash
-docker compose --profile test build mysql-tests
-docker compose --profile test run --rm mysql-tests
+docker compose --profile test build tests
+docker compose --profile test run --rm tests
 docker compose --profile test stop mysql-test
 docker compose --profile test rm -f mysql-test
 ```
 
-测试容器中的 `MYSQL_TEST_DATABASE_URL` 已指向 `mysql-test:3306/xling_test`，测试用户只拥有该库的权限。测试会重建表结构；数据库名必须以 `_test` 结尾。测试数据使用临时内存文件系统，不挂载业务 `mysql-data`，测试服务不发布主机端口，也不会随普通 `docker compose up` 启动。
+只需事务测试时可把第二行中的 `tests` 换成 `mysql-tests`。测试容器中的 `MYSQL_TEST_DATABASE_URL` 已指向 `mysql-test:3306/xling_test`，测试用户只拥有该库的权限。测试会重建表结构；数据库名必须以 `_test` 结尾。测试数据使用临时内存文件系统，不挂载业务 `mysql-data`，测试服务不发布主机端口，也不会随普通 `docker compose up` 启动。
 
 ## 本地开发与验证
 
-项目使用 Python 3.12。本地直接启动应用前，需要有可用的 MySQL、Redis，以及所选模型服务。默认单元测试不需要这些外部服务；MySQL 事务集成测试使用上述专用 Docker 环境。
+应用启动和完整 Python 测试均不要求本机安装 Python。项目运行时使用 Python 3.12 容器；以下本机命令仅用于可选的代码检查：
 
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install -r requirements-dev.txt
-.venv/bin/python -m pytest -q
 .venv/bin/ruff check app evals tests
 .venv/bin/mypy --ignore-missing-imports app evals
 ```
 
-未配置 `MYSQL_TEST_DATABASE_URL` 时，Python 测试会跳过 MySQL 事务用例；完整验证还需执行上面的独立容器测试。浏览器脚本回归测试需要 Node.js，并启用其 VM 模块：
+浏览器脚本回归测试需要 Node.js，并启用其 VM 模块：
 
 ```bash
 node --experimental-vm-modules --test tests/*-ui.test.mjs
@@ -269,4 +281,4 @@ git diff --check
 
 文件每 10 MiB 轮转，保留 5 个轮转文件。`DIAGNOSTIC_LOG_DIR` 可指定本地输出目录；默认日志目录已从版本控制和发布包排除。输出故障只提示诊断不可用，不阻断业务；图暂停记为等待审核，取消和真正异常分别记录。
 
-如需运行本地风险分类器，可先使用 `scripts/start-ollama.sh` 启动 Ollama，再用 `scripts/create-classifier-model.sh` 注册分类模型。`scripts/create-finetuned-model.sh` 只用于显式选择本地回答模型的可选模式，不是远程回答模型联调的前置条件。
+本地风险分类器统一通过 `docker compose --profile models up -d --build` 启动和注册；原 `scripts/start-ollama.sh` 与模型注册脚本仅保留给历史本机开发流程。

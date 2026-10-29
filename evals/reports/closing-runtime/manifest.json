@@ -1,0 +1,66 @@
+{
+  "scope": "Completed selected engineering scope; synthetic fixtures, real services; not complete product or clinical qualification",
+  "recordedAtUTC": "2026-10-06T14:28:05.302190+00:00",
+  "businessPaths": {
+    "daily": "completed",
+    "lowSupportPlanFeedback": "completed",
+    "mediumSupportPlanFeedback": "completed",
+    "highPauseReview": "completed"
+  },
+  "reliability": {
+    "restartRecovery": "passed",
+    "toolRetryIdempotency": "passed",
+    "noLongMemoryIsolation": "passed"
+  },
+  "videos": [
+    {
+      "scene": "browser-support-verified",
+      "sha256": "8b5a5377b61dd04345141efaad811549a5d07a5664befd6f889c1280de684276",
+      "bytes": 2937224,
+      "path": "assets/closing-videos/daily-low-support.webm"
+    },
+    {
+      "scene": "browser-mid-support",
+      "sha256": "2c181f17633c045895f019ebaac0a5400ddc15abe05bda1fee9f428e156d251d",
+      "bytes": 3299872,
+      "path": "assets/closing-videos/medium-support.webm"
+    },
+    {
+      "scene": "browser-high-review-verified",
+      "sha256": "8898a3c974d3f36fd73aff1812f2e51837bdf3d141917eb0939f6eeea79e417a",
+      "bytes": 517707,
+      "path": "assets/closing-videos/high-user-restart.webm"
+    },
+    {
+      "scene": "browser-high-review-verified",
+      "sha256": "f6932840fa7dd888e076d1381bb97e8aaed8a3d33f77f90ec9c8487e1edd23ce",
+      "bytes": 316506,
+      "path": "assets/closing-videos/high-reviewer.webm"
+    },
+    {
+      "scene": "browser-no-memory",
+      "sha256": "7071059c933b7ad6acf2c67031745b499e347ea2514a128fa06013bfe1a6f131",
+      "bytes": 601674,
+      "path": "assets/closing-videos/no-memory.webm"
+    },
+    {
+      "scene": "tool-reliability-verified",
+      "sha256": "051b7b5dbb808439e5aa89b0040ef8d6fa6eb1ca7dc0eacd73365acba883bf94",
+      "bytes": 578839,
+      "path": "assets/closing-videos/tool-retry-idempotency.webm"
+    }
+  ],
+  "checks": {
+    "python": "559 passed, 4 skipped (MySQL URL absent)",
+    "mysqlTransactions": "4 passed in isolated tmpfs MySQL container",
+    "frontend": "6 passed",
+    "ruff": "passed",
+    "mypy": "passed (69 application/eval source files)",
+    "diffWhitespace": "passed"
+  },
+  "ragReports": "../closing-rag",
+  "sourceIdentity": "Source fingerprints are recorded per model/retrieval batch and in the actual runtime configuration snapshot",
+  "configuration": "configuration.json",
+  "mediaLocation": "Repository-relative paths; source recording bytes preserved",
+  "dependencies": "dependencies.json"
+}

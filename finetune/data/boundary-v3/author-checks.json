@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "result": "PASS_AUTHOR_CHECKS_PENDING_INDEPENDENT_REVIEW",
+  "checks": {
+    "validAdditionJSONL": true,
+    "additionCountsAndLabelBalance": true,
+    "eachSourceGroupHasExactlyOneOfEachLabel": true,
+    "uniqueNewIDsAndInputs": true,
+    "newTrainValSourceGroupOverlap": 0,
+    "newTrainValExactInputOverlap": 0,
+    "oldTrainNewSourceGroupOverlap": 0,
+    "oldTrainNewExactInputOverlap": 0,
+    "oldTrainNewIDOverlap": 0,
+    "allSupportEvidenceLiteralSpans": true,
+    "syntheticAndProvenanceTagsPresent": true,
+    "originalTrainAndValPrefixBytesPreserved": true,
+    "oldTrainOldValSystemFilesUnchanged": true,
+    "oldValidationDecodedOrParsed": false,
+    "accessCheckMeaning": "oldValidationDecodedOrParsed describes this materialization program only; the separate authorized review-role exposure is disclosed in manifest.currentAuthorExposure.",
+    "sourceCorrectionUntouchedAdditionRowsByteIdentical": 44,
+    "sourceCorrectionAll16ValAdditionBytesIdentical": true,
+    "modelCalls": 0,
+    "trainingUpdates": 0
+  },
+  "newVsOldTrainComparisons": 18048,
+  "highestCharacterSequenceRatioVsOldTrain": 0.57377,
+  "closestOldTrainPerNewRow": [
+    {
+      "newID": "boundary-v3-t01-seal-archive-digitization-1",
+      "oldTrainID": "754cdad0d8129caf",
+      "characterSequenceRatio": 0.195122
+    },
+    {
+      "newID": "boundary-v3-t01-seal-archive-digitization-2",
+      "oldTrainID": "temporal-v06-20261003-a3-irrigation-rota-01",
+      "characterSequenceRatio": 0.239437
+    },
+    {
+      "newID": "boundary-v3-t01-seal-archive-digitization-3",
+      "oldTrainID": "temporal-v06-r2-20261003-l3-beekeeper-rounds-01",
+      "characterSequenceRatio": 0.3125
+    },
+    {
+      "newID": "boundary-v3-t01-seal-archive-digitization-4",
+      "oldTrainID": "temporal-v06-20261003-h3-coastal-observation-01",
+      "characterSequenceRatio": 0.325203
+    },
+    {
+      "newID": "boundary-v3-t02-tower-clock-overhaul-1",
+      "oldTrainID": "natural-v08-正常-stable_state_reflection-02",
+      "characterSequenceRatio": 0.219512
+    },
+    {
+      "newID": "boundary-v3-t02-tower-clock-overhaul-2",
+      "oldTrainID": "temporal-v06-20261003-a2-tactile-route-01",
+      "characterSequenceRatio": 0.296296
+    },
+    {
+      "newID": "boundary-v3-t02-tower-clock-overhaul-3",
+      "oldTrainID": "temporal-v06-r2-20261003-l1-planetarium-guide-02",
+      "characterSequenceRatio": 0.275
+    },
+    {
+      "newID": "boundary-v3-t02-tower-clock-overhaul-4",
+      "oldTrainID": "v10-inc-h-t3-deliberate-today-not-accident-01",
+      "characterSequenceRatio": 0.57377
+    },
+    {
+      "newID": "boundary-v3-t03-container-seal-trace-archive-1",
+      "oldTrainID": "c1aa80c7c67c5910",
+      "characterSequenceRatio": 0.2
+    },
+    {
+      "newID": "boundary-v3-t03-container-seal-trace-archive-2",
+      "oldTrainID": "temporal-v06-20261003-a2-tactile-route-01",
+      "characterSequenceRatio": 0.319444
+    },
+    {
+      "newID": "boundary-v3-t03-container-seal-trace-archive-3",
+      "oldTrainID": "1a4ce93eb1d237fe",
+      "characterSequenceRatio": 0.310345
+    },
+    {
+      "newID": "boundary-v3-t03-container-seal-trace-archive-4",
+      "oldTrainID": "temporal-v06-r2-20261003-h2-surname-registry-04",
+      "characterSequenceRatio": 0.378378
+    },
+    {
+      "newID": "boundary-v3-t04-luggage-wheel-repair-1",
+      "oldTrainID": "temporal-v06-20261003-n1-braille-course-01",
+      "characterSequenceRatio": 0.188976
+    },
+    {
+      "newID": "boundary-v3-t04-luggage-wheel-repair-2",
+      "oldTrainID": "v10-inc-l-t2-repaired-receipt-self-worth-02",
+      "characterSequenceRatio": 0.323529
+    },
+    {
+      "newID": "boundary-v3-t04-luggage-wheel-repair-3",
+      "oldTrainID": "v10-r2-inc-a-t1-elevator-confinement-uncertainty-03",
+      "characterSequenceRatio": 0.338462
+    },
+    {
+      "newID": "boundary-v3-t04-luggage-wheel-repair-4",
+      "oldTrainID": "v10-inc-h-t2-directed-at-self-not-others-01",
+      "characterSequenceRatio": 0.344828
+    },
+    {
+      "newID": "boundary-v3-t05-aquarium-filter-maintenance-1",
+      "oldTrainID": "281216a69bd40bc6",
+      "characterSequenceRatio": 0.326087
+    },
+    {
+      "newID": "boundary-v3-t05-aquarium-filter-maintenance-2",
+      "oldTrainID": "v10-r2-inc-a-t1-elevator-confinement-uncertainty-03",
+      "characterSequenceRatio": 0.330827
+    },
+    {
+      "newID": "boundary-v3-t05-aquarium-filter-maintenance-3",
+      "oldTrainID": "temporal-v06-r2-20261003-l3-beekeeper-rounds-02",
+      "characterSequenceRatio": 0.287671
+    },
+    {
+      "newID": "boundary-v3-t05-aquarium-filter-maintenance-4",
+      "oldTrainID": "temporal-v06-20261003-h1-seed-lending-04",
+      "characterSequenceRatio": 0.328571
+    },
+    {
+      "newID": "boundary-v3-t06-paper-cut-light-art-1",
+      "oldTrainID": "7f4c7bd1b5e304dc",
+      "characterSequenceRatio": 0.175
+    },
+    {
+      "newID": "boundary-v3-t06-paper-cut-light-art-2",
+      "oldTrainID": "temporal-v06-20261003-l2-weaving-courtyard-01",
+      "characterSequenceRatio": 0.28169
+    },
+    {
+      "newID": "boundary-v3-t06-paper-cut-light-art-3",
+      "oldTrainID": "6d0233ad0ca07981",
+      "characterSequenceRatio": 0.425806
+    },
+    {
+      "newID": "boundary-v3-t06-paper-cut-light-art-4",
+      "oldTrainID": "temporal-v06-20261003-h1-seed-lending-04",
+      "characterSequenceRatio": 0.257143
+    },
+    {
+      "newID": "boundary-v3-t07-roller-rink-duty-1",
+      "oldTrainID": "temporal-v06-20261003-h1-seed-lending-04",
+      "characterSequenceRatio": 0.245902
+    },
+    {
+      "newID": "boundary-v3-t07-roller-rink-duty-2",
+      "oldTrainID": "476bd9548703c159",
+      "characterSequenceRatio": 0.265306
+    },
+    {
+      "newID": "boundary-v3-t07-roller-rink-duty-3",
+      "oldTrainID": "temporal-v06-r2-20261003-l1-planetarium-guide-01",
+      "characterSequenceRatio": 0.306667
+    },
+    {
+      "newID": "boundary-v3-t07-roller-rink-duty-4",
+      "oldTrainID": "v10-inc-h-t2-directed-at-self-not-others-04",
+      "characterSequenceRatio": 0.313043
+    },
+    {
+      "newID": "boundary-v3-t08-fermented-sauce-workshop-1",
+      "oldTrainID": "d54129f7b2c55a17",
+      "characterSequenceRatio": 0.177419
+    },
+    {
+      "newID": "boundary-v3-t08-fermented-sauce-workshop-2",
+      "oldTrainID": "v10-r2-inc-a-t1-elevator-confinement-uncertainty-04",
+      "characterSequenceRatio": 0.307692
+    },
+    {
+      "newID": "boundary-v3-t08-fermented-sauce-workshop-3",
+      "oldTrainID": "3dd37305916e83cb",
+      "characterSequenceRatio": 0.303797
+    },
+    {
+      "newID": "boundary-v3-t08-fermented-sauce-workshop-4",
+      "oldTrainID": "temporal-v06-r2-20261003-h2-surname-registry-03",
+      "characterSequenceRatio": 0.283582
+    },
+    {
+      "newID": "boundary-v3-v01-carpet-cleaning-workshop-1",
+      "oldTrainID": "temporal-v06-20261003-n1-braille-course-01",
+      "characterSequenceRatio": 0.1875
+    },
+    {
+      "newID": "boundary-v3-v01-carpet-cleaning-workshop-2",
+      "oldTrainID": "v10-inc-l-t1-bereavement-memento-01",
+      "characterSequenceRatio": 0.288
+    },
+    {
+      "newID": "boundary-v3-v01-carpet-cleaning-workshop-3",
+      "oldTrainID": "v10-inc-l-t3-unexplained-voice-note-tears-01",
+      "characterSequenceRatio": 0.278689
+    },
+    {
+      "newID": "boundary-v3-v01-carpet-cleaning-workshop-4",
+      "oldTrainID": "natural-v08-高风险-expressed_ideation_with_support_person-04",
+      "characterSequenceRatio": 0.333333
+    },
+    {
+      "newID": "boundary-v3-v02-ceramic-joint-restoration-1",
+      "oldTrainID": "ff6b544582a7de0e",
+      "characterSequenceRatio": 0.271605
+    },
+    {
+      "newID": "boundary-v3-v02-ceramic-joint-restoration-2",
+      "oldTrainID": "v10-inc-a-t3-relative-road-safety-sendoff-02",
+      "characterSequenceRatio": 0.304348
+    },
+    {
+      "newID": "boundary-v3-v02-ceramic-joint-restoration-3",
+      "oldTrainID": "v10-inc-l-t2-repaired-receipt-self-worth-02",
+      "characterSequenceRatio": 0.287879
+    },
+    {
+      "newID": "boundary-v3-v02-ceramic-joint-restoration-4",
+      "oldTrainID": "v10-inc-h-t2-directed-at-self-not-others-01",
+      "characterSequenceRatio": 0.482759
+    },
+    {
+      "newID": "boundary-v3-v03-coffee-cupping-log-1",
+      "oldTrainID": "bb814eba4a44b6b1",
+      "characterSequenceRatio": 0.216867
+    },
+    {
+      "newID": "boundary-v3-v03-coffee-cupping-log-2",
+      "oldTrainID": "v10-inc-l-t3-unexplained-voice-note-tears-03",
+      "characterSequenceRatio": 0.290323
+    },
+    {
+      "newID": "boundary-v3-v03-coffee-cupping-log-3",
+      "oldTrainID": "9921b227599bdd34",
+      "characterSequenceRatio": 0.337662
+    },
+    {
+      "newID": "boundary-v3-v03-coffee-cupping-log-4",
+      "oldTrainID": "v10-inc-h-t1-plan-denial-scope-correction-03",
+      "characterSequenceRatio": 0.313043
+    },
+    {
+      "newID": "boundary-v3-v04-wooden-puzzle-rental-1",
+      "oldTrainID": "v10-inc-l-t1-bereavement-memento-01",
+      "characterSequenceRatio": 0.185185
+    },
+    {
+      "newID": "boundary-v3-v04-wooden-puzzle-rental-2",
+      "oldTrainID": "temporal-v06-20261003-a1-theatre-lottery-02",
+      "characterSequenceRatio": 0.305556
+    },
+    {
+      "newID": "boundary-v3-v04-wooden-puzzle-rental-3",
+      "oldTrainID": "temporal-v06-20261003-a2-tactile-route-01",
+      "characterSequenceRatio": 0.281481
+    },
+    {
+      "newID": "boundary-v3-v04-wooden-puzzle-rental-4",
+      "oldTrainID": "temporal-v06-20261003-h1-seed-lending-01",
+      "characterSequenceRatio": 0.283688
+    }
+  ],
+  "newWithinIncrementPairCount": 1128,
+  "highestCharacterSequenceRatioWithinIncrement": 0.437956,
+  "highestRatioWithinIncrementIDs": [
+    "boundary-v3-t07-roller-rink-duty-4",
+    "boundary-v3-v04-wooden-puzzle-rental-4"
+  ],
+  "authorNarrativeReview": {
+    "newTrainValStoryFamilies": "8 training and4 distinct validation families; each family holds all four class variants in one split.",
+    "vsPermittedOldTrain": "Reviewed original376 text/source groups. New12 stories do not reproduce its specific story families; generic making/working settings and label vocabulary are shared.",
+    "construction": "All48 message texts were separately authored, with different observed actions/events inside each family; no field-slot generation from one repeated sentence template.",
+    "labels": "Each row includes a literal support span and authored explanation under frozen SYSTEM. These are author checks, not independent human or clinical review."
+  },
+  "manifestSHA256": "72135bbacb409be3f256eab8c53ce9db97f151fc63fbae9b7ec72831de19e726",
+  "remainingIncrementSourceReview": {
+    "scope": "All48 increment message bodies compared narratively with oldtrain376/val128/mechanical80/natural40 during the authorized source audit, without model predictions.",
+    "confirmedInitialReuse": "Only original t03 first-radio-broadcast family was confirmed reused from natural-v12-030. Its whole four-row family is archived and replaced before any model use.",
+    "other44ConfirmedFamilyReuses": 0,
+    "replacementSource": "Container-seal trace archive: indexing matching photos, imminent handover-time audit worry, team dispersal after project closure and removal of archive-edit permission are four distinct authored episodes. Old warehouse intentional self-harm is only a broad logistics-domain neighbor.",
+    "commonDomainsNotCalledIndependentByName": "Ceramic restoration versus kiln firing; paper-cut projection versus stage lighting console; aquarium maintenance versus fish-fry transport; puzzle rental work versus personal puzzle interest. The actor/task/artifact and triggering episode differ; shared art/care/work domains or label-contract language alone do not establish same story family.",
+    "limits": "Narrative text review is evidence against the inspected concrete family repetitions, not a guarantee of global originality. Root independently checks replacement labels and source distinction."
+  }
+}

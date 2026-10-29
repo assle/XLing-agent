@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "datasetVersion": "boundary-v3",
+  "scope": "One finite authored increment: train32/val16 appended without changing original train376/validation128 or frozen SYSTEM.",
+  "provenance": "Synthetic engineering expressions authored from the selected boundary directions and permitted training text review; no real-user or medical gold claim.",
+  "oldGroundTruthChanged": false,
+  "systemPromptChanged": false,
+  "modelOrTrainingRuns": 0,
+  "validationAccess": "This materialization program reads original validation as opaque bytes only for SHA, line count and prefix-preserving concatenation. Initial author did not inspect its body; subsequent root-authorized source-review role did inspect old validation/test/natural corpus bodies before the one source-family correction. No old labels or bytes were changed.",
+  "initialAuthorIsolation": "Initial48 were authored from originaltrain376, training-text review and frozen SYS only; no old validation/test/natural bodies or predictions were inspected then.",
+  "currentAuthorExposure": "For root-authorized independent new40 source review, this agent later read oldtrain376/val128/mechanical80/natural40, the increment48 and initial new40 bodies/targets. No model predictions were read. The replacement container-archive family was selected by root; the five revised blind cases are not used to construct it.",
+  "forbiddenReads": [
+    "model predictions",
+    "revised independent new40 bodies during this training-source correction"
+  ],
+  "sourcesRead": [
+    "finetune/data/current-classifier/train-376.jsonl",
+    "training content review summary/structure",
+    "finetune/reports/current-classifier/training/system-prompt.txt",
+    "old validation/test/natural corpora and initial new40 for authorized source audit only"
+  ],
+  "baseFiles": [
+    {
+      "path": "finetune/data/current-classifier/train-376.jsonl",
+      "bytes": 242631,
+      "rows": 376,
+      "sha256": "a1984a75d366d9d5d678cea7c1e9a27ba52308861fea46eedfed4035f3954a1e"
+    },
+    {
+      "path": "finetune/data/current-classifier/validation-128.jsonl",
+      "bytes": 74932,
+      "rows": 128,
+      "sha256": "e07fd17f36cd9561d7488efd604774bda7e1741ef72a81038c5194383fd6cd25",
+      "bodyInspected": false
+    },
+    {
+      "path": "finetune/reports/current-classifier/training/system-prompt.txt",
+      "bytes": 372,
+      "sha256": "a6d981d29f3cfe7f4edef11bb293a5c5ddf06a87d6205177746b5c4454d346ab"
+    }
+  ],
+  "counts": {
+    "trainAdditions": {
+      "rows": 32,
+      "perClass": {
+        "正常": 8,
+        "焦虑": 8,
+        "低落": 8,
+        "高风险": 8
+      },
+      "sourceGroups": 8
+    },
+    "valAdditions": {
+      "rows": 16,
+      "perClass": {
+        "正常": 4,
+        "焦虑": 4,
+        "低落": 4,
+        "高风险": 4
+      },
+      "sourceGroups": 4
+    },
+    "combinedTrain": {
+      "rows": 408,
+      "perClass": {
+        "正常": 102,
+        "焦虑": 102,
+        "低落": 102,
+        "高风险": 102
+      }
+    },
+    "combinedValidation": {
+      "rows": 144,
+      "oldRows": 128,
+      "appendedPerClass": {
+        "正常": 4,
+        "焦虑": 4,
+        "低落": 4,
+        "高风险": 4
+      },
+      "oldLabelCountsNotInspected": true
+    }
+  },
+  "sourceGroups": [
+    {
+      "sourceGroup": "boundary-v3-t01-seal-archive-digitization",
+      "split": "train",
+      "story": "为地方印章档案拍摄印面、校对影像并制作数字目录。",
+      "ids": [
+        "boundary-v3-t01-seal-archive-digitization-1",
+        "boundary-v3-t01-seal-archive-digitization-2",
+        "boundary-v3-t01-seal-archive-digitization-3",
+        "boundary-v3-t01-seal-archive-digitization-4"
+      ]
+    },
+    {
+      "sourceGroup": "boundary-v3-t02-tower-clock-overhaul",
+      "split": "train",
+      "story": "参加街区塔钟检修，记录齿轮部件并验收报时。",
+      "ids": [
+        "boundary-v3-t02-tower-clock-overhaul-1",
+        "boundary-v3-t02-tower-clock-overhaul-2",
+        "boundary-v3-t02-tower-clock-overhaul-3",
+        "boundary-v3-t02-tower-clock-overhaul-4"
+      ]
+    },
+    {
+      "sourceGroup": "boundary-v3-t03-container-seal-trace-archive",
+      "split": "train",
+      "story": "集装箱封签追溯岗归档核验照片与交接记录，处理审计及档案权限。",
+      "ids": [
+        "boundary-v3-t03-container-seal-trace-archive-1",
+        "boundary-v3-t03-container-seal-trace-archive-2",
+        "boundary-v3-t03-container-seal-trace-archive-3",
+        "boundary-v3-t03-container-seal-trace-archive-4"
+      ]
+    },
+    {
+      "sourceGroup": "boundary-v3-t04-luggage-wheel-repair",
+      "split": "train",
+      "story": "行李箱维修站更换轮子、测试拖行并接待取件顾客。",
+      "ids": [
+        "boundary-v3-t04-luggage-wheel-repair-1",
+        "boundary-v3-t04-luggage-wheel-repair-2",
+        "boundary-v3-t04-luggage-wheel-repair-3",
+        "boundary-v3-t04-luggage-wheel-repair-4"
+      ]
+    },
+    {
+      "sourceGroup": "boundary-v3-t05-aquarium-filter-maintenance",
+      "split": "train",
+      "story": "水族缸服务组清洗过滤设备、安排巡缸并记录维护。",
+      "ids": [
+        "boundary-v3-t05-aquarium-filter-maintenance-1",
+        "boundary-v3-t05-aquarium-filter-maintenance-2",
+        "boundary-v3-t05-aquarium-filter-maintenance-3",
+        "boundary-v3-t05-aquarium-filter-maintenance-4"
+      ]
+    },
+    {
+      "sourceGroup": "boundary-v3-t06-paper-cut-light-art",
+      "split": "train",
+      "story": "剪纸灯影制作小组剪图案、安装透光板并展示作品。",
+      "ids": [
+        "boundary-v3-t06-paper-cut-light-art-1",
+        "boundary-v3-t06-paper-cut-light-art-2",
+        "boundary-v3-t06-paper-cut-light-art-3",
+        "boundary-v3-t06-paper-cut-light-art-4"
+      ]
+    },
+    {
+      "sourceGroup": "boundary-v3-t07-roller-rink-duty",
+      "split": "train",
+      "story": "成人溜冰馆轮值，管理护具归还并带入门课程。",
+      "ids": [
+        "boundary-v3-t07-roller-rink-duty-1",
+        "boundary-v3-t07-roller-rink-duty-2",
+        "boundary-v3-t07-roller-rink-duty-3",
+        "boundary-v3-t07-roller-rink-duty-4"
+      ]
+    },
+    {
+      "sourceGroup": "boundary-v3-t08-fermented-sauce-workshop",
+      "split": "train",
+      "story": "发酵酱料工坊记录批次，举行成品交流并分配清洗工作。",
+      "ids": [
+        "boundary-v3-t08-fermented-sauce-workshop-1",
+        "boundary-v3-t08-fermented-sauce-workshop-2",
+        "boundary-v3-t08-fermented-sauce-workshop-3",
+        "boundary-v3-t08-fermented-sauce-workshop-4"
+      ]
+    },
+    {
+      "sourceGroup": "boundary-v3-v01-carpet-cleaning-workshop",
+      "split": "val",
+      "story": "地毯清洗车间区分纤维批次、排晾晒位并接收送洗地毯。",
+      "ids": [
+        "boundary-v3-v01-carpet-cleaning-workshop-1",
+        "boundary-v3-v01-carpet-cleaning-workshop-2",
+        "boundary-v3-v01-carpet-cleaning-workshop-3",
+        "boundary-v3-v01-carpet-cleaning-workshop-4"
+      ]
+    },
+    {
+      "sourceGroup": "boundary-v3-v02-ceramic-joint-restoration",
+      "split": "val",
+      "story": "陶瓷修补室给碎片编号、接合并展示修复后的器皿。",
+      "ids": [
+        "boundary-v3-v02-ceramic-joint-restoration-1",
+        "boundary-v3-v02-ceramic-joint-restoration-2",
+        "boundary-v3-v02-ceramic-joint-restoration-3",
+        "boundary-v3-v02-ceramic-joint-restoration-4"
+      ]
+    },
+    {
+      "sourceGroup": "boundary-v3-v03-coffee-cupping-log",
+      "split": "val",
+      "story": "咖啡杯测室记录样品风味、主持品评并准备下轮杯测。",
+      "ids": [
+        "boundary-v3-v03-coffee-cupping-log-1",
+        "boundary-v3-v03-coffee-cupping-log-2",
+        "boundary-v3-v03-coffee-cupping-log-3",
+        "boundary-v3-v03-coffee-cupping-log-4"
+      ]
+    },
+    {
+      "sourceGroup": "boundary-v3-v04-wooden-puzzle-rental",
+      "split": "val",
+      "story": "木制拼图出租店清点拼片、办理归还并安排拼图活动。",
+      "ids": [
+        "boundary-v3-v04-wooden-puzzle-rental-1",
+        "boundary-v3-v04-wooden-puzzle-rental-2",
+        "boundary-v3-v04-wooden-puzzle-rental-3",
+        "boundary-v3-v04-wooden-puzzle-rental-4"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "path": "train-additions-32.jsonl",
+      "bytes": 30047,
+      "rows": 32,
+      "sha256": "1d2bf027259908bcf7689239ee65932ccd8a0615311ba4b80712f95bcd8e5340"
+    },
+    {
+      "path": "val-additions-16.jsonl",
+      "bytes": 14613,
+      "rows": 16,
+      "sha256": "2dd069e34dd6fd4053ccc3ac442928f13002b2ab069209ffbba5e3bd2f1953be"
+    },
+    {
+      "path": "train-408.jsonl",
+      "bytes": 272678,
+      "rows": 408,
+      "sha256": "98138ead474593c818a681101cb069ea46f3ed93023f858ab5927cdcf83c561d"
+    },
+    {
+      "path": "validation-144.jsonl",
+      "bytes": 89545,
+      "rows": 144,
+      "sha256": "4d32da010f82e2fd8d5705b6ae0b032aadf63bfd16ced4b8e71d3132176a2b14"
+    }
+  ],
+  "reviewState": "Author checks and root independent label-support review completed before the single training; source correction and cross-corpus narrative review completed. Review evidence is referenced below.",
+  "sourceRevision": {
+    "modelExposure": "Root confirms no model has read any boundary-v3 candidate before this revision.",
+    "initialArchive": ".scratch/model-repair-20261004/data-draft/boundary-v3-initial",
+    "reason": "Independent old-natural narrative audit found original t03 radio family shared a first-radio-broadcast story with v12-030; root selected one whole-family pre-model correction.",
+    "changedSourceGroup": "boundary-v3-t03-container-seal-trace-archive",
+    "unchangedAdditionRows": 44,
+    "new40ExposureBoundary": "Reviewer may inspect the blind corpus for source audit; no new40 bodies, labels or predictions guided this root-selected container-archive family."
+  },
+  "limits": [
+    "All48 additions are synthetic and expose no independent natural-language or clinical validity.",
+    "New train and new validation use different story groups but share the requested label-boundary design.",
+    "Initial author isolation and subsequent audit-role exposure are distinct and disclosed; root independently reviews replacement-family label support before model use.",
+    "String similarity detects lexical likeness, not proof of source independence or semantic label validity."
+  ],
+  "independentReviewEvidence": "finetune/reports/model-repair/training/data-preflight.json"
+}

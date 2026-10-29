@@ -84,6 +84,23 @@ def test_training_only_cli_keeps_test_gate_separate(monkeypatch):
     assert args.system_prompt_file == "contract.txt"
 
 
+def test_training_and_runtime_share_quoted_input_contract():
+    from app.core.config import Settings
+    from app.services.ai import AiClient
+
+    class RecordingTokenizer:
+        def apply_chat_template(self, messages, **kwargs):
+            self.messages = messages
+            return "formatted"
+
+    tokenizer = RecordingTokenizer()
+    text = '说明："没有计划"\n仍然感到担忧。'
+    training.prompt_text(tokenizer, text, input_format="quoted")
+    client = AiClient(Settings(classifier_input_format="quoted"))
+    assert tokenizer.messages[-1] == client._classifier_payload(text)["messages"][0]
+    assert tokenizer.messages[-1]["content"].endswith('"说明：\\"没有计划\\"\\n仍然感到担忧。"')
+
+
 class _ProbeTokenizer(_Tokenizer):
     target_ids = {"正常": 1, "焦虑": 3, "低落": 5, "高风险": 7}
     pad_token_id = 0

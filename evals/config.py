@@ -20,6 +20,7 @@ class EvalSettings(Settings):
     rag_eval_multi_query_output: str = "target/rag-eval-multi-query.json"
     rag_eval_hybrid_rrf_output: str = "target/rag-eval-hybrid-rrf.json"
     rag_eval_llm_rerank_output: str = "target/rag-eval-llm-rerank.json"
+    rag_eval_hyde_rerank_output: str = "target/rag-eval-hyde-rerank.json"
     rag_eval_bge_output: str = "target/rag-eval-bge-m3.json"
     rag_eval_bge_summary_output: str = "target/rag-eval-bge-m3-summary.json"
     rag_eval_bge_rerank_output: str = "target/rag-eval-bge-m3-rerank.json"

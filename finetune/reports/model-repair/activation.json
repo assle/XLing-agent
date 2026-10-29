@@ -1,0 +1,16 @@
+{
+  "status": "selected-config-applied",
+  "changedKeys": [
+    "CLASSIFIER_INPUT_FORMAT",
+    "OLLAMA_CLASSIFIER_MODEL"
+  ],
+  "selectedModel": "xling-general-cls-05b:quoted-f16",
+  "inputFormat": "quoted",
+  "beforeSHA256": "6a3eb808eab03035ec2f5b881f7d022908d977a35499c100fa9772346b0884c1",
+  "afterSHA256": "2dd600d7170957b9794af04d736aa7057dbebb7cbaad8cf46bb804c3555d7223",
+  "otherSettingsUnchanged": true,
+  "dockerComposeConfiguredCorrectly": true,
+  "dockerSyncAsyncProbePassed": true,
+  "productionServicesRestarted": false,
+  "oldLatestTagPreserved": true
+}
