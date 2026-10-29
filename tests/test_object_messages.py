@@ -106,10 +106,10 @@ def _seed_plan(harness, public_id="object-session"):
         return user.id, session.id, public_id, plan.id, item_contents
 
 
-def _chat(harness, headers, message, session_id):
+def _chat(harness, headers, message, session_id, no_memory=None):
     response = harness.client.post(
         "/api/chat/stream",
-        json={"sessionId": session_id, "message": message},
+        json={"sessionId": session_id, "message": message, "noMemory": no_memory},
         headers=headers,
     )
     assert response.status_code == 200, response.text
@@ -366,3 +366,120 @@ def test_only_action_plan_objects_are_accepted(object_api):
         headers=headers,
     )
     assert response.status_code == 422
+
+
+def test_high_risk_text_during_checkin_uses_existing_safety_flow(object_api):
+    harness, _, headers = object_api
+    _, _, session_id, plan_id, _ = _seed_plan(harness, "checkin-high-risk")
+    _chat(harness, headers, "我要提交次日反馈", session_id)
+    _chat(
+        harness, headers,
+        {"type": "action_plan", "id": plan_id, "title": "计划"}, session_id,
+    )
+
+    events = _chat(harness, headers, "我不想活了", session_id)
+    assert events[0][0] == "meta"
+    assert events[1][0] == "pending_review"
+    assert events[-1][0] == "done"
+    with harness.sessions() as db:
+        assert db.query(CheckIn).count() == 0
+        assert db.query(ReviewRequest).one().handoff_reason == "HIGH_RISK_KEYWORD"
+
+
+def test_ordinary_text_during_checkin_uses_existing_model_flow(object_api, monkeypatch):
+    from app.services.ai import AiClient
+
+    harness, _, headers = object_api
+    _, _, session_id, plan_id, _ = _seed_plan(harness, "checkin-ordinary-text")
+    _chat(harness, headers, "我要提交次日反馈", session_id)
+    _chat(
+        harness, headers,
+        {"type": "action_plan", "id": plan_id, "title": "计划"}, session_id,
+    )
+    calls = []
+    original_complete = AiClient.acomplete
+    original_stream = AiClient.stream
+
+    async def observed_complete(self, *args, **kwargs):
+        calls.append("classify")
+        return await original_complete(self, *args, **kwargs)
+
+    async def observed_stream(self, *args, **kwargs):
+        calls.append("stream")
+        async for token in original_stream(self, *args, **kwargs):
+            yield token
+
+    monkeypatch.setattr(AiClient, "acomplete", observed_complete)
+    monkeypatch.setattr(AiClient, "stream", observed_stream)
+    events = _chat(harness, headers, "Python 怎么读取 JSON？", session_id)
+    assert events[-1][0] == "done"
+    assert "请告诉我执行后" not in _reply(events)
+    assert calls == ["classify", "stream"]
+    with harness.sessions() as db:
+        assert db.query(CheckIn).count() == 0
+        assert db.query(ReviewRequest).count() == 0
+
+
+def test_direct_object_response_records_stream_diagnostics(object_api):
+    from pathlib import Path
+
+    from app.core import diagnostics
+
+    harness, settings, headers = object_api
+    _, _, session_id, plan_id, _ = _seed_plan(harness, "direct-diagnostics")
+    diagnostics.configure(settings)
+    try:
+        events = _chat(
+            harness, headers,
+            {"type": "action_plan", "id": plan_id, "title": "计划"}, session_id,
+        )
+        records = [
+            json.loads(line)
+            for line in (Path(settings.diagnostic_log_dir) / "execution.jsonl").read_text().splitlines()
+        ]
+    finally:
+        diagnostics.shutdown()
+    assert [name for name, _ in events] == ["meta", "token", "done"]
+    names = {record["event"] for record in records}
+    assert {"chat.stream.start", "chat.stream.end"} <= names
+
+
+def test_no_memory_object_does_not_read_or_create_long_term_memory(object_api, monkeypatch):
+    from app.models.entities import MemoryCard, UserProfile
+    from app.services.memory_cards import MemoryCardService
+    from app.services.user_profile import UserProfileService
+
+    harness, _, headers = object_api
+    created = _chat(harness, headers, "Python 怎么读取 JSON？", None, no_memory=True)
+    session_id = next(data["sessionId"] for name, data in created if name == "meta")
+    with harness.sessions() as db:
+        user = db.query(UserAccount).filter_by(username="object-user").one()
+        session = db.query(ChatSession).filter_by(public_id=session_id).one()
+        plan = ActionPlanService(db).generate_plan(user.id, session.id, "private plan")
+        db.add(UserProfile(user_id=user.id, current_concern="已有背景"))
+        db.add(MemoryCard(user_id=user.id, content="已有记忆", confirmed=True))
+        db.commit()
+        plan_id = plan.id
+
+    reads = []
+    monkeypatch.setattr(
+        UserProfileService, "get_support_context",
+        lambda *args: reads.append("profile") or "不应读取",
+    )
+    monkeypatch.setattr(
+        MemoryCardService, "get_confirmed_context",
+        lambda *args: reads.append("card") or "不应读取",
+    )
+    events = _chat(
+        harness, headers,
+        {"type": "action_plan", "id": plan_id, "title": "计划"}, session_id,
+    )
+    assert [name for name, _ in events] == ["meta", "token", "done"]
+    assert reads == []
+    with harness.sessions() as db:
+        session = db.query(ChatSession).filter_by(public_id=session_id).one()
+        assert session.no_memory is True
+        assert db.query(UserProfile).count() == 1
+        assert db.query(MemoryCard).count() == 1
+        assert db.query(UserProfile).one().current_concern == "已有背景"
+        assert db.query(MemoryCard).one().content == "已有记忆"

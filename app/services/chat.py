@@ -171,10 +171,11 @@ class ChatService:
                 yield sse("action_plan", {"type": "action_plan", "sessionId": session_id, **prepared.action_plan_event})
             assistant = []
             if prepared.direct_response is not None:
-                assistant.append(prepared.direct_response)
-                yield sse("token", ChatStreamEvent(
-                    type="token", sessionId=session_id, content=prepared.direct_response,
-                ).model_dump())
+                with diagnostics.stage("chat.stream"):
+                    assistant.append(prepared.direct_response)
+                    yield sse("token", ChatStreamEvent(
+                        type="token", sessionId=session_id, content=prepared.direct_response,
+                    ).model_dump())
             else:
                 with diagnostics.stage("chat.stream"):
                     async with aclosing(self.ai.stream(prepared.messages)) as stream:

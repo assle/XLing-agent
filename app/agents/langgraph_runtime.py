@@ -430,16 +430,16 @@ class LangGraphAgentRuntimeService:
             if saved_cbt and not CBTState.from_dict(saved_cbt).is_complete:
                 return {"direct_response": "这份计划已保留。请继续当前的支持追问，完成后再决定下一步。"}
         if state["checkin_task"] == "checkin":
-            status = self._improvement_status(text)
+            status = self._improvement_status(text) if message is None else None
+            if message is None and status is None:
+                return {}
             if status is not None and "improvement_status" in state["checkin_slots"] and "plan_id" not in state["checkin_slots"]:
                 return self._submit_checkin(state, status)
             prompt = "请先选择要反馈的 24 小时行动计划。" if "plan_id" in state["checkin_slots"] else "请告诉我执行后是有改善、没有变化，还是恶化了。"
             return {"direct_response": prompt}
         if message is not None:
-            from app.services.action_plan import ActionPlanService
-
-            plan = ActionPlanService(self.db).get_plan(state["user_id"], message["id"])
-            if message["type"] == "action_plan" and plan is not None and plan.session_id == state["session_id"]:
+            plan = self._object_plan(state, message)
+            if plan is not None:
                 return {
                     "focused_object": {"type": "action_plan", "id": plan.id},
                     "direct_response": "已选择这份 24 小时行动计划。你希望我为你做什么？",
@@ -453,17 +453,18 @@ class LangGraphAgentRuntimeService:
         return route
 
     def _latest_checkin_plan(self, state: GraphState):
-        from app.models.entities import ActionPlan
+        from app.services.action_plan import ActionPlanService
 
-        return (
-            self.db.query(ActionPlan)
-            .filter(
-                ActionPlan.user_id == state["user_id"], ActionPlan.session_id == state["session_id"],
-                ActionPlan.status == "active",
-            )
-            .order_by(ActionPlan.created_at.desc(), ActionPlan.id.desc())
-            .first()
-        )
+        plan = ActionPlanService(self.db).get_session_plan(state["user_id"], state["session_id"])
+        return plan if plan is not None and plan.status == "active" else None
+
+    def _object_plan(self, state: GraphState, message: dict[str, Any]):
+        from app.services.action_plan import ActionPlanService
+
+        if message["type"] != "action_plan":
+            return None
+        plan = ActionPlanService(self.db).get_plan(state["user_id"], message["id"])
+        return plan if plan is not None and plan.session_id == state["session_id"] else None
 
     @staticmethod
     def _plan_event(plan) -> dict[str, Any]:
@@ -485,10 +486,8 @@ class LangGraphAgentRuntimeService:
         }
 
     def _fill_checkin_plan(self, state: GraphState, message: dict[str, Any]) -> GraphUpdate:
-        from app.services.action_plan import ActionPlanService
-
-        plan = ActionPlanService(self.db).get_plan(state["user_id"], message["id"])
-        if message["type"] != "action_plan" or plan is None or plan.session_id != state["session_id"] or plan.status != "active":
+        plan = self._object_plan(state, message)
+        if plan is None or plan.status != "active":
             return {"direct_response": "这份 24 小时行动计划不存在、已结束或不属于当前会话，请选择当前会话中的计划。"}
         focused = {"type": "action_plan", "id": plan.id}
         return {
