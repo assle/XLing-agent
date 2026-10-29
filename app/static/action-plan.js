@@ -3,6 +3,11 @@
 import { state, api } from "/app.js";
 
 const els = {};
+let actionPlanObjectSender = null;
+
+export function bindActionPlanObjectSender(sender) {
+  actionPlanObjectSender = sender;
+}
 
 /**
  * 取得计划与反馈表单元素并绑定展开、取消及提交事件。
@@ -18,6 +23,17 @@ export function initActionPlan() {
   els.checkinCancel = document.querySelector("#checkinCancel");
   els.checkinState = document.querySelector("#checkinState");
   els.progressBar = document.querySelector("#planProgressBar");
+  els.planObject = document.querySelector("#planObject");
+  els.planObject.addEventListener("click", async () => {
+    const plan = state.activePlan;
+    if (!plan || !actionPlanObjectSender) return;
+    await actionPlanObjectSender({
+      type: "action_plan",
+      id: plan.id,
+      title: `24 小时行动计划 #${plan.id}`,
+      properties: { feedbackDueAt: plan.feedbackDueAt || null }
+    });
+  });
 
   // 点击反馈入口时展开表单并隐藏重复入口。
   els.checkinStart.addEventListener("click", () => {

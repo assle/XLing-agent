@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.config import Settings
 from app.core.enums import IntentType, RiskLevel
 from app.models.entities import ChatSession, UserAccount
-from app.schemas.dtos import AiMessage
+from app.schemas.dtos import ActionPlanObjectMessage, AiMessage
 from app.services.ai import AiClient
 from app.services.assessment import PsychologicalAssessmentService, PsychologyAssessment
 from app.services.knowledge import KnowledgeService, SearchResult
@@ -69,6 +69,7 @@ class AgentRunResult:
     action_plan_event: ActionPlanEvent | None = None
     quick_safety_checked: bool = False
     quick_risk_flagged: bool = False
+    direct_response: str | None = None
 
     @property
     def requires_report(self) -> bool:
@@ -107,7 +108,7 @@ class AgentRuntime(Protocol):
     """Business boundary for conversation planning, independent of graph scheduling."""
 
     async def run(
-        self, user: UserAccount, session: ChatSession, model_input: str,
+        self, user: UserAccount, session: ChatSession, model_input: str | ActionPlanObjectMessage,
     ) -> AgentRunResult: ...
 
     async def aclose(self) -> None: ...

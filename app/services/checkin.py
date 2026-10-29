@@ -141,3 +141,35 @@ class CheckInService:
         elif improvement_status == "worsened":
             plan.status = "active"  # 保持进行中，其他入口可继续检查安全升级。
         self.db.commit()
+
+
+def submit_checkin_application(db, user, request, settings) -> tuple[CheckIn, str]:
+    """Save feedback and apply first-submission safety escalation for every entry point."""
+    from app.models.entities import ChatSession
+    from app.services.action_plan import ActionPlanService
+    from app.services.escalation import EscalationService
+    from app.services.review import ReviewService
+
+    checkins = CheckInService(db)
+    first_submission = checkins.get_by_plan(request.planId) is None
+    checkin = checkins.submit_checkin(
+        user.id,
+        request.planId,
+        request.improvementStatus,
+        request.notes or "",
+        request.itemStates,
+    )
+    if not first_submission:
+        return checkin, ""
+    plan = ActionPlanService(db).get_plan(user.id, request.planId)
+    session = db.get(ChatSession, plan.session_id) if plan and plan.session_id else None
+    result = EscalationService(db, ReviewService(db, settings)).check_checkin_escalation(
+        user_id=user.id,
+        session_id=session.id if session else None,
+        report_id=None,
+        thread_id=session.public_id if session else "",
+        improvement_status=request.improvementStatus,
+        current_difficulty=request.notes or "",
+    )
+    safety_message = result.user_message if result.should_escalate and result.review_id is not None else ""
+    return checkin, safety_message
