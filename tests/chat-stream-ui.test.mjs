@@ -33,6 +33,7 @@ globalThis.document = {
 const state = { auth: { token: "test-only" }, sending: false, pendingReview: false };
 let suppliedEvents = [];
 let lastChatBody = null;
+let loadActionPlansCalls = 0;
 const api = async (path, options = {}) => {
   if (path !== "/api/chat/stream") return { json: async () => [] };
   lastChatBody = JSON.parse(options.body);
@@ -55,7 +56,7 @@ const app = new SyntheticModule(["state", "api", "setPill", "isAdmin"], function
 const plans = new SyntheticModule(["handlePlanEvent", "resetPlanPanel", "loadActionPlans", "bindActionPlanObjectSender"], function () {
   this.setExport("handlePlanEvent", () => {});
   this.setExport("resetPlanPanel", () => {});
-  this.setExport("loadActionPlans", async () => {});
+  this.setExport("loadActionPlans", async () => { loadActionPlansCalls += 1; });
   this.setExport("bindActionPlanObjectSender", () => {});
 });
 const module = new SourceTextModule(await readFile(new URL("../app/static/chat.js", import.meta.url), "utf8"));
@@ -112,4 +113,35 @@ const messageCount = elements.get("#messages").children.length;
 await module.namespace.sendActionPlanObject(planObject);
 assert.deepEqual(lastChatBody.message, planObject);
 assert.match(elements.get("#messages").children[messageCount].bubble.textContent, /选择了 24 小时行动计划 #4/);
+
+suppliedEvents = [
+  { type: "meta", sessionId: "test-session", noMemory: false },
+  { type: "token", content: "次日反馈已提交，谢谢你的反馈。" },
+  { type: "done" }
+];
+elements.get("#messageInput").value = "有改善";
+const callsBeforeSuccessfulCheckin = loadActionPlansCalls;
+await elements.get("#chatForm").listeners.submit({ preventDefault() {} });
+assert.equal(loadActionPlansCalls, callsBeforeSuccessfulCheckin + 1);
+assert.equal(elements.get("#sessionBadge").textContent, "DONE");
+
+suppliedEvents = [
+  { type: "token", content: "反馈尚未完成" },
+  { type: "error", message: "请稍后重试" }
+];
+elements.get("#messageInput").value = "再次反馈";
+const callsBeforeError = loadActionPlansCalls;
+await elements.get("#chatForm").listeners.submit({ preventDefault() {} });
+assert.equal(loadActionPlansCalls, callsBeforeError);
+assert.equal(elements.get("#sessionBadge").textContent, "ERROR");
+
+suppliedEvents = [
+  { type: "pending_review", content: "反馈已收到，正在等待审核。" },
+  { type: "done" }
+];
+elements.get("#messageInput").value = "提交反馈";
+const callsBeforePendingReview = loadActionPlansCalls;
+await elements.get("#chatForm").listeners.submit({ preventDefault() {} });
+assert.equal(loadActionPlansCalls, callsBeforePendingReview);
+assert.equal(state.pendingReview, true);
 console.log("chat stream and action-plan object regressions passed");

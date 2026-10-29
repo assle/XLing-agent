@@ -321,6 +321,7 @@ async function sendChatMessage(message, displayText) {
     if (!streamFailed && !pendingReview) {
       if (raw.trim()) {
         setPill(els.sessionBadge, "DONE", "ok");
+        await loadActionPlans();
       } else {
         assistant.textContent = "回复生成未返回内容，请重试。";
         setPill(els.sessionBadge, "ERROR", "danger");
