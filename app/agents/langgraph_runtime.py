@@ -406,6 +406,20 @@ class LangGraphAgentRuntimeService:
         return "次日反馈" in text and any(word in text for word in ("提交", "填写", "开始", "我要", "我想"))
 
     @staticmethod
+    def _is_checkin_cancel(text: str) -> bool:
+        return text.strip().rstrip("。") in {"算了，不反馈了", "算了,不反馈了", "取消次日反馈"}
+
+    @staticmethod
+    def _is_checkin_resume(text: str) -> bool:
+        return text.strip().rstrip("。") in {"继续刚才的反馈", "继续次日反馈"}
+
+    @staticmethod
+    def _checkin_prompt(state: GraphState) -> str:
+        if "plan_id" in state["checkin_slots"]:
+            return "请先选择要反馈的 24 小时行动计划。"
+        return "请告诉我执行后是有改善、没有变化，还是恶化了。"
+
+    @staticmethod
     def _improvement_status(text: str) -> str | None:
         normalized = text.strip().lower()
         if normalized in {"改善", "改善了", "有改善", "好转", "好转了", "improved"}:
@@ -423,6 +437,16 @@ class LangGraphAgentRuntimeService:
             return {}
         if self._is_checkin_start(text):
             return self._start_checkin(state)
+        if state["checkin_task"] is not None and self._is_checkin_cancel(text):
+            return {
+                "checkin_task": None, "checkin_slots": [], "checkin_values": {},
+                "direct_response": "已取消本次次日反馈。",
+            }
+        if state["checkin_task"] == "suspended" and message is None:
+            if self._is_checkin_resume(text):
+                prompt = self._checkin_prompt(state)
+                return {"checkin_task": "checkin", "direct_response": prompt}
+            return {}
         if message is not None and state["checkin_task"] == "checkin" and "plan_id" in state["checkin_slots"]:
             return self._fill_checkin_plan(state, message)
         if message is not None and state["checkin_task"] is None:
@@ -432,10 +456,10 @@ class LangGraphAgentRuntimeService:
         if state["checkin_task"] == "checkin":
             status = self._improvement_status(text) if message is None else None
             if message is None and status is None:
-                return {}
+                return {"checkin_task": "suspended"}
             if status is not None and "improvement_status" in state["checkin_slots"] and "plan_id" not in state["checkin_slots"]:
                 return self._submit_checkin(state, status)
-            prompt = "请先选择要反馈的 24 小时行动计划。" if "plan_id" in state["checkin_slots"] else "请告诉我执行后是有改善、没有变化，还是恶化了。"
+            prompt = self._checkin_prompt(state)
             return {"direct_response": prompt}
         if message is not None:
             plan = self._object_plan(state, message)
@@ -476,6 +500,9 @@ class LangGraphAgentRuntimeService:
         ))
 
     def _start_checkin(self, state: GraphState) -> GraphUpdate:
+        if state["checkin_task"] == "checkin":
+            prompt = self._checkin_prompt(state)
+            return {"direct_response": prompt}
         plan = self._latest_checkin_plan(state)
         if plan is None:
             return {"direct_response": "当前会话没有可反馈的 24 小时行动计划。"}

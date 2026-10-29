@@ -386,6 +386,30 @@ def test_high_risk_text_during_checkin_uses_existing_safety_flow(object_api):
         assert db.query(ReviewRequest).one().handoff_reason == "HIGH_RISK_KEYWORD"
 
 
+def test_high_risk_while_suspended_escalates_and_blocks_resume(object_api):
+    harness, _, headers = object_api
+    _, _, session_id, plan_id, _ = _seed_plan(harness, "suspended-high-risk")
+    _chat(harness, headers, "我要提交次日反馈", session_id)
+    _chat(
+        harness, headers,
+        {"type": "action_plan", "id": plan_id, "title": "计划"}, session_id,
+    )
+    _chat(harness, headers, "Python 怎么读取 JSON？", session_id)
+
+    events = _chat(harness, headers, "我不想活了", session_id)
+    assert "pending_review" in [name for name, _ in events]
+    assert events[-1][0] == "done"
+    blocked = harness.client.post(
+        "/api/chat/stream",
+        json={"sessionId": session_id, "message": "继续刚才的反馈"},
+        headers=headers,
+    )
+    assert blocked.status_code == 409
+    with harness.sessions() as db:
+        assert db.query(CheckIn).count() == 0
+        assert db.query(ReviewRequest).one().handoff_reason == "HIGH_RISK_KEYWORD"
+
+
 def test_ordinary_text_during_checkin_uses_existing_model_flow(object_api, monkeypatch):
     from app.services.ai import AiClient
 
@@ -418,6 +442,150 @@ def test_ordinary_text_during_checkin_uses_existing_model_flow(object_api, monke
     with harness.sessions() as db:
         assert db.query(CheckIn).count() == 0
         assert db.query(ReviewRequest).count() == 0
+
+
+def test_repeated_checkin_start_preserves_selected_plan_without_replaying_card(object_api):
+    harness, _, headers = object_api
+    _, _, session_id, plan_id, _ = _seed_plan(harness, "repeated-start-session")
+    _chat(harness, headers, "我要提交次日反馈", session_id)
+    _chat(
+        harness, headers,
+        {"type": "action_plan", "id": plan_id, "title": "计划"}, session_id,
+    )
+
+    repeated = _chat(harness, headers, "我要提交次日反馈", session_id)
+    assert [name for name, _ in repeated] == ["meta", "token", "done"]
+    assert "有改善" in _reply(repeated)
+    assert "没有变化" in _reply(repeated)
+
+    submitted = _chat(harness, headers, "有改善", session_id)
+    assert "已提交" in _reply(submitted)
+    with harness.sessions() as db:
+        assert db.query(CheckIn).filter_by(plan_id=plan_id).one().improvement_status == "improved"
+
+
+def test_repeated_checkin_start_before_plan_selection_does_not_replay_card(object_api):
+    harness, _, headers = object_api
+    _, _, session_id, plan_id, _ = _seed_plan(harness, "repeated-unselected-session")
+    _chat(harness, headers, "我要提交次日反馈", session_id)
+
+    repeated = _chat(harness, headers, "我要提交次日反馈", session_id)
+    assert [name for name, _ in repeated] == ["meta", "token", "done"]
+    assert "请先选择" in _reply(repeated)
+    _chat(
+        harness, headers,
+        {"type": "action_plan", "id": plan_id, "title": "计划"}, session_id,
+    )
+    submitted = _chat(harness, headers, "有改善", session_id)
+    assert "已提交" in _reply(submitted)
+    with harness.sessions() as db:
+        assert db.query(CheckIn).filter_by(plan_id=plan_id).count() == 1
+
+
+def test_cancel_checkin_clears_progress_without_completing_plan(object_api):
+    harness, _, headers = object_api
+    _, _, session_id, plan_id, _ = _seed_plan(harness, "cancel-session")
+    _chat(harness, headers, "我要提交次日反馈", session_id)
+    _chat(
+        harness, headers,
+        {"type": "action_plan", "id": plan_id, "title": "计划"}, session_id,
+    )
+
+    cancelled = _chat(harness, headers, "算了，不反馈了", session_id)
+    assert [name for name, _ in cancelled] == ["meta", "token", "done"]
+    assert "已取消" in _reply(cancelled)
+    _chat(harness, headers, "有改善", session_id)
+
+    with harness.sessions() as db:
+        assert db.query(CheckIn).count() == 0
+        assert db.get(ActionPlan, plan_id).status == "active"
+
+
+def test_suspended_checkin_can_be_cancelled_without_resume(object_api):
+    harness, _, headers = object_api
+    _, _, session_id, plan_id, _ = _seed_plan(harness, "cancel-suspended-session")
+    _chat(harness, headers, "我要提交次日反馈", session_id)
+    _chat(
+        harness, headers,
+        {"type": "action_plan", "id": plan_id, "title": "计划"}, session_id,
+    )
+    _chat(harness, headers, "Python 怎么读取 JSON？", session_id)
+
+    cancelled = _chat(harness, headers, "取消次日反馈", session_id)
+    assert [name for name, _ in cancelled] == ["meta", "token", "done"]
+    assert "已取消" in _reply(cancelled)
+    _chat(harness, headers, "有改善", session_id)
+    with harness.sessions() as db:
+        assert db.query(CheckIn).count() == 0
+        assert db.get(ActionPlan, plan_id).status == "active"
+
+
+def test_ordinary_chat_suspends_checkin_until_explicit_resume(object_api):
+    harness, _, headers = object_api
+    _, _, session_id, plan_id, _ = _seed_plan(harness, "suspend-resume-session")
+    _chat(harness, headers, "我要提交次日反馈", session_id)
+    _chat(
+        harness, headers,
+        {"type": "action_plan", "id": plan_id, "title": "计划"}, session_id,
+    )
+
+    ordinary = _chat(harness, headers, "Python 怎么读取 JSON？", session_id)
+    assert ordinary[-1][0] == "done"
+    assert "请告诉我执行后" not in _reply(ordinary)
+    _chat(harness, headers, "有改善", session_id)
+    with harness.sessions() as db:
+        assert db.query(CheckIn).count() == 0
+
+    resumed = _chat(harness, headers, "继续刚才的反馈", session_id)
+    assert [name for name, _ in resumed] == ["meta", "token", "done"]
+    assert "有改善" in _reply(resumed)
+    assert "没有变化" in _reply(resumed)
+    submitted = _chat(harness, headers, "有改善", session_id)
+    assert "已提交" in _reply(submitted)
+    with harness.sessions() as db:
+        assert db.query(CheckIn).filter_by(plan_id=plan_id).one().improvement_status == "improved"
+
+
+def test_unselected_checkin_resumes_plan_slot_without_replaying_card(object_api):
+    harness, _, headers = object_api
+    _, _, session_id, plan_id, _ = _seed_plan(harness, "unselected-resume-session")
+    _chat(harness, headers, "我要提交次日反馈", session_id)
+    _chat(harness, headers, "Python 怎么读取 JSON？", session_id)
+
+    resumed = _chat(harness, headers, "继续刚才的反馈", session_id)
+    assert [name for name, _ in resumed] == ["meta", "token", "done"]
+    assert "请先选择" in _reply(resumed)
+    _chat(
+        harness, headers,
+        {"type": "action_plan", "id": plan_id, "title": "计划"}, session_id,
+    )
+    submitted = _chat(harness, headers, "有改善", session_id)
+    assert "已提交" in _reply(submitted)
+    with harness.sessions() as db:
+        assert db.query(CheckIn).filter_by(plan_id=plan_id).count() == 1
+
+
+def test_suspended_checkin_resumes_from_file_checkpoint_without_replaying_plan(object_api):
+    from starlette.testclient import TestClient
+
+    harness, _, headers = object_api
+    _, _, session_id, plan_id, _ = _seed_plan(harness, "suspended-restart-session")
+    _chat(harness, headers, "我要提交次日反馈", session_id)
+    _chat(
+        harness, headers,
+        {"type": "action_plan", "id": plan_id, "title": "计划"}, session_id,
+    )
+    _chat(harness, headers, "Python 怎么读取 JSON？", session_id)
+
+    harness.client.close()
+    harness.client = TestClient(harness.app)
+    resumed = _chat(harness, headers, "继续刚才的反馈", session_id)
+    assert [name for name, _ in resumed] == ["meta", "token", "done"]
+    assert "有改善" in _reply(resumed)
+    submitted = _chat(harness, headers, "有改善", session_id)
+    assert "已提交" in _reply(submitted)
+    with harness.sessions() as db:
+        assert db.query(CheckIn).filter_by(plan_id=plan_id).one().improvement_status == "improved"
 
 
 def test_direct_object_response_records_stream_diagnostics(object_api):
@@ -483,3 +651,73 @@ def test_no_memory_object_does_not_read_or_create_long_term_memory(object_api, m
         assert db.query(MemoryCard).count() == 1
         assert db.query(UserProfile).one().current_concern == "已有背景"
         assert db.query(MemoryCard).one().content == "已有记忆"
+
+
+def test_no_memory_checkin_suspend_resume_preserves_privacy(object_api, monkeypatch):
+    from app.models.entities import MemoryCard, UserProfile
+    from app.services.memory_cards import MemoryCardService
+    from app.services.user_profile import UserProfileService
+
+    harness, _, headers = object_api
+    created = _chat(harness, headers, "Python 怎么读取 JSON？", None, no_memory=True)
+    session_id = next(data["sessionId"] for name, data in created if name == "meta")
+    with harness.sessions() as db:
+        user = db.query(UserAccount).filter_by(username="object-user").one()
+        session = db.query(ChatSession).filter_by(public_id=session_id).one()
+        plan = ActionPlanService(db).generate_plan(user.id, session.id, "private lifecycle plan")
+        db.add(UserProfile(user_id=user.id, current_concern="已有背景"))
+        db.add(MemoryCard(user_id=user.id, content="已有记忆", confirmed=True))
+        db.commit()
+        plan_id = plan.id
+
+    reads = []
+    monkeypatch.setattr(
+        UserProfileService, "get_support_context",
+        lambda *args: reads.append("profile") or "不应读取",
+    )
+    monkeypatch.setattr(
+        MemoryCardService, "get_confirmed_context",
+        lambda *args: reads.append("card") or "不应读取",
+    )
+    _chat(harness, headers, "我要提交次日反馈", session_id)
+    _chat(
+        harness, headers,
+        {"type": "action_plan", "id": plan_id, "title": "计划"}, session_id,
+    )
+    _chat(harness, headers, "再讲一个 Python 示例", session_id)
+    resumed = _chat(harness, headers, "继续刚才的反馈", session_id)
+    assert "有改善" in _reply(resumed)
+    _chat(harness, headers, "有改善", session_id)
+
+    assert reads == []
+    with harness.sessions() as db:
+        assert db.query(CheckIn).filter_by(plan_id=plan_id).count() == 1
+        assert db.query(UserProfile).count() == 1
+        assert db.query(MemoryCard).count() == 1
+        assert db.query(UserProfile).one().current_concern == "已有背景"
+        assert db.query(MemoryCard).one().content == "已有记忆"
+
+
+def test_suspended_checkin_lifecycle_is_isolated_by_session(object_api):
+    harness, _, headers = object_api
+    _, _, first_session, first_plan, _ = _seed_plan(harness, "lifecycle-isolated-first")
+    _, _, second_session, second_plan, _ = _seed_plan(harness, "lifecycle-isolated-second")
+    for session_id, plan_id in ((first_session, first_plan), (second_session, second_plan)):
+        _chat(harness, headers, "我要提交次日反馈", session_id)
+        _chat(
+            harness, headers,
+            {"type": "action_plan", "id": plan_id, "title": "计划"}, session_id,
+        )
+        _chat(harness, headers, "Python 怎么读取 JSON？", session_id)
+
+    resumed = _chat(harness, headers, "继续刚才的反馈", second_session)
+    assert "有改善" in _reply(resumed)
+    _chat(harness, headers, "有改善", second_session)
+    _chat(harness, headers, "取消次日反馈", first_session)
+    _chat(harness, headers, "有改善", first_session)
+
+    with harness.sessions() as db:
+        assert db.query(CheckIn).filter_by(plan_id=first_plan).count() == 0
+        assert db.query(CheckIn).filter_by(plan_id=second_plan).one().improvement_status == "improved"
+        assert db.get(ActionPlan, first_plan).status == "active"
+        assert db.get(ActionPlan, second_plan).status == "completed"
