@@ -187,6 +187,15 @@ class ChatMessage(Base):
     session: Mapped[ChatSession] = relationship(back_populates="messages")
 
 
+class KnowledgeSource(Base):
+    """Derived ingestion fingerprint, committed together with the source chunks."""
+
+    __tablename__ = "knowledge_sources"
+
+    source: Mapped[str] = mapped_column(String(256), primary_key=True)
+    fingerprint: Mapped[str] = mapped_column(String(64))
+
+
 class KnowledgeChunk(Base):
     __tablename__ = "knowledge_chunks"
 

@@ -26,17 +26,17 @@ cp .env.production.example .env
 # - MYSQL_PASSWORD=<强密码>
 # - MYSQL_ROOT_PASSWORD=<强密码>
 # - OPENAI_BASE_URL / OPENAI_API_KEY / OPENAI_MODEL=<同一远程回答服务的配置>
-# - OLLAMA_BASE_URL / OLLAMA_CLASSIFIER_MODEL=<容器可访问的本地风险分类器>
+# - OLLAMA_CLASSIFIER_MODEL / OLLAMA_CLASSIFIER_MODEL_FILE=<已准备的分类器名称与定义>
 ```
 
-生产样例默认使用 `AI_PROVIDER=openai`：回答依赖兼容 OpenAI 的远程接口，风险分类仍依赖 Ollama 中已注册的独立分类器。模型角色、请求契约和知识向量配置见 [README 的真实模型联调](../README.md#真实模型联调)。
+生产样例默认使用 `AI_PROVIDER=openai`：回答依赖兼容 OpenAI 的远程接口，风险分类使用 Compose 中的独立 Ollama 服务。模型角色、请求契约和知识向量配置见 [README 的真实模型联调](../README.md#真实模型联调)。
 
-Docker Desktop 可用 `http://host.docker.internal:11434` 访问宿主上的 Ollama。Linux 服务器需把 `OLLAMA_BASE_URL` 改为应用容器实际可达的地址；当前 Compose 没有为 Linux 配置该宿主别名。分类模型必须已注册，并允许应用容器访问其服务。
+`OLLAMA_BASE_URL` 默认是 `http://ollama:11434`。启动时添加 `--profile models`，`ollama-init` 会从只读挂载的项目 `models/` 目录注册分类器到 `ollama-data` 数据卷，不需要宿主机 Ollama。若使用外部模型服务，可省略该 profile 并把 `OLLAMA_BASE_URL` 改为应用容器实际可达的地址。
 
 ### 3. 启动服务
 
 ```bash
-docker compose up -d --build
+docker compose --profile models up -d --build
 ```
 
 Caddy 会自动为你的域名签发 HTTPS 证书（通过 Let's Encrypt）。

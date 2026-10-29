@@ -98,6 +98,17 @@ class PromptTemplates:
         ]
 
     @staticmethod
+    def hyde_prompt(query: str) -> list[AiMessage]:
+        return [
+            AiMessage(role="system", content=(
+                "你为心理健康支持知识库检索生成假设性说明文字，不直接回答用户。"
+                "根据问题写出一段可能出现在支持知识中的简短说明，使用中文，不超过 300 字。"
+                "不要诊断疾病，不要虚构机构电话、地址、预约时段或其他现实服务信息。"
+            )),
+            AiMessage(role="user", content=query),
+        ]
+
+    @staticmethod
     def rerank_prompt(query: str, candidates: list[dict]) -> list[AiMessage]:
         import json as _json
         docs = [{"index": i, "source": c["source"], "preview": c["content"][:200]} for i, c in enumerate(candidates)]
@@ -173,6 +184,11 @@ class AiClient:
                 return [query]
             diagnostics.degraded("ai.sub_queries", "invalid_sub_query_shape")
             return [query]
+
+    def generate_hyde_document(self, query: str) -> str:
+        """生成只用于向量检索的假设性说明，不把它作为事实或用户回复。"""
+        with diagnostics.stage("ai.hyde"):
+            return self.complete(PromptTemplates.hyde_prompt(query)).strip()[:300]
 
     def rerank(self, query: str, candidates: list[dict]) -> list[tuple[int, float]]:
         """通过一次模型请求为候选资料取得编号和相关性分数。

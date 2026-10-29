@@ -308,7 +308,7 @@ def _build_ai_client(settings: EvalSettings, strategy: str):
 
     多查询、排名融合和模型重排返回客户端，其余方案返回 None。
     """
-    if strategy in ("multi-query", "hybrid-rrf", "llm-rerank"):
+    if strategy in ("multi-query", "hybrid-rrf", "llm-rerank", "hyde-rerank"):
         from app.services.ai import AiClient
         return AiClient(settings)
     return None
@@ -324,6 +324,7 @@ def _strategy_label(strategy: str, retrieval_label: str) -> str:
         "multi-query": f"multi-query + {retrieval_label}",
         "hybrid-rrf": f"multi-query + hybrid-RRF (k=60) + {retrieval_label}",
         "llm-rerank": f"multi-query + hybrid-RRF + LLM-rerank + {retrieval_label}",
+        "hyde-rerank": "direct + HyDE + RRF (k=60) + LLM-rerank + cliff cutoff",
         "bge-m3": "BGE-M3",
         "bge-m3-rerank": "BGE-M3 + bge-reranker-v2-m3",
     }
@@ -344,16 +345,16 @@ def _build_retrieve_fn(service: KnowledgeService, strategy: str, settings: EvalS
     if strategy == "hybrid-rrf":
         # 每条改写查询都使用排名融合检索，再由多查询入口合并去重。
         return lambda q, k: service.retrieve_multi_query(q, k, base_retrieve=service.retrieve_hybrid_rrf)
-    if strategy == "llm-rerank":
+    if strategy in {"llm-rerank", "hyde-rerank"}:
         from app.services.knowledge import SearchResult as _SR
         pool = settings.rag_eval_rerank_candidate_pool
 
         def _retrieve(q: str, k: int):
-            """先用多查询与排名融合取得候选，再由模型评分并截取前 k 项。
-
-            q 是问题，k 是最终数量；无候选或无模型时直接截取原结果，未评分候选按零分排序。
-            """
-            candidates = service.retrieve_multi_query(q, pool, base_retrieve=service.retrieve_hybrid_rrf)
+            """先取得候选，再由模型评分；HyDE 策略最后按分数落差截断。"""
+            candidates = (
+                service.retrieve_hyde(q, pool) if strategy == "hyde-rerank"
+                else service.retrieve_multi_query(q, pool, base_retrieve=service.retrieve_hybrid_rrf)
+            )
             if not candidates or not service.ai_client:
                 return candidates[:k] if candidates else []
             candidate_dicts = [
@@ -366,9 +367,8 @@ def _build_retrieve_fn(service: KnowledgeService, strategy: str, settings: EvalS
                 _SR(c.chunk_id, c.source, c.content, index_to_score.get(i, 0.0))
                 for i, c in enumerate(candidates)
             ]
-            # 按模型重排后替换的分数排序，截取最终候选。
             reranked.sort(key=lambda r: r.score, reverse=True)
-            return reranked[:k]
+            return service._cliff_cutoff(reranked, k) if strategy == "hyde-rerank" else reranked[:k]
         return _retrieve
     # 把统一的查询和数量参数传给默认检索入口。
     return lambda q, k: service.retrieve(q, k)
@@ -392,6 +392,10 @@ def _strategy_paths(strategy: str, settings: EvalSettings) -> tuple[str, str]:
         "llm-rerank": (
             settings.rag_eval_output.replace(".json", "-llm-rerank.json"),
             settings.rag_eval_llm_rerank_output,
+        ),
+        "hyde-rerank": (
+            settings.rag_eval_output.replace(".json", "-hyde-rerank.json"),
+            settings.rag_eval_hyde_rerank_output,
         ),
         "bge-m3": (
             settings.rag_eval_bge_output,
@@ -602,6 +606,7 @@ if __name__ == "__main__":
         "multi-query",
         "hybrid-rrf",
         "llm-rerank",
+        "hyde-rerank",
         "bge-m3",
         "bge-m3-rerank",
         "comparison",
