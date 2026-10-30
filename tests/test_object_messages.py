@@ -291,8 +291,11 @@ def test_worsened_checkin_escalates_once_and_repeat_updates_same_record(object_a
         review_id = db.query(ReviewRequest).one().id
         assert db.get(ActionPlan, plan_id).status == "active"
 
+    claimed = harness.client.post(f"/api/admin/reviews/{review_id}/claim", headers=harness.reviewer_headers)
+    assert claimed.status_code == 200
     decided = harness.client.post(
-        f"/api/admin/reviews/{review_id}/decision", json={"decision": "reject"},
+        f"/api/admin/reviews/{review_id}/decision",
+        json={"decision": "complete", "note": "已记录恶化反馈", "completionBasis": "已核对学生现实支持安排"},
         headers=harness.reviewer_headers,
     )
     assert decided.status_code == 200, decided.text
@@ -386,7 +389,7 @@ def test_high_risk_text_during_checkin_uses_existing_safety_flow(object_api):
         assert db.query(ReviewRequest).one().handoff_reason == "HIGH_RISK_KEYWORD"
 
 
-def test_high_risk_while_suspended_escalates_and_blocks_resume(object_api):
+def test_high_risk_while_suspended_escalates_and_allows_human_follow_up(object_api):
     harness, _, headers = object_api
     _, _, session_id, plan_id, _ = _seed_plan(harness, "suspended-high-risk")
     _chat(harness, headers, "我要提交次日反馈", session_id)
@@ -399,15 +402,13 @@ def test_high_risk_while_suspended_escalates_and_blocks_resume(object_api):
     events = _chat(harness, headers, "我不想活了", session_id)
     assert "pending_review" in [name for name, _ in events]
     assert events[-1][0] == "done"
-    blocked = harness.client.post(
-        "/api/chat/stream",
-        json={"sessionId": session_id, "message": "继续刚才的反馈"},
-        headers=headers,
-    )
-    assert blocked.status_code == 409
+    followed_up = _chat(harness, headers, "继续刚才的反馈", session_id)
+    assert [name for name, _ in followed_up] == ["meta", "pending_review", "done"]
     with harness.sessions() as db:
         assert db.query(CheckIn).count() == 0
-        assert db.query(ReviewRequest).one().handoff_reason == "HIGH_RISK_KEYWORD"
+        review = db.query(ReviewRequest).one()
+        assert review.handoff_reason == "HIGH_RISK_KEYWORD"
+        assert db.query(ChatMessage).filter_by(review_id=review.id, content="继续刚才的反馈").count() == 1
 
 
 def test_ordinary_text_during_checkin_uses_existing_model_flow(object_api, monkeypatch):

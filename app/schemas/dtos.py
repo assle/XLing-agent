@@ -29,6 +29,7 @@ class ChatStreamEvent(BaseModel):
     message: Optional[str] = None
     noMemory: Optional[bool] = None
     code: Optional[str] = None
+    supportStatus: Optional[str] = None
     type: str
 
 
@@ -61,6 +62,7 @@ class ConversationMessageResponse(BaseModel):
     role: str
     content: str
     createdAt: UtcDateTime
+    senderLabel: Optional[str] = None
 
 
 class ConversationResponse(BaseModel):
@@ -68,6 +70,7 @@ class ConversationResponse(BaseModel):
     title: str
     noMemory: bool = False
     pendingReview: bool = False
+    supportStatus: Optional[str] = None
     messages: list[ConversationMessageResponse]
 
 
@@ -160,6 +163,19 @@ class CheckInSubmitRequest(BaseModel):
     itemStates: Optional[list[dict]] = None
 
 
+class HumanReplyRequest(BaseModel):
+    content: str = Field(min_length=1, max_length=4000)
+    clientRequestId: Optional[str] = Field(default=None, max_length=64)
+
+
+class OffsiteContactRequest(BaseModel):
+    contactMethod: str = Field(min_length=1, max_length=32)
+    contactedAt: datetime
+    outcome: str = Field(min_length=1, max_length=2000)
+    nextStep: str = Field(min_length=1, max_length=1000)
+    clientRequestId: Optional[str] = Field(default=None, max_length=64)
+
+
 class ReviewDecisionRequest(BaseModel):
     decision: str = Field(min_length=1)
     note: Optional[str] = ""
@@ -167,3 +183,4 @@ class ReviewDecisionRequest(BaseModel):
     nextStep: Optional[str] = Field(default=None, max_length=500)
     followUpOwner: Optional[str] = Field(default=None, max_length=128)
     followUpAt: Optional[datetime] = None
+    completionBasis: Optional[str] = Field(default=None, max_length=2000)

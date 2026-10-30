@@ -7,7 +7,6 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from starlette.types import Send
 
-from app.core import diagnostics
 from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.security import current_user
@@ -18,7 +17,7 @@ from app.schemas.dtos import (
     ReplaceActionItemRequest,
 )
 from app.services.action_plan import ActionPlanService
-from app.services.chat import ChatService, PendingReviewError, sse
+from app.services.chat import ChatService, sse
 from app.services.checkin import CheckInService, submit_checkin_application
 from app.services.report import ReportService
 
@@ -50,13 +49,6 @@ async def chat_stream(
     if "ROLE_ADMIN" in user.roles:
         raise HTTPException(403, "管理员账号只能查看后台记录，不能发起用户对话。")
     settings = get_settings()
-    service = ChatService(db, settings)
-    try:
-        service.ensure_chat_available(user, request.sessionId)
-    except PendingReviewError as exc:
-        with diagnostics.execution("chat.rejected", session_id=request.sessionId):
-            diagnostics.emit("chat.blocked", reason_code="PENDING_REVIEW")
-        raise HTTPException(409, str(exc)) from exc
     bind = db.get_bind()
     user_id = user.id
 

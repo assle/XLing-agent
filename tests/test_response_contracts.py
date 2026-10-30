@@ -43,7 +43,9 @@ def test_no_memory_fact_is_supplied_to_chat_interview_and_review_reply(database_
         )
         result = asyncio.run(runtime.run(user, session, text))
         if result.pending_review:
-            result = asyncio.run(runtime.resume(session.public_id, approved=True))
+            assert result.response_messages == []
+            assert db.query(MemoryCard).count() == 1
+            return
         content = "\n".join(message.content for message in result.response_messages)
         assert "本次是无记忆会话" in content
         assert "关闭页面或结束会话不会删除它们" in content

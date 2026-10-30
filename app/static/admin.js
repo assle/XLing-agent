@@ -5,7 +5,7 @@ import { api, displayTime } from "/app.js";
 const els = {};
 const reportSessions = new Map();
 
-const TASK_KIND_LABELS = { EXCEL_REPORT: "台账导出", RISK_ALERT: "预警通知" };
+const TASK_KIND_LABELS = { EXCEL_REPORT: "台账导出", RISK_ALERT: "预警通知", ESCALATION_ALERT: "超时升级通知" };
 const TASK_STATUS_LABELS = { PENDING: "待执行", RUNNING: "执行中", SUCCESS: "成功", DEAD: "失败留存" };
 
 const HANDOFF_REASON_LABELS = {
@@ -16,21 +16,14 @@ const HANDOFF_REASON_LABELS = {
   TIMEOUT: "超时未审"
 };
 
-const DECISION_LABELS = {
-  approve: "放行",
-  reject: "拒绝",
-  refer: "转介",
-  monitor: "持续关注"
-};
-
-const OUTCOME_LABELS = { ...DECISION_LABELS, timeout: "超时自动兜底" };
-
+const DECISION_LABELS = { refer: "转介", monitor: "持续关注", complete: "完成处置" };
+const OUTCOME_LABELS = { ...DECISION_LABELS };
 const STATUS_LABELS = {
-  approved: "已放行",
-  rejected: "已拒绝",
+  pending: "待接手",
+  in_progress: "已接手",
   referred: "已转介",
-  monitoring: "持续关注中",
-  escalated: "已自动升级"
+  monitoring: "持续关注",
+  completed: "已完成"
 };
 
 /**
@@ -295,6 +288,7 @@ function roleLabel(role) {
   const value = (role || "").toUpperCase();
   if (value === "USER") return "用户";
   if (value === "ASSISTANT") return "Xling";
+  if (value === "SUPPORT") return "支持人员";
   if (value === "SYSTEM") return "系统";
   return role || "未知角色";
 }
@@ -358,23 +352,23 @@ function renderReviews(items) {
 }
 
 /**
- * 展示审核原因、风险、可展开摘要及当前处理结果。
- * 已处理项只读展示决定与后续行动；待处理项才提供四类决定按钮。
+ * 展示高风险上下文和当前责任状态。
+ * 待接手记录只能接手；处理中记录提供人工操作；终结记录只读展示处置结果。
  */
 function renderReviewItem(item) {
   const box = document.createElement("div");
-  const decided = item.status && item.status !== "pending";
-  box.className = `review-item${decided ? " decided" : ""}`;
+  const terminal = ["referred", "monitoring", "completed"].includes(item.status);
+  box.className = `review-item${terminal ? " decided" : ""}`;
 
   const head = document.createElement("div");
   head.className = "review-item-head";
   const reason = document.createElement("span");
-  reason.className = `badge reason-${item.handoffReason || "TIMEOUT"}`;
+  reason.className = `badge reason-${item.handoffReason || "HIGH_RISK_KEYWORD"}`;
   reason.textContent = HANDOFF_REASON_LABELS[item.handoffReason] || item.handoffReason || "未知原因";
   const meta = document.createElement("span");
   meta.className = "hint";
   const risk = item.riskLevel ? `风险 ${item.riskLevel}` : "风险未知";
-  meta.textContent = `#${item.reviewId} · ${risk} · ${displayTime(item.createdAt)}`;
+  meta.textContent = `#${item.reviewId} · ${STATUS_LABELS[item.status] || item.status} · ${risk} · ${displayTime(item.createdAt)}`;
   head.append(reason, meta);
   box.append(head);
 
@@ -392,7 +386,6 @@ function renderReviewItem(item) {
     detail.className = "review-summary";
     detail.textContent = item.desensitizedSummary;
     detail.hidden = true;
-    // 切换摘要区域可见状态，同时同步展开或收起的按钮文字。
     toggle.addEventListener("click", () => {
       detail.hidden = !detail.hidden;
       toggle.textContent = detail.hidden ? "展开脱敏摘要 ▾" : "收起脱敏摘要 ▴";
@@ -400,14 +393,32 @@ function renderReviewItem(item) {
     box.append(toggle, detail);
   }
 
-  if (decided) {
+  const responsibility = [];
+  if (item.claimedBy) responsibility.push(`接手人：${item.claimedBy}`);
+  if (item.escalationCount) responsibility.push(`已升级 ${item.escalationCount} 次`);
+  if (responsibility.length) {
+    const state = document.createElement("p");
+    state.className = "hint";
+    state.textContent = responsibility.join(" · ");
+    box.append(state);
+  }
+
+  if (item.recentContext?.length) {
+    const context = document.createElement("div");
+    context.className = "review-summary";
+    context.textContent = item.recentContext.map((message) => `${roleLabel(message.role)}：${message.content}`).join("\n");
+    box.append(context);
+  }
+
+  if (terminal) {
     const outcome = document.createElement("p");
     outcome.className = "review-outcome";
-    const decision = item.reviewerDecision ? (OUTCOME_LABELS[item.reviewerDecision] || item.reviewerDecision) : (STATUS_LABELS[item.status] || item.status);
+    const decision = OUTCOME_LABELS[item.reviewerDecision] || STATUS_LABELS[item.status] || item.status;
     const parts = [`处理结果：${decision}`];
-    if (item.reviewedBy) parts.push(`审核人：${item.reviewedBy}`);
-    if (item.reviewerNote) parts.push(`备注:${item.reviewerNote}`);
-    if (item.referralTarget) parts.push(`转介对象：${item.referralTarget}`);
+    if (item.reviewedBy) parts.push(`处理人：${item.reviewedBy}`);
+    if (item.reviewerNote) parts.push(`处理记录：${item.reviewerNote}`);
+    if (item.completionBasis) parts.push(`完成依据：${item.completionBasis}`);
+    if (item.referralTarget) parts.push(`转介去向：${item.referralTarget}`);
     if (item.nextStep) parts.push(`下一步：${item.nextStep}`);
     if (item.followUpOwner) parts.push(`跟进负责人：${item.followUpOwner}`);
     if (item.followUpAt) parts.push(`跟进时间：${displayTime(item.followUpAt)}`);
@@ -416,75 +427,100 @@ function renderReviewItem(item) {
     return box;
   }
 
-  const decisions = document.createElement("div");
-  decisions.className = "review-decisions";
-  for (const [value, label] of Object.entries(DECISION_LABELS)) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = `decide-${value}`;
-    button.textContent = label;
-    // 把所选决定和当前审核编号传入详情表单。
-    button.addEventListener("click", () => showNoteRow(box, item.reviewId, value, label));
-    decisions.append(button);
+  const actions = document.createElement("div");
+  actions.className = "review-decisions";
+  if (item.status === "pending") {
+    const claim = document.createElement("button");
+    claim.type = "button";
+    claim.className = "primary";
+    claim.textContent = "接手";
+    claim.addEventListener("click", async () => {
+      claim.disabled = true;
+      try {
+        await api(`/api/admin/reviews/${item.reviewId}/claim`, { method: "POST" });
+        await loadReviews();
+      } catch (error) {
+        claim.disabled = false;
+        alert(`接手失败：${error.message}`);
+      }
+    });
+    actions.append(claim);
+  } else if (item.status === "in_progress") {
+    const definitions = [
+      ["reply", "发送人工回复", [["content", "人工回复内容（必填）"]]],
+      ["contact", "记录站外联系", [
+        ["contactMethod", "联系方式（必填）"],
+        ["contactedAt", "联系时间（必填）", "datetime-local"],
+        ["outcome", "联系结果（必填）"],
+        ["nextStep", "下一步（必填）"]
+      ]],
+      ["monitor", "持续关注", [
+        ["followUpOwner", "跟进负责人（必填）"],
+        ["followUpAt", "跟进时间（必填）", "datetime-local"],
+        ["note", "处理记录（可选）"]
+      ]],
+      ["refer", "转介", [
+        ["referralTarget", "转介去向（必填）"],
+        ["nextStep", "下一步（必填）"],
+        ["followUpOwner", "跟进负责人（必填）"],
+        ["note", "处理记录（可选）"]
+      ]],
+      ["complete", "完成处置", [["note", "处理记录（必填）"], ["completionBasis", "完成依据（必填）"]]]
+    ];
+    for (const [action, label, fields] of definitions) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `decide-${action}`;
+      button.textContent = label;
+      button.addEventListener("click", () => showActionRow(box, item.reviewId, action, fields));
+      actions.append(button);
+    }
   }
-  box.append(decisions);
+  box.append(actions);
   return box;
 }
 
-/**
- * 按审核决定生成所需备注和后续行动输入框。
- * 转介收集去向和下一步，持续关注收集负责人和时间；确认后提交并刷新队列，失败恢复按钮。
- */
-function showNoteRow(box, reviewId, decision, label) {
+/** 为当前人工操作生成表单；客户端请求编号在表单打开时创建，失败重试仍保持幂等。 */
+function showActionRow(box, reviewId, action, definitions) {
   box.querySelector(".review-note-row")?.remove();
   const row = document.createElement("div");
   row.className = "review-note-row";
   const fields = {};
-  // 创建一个输入框并按字段名登记，便于提交时读取对应值。
-  const addField = (name, placeholder, type = "text") => {
+  for (const [name, placeholder, type = "text"] of definitions) {
     const input = document.createElement("input");
     input.type = type;
     input.placeholder = placeholder;
     fields[name] = input;
     row.append(input);
-  };
-  addField("note", `备注（可选），将随「${label}」一起记录`);
-  if (decision === "refer") {
-    addField("referralTarget", "转介对象（必填）");
-    addField("nextStep", "下一步（必填）");
   }
-  if (decision === "monitor") {
-    addField("followUpOwner", "跟进负责人（必填）");
-    addField("followUpAt", "跟进时间（必填）", "datetime-local");
-  }
+  const clientRequestId = crypto.randomUUID();
   const confirm = document.createElement("button");
   confirm.type = "button";
   confirm.className = "primary";
   confirm.textContent = "确认";
-  // 确认时禁用按钮避免重复点击，提交审核详情后重新读取队列。
   confirm.addEventListener("click", async () => {
     confirm.disabled = true;
+    const payload = {};
+    for (const [name] of definitions) {
+      const value = fields[name].value;
+      payload[name] = ["contactedAt", "followUpAt"].includes(name) && value ? new Date(value).toISOString() : value.trim();
+    }
+    if (action === "reply" || action === "contact") payload.clientRequestId = clientRequestId;
+    else payload.decision = action;
     try {
-      await api(`/api/admin/reviews/${reviewId}/decision`, {
+      const endpoint = action === "reply" || action === "contact" ? action : "decision";
+      await api(`/api/admin/reviews/${reviewId}/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          decision,
-          note: fields.note.value.trim(),
-          referralTarget: fields.referralTarget?.value.trim() || null,
-          nextStep: fields.nextStep?.value.trim() || null,
-          followUpOwner: fields.followUpOwner?.value.trim() || null,
-          followUpAt: fields.followUpAt?.value ? new Date(fields.followUpAt.value).toISOString() : null,
-        })
+        body: JSON.stringify(payload)
       });
       await loadReviews();
     } catch (error) {
       confirm.disabled = false;
-      fields.note.value = "";
       alert(`操作失败：${error.message}`);
     }
   });
   row.append(confirm);
   box.append(row);
-  fields[decision === "refer" ? "referralTarget" : decision === "monitor" ? "followUpOwner" : "note"].focus();
+  fields[definitions[0][0]].focus();
 }

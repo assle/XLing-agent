@@ -12,15 +12,29 @@ class Element {
     this.listeners = {};
     this.dataset = {};
     this._text = "";
+    this.value = "";
     this.hidden = false;
+    this.parentNode = null;
     this.classList = { toggle() {} };
   }
   addEventListener(name, callback) { this.listeners[name] = callback; }
-  append(...children) { this.children.push(...children); }
+  append(...children) {
+    this.children.push(...children);
+    for (const child of children) child.parentNode = this;
+  }
+  remove() {
+    const index = this.parentNode?.children.indexOf(this) ?? -1;
+    if (index >= 0) this.parentNode.children.splice(index, 1);
+  }
   set textContent(value) { this._text = String(value); this.children = []; }
   get textContent() { return this._text + this.children.map((child) => child.textContent).join(" "); }
   set innerHTML(value) { this._text = String(value); this.children = []; }
   querySelectorAll() { return []; }
+  querySelector(selector) {
+    const className = selector.startsWith(".") ? selector.slice(1) : null;
+    return this.children.find((child) => child.className === className) || null;
+  }
+  focus() {}
 }
 
 const elements = new Map();
@@ -34,6 +48,7 @@ globalThis.document = {
 
 const state = { auth: { token: "test-only" } };
 const requests = [];
+const requestBodies = [];
 const profile = { username: "qa_user", roles: [{ authority: "ROLE_USER" }] };
 const fixture = new Map([
   ["/api/profile", profile],
@@ -54,8 +69,9 @@ fixture.set("/api/admin/tool-jobs", [
 fixture.set("/api/admin/dead-letters", [{ id: 6, jobId: 5, reportId: 10, kind: "EXCEL_REPORT", reason: "<img src=x onerror=alert(1)>: secret", payload: "raw sensitive payload", createdAt: time }]);
 const deferred = new Map();
 const failures = new Set();
-const api = async (path) => {
+const api = async (path, options = {}) => {
   requests.push(path);
+  if (options.body) requestBodies.push({ path, body: JSON.parse(options.body) });
   if (failures.has(path)) throw new Error("OperationalError: raw SQL/password must not render");
   if (deferred.has(path)) await deferred.get(path).promise;
   return { json: async () => fixture.get(path) ?? [] };
@@ -126,6 +142,34 @@ assert.doesNotMatch(jobs.textContent, /SQL|password/);
 failures.clear();
 await elements.get("#refreshTasks").listeners.click();
 assert.equal(jobs.textContent, "暂无后台任务。");
+
+// Human support workbench: claim, reply, offsite contact and all three outcomes.
+const findButton = (root, text) => root.children.flatMap((child) => {
+  if (child.textContent === text && child.listeners.click) return [child];
+  return child.children?.length ? [findButton(child, text)] : [];
+}).flat().find(Boolean);
+fixture.set("/api/admin/reviews", [
+  { reviewId: 41, status: "pending", riskLevel: "HIGH", handoffReason: "HIGH_RISK_KEYWORD", createdAt: time, recentContext: [] },
+  { reviewId: 42, status: "in_progress", riskLevel: "HIGH", handoffReason: "HIGH_RISK_KEYWORD", createdAt: time, claimedBy: "qa_user", recentContext: [] }
+]);
+await admin.namespace.loadReviews();
+const reviewCards = elements.get("#reviews").children;
+assert.ok(findButton(reviewCards[0], "接手"));
+assert.doesNotMatch(reviewCards[1].textContent, /放行|拒绝/);
+await findButton(reviewCards[0], "接手").listeners.click();
+assert.ok(requests.includes("/api/admin/reviews/41/claim"));
+await findButton(reviewCards[1], "发送人工回复").listeners.click();
+await findButton(reviewCards[1], "确认").listeners.click();
+await findButton(reviewCards[1], "记录站外联系").listeners.click();
+await findButton(reviewCards[1], "确认").listeners.click();
+for (const label of ["持续关注", "转介", "完成处置"]) {
+  await findButton(reviewCards[1], label).listeners.click();
+  assert.ok(reviewCards[1].textContent.includes("确认"));
+  await findButton(reviewCards[1], "确认").listeners.click();
+}
+assert.ok(requestBodies.some((request) => request.path === "/api/admin/reviews/42/reply"));
+assert.ok(requestBodies.some((request) => request.path === "/api/admin/reviews/42/contact"));
+assert.ok(requestBodies.some((request) => request.path === "/api/admin/reviews/42/decision" && request.body.decision === "complete"));
 
 // Actual auth orchestration must not load tasks or reviews for a normal account.
 const support = new SyntheticModule(["loadSupportProfile"], function () { this.setExport("loadSupportProfile", async () => {}); });

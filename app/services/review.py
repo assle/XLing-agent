@@ -1,6 +1,7 @@
 """Service for managing high-risk message review queue (issues 06-07, 11)."""
 from __future__ import annotations
 
+import json
 import logging
 import threading
 from datetime import UTC, datetime, timedelta
@@ -11,9 +12,17 @@ from sqlalchemy.orm import Session
 from app.core import diagnostics
 from app.core.config import Settings
 from app.core.database import SessionLocal
-from app.core.enums import MessageRole
+from app.core.enums import MessageRole, ToolJobKind, ToolJobStatus
 from app.core.time import utc_isoformat, utc_now
-from app.models.entities import ChatMessage, ChatSession, ReviewRequest, SafetyAssessmentRecord
+from app.models.entities import (
+    ChatMessage,
+    ChatSession,
+    OffsiteContactRecord,
+    ReviewRequest,
+    SafetyAssessmentRecord,
+    SupportAuditEvent,
+    ToolJob,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,31 +33,175 @@ HANDOFF_REASONS = {
     "SUSTAINED_NO_IMPROVEMENT", "USER_REQUEST", "TIMEOUT",
 }
 
-REVIEW_DECISIONS = {"approve", "reject", "refer", "monitor"}
+REVIEW_DECISIONS = {"refer", "monitor", "complete"}
+
+
+class ReviewConflictError(ValueError):
+    """人工支持记录已被其他操作推进，当前请求不能覆盖它。"""
 
 
 class ReviewService:
-    def __init__(self, db: Session, settings: Settings):
-        """保存人工审核查询、决定和超时处理需要的数据库会话及配置。
-
-        初始化不执行审核或恢复对话。
-        """
+    def __init__(
+        self, db: Session, settings: Settings, *, fault_injector: Callable[[str], None] | None = None,
+    ):
+        """保存人工支持依赖；故障入口仅供事务测试在提交前注入异常。"""
         self.db = db
         self.settings = settings
+        self.fault_injector = fault_injector or (lambda stage: None)
+
+    def claim(self, review_id: int, claimed_by: str) -> ReviewRequest:
+        """用一次条件更新原子接手待处理需求，并在同一事务写入审计。"""
+        now = utc_now()
+        try:
+            claimed = (
+                self.db.query(ReviewRequest)
+                .filter(ReviewRequest.id == review_id, ReviewRequest.status == "pending")
+                .update(
+                    {
+                        ReviewRequest.status: "in_progress",
+                        ReviewRequest.claimed_by: claimed_by,
+                        ReviewRequest.claimed_at: now,
+                    },
+                    synchronize_session=False,
+                )
+            )
+            if claimed != 1:
+                self.db.rollback()
+                if self.db.get(ReviewRequest, review_id) is None:
+                    raise ValueError(f"Review {review_id} not found")
+                raise ReviewConflictError(f"Review {review_id} is not pending")
+            self.db.add(SupportAuditEvent(
+                review_id=review_id, event_type="claimed", actor=claimed_by, payload_json="{}",
+            ))
+            self.db.commit()
+            review = self.db.get(ReviewRequest, review_id)
+            self.db.refresh(review)
+            return review
+        except Exception:
+            self.db.rollback()
+            raise
+
+    def reply(
+        self, review_id: int, content: str, replied_by: str, client_request_id: str | None = None,
+    ) -> ChatMessage:
+        """由当前负责人发送站内人工回复；相同客户端请求不会重复保存。"""
+        content = content.strip()
+        if not content:
+            raise ValueError("content is required")
+        try:
+            review = self._get_in_progress(review_id, for_update=True)
+            duplicate_query = self.db.query(ChatMessage).filter(
+                ChatMessage.review_id == review.id, ChatMessage.role == MessageRole.SUPPORT.value,
+            )
+            if client_request_id:
+                duplicate_query = duplicate_query.filter(ChatMessage.client_request_id == client_request_id)
+            else:
+                duplicate_query = duplicate_query.filter(ChatMessage.content == content)
+            duplicate = duplicate_query.first()
+            if duplicate is not None:
+                self.db.rollback()
+                return duplicate
+            session = self.db.get(ChatSession, review.session_id)
+            if session is None:
+                raise ValueError(f"Session {review.session_id} not found")
+            message = ChatMessage(
+                user_id=session.user_id, session_id=session.id, review_id=review.id,
+                role=MessageRole.SUPPORT.value, content=content, client_request_id=client_request_id,
+            )
+            session.touch()
+            self.db.add_all([message, session])
+            self.db.flush()
+            self.db.add(SupportAuditEvent(
+                review_id=review.id, event_type="human_reply", actor=replied_by,
+                payload_json=json.dumps({"messageId": message.id}),
+            ))
+            self.fault_injector("human_reply")
+            self.db.commit()
+            self.db.refresh(message)
+            return message
+        except Exception:
+            self.db.rollback()
+            raise
+
+    def record_offsite_contact(
+        self,
+        review_id: int,
+        *,
+        contact_method: str,
+        contacted_at: datetime,
+        outcome: str,
+        next_step: str,
+        recorded_by: str,
+        client_request_id: str | None = None,
+    ) -> OffsiteContactRecord:
+        """保存站外联系记录及用户可见下一步，不记录通话正文。"""
+        contact_method = contact_method.strip()
+        outcome = outcome.strip()
+        next_step = next_step.strip()
+        if not contact_method or not outcome or not next_step:
+            raise ValueError("contact_method, outcome and next_step are required")
+        if contacted_at.tzinfo is not None:
+            contacted_at = contacted_at.astimezone(UTC).replace(tzinfo=None)
+        try:
+            review = self._get_in_progress(review_id, for_update=True)
+            duplicate_query = self.db.query(OffsiteContactRecord).filter(
+                OffsiteContactRecord.review_id == review.id,
+            )
+            if client_request_id:
+                duplicate_query = duplicate_query.filter(
+                    OffsiteContactRecord.client_request_id == client_request_id,
+                )
+            else:
+                duplicate_query = duplicate_query.filter(
+                    OffsiteContactRecord.contact_method == contact_method,
+                    OffsiteContactRecord.contacted_at == contacted_at,
+                    OffsiteContactRecord.outcome == outcome,
+                    OffsiteContactRecord.next_step == next_step,
+                )
+            duplicate = duplicate_query.first()
+            if duplicate is not None:
+                self.db.rollback()
+                return duplicate
+            contact = OffsiteContactRecord(
+                review_id=review.id, contact_method=contact_method, contacted_at=contacted_at,
+                outcome=outcome, next_step=next_step, recorded_by=recorded_by,
+                client_request_id=client_request_id,
+            )
+            self.db.add(contact)
+            self.db.flush()
+            session = self.db.get(ChatSession, review.session_id)
+            if session is None:
+                raise ValueError(f"Session {review.session_id} not found")
+            user_message = (
+                f"支持人员新增了站外联系记录。方式：{contact_method}；"
+                f"时间：{utc_isoformat(contacted_at)}；结果：{outcome}；下一步：{next_step}。"
+            )
+            self.db.add(ChatMessage(
+                user_id=session.user_id, session_id=session.id, review_id=review.id,
+                role=MessageRole.SUPPORT.value, content=user_message, client_request_id=client_request_id,
+            ))
+            session.touch()
+            self.db.add_all([session, SupportAuditEvent(
+                review_id=review.id, event_type="offsite_contact", actor=recorded_by,
+                payload_json=json.dumps({"contactId": contact.id}),
+            )])
+            self.fault_injector("offsite_contact")
+            self.db.commit()
+            self.db.refresh(contact)
+            return contact
+        except Exception:
+            self.db.rollback()
+            raise
 
     def list_pending(self) -> list[dict]:
-        """列出待处理审核，先按风险高低，再按等待时长排序。
-
-        排序使用风险优先级和等待秒数的负值，让默认升序实现高风险、长等待优先。
-        """
+        """列出等待接手和处理中记录，先按风险高低，再按等待时长排序。"""
         reviews = (
             self.db.query(ReviewRequest)
-            .filter(ReviewRequest.status == "pending")
+            .filter(ReviewRequest.status.in_(["pending", "in_progress"]))
             .all()
         )
         items = [self._to_dict(r) for r in reviews]
         items.sort(
-            # 先取风险优先级的负值，再取等待时长的负值，实现高风险和长等待优先。
             key=lambda x: (
                 -_RISK_PRIORITY.get(x.get("riskLevel") or "", 0),
                 -(x.get("waitSeconds") or 0),
@@ -57,135 +210,75 @@ class ReviewService:
         return items
 
     def list_all(self) -> list[dict]:
-        """返回全部审核记录，待处理项优先显示。
-
-        待处理项按风险与等待时间排序，其余按处理时间从新到旧排列。
-        """
+        """返回全部记录，活跃人工支持优先，终结记录按处理时间排列。"""
         reviews = self.db.query(ReviewRequest).all()
         items = [self._to_dict(r) for r in reviews]
-        pending = [i for i in items if i.get("status") == "pending"]
-        pending.sort(
-            # 先取风险优先级的负值，再取等待时长的负值，实现高风险和长等待优先。
+        active = [i for i in items if i.get("status") in {"pending", "in_progress"}]
+        active.sort(
             key=lambda x: (
                 -_RISK_PRIORITY.get(x.get("riskLevel") or "", 0),
                 -(x.get("waitSeconds") or 0),
             )
         )
-        decided = [i for i in items if i.get("status") != "pending"]
-        # 按处理时间从新到旧排列已结束审核，缺少时间时使用空文本。
-        decided.sort(key=lambda x: x.get("reviewedAt") or "", reverse=True)
-        return pending + decided
+        terminal = [i for i in items if i.get("status") not in {"pending", "in_progress"}]
+        terminal.sort(key=lambda x: x.get("reviewedAt") or "", reverse=True)
+        return active + terminal
 
     def escalate_timed_out(self) -> list[int]:
-        """处理超过配置等待时间的审核，并保存固定安全回复。
-
-        对候选逐条重新检查待处理状态并请求行锁；同会话已有完全相同回复时不重复写入。
-        每条审核单独提交，返回成功标记为超时升级的编号列表。
-        """
-        from app.services.ai import PromptTemplates
-
+        """超时只登记升级与通知任务，需求和负责人保持原状态。"""
         cutoff = utc_now() - timedelta(minutes=self.settings.review_timeout_minutes)
         timed_out_ids = (
             self.db.query(ReviewRequest)
-            .filter(ReviewRequest.status == "pending")
+            .filter(ReviewRequest.status.in_(["pending", "in_progress"]))
             .filter(ReviewRequest.created_at < cutoff)
+            .filter(ReviewRequest.last_escalated_at.is_(None))
             .with_entities(ReviewRequest.id)
             .all()
         )
         escalated: list[int] = []
-        fallback = PromptTemplates.fallback_response()
         for (review_id,) in timed_out_ids:
-            review = (
-                self.db.query(ReviewRequest)
-                .filter(ReviewRequest.id == review_id, ReviewRequest.status == "pending")
-                .with_for_update()
-                .one_or_none()
-            )
-            # 候选列表取得后可能已被人工处理，重新检查避免覆盖新决定。
-            if review is None:
-                continue
-            session = self.db.get(ChatSession, review.session_id)
-            # 以同会话中完全相同的固定回复判断是否已经通知，避免重复超时处理写多份文字。
-            already_sent = session is not None and self.db.query(ChatMessage).filter(
-                ChatMessage.session_id == review.session_id,
-                ChatMessage.role == MessageRole.ASSISTANT.value,
-                ChatMessage.content == fallback,
-            ).first() is not None
-            if session is not None and not already_sent:
-                self.db.add(ChatMessage(
-                    user_id=session.user_id,
-                    session_id=review.session_id,
-                    role=MessageRole.ASSISTANT.value,
-                    content=fallback,
-                ))
-            review.status = "escalated"
-            review.reviewer_decision = "timeout"
-            review.reviewer_note = "系统自动处理：人工审核等待超时"
-            review.reviewed_by = "system"
-            review.reviewed_at = utc_now()
-            escalated.append(review.id)
-            self.db.commit()
-        return escalated
-
-    async def resume_and_respond(self, review: ReviewRequest, approved: bool) -> tuple[str, bool]:
-        """Restore a paused graph and observe its graph-external response and durable save."""
-        from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
-        from app.services.ai import AiClient, PromptTemplates
-
-        with diagnostics.execution(
-            "review.request", review_id=review.id, report_id=review.report_id,
-            thread_id=review.thread_id, review_action="approve" if approved else "reject",
-        ):
-            session = self.db.get(ChatSession, review.session_id)
-            if session is None:
-                raise ValueError(f"Session {review.session_id} not found for review {review.id}")
-            diagnostics.bind(session_id=session.public_id)
-            if review.created_at is not None:
-                diagnostics.emit("review.waited", wait_ms=max(0.0, (utc_now() - review.created_at).total_seconds() * 1000))
             try:
-                with diagnostics.stage("review.restore"):
-                    runtime = LangGraphAgentRuntimeService(self.db, self.settings)
-                    try:
-                        result = await runtime.resume(review.thread_id, approved=approved)
-                    finally:
-                        with diagnostics.stage("runtime.close"):
-                            await runtime.aclose()
-            except Exception as exc:
-                diagnostics.degraded("review.restore", "checkpoint_unavailable", exc)
-                response_text = PromptTemplates.fallback_response()
-                degraded = True
-            else:
-                degraded = result.degraded
-                if degraded or not approved:
-                    response_text = result.fallback_response or PromptTemplates.fallback_response()
-                else:
-                    with diagnostics.stage("review.stream"):
-                        tokens = [token async for token in AiClient(self.settings).stream(result.response_messages)]
-                        response_text = "".join(tokens)
-            with diagnostics.stage("review.save"):
-                message = ChatMessage(
-                    user_id=session.user_id, session_id=session.id,
-                    role=MessageRole.ASSISTANT.value, content=response_text,
+                review = (
+                    self.db.query(ReviewRequest)
+                    .filter(
+                        ReviewRequest.id == review_id,
+                        ReviewRequest.status.in_(["pending", "in_progress"]),
+                        ReviewRequest.last_escalated_at.is_(None),
+                    )
+                    .with_for_update()
+                    .one_or_none()
                 )
-                self.db.add(message)
-                self.db.flush()
-                message_id = message.id
+                if review is None:
+                    continue
+                now = utc_now()
+                review.escalation_count += 1
+                review.last_escalated_at = now
+                recipient = (
+                    self.settings.escalation_alert_email_to.strip()
+                    or self.settings.alert_email_to.strip()
+                    or "unconfigured"
+                )
+                self.db.add(SupportAuditEvent(
+                    review_id=review.id, event_type="escalated", actor="system",
+                    payload_json=json.dumps({"status": review.status, "recipient": recipient}),
+                ))
+                existing_job = self.db.query(ToolJob).filter(
+                    ToolJob.report_id == review.report_id,
+                    ToolJob.kind == ToolJobKind.ESCALATION_ALERT.value,
+                ).first()
+                if existing_job is None:
+                    self.db.add(ToolJob(
+                        report_id=review.report_id, kind=ToolJobKind.ESCALATION_ALERT.value,
+                        status=ToolJobStatus.PENDING.value, attempts=0,
+                        max_attempts=self.settings.tool_queue_max_attempts,
+                        run_after=now, last_error="",
+                    ))
+                escalated.append(review.id)
                 self.db.commit()
-                diagnostics.bind(assistant_message_id=message_id)
-                diagnostics.emit("review.persisted", assistant_message_id=message_id)
-            return response_text, degraded
-
-    def mark_escalated(self, review_id: int) -> ReviewRequest:
-        """将仍待处理的审核标记为已安全升级并保存处理时间。
-
-        不存在或已处理的记录由统一检查抛错；不在此发送回复。
-        """
-        review = self._get_pending(review_id)
-        review.status = "escalated"
-        review.reviewed_at = utc_now()
-        self.db.commit()
-        return review
-
+            except Exception:
+                self.db.rollback()
+                raise
+        return escalated
 
     def create_with_context(
         self,
@@ -226,39 +319,57 @@ class ReviewService:
         next_step: str | None = None,
         follow_up_owner: str | None = None,
         follow_up_at: datetime | None = None,
+        completion_basis: str | None = None,
     ) -> ReviewRequest:
-        """验证并保存审核决定、处理人员及后续行动详情。
-
-        转介必须填写去向和下一步，持续关注必须填写负责人和时间；仅可修改待处理记录。
-        """
+        """原子保存处置结果、用户说明和审计，不允许恢复常规 AI 支持。"""
         if decision not in REVIEW_DECISIONS:
             raise ValueError(f"Invalid decision: {decision}. Valid: {REVIEW_DECISIONS}")
+        note = note.strip()
         referral_target = referral_target.strip() if referral_target else None
         next_step = next_step.strip() if next_step else None
         follow_up_owner = follow_up_owner.strip() if follow_up_owner else None
-        # 转介必须有实际去向与下一步，持续关注则必须有人负责且有约定时间。
-        if decision == "refer" and (not referral_target or not next_step):
-            raise ValueError("referral_target and next_step are required for refer")
+        completion_basis = completion_basis.strip() if completion_basis else None
+        if decision == "refer" and (not referral_target or not next_step or not follow_up_owner):
+            raise ValueError("referral_target, next_step and follow_up_owner are required for refer")
         if decision == "monitor" and (not follow_up_owner or follow_up_at is None):
             raise ValueError("follow_up_owner and follow_up_at are required for monitor")
-        review = self._get_pending(review_id)
-        review.reviewer_decision = decision
-        review.reviewer_note = note
-        review.reviewed_by = reviewed_by
-        review.referral_target = referral_target
-        review.next_step = next_step
-        review.follow_up_owner = follow_up_owner
-        review.follow_up_at = (
-            follow_up_at.astimezone(UTC).replace(tzinfo=None)
-            if follow_up_at is not None and follow_up_at.tzinfo is not None
-            else follow_up_at
-        )
-        review.reviewed_at = utc_now()
-        # 将审核决定映射成对外展示和后续查询使用的处理状态。
-        status_map = {"approve": "approved", "reject": "rejected", "refer": "referred", "monitor": "monitoring"}
-        review.status = status_map[decision]
-        self.db.commit()
-        return review
+        if decision == "complete" and (not note or not completion_basis):
+            raise ValueError("note and completion_basis are required for complete")
+        try:
+            review = self._get_in_progress(review_id, for_update=True)
+            review.reviewer_decision = decision
+            review.reviewer_note = note
+            review.reviewed_by = reviewed_by
+            review.referral_target = referral_target
+            review.next_step = next_step
+            review.follow_up_owner = follow_up_owner
+            review.follow_up_at = (
+                follow_up_at.astimezone(UTC).replace(tzinfo=None)
+                if follow_up_at is not None and follow_up_at.tzinfo is not None
+                else follow_up_at
+            )
+            review.completion_basis = completion_basis
+            review.reviewed_at = utc_now()
+            review.status = {"refer": "referred", "monitor": "monitoring", "complete": "completed"}[decision]
+            session = self.db.get(ChatSession, review.session_id)
+            if session is None:
+                raise ValueError(f"Session {review.session_id} not found")
+            self.db.add(ChatMessage(
+                user_id=session.user_id, session_id=session.id, review_id=review.id,
+                role=MessageRole.SUPPORT.value, content=self.student_message(review),
+            ))
+            session.touch()
+            self.db.add_all([session, SupportAuditEvent(
+                review_id=review.id, event_type="outcome", actor=reviewed_by,
+                payload_json=json.dumps({"decision": decision, "status": review.status}),
+            )])
+            self.fault_injector("outcome")
+            self.db.commit()
+            self.db.refresh(review)
+            return review
+        except Exception:
+            self.db.rollback()
+            raise
 
     def get_review(self, review_id: int) -> ReviewRequest | None:
         """按内部编号读取审核记录，缺失时返回 None。
@@ -275,44 +386,31 @@ class ReviewService:
         """
         if review.reviewer_decision == "refer":
             return (
-                f"人工审核建议你联系{review.referral_target}。"
-                f"下一步：{review.next_step}。如你现在处于紧急危险中，请立即联系身边可信任的人或当地紧急服务。"
+                f"支持人员记录了转介安排。去向：{review.referral_target}；下一步：{review.next_step}；"
+                f"负责人：{review.follow_up_owner}。如你现在处于紧急危险中，请立即联系身边可信任的人或当地紧急服务。"
             )
         if review.reviewer_decision == "monitor":
             when = review.follow_up_at.strftime("%Y-%m-%d %H:%M UTC") if review.follow_up_at else "后续约定时间"
-            return f"人工审核记录了持续关注建议。负责人：{review.follow_up_owner}；建议跟进时间：{when}。如情况变化，请主动联系身边可信任的人或当地支持服务。"
+            return (
+                f"支持人员记录了持续关注安排。负责人：{review.follow_up_owner}；跟进时间：{when}。"
+                "提醒不代表人工已经完成跟进；如情况变化，请主动联系身边可信任的人或当地支持服务。"
+            )
+        if review.reviewer_decision == "complete":
+            return (
+                f"本次人工支持已完成处置记录。处理记录：{review.reviewer_note}；"
+                f"完成依据：{review.completion_basis}。这不表示风险已经解除或现实服务已经完成。"
+            )
         return ""
 
-    def persist_student_message(self, review: ReviewRequest) -> str:
-        """将审核决定对应的后续行动说明保存成会话消息。
-
-        没有说明或原会话已不存在时返回空字符串；成功提交后返回保存的文字。
-        """
-        message = self.student_message(review)
-        if not message:
-            return ""
-        session = self.db.get(ChatSession, review.session_id)
-        if session is None:
-            return ""
-        self.db.add(ChatMessage(
-            user_id=session.user_id,
-            session_id=session.id,
-            role=MessageRole.ASSISTANT.value,
-            content=message,
-        ))
-        self.db.commit()
-        return message
-
-    def _get_pending(self, review_id: int) -> ReviewRequest:
-        """读取审核记录并要求它仍处于待处理状态。
-
-        不存在或已经处理时抛出 ValueError，防止把普通更新误用到已结束记录。
-        """
-        review = self.db.get(ReviewRequest, review_id)
+    def _get_in_progress(self, review_id: int, *, for_update: bool = False) -> ReviewRequest:
+        query = self.db.query(ReviewRequest).filter(ReviewRequest.id == review_id)
+        if for_update:
+            query = query.with_for_update()
+        review = query.one_or_none()
         if review is None:
             raise ValueError(f"Review {review_id} not found")
-        if review.status != "pending":
-            raise ValueError(f"Review {review_id} is not pending (status={review.status})")
+        if review.status != "in_progress":
+            raise ReviewConflictError(f"Review {review_id} is not in progress (status={review.status})")
         return review
 
     def _to_dict(self, review: ReviewRequest) -> dict:
@@ -346,6 +444,11 @@ class ReviewService:
             "nextStep": review.next_step,
             "followUpOwner": review.follow_up_owner,
             "followUpAt": utc_isoformat(review.follow_up_at) if review.follow_up_at else None,
+            "completionBasis": review.completion_basis,
+            "claimedBy": review.claimed_by,
+            "claimedAt": utc_isoformat(review.claimed_at) if review.claimed_at else None,
+            "escalationCount": review.escalation_count,
+            "lastEscalatedAt": utc_isoformat(review.last_escalated_at) if review.last_escalated_at else None,
             "status": review.status,
             "reviewedAt": utc_isoformat(review.reviewed_at) if review.reviewed_at else None,
             "riskLevel": report.risk_level if report else None,

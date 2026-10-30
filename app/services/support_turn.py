@@ -162,6 +162,42 @@ class SupportTurnTransaction:
             self.db.rollback()
             raise
 
+    def save_human_support_follow_up(
+        self,
+        *,
+        user: UserAccount,
+        session: ChatSession,
+        review: ReviewRequest,
+        content: str,
+        acknowledgment: str,
+    ) -> ChatMessage:
+        """把等待或处理中的补充留言与固定确认作为同一事务保存。"""
+        try:
+            message = ChatMessage(
+                user_id=user.id,
+                session_id=session.id,
+                review_id=review.id,
+                role=MessageRole.USER.value,
+                content=content,
+            )
+            confirmation = ChatMessage(
+                user_id=user.id,
+                session_id=session.id,
+                review_id=review.id,
+                role=MessageRole.ASSISTANT.value,
+                content=acknowledgment,
+            )
+            session.touch()
+            self.db.add_all([message, confirmation, session])
+            self.db.flush()
+            self.fault_injector("human_support_follow_up")
+            self.db.commit()
+            self.db.refresh(message)
+            return message
+        except Exception:
+            self.db.rollback()
+            raise
+
     def _job(
         self,
         report_id: int,
