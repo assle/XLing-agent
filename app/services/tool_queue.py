@@ -257,7 +257,11 @@ class ToolQueueWorker:
                     diagnostics.emit("tool_job.deferred", reason_code="dependency_pending")
                     return
                 # 只有邮件通知需要频率限制，表格写入使用自己的线程池和文件锁。
-                if job.kind in {ToolJobKind.RISK_ALERT.value, ToolJobKind.ESCALATION_ALERT.value}:
+                if job.kind in {
+                    ToolJobKind.RISK_ALERT.value,
+                    ToolJobKind.ESCALATION_ALERT.value,
+                    ToolJobKind.FOLLOW_UP_REMINDER.value,
+                }:
                     allowed, retry_after = self.email_limiter.allow()
                     if not allowed:
                         self._requeue(db, job, "邮件预警限流中，稍后重试", retry_after)
@@ -302,8 +306,12 @@ class ToolQueueWorker:
             if excel_record.status != ToolStatus.SUCCESS.value:
                 raise RuntimeError(excel_record.message)
             return
-        if job.kind in {ToolJobKind.RISK_ALERT.value, ToolJobKind.ESCALATION_ALERT.value}:
-            alert_record = tools.notify(report, escalation=job.kind == ToolJobKind.ESCALATION_ALERT.value)
+        if job.kind in {
+            ToolJobKind.RISK_ALERT.value,
+            ToolJobKind.ESCALATION_ALERT.value,
+            ToolJobKind.FOLLOW_UP_REMINDER.value,
+        }:
+            alert_record = tools.notify(report, kind=ToolJobKind(job.kind))
             if alert_record.status != ToolStatus.SUCCESS.value:
                 raise RuntimeError(alert_record.message)
             return

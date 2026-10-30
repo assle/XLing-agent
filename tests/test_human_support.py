@@ -84,6 +84,79 @@ def test_claim_and_human_reply_are_atomic_and_visible_to_user(api_harness_factor
     assert human_messages[0]["senderLabel"] == "支持人员"
 
 
+def test_same_content_without_client_request_id_is_not_deduplicated(api_harness_factory):
+    harness, review_id, admin_token, user_token = _seed_support(api_harness_factory)
+    assert harness.client.post(
+        f"/api/admin/reviews/{review_id}/claim", headers=harness.auth(admin_token),
+    ).status_code == 200
+
+    reply_ids = []
+    for _ in range(2):
+        response = harness.client.post(
+            f"/api/admin/reviews/{review_id}/reply", json={"content": "我会继续关注你的情况。"},
+            headers=harness.auth(admin_token),
+        )
+        assert response.status_code == 200
+        reply_ids.append(response.json()["messageId"])
+    assert reply_ids[0] != reply_ids[1]
+
+    contact_payload = {
+        "contactMethod": "phone", "contactedAt": "2026-10-30T10:00:00Z",
+        "outcome": "用户表示目前安全", "nextStep": "稍后再次联系",
+    }
+    contact_ids = []
+    for _ in range(2):
+        response = harness.client.post(
+            f"/api/admin/reviews/{review_id}/contact", json=contact_payload,
+            headers=harness.auth(admin_token),
+        )
+        assert response.status_code == 200
+        contact_ids.append(response.json()["contactId"])
+    assert contact_ids[0] != contact_ids[1]
+
+    body = harness.client.get("/api/sessions/human-support-session", headers=harness.auth(user_token)).json()
+    support_messages = [message for message in body["messages"] if message["role"] == "SUPPORT"]
+    assert len(support_messages) == 4
+
+
+def test_only_claimed_owner_can_reply_contact_or_decide(api_harness_factory):
+    harness, review_id, admin_token, user_token = _seed_support(api_harness_factory)
+    with harness.sessions() as db:
+        other = UserAccount(
+            username="other-admin", display_name="其他管理员", password_hash=hash_password("admin123"),
+        )
+        other.roles = {"ROLE_ADMIN", "ROLE_USER"}
+        db.add(other)
+        db.commit()
+    other_token = harness.token("other-admin", "admin123")
+    assert harness.client.post(
+        f"/api/admin/reviews/{review_id}/claim", headers=harness.auth(admin_token),
+    ).status_code == 200
+
+    attempts = [
+        ("/reply", {"content": "不应覆盖负责人的回复"}),
+        ("/contact", {
+            "contactMethod": "phone", "contactedAt": "2026-10-30T10:00:00Z",
+            "outcome": "不应保存", "nextStep": "不应保存",
+        }),
+        ("/decision", {
+            "decision": "complete", "note": "不应保存", "completionBasis": "不应保存",
+        }),
+    ]
+    for suffix, payload in attempts:
+        response = harness.client.post(
+            f"/api/admin/reviews/{review_id}{suffix}", json=payload, headers=harness.auth(other_token),
+        )
+        assert response.status_code == 409, (suffix, response.text)
+
+    queue = harness.client.get("/api/admin/reviews?all=true", headers=harness.auth(admin_token)).json()
+    item = next(item for item in queue if item["reviewId"] == review_id)
+    assert item["status"] == "in_progress"
+    assert item["claimedBy"] == "support-admin"
+    body = harness.client.get("/api/sessions/human-support-session", headers=harness.auth(user_token)).json()
+    assert body["messages"] == []
+
+
 def test_offsite_contact_records_required_fields_and_user_next_step(api_harness_factory):
     harness, review_id, admin_token, user_token = _seed_support(api_harness_factory)
     assert harness.client.post(

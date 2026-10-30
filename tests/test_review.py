@@ -20,7 +20,7 @@ from app.models.entities import (
     ToolJob,
     UserAccount,
 )
-from app.services.review import ReviewService, ReviewTimeoutWorker
+from app.services.review import ReviewOutcome, ReviewService, ReviewTimeoutWorker
 
 
 def _make_db():
@@ -63,7 +63,7 @@ def test_active_list_contains_pending_and_in_progress_but_not_terminal():
     _seed_review(db, "thread-001", status="pending")
     _seed_review(db, "thread-002", status="in_progress")
     _seed_review(db, "thread-003", status="completed")
-    items = ReviewService(db, Settings(ai_provider="mock")).list_pending()
+    items = ReviewService(db, Settings(ai_provider="mock")).list_active()
     assert {item["status"] for item in items} == {"pending", "in_progress"}
     assert len(items) == 2
     assert all(item["riskSummary"] for item in items)
@@ -72,7 +72,7 @@ def test_active_list_contains_pending_and_in_progress_but_not_terminal():
 def test_active_list_includes_context():
     db = _make_db()
     _seed_review(db, "thread-ctx-001", status="pending")
-    item = ReviewService(db, Settings(ai_provider="mock")).list_pending()[0]
+    item = ReviewService(db, Settings(ai_provider="mock")).list_active()[0]
     assert item["threadId"] == "thread-ctx-001"
     assert item["emotion"] == "HIGH_RISK"
     assert item["studentMessage"] == "我不想活了"
@@ -86,7 +86,7 @@ def test_legacy_approve_and_reject_are_invalid():
     service = ReviewService(db, Settings(ai_provider="mock"))
     for decision in ("approve", "reject"):
         with pytest.raises(ValueError, match="Invalid decision"):
-            service.mark_decision(review_id, decision)
+            service.mark_decision(review_id, ReviewOutcome(decision=decision), "owner")
     assert service.get_review(review_id).status == "pending"
 
 
@@ -95,7 +95,7 @@ def test_active_list_orders_by_risk_then_wait():
     _seed_review(db, "thread-med-old", minutes_ago=30, risk_level="MEDIUM")
     _seed_review(db, "thread-high-new", minutes_ago=1)
     _seed_review(db, "thread-high-old", minutes_ago=20)
-    items = ReviewService(db, Settings(ai_provider="mock")).list_pending()
+    items = ReviewService(db, Settings(ai_provider="mock")).list_active()
     assert [item["threadId"] for item in items] == ["thread-high-old", "thread-high-new", "thread-med-old"]
 
 
@@ -133,6 +133,47 @@ def test_timeout_worker_runs_without_admin_list_request():
     review = ReviewService(db, settings).get_review(review_id)
     assert review.status == "pending"
     assert review.escalation_count == 1
+
+
+def test_due_follow_up_reminder_is_enqueued_once_without_completing_support():
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    factory = sessionmaker(bind=engine)
+    db = factory()
+    review_id = _seed_review(db, "thread-follow-up-reminder")
+    settings = Settings(ai_provider="mock", review_timeout_minutes=15)
+    service = ReviewService(db, settings)
+    service.claim(review_id, "owner")
+    review = service.mark_decision(
+        review_id,
+        ReviewOutcome(
+            decision="monitor", follow_up_owner="owner",
+            follow_up_at=utc_now() + timedelta(minutes=5),
+        ),
+        "owner",
+    )
+    worker = ReviewTimeoutWorker(settings, session_factory=factory)
+
+    assert worker.run_once() == []
+    review.follow_up_at = utc_now() - timedelta(minutes=1)
+    db.add(review)
+    db.commit()
+    assert worker.run_once() == [review_id]
+    assert worker.run_once() == []
+
+    db.refresh(review)
+    assert review.status == "monitoring"
+    assert review.follow_up_owner == "owner"
+    jobs = db.query(ToolJob).filter_by(
+        report_id=review.report_id, kind=ToolJobKind.FOLLOW_UP_REMINDER.value,
+    ).all()
+    assert len(jobs) == 1
+    assert jobs[0].status == "PENDING"
+    assert db.query(SupportAuditEvent).filter_by(
+        review_id=review_id, event_type="follow_up_reminder",
+    ).count() == 1
+    # 初次两条上下文和一条持续关注说明之外，提醒不得伪造新的用户消息或现实跟进。
+    assert db.query(ChatMessage).filter_by(session_id=review.session_id).count() == 3
 
 
 def test_timeout_skips_recent_reviews():

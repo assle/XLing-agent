@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import logging
 import threading
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Callable
 
@@ -38,6 +39,43 @@ REVIEW_DECISIONS = {"refer", "monitor", "complete"}
 
 class ReviewConflictError(ValueError):
     """人工支持记录已被其他操作推进，当前请求不能覆盖它。"""
+
+
+@dataclass(frozen=True)
+class ReviewOutcome:
+    """一次人工处置的完整输入，集中负责规范化和必填信息校验。"""
+
+    decision: str
+    note: str = ""
+    referral_target: str | None = None
+    next_step: str | None = None
+    follow_up_owner: str | None = None
+    follow_up_at: datetime | None = None
+    completion_basis: str | None = None
+
+    def __post_init__(self) -> None:
+        decision = self.decision.strip().lower()
+        if decision not in REVIEW_DECISIONS:
+            raise ValueError(f"Invalid decision: {decision}. Valid: {REVIEW_DECISIONS}")
+        object.__setattr__(self, "decision", decision)
+        object.__setattr__(self, "note", self.note.strip())
+        for field_name in ("referral_target", "next_step", "follow_up_owner", "completion_basis"):
+            value = getattr(self, field_name)
+            object.__setattr__(self, field_name, value.strip() if value else None)
+        if self.follow_up_at is not None and self.follow_up_at.tzinfo is not None:
+            object.__setattr__(
+                self, "follow_up_at", self.follow_up_at.astimezone(UTC).replace(tzinfo=None),
+            )
+        if decision == "refer" and (not self.referral_target or not self.next_step or not self.follow_up_owner):
+            raise ValueError("referral_target, next_step and follow_up_owner are required for refer")
+        if decision == "monitor" and (not self.follow_up_owner or self.follow_up_at is None):
+            raise ValueError("follow_up_owner and follow_up_at are required for monitor")
+        if decision == "complete" and (not self.note or not self.completion_basis):
+            raise ValueError("note and completion_basis are required for complete")
+
+    @property
+    def status(self) -> str:
+        return {"refer": "referred", "monitor": "monitoring", "complete": "completed"}[self.decision]
 
 
 class ReviewService:
@@ -89,36 +127,20 @@ class ReviewService:
         if not content:
             raise ValueError("content is required")
         try:
-            review = self._get_in_progress(review_id, for_update=True)
-            duplicate_query = self.db.query(ChatMessage).filter(
-                ChatMessage.review_id == review.id, ChatMessage.role == MessageRole.SUPPORT.value,
-            )
+            review = self._get_in_progress(review_id, replied_by)
             if client_request_id:
-                duplicate_query = duplicate_query.filter(ChatMessage.client_request_id == client_request_id)
-            else:
-                duplicate_query = duplicate_query.filter(ChatMessage.content == content)
-            duplicate = duplicate_query.first()
-            if duplicate is not None:
-                self.db.rollback()
-                return duplicate
-            session = self.db.get(ChatSession, review.session_id)
-            if session is None:
-                raise ValueError(f"Session {review.session_id} not found")
-            message = ChatMessage(
-                user_id=session.user_id, session_id=session.id, review_id=review.id,
-                role=MessageRole.SUPPORT.value, content=content, client_request_id=client_request_id,
+                duplicate = self.db.query(ChatMessage).filter(
+                    ChatMessage.review_id == review.id,
+                    ChatMessage.role == MessageRole.SUPPORT.value,
+                    ChatMessage.client_request_id == client_request_id,
+                ).first()
+                if duplicate is not None:
+                    self.db.rollback()
+                    return duplicate
+            return self._append_support_message_and_audit(
+                review=review, actor=replied_by, event_type="human_reply", content=content,
+                client_request_id=client_request_id, fault_stage="human_reply",
             )
-            session.touch()
-            self.db.add_all([message, session])
-            self.db.flush()
-            self.db.add(SupportAuditEvent(
-                review_id=review.id, event_type="human_reply", actor=replied_by,
-                payload_json=json.dumps({"messageId": message.id}),
-            ))
-            self.fault_injector("human_reply")
-            self.db.commit()
-            self.db.refresh(message)
-            return message
         except Exception:
             self.db.rollback()
             raise
@@ -143,25 +165,15 @@ class ReviewService:
         if contacted_at.tzinfo is not None:
             contacted_at = contacted_at.astimezone(UTC).replace(tzinfo=None)
         try:
-            review = self._get_in_progress(review_id, for_update=True)
-            duplicate_query = self.db.query(OffsiteContactRecord).filter(
-                OffsiteContactRecord.review_id == review.id,
-            )
+            review = self._get_in_progress(review_id, recorded_by)
             if client_request_id:
-                duplicate_query = duplicate_query.filter(
+                duplicate = self.db.query(OffsiteContactRecord).filter(
+                    OffsiteContactRecord.review_id == review.id,
                     OffsiteContactRecord.client_request_id == client_request_id,
-                )
-            else:
-                duplicate_query = duplicate_query.filter(
-                    OffsiteContactRecord.contact_method == contact_method,
-                    OffsiteContactRecord.contacted_at == contacted_at,
-                    OffsiteContactRecord.outcome == outcome,
-                    OffsiteContactRecord.next_step == next_step,
-                )
-            duplicate = duplicate_query.first()
-            if duplicate is not None:
-                self.db.rollback()
-                return duplicate
+                ).first()
+                if duplicate is not None:
+                    self.db.rollback()
+                    return duplicate
             contact = OffsiteContactRecord(
                 review_id=review.id, contact_method=contact_method, contacted_at=contacted_at,
                 outcome=outcome, next_step=next_step, recorded_by=recorded_by,
@@ -169,31 +181,22 @@ class ReviewService:
             )
             self.db.add(contact)
             self.db.flush()
-            session = self.db.get(ChatSession, review.session_id)
-            if session is None:
-                raise ValueError(f"Session {review.session_id} not found")
             user_message = (
                 f"支持人员新增了站外联系记录。方式：{contact_method}；"
                 f"时间：{utc_isoformat(contacted_at)}；结果：{outcome}；下一步：{next_step}。"
             )
-            self.db.add(ChatMessage(
-                user_id=session.user_id, session_id=session.id, review_id=review.id,
-                role=MessageRole.SUPPORT.value, content=user_message, client_request_id=client_request_id,
-            ))
-            session.touch()
-            self.db.add_all([session, SupportAuditEvent(
-                review_id=review.id, event_type="offsite_contact", actor=recorded_by,
-                payload_json=json.dumps({"contactId": contact.id}),
-            )])
-            self.fault_injector("offsite_contact")
-            self.db.commit()
+            self._append_support_message_and_audit(
+                review=review, actor=recorded_by, event_type="offsite_contact", content=user_message,
+                client_request_id=client_request_id, audit_payload={"contactId": contact.id},
+                fault_stage="offsite_contact",
+            )
             self.db.refresh(contact)
             return contact
         except Exception:
             self.db.rollback()
             raise
 
-    def list_pending(self) -> list[dict]:
+    def list_active(self) -> list[dict]:
         """列出等待接手和处理中记录，先按风险高低，再按等待时长排序。"""
         reviews = (
             self.db.query(ReviewRequest)
@@ -280,6 +283,57 @@ class ReviewService:
                 raise
         return escalated
 
+    def enqueue_due_follow_up_reminders(self) -> list[int]:
+        """为到期持续关注登记一次提醒任务，不把提醒写成现实跟进结果。"""
+        due_ids = (
+            self.db.query(ReviewRequest)
+            .filter(
+                ReviewRequest.status == "monitoring",
+                ReviewRequest.follow_up_at.is_not(None),
+                ReviewRequest.follow_up_at <= utc_now(),
+            )
+            .with_entities(ReviewRequest.id)
+            .all()
+        )
+        reminded: list[int] = []
+        for (review_id,) in due_ids:
+            try:
+                review = (
+                    self.db.query(ReviewRequest)
+                    .filter(ReviewRequest.id == review_id, ReviewRequest.status == "monitoring")
+                    .with_for_update()
+                    .one_or_none()
+                )
+                if review is None:
+                    continue
+                existing_job = self.db.query(ToolJob).filter(
+                    ToolJob.report_id == review.report_id,
+                    ToolJob.kind == ToolJobKind.FOLLOW_UP_REMINDER.value,
+                ).first()
+                if existing_job is not None:
+                    self.db.commit()
+                    continue
+                now = utc_now()
+                self.db.add(ToolJob(
+                    report_id=review.report_id, kind=ToolJobKind.FOLLOW_UP_REMINDER.value,
+                    status=ToolJobStatus.PENDING.value, attempts=0,
+                    max_attempts=self.settings.tool_queue_max_attempts,
+                    run_after=now, last_error="",
+                ))
+                self.db.add(SupportAuditEvent(
+                    review_id=review.id, event_type="follow_up_reminder", actor="system",
+                    payload_json=json.dumps({
+                        "followUpAt": utc_isoformat(review.follow_up_at),
+                        "owner": review.follow_up_owner,
+                    }),
+                ))
+                reminded.append(review.id)
+                self.db.commit()
+            except Exception:
+                self.db.rollback()
+                raise
+        return reminded
+
     def create_with_context(
         self,
         session_id: int,
@@ -310,61 +364,27 @@ class ReviewService:
         return review
 
     def mark_decision(
-        self,
-        review_id: int,
-        decision: str,
-        note: str = "",
-        reviewed_by: str = "",
-        referral_target: str | None = None,
-        next_step: str | None = None,
-        follow_up_owner: str | None = None,
-        follow_up_at: datetime | None = None,
-        completion_basis: str | None = None,
+        self, review_id: int, outcome: ReviewOutcome, reviewed_by: str,
     ) -> ReviewRequest:
         """原子保存处置结果、用户说明和审计，不允许恢复常规 AI 支持。"""
-        if decision not in REVIEW_DECISIONS:
-            raise ValueError(f"Invalid decision: {decision}. Valid: {REVIEW_DECISIONS}")
-        note = note.strip()
-        referral_target = referral_target.strip() if referral_target else None
-        next_step = next_step.strip() if next_step else None
-        follow_up_owner = follow_up_owner.strip() if follow_up_owner else None
-        completion_basis = completion_basis.strip() if completion_basis else None
-        if decision == "refer" and (not referral_target or not next_step or not follow_up_owner):
-            raise ValueError("referral_target, next_step and follow_up_owner are required for refer")
-        if decision == "monitor" and (not follow_up_owner or follow_up_at is None):
-            raise ValueError("follow_up_owner and follow_up_at are required for monitor")
-        if decision == "complete" and (not note or not completion_basis):
-            raise ValueError("note and completion_basis are required for complete")
         try:
-            review = self._get_in_progress(review_id, for_update=True)
-            review.reviewer_decision = decision
-            review.reviewer_note = note
+            review = self._get_in_progress(review_id, reviewed_by)
+            review.reviewer_decision = outcome.decision
+            review.reviewer_note = outcome.note
             review.reviewed_by = reviewed_by
-            review.referral_target = referral_target
-            review.next_step = next_step
-            review.follow_up_owner = follow_up_owner
-            review.follow_up_at = (
-                follow_up_at.astimezone(UTC).replace(tzinfo=None)
-                if follow_up_at is not None and follow_up_at.tzinfo is not None
-                else follow_up_at
-            )
-            review.completion_basis = completion_basis
+            review.referral_target = outcome.referral_target
+            review.next_step = outcome.next_step
+            review.follow_up_owner = outcome.follow_up_owner
+            review.follow_up_at = outcome.follow_up_at
+            review.completion_basis = outcome.completion_basis
             review.reviewed_at = utc_now()
-            review.status = {"refer": "referred", "monitor": "monitoring", "complete": "completed"}[decision]
-            session = self.db.get(ChatSession, review.session_id)
-            if session is None:
-                raise ValueError(f"Session {review.session_id} not found")
-            self.db.add(ChatMessage(
-                user_id=session.user_id, session_id=session.id, review_id=review.id,
-                role=MessageRole.SUPPORT.value, content=self.student_message(review),
-            ))
-            session.touch()
-            self.db.add_all([session, SupportAuditEvent(
-                review_id=review.id, event_type="outcome", actor=reviewed_by,
-                payload_json=json.dumps({"decision": decision, "status": review.status}),
-            )])
-            self.fault_injector("outcome")
-            self.db.commit()
+            review.status = outcome.status
+            self._append_support_message_and_audit(
+                review=review, actor=reviewed_by, event_type="outcome",
+                content=self.support_outcome_message(review),
+                audit_payload={"decision": outcome.decision, "status": review.status},
+                fault_stage="outcome",
+            )
             self.db.refresh(review)
             return review
         except Exception:
@@ -379,11 +399,8 @@ class ReviewService:
         return self.db.get(ReviewRequest, review_id)
 
     @staticmethod
-    def student_message(review: ReviewRequest) -> str:
-        """为转介或持续关注决定生成用户可见的后续行动说明。
-
-        其他决定返回空字符串；只构造文字，不写入数据库或发送外部消息。
-        """
+    def support_outcome_message(review: ReviewRequest) -> str:
+        """为三类人工处置生成用户可见说明，不表示现实服务已经完成。"""
         if review.reviewer_decision == "refer":
             return (
                 f"支持人员记录了转介安排。去向：{review.referral_target}；下一步：{review.next_step}；"
@@ -402,15 +419,44 @@ class ReviewService:
             )
         return ""
 
-    def _get_in_progress(self, review_id: int, *, for_update: bool = False) -> ReviewRequest:
-        query = self.db.query(ReviewRequest).filter(ReviewRequest.id == review_id)
-        if for_update:
-            query = query.with_for_update()
-        review = query.one_or_none()
+    def _append_support_message_and_audit(
+        self, *, review: ReviewRequest, actor: str, event_type: str, content: str,
+        fault_stage: str, client_request_id: str | None = None,
+        audit_payload: dict | None = None,
+    ) -> ChatMessage:
+        """在同一事务追加人工消息与审计，并执行既定故障注入点。"""
+        session = self.db.get(ChatSession, review.session_id)
+        if session is None:
+            raise ValueError(f"Session {review.session_id} not found")
+        message = ChatMessage(
+            user_id=session.user_id, session_id=session.id, review_id=review.id,
+            role=MessageRole.SUPPORT.value, content=content, client_request_id=client_request_id,
+        )
+        session.touch()
+        self.db.add_all([message, session])
+        self.db.flush()
+        self.db.add(SupportAuditEvent(
+            review_id=review.id, event_type=event_type, actor=actor,
+            payload_json=json.dumps(audit_payload or {"messageId": message.id}),
+        ))
+        self.fault_injector(fault_stage)
+        self.db.commit()
+        self.db.refresh(message)
+        return message
+
+    def _get_in_progress(self, review_id: int, actor: str) -> ReviewRequest:
+        review = (
+            self.db.query(ReviewRequest)
+            .filter(ReviewRequest.id == review_id)
+            .with_for_update()
+            .one_or_none()
+        )
         if review is None:
             raise ValueError(f"Review {review_id} not found")
         if review.status != "in_progress":
             raise ReviewConflictError(f"Review {review_id} is not in progress (status={review.status})")
+        if review.claimed_by != actor:
+            raise ReviewConflictError(f"Review {review_id} is owned by {review.claimed_by}")
         return review
 
     def _to_dict(self, review: ReviewRequest) -> dict:
@@ -496,13 +542,11 @@ class ReviewTimeoutWorker:
             self.thread = None
 
     def run_once(self) -> list[int]:
-        """用独立数据库会话执行一轮超时审核处理。
-
-        返回升级编号列表，并在成功或异常后关闭会话。
-        """
+        """用独立会话执行一轮超时升级和到期持续关注提醒。"""
         db = self.session_factory()
         try:
-            return ReviewService(db, self.settings).escalate_timed_out()
+            service = ReviewService(db, self.settings)
+            return service.escalate_timed_out() + service.enqueue_due_follow_up_reminders()
         finally:
             db.close()
 

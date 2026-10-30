@@ -22,7 +22,7 @@ from app.models.entities import (
     UserAccount,
 )
 from app.services.assessment import PsychologyAssessment
-from app.services.review import ReviewService
+from app.services.review import ReviewOutcome, ReviewService
 from app.services.support_turn import SupportTurnTransaction
 
 MYSQL_TEST_DATABASE_URL = os.getenv("MYSQL_TEST_DATABASE_URL", "")
@@ -177,7 +177,9 @@ def test_mysql_human_action_and_audit_roll_back_together(mysql_db, stage):
             )
         else:
             service.mark_decision(
-                review.id, "complete", "处理记录", "admin", completion_basis="完成依据",
+                review.id,
+                ReviewOutcome(decision="complete", note="处理记录", completion_basis="完成依据"),
+                "admin",
             )
 
     assert mysql_db.get(ReviewRequest, review.id).status == "in_progress"
