@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+import os
+
+# 测试默认走生成式/模拟分类路径，不加载真实决策头权重；
+# 决策头分层路径由 tests/test_decision_head_assessment.py 显式注入 backend 验证。
+os.environ.setdefault("CLASSIFIER_BACKEND", "ollama")
+
 from collections.abc import Callable, Iterator
 
 import pytest

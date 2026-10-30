@@ -98,7 +98,8 @@ class AgentRuntimeDependencies:
         ai = AiClient(settings)
         return cls(
             ai=ai,
-            knowledge=KnowledgeService(db, settings),
+            # 线上默认多查询＋混合 RRF 需要模型客户端生成改写查询；复用同一客户端。
+            knowledge=KnowledgeService(db, settings, ai_client=ai),
             memory=RedisShortTermMemoryStore(settings),
             assessment=PsychologicalAssessmentService(ai),
         )

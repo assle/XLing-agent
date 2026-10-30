@@ -107,12 +107,17 @@ class KnowledgeService:
                 vector_chunks = self.vector_store.count()
             except Exception as exc:
                 vector_error = f"{type(exc).__name__}: {exc}"
+        primary_label = (
+            "multi-query + Chroma dense/BM25 RRF (k=60)"
+            if self.settings.knowledge_retrieval_strategy == "multi_query_hybrid_rrf"
+            else PRIMARY_RETRIEVAL_LABEL
+        )
         return {
             "retrievalOrder": [
-                PRIMARY_RETRIEVAL_LABEL,
+                primary_label,
                 f"{FALLBACK_RETRIEVAL_LABEL} when OPENAI_API_KEY/chromadb/vector call is unavailable",
             ],
-            "primaryRetrieval": PRIMARY_RETRIEVAL_LABEL,
+            "primaryRetrieval": primary_label,
             "fallbackRetrieval": FALLBACK_RETRIEVAL_LABEL,
             "databaseChunks": self.count(),
             "vectorEnabled": self.settings.knowledge_vector_enabled,
@@ -186,6 +191,12 @@ class KnowledgeService:
             return self._retrieve_current(query, top_k)
 
     def _retrieve_current(self, query: str, top_k: int) -> list[SearchResult]:
+        """按配置的线上检索策略分派；默认多查询＋混合 RRF，归一化加权保留为可选。"""
+        if self.settings.knowledge_retrieval_strategy == "multi_query_hybrid_rrf":
+            return self.retrieve_multi_query(query, top_k, base_retrieve=self.retrieve_hybrid_rrf)
+        return self._retrieve_normalized_fusion(query, top_k)
+
+    def _retrieve_normalized_fusion(self, query: str, top_k: int) -> list[SearchResult]:
         """Fuse complementary dense/BM25 scores over the union, then expand once."""
         pool = top_k * 3
         dense, query_vector = self._search_vector(query, pool)
@@ -234,7 +245,12 @@ class KnowledgeService:
         base_retrieve = base_retrieve or self.retrieve
         if not self.ai_client:
             return base_retrieve(query, top_k)
-        sub_queries = self.ai_client.generate_sub_queries(query, n=3)
+        try:
+            sub_queries = self.ai_client.generate_sub_queries(query, n=3)
+        except Exception as exc:
+            # 线上默认策略下，远程改写失败不得让检索整体失败，降级为单查询。
+            diagnostics.degraded("knowledge.multi_query", "sub_query_unavailable", exc)
+            sub_queries = [query]
         if not sub_queries:
             sub_queries = [query]
         seen: dict[int | None, SearchResult] = {}
