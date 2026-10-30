@@ -258,7 +258,9 @@ docker compose --profile test stop mysql-test
 docker compose --profile test rm -f mysql-test
 ```
 
-只需事务测试时可把第二行中的 `tests` 换成 `mysql-tests`。测试容器中的 `MYSQL_TEST_DATABASE_URL` 已指向 `mysql-test:3306/xling_test`，测试用户只拥有该库的权限。测试会重建表结构；数据库名必须以 `_test` 结尾。测试数据使用临时内存文件系统，不挂载业务 `mysql-data`，测试服务不发布主机端口，也不会随普通 `docker compose up` 启动。
+只需事务测试时可把第二行中的 `tests` 换成 `mysql-tests`。测试容器中的 `MYSQL_TEST_DATABASE_URL` 已指向 `mysql-test:3306/xling_test`，测试用户只拥有该库的权限。测试会重建表结构；数据库名必须以 `_test` 结尾。测试数据使用临时内存文件系统，不挂载业务 `mysql-data`，也不会随普通 `docker compose up` 启动。
+
+本机直接运行 pytest 且未显式配置 `MYSQL_TEST_DATABASE_URL` 时，MySQL 用例会通过 Docker 自动启动 `mysql-test`，连接 `127.0.0.1:13306`，并在测试会话结束后停止和删除该容器；显式配置外部测试库时不自动管理其生命周期。
 
 ## 本地开发与验证
 
