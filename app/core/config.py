@@ -11,8 +11,22 @@ class Settings(BaseSettings):
     ai_max_tokens: int = 2048
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "xling-qwen2.5-7b-ft:latest"
-    ollama_classifier_model: str = "xling-cls-3b-ft:latest"
-    classifier_input_format: Literal["plain", "quoted"] = "plain"
+    ollama_classifier_model: str = "xling-general-cls-05b:quoted-f16"
+    classifier_input_format: Literal["plain", "quoted"] = "quoted"
+    # 单次前向决策头分类器为默认后端，ollama 生成式分类器保留为回退复核；测试经 conftest 固定为 ollama。
+    classifier_backend: str = "decision_head"
+    decision_head_model_dir: str = ".scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate/recovered-merged-base"
+    decision_head_adapter_dir: str = "finetune/saves/qwen25-05b-decision-head-376/adapter"
+    decision_head_head_path: str = "finetune/saves/qwen25-05b-decision-head-376/head.pt"
+    decision_head_calibration_path: str = "finetune/saves/qwen25-05b-decision-head-376/calibration.json"
+    decision_head_system_prompt_file: str = "finetune/reports/current-classifier/training/system-prompt.txt"
+    decision_head_device: str = ""
+    decision_head_max_length: int = 256
+    # 分层安全策略阈值（工程初始值，待新鲜盲测集校准）：高风险直接判定、灰区复核、低置信度与前两名概率差回退。
+    classifier_high_risk_threshold: float = 0.5
+    classifier_high_risk_review_threshold: float = 0.15
+    classifier_low_confidence_threshold: float = 0.70
+    classifier_margin_threshold: float = 0.30
     finetuned_model_name: str = "xling-qwen2.5-7b-ft:latest"
     finetuned_model_dir: str = "models/xling-qwen2.5-7b-ft"
     finetuned_model_file: str = "xling-qwen2.5-7b-ft-q4_k_m.gguf"
@@ -25,6 +39,8 @@ class Settings(BaseSettings):
     database_url: str = "mysql+pymysql://xling:xling@127.0.0.1:3306/xling?charset=utf8mb4"
     chat_history_limit: int = 10
     knowledge_top_k: int = 4
+    # 线上检索策略：multi_query_hybrid_rrf（多查询＋混合 RRF，默认）或 normalized_fusion（dense＋BM25 归一化加权）。
+    knowledge_retrieval_strategy: str = "multi_query_hybrid_rrf"
     knowledge_chunk_size: int = 512
     knowledge_chunk_overlap: int = 64
     knowledge_vector_enabled: bool = True

@@ -25,13 +25,11 @@ MYSQL_TEST_DATABASE_URL = os.getenv("MYSQL_TEST_DATABASE_URL", "")
 
 
 @pytest.fixture
-def mysql_db():
+def mysql_db(mysql_test_database):
     """提供专用 MySQL 测试数据库，并在前后重建表结构。
 
-    缺少地址时跳过，名称不以 _test 结尾则拒绝运行，防止测试清理作用于普通数据库。
+    本机未显式配置时自动使用隔离容器；名称不以 _test 结尾则拒绝运行。
     """
-    if not MYSQL_TEST_DATABASE_URL:
-        pytest.skip("需要 MYSQL_TEST_DATABASE_URL 才运行 MySQL 事务集成测试")
     url = make_url(MYSQL_TEST_DATABASE_URL)
     if url.get_backend_name() != "mysql" or not (url.database or "").endswith("_test"):
         pytest.fail("MySQL 集成测试只允许使用名称以 _test 结尾的测试数据库")

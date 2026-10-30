@@ -33,6 +33,8 @@ cp .env.production.example .env
 
 `OLLAMA_BASE_URL` 默认是 `http://ollama:11434`。启动时添加 `--profile models`，`ollama-init` 会从只读挂载的项目 `models/` 目录注册分类器到 `ollama-data` 数据卷，不需要宿主机 Ollama。若使用外部模型服务，可省略该 profile 并把 `OLLAMA_BASE_URL` 改为应用容器实际可达的地址。
 
+默认分类后端为应用内单次前向决策头（`CLASSIFIER_BACKEND=decision_head`），需要 `DECISION_HEAD_*` 配置指向的 HF 基座、LoRA 适配器、决策头与温度校准文件（本机实验产物，不随源码分发）。这些权重缺失或加载失败不会阻断启动，分类自动回退到上述 Ollama 生成式分类器并记录降级事件；纯 Ollama 部署可显式设 `CLASSIFIER_BACKEND=ollama` 避免重复加载尝试。分层阈值（`CLASSIFIER_HIGH_RISK_THRESHOLD` 等）为工程初始值，可按部署方评测结果覆盖。
+
 ### 3. 启动服务
 
 ```bash

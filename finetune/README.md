@@ -85,3 +85,9 @@ TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 \
 ```
 
 [注册入口](scripts/register_runtime_classifier.py)接受模型目录、系统提示、独立 tag 与服务地址，拒绝覆盖已有 tag，并在评测前检查零输入加载。[运行评测入口](scripts/evaluate_runtime_classifier.py)接受重复的 `--dataset`、`--output`、`--model`、`--base-url` 与 `--input-format quoted`，调用实际业务分类客户端，拒绝覆盖已有结果。可选远端评测的默认[系统提示](reports/current-classifier/remote-profile/system-prompt.txt)保留为 CLI 输入配置。
+
+## 决策头架构实验（2026-10-30）
+
+借鉴 Strands Decider / Clef 的单次前向决策模型范式，新增[决策头训练入口](scripts/train_decision_head_classifier.py)与[评测入口](scripts/evaluate_decision_head_classifier.py)：同基座、同数据、同超参下训练 LoRA + 固定标签线性决策头，不生成文本，直接输出四类概率。固定 160 例回归集上 160/160、高风险误报 0（已选生成式为 156/160、误报 4），P50 约 34 ms；满分基于已曝光合成回归集，不作泛化结论。配置、逐例概率、历史误报核对与限制见[实验报告](reports/decision-head-20261030/summary.md)。
+
+同日新增[温度校准拟合入口](scripts/fit_decision_head_temperature.py)，在 training-only 验证集 128 条概率上拟合温度（T≈1.94，NLL 0.061→0.043），产物为 `finetune/saves/qwen25-05b-decision-head-376/calibration.json`。决策头已接入业务评估路径并作为默认后端（`CLASSIFIER_BACKEND=decision_head`，`app/services/decision_classifier.py` + `app/services/assessment.py` 分层安全策略：高风险双阈值、低置信回退生成式复核、分歧就高；权重缺失或故障时自动回退生成式主路径），架构决策见 [ADR-0016](../docs/adr/0016-decision-head-classifier-layered-safety.md)；生产替换资格仍待新鲜盲测集验证。

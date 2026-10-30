@@ -101,7 +101,10 @@ def test_sparse_only_candidate_gets_its_real_dense_score(monkeypatch):
                     ])]
             db.add_all(rows)
             db.commit()
-            service = KnowledgeService(db, Settings(_env_file=None, knowledge_vector_enabled=False))
+            service = KnowledgeService(db, Settings(
+                _env_file=None, knowledge_vector_enabled=False,
+                knowledge_retrieval_strategy="normalized_fusion",
+            ))
             monkeypatch.setattr(service, "_search_vector", lambda query, pool: (
                 [SearchResult(rows[0].id, rows[0].source, rows[0].content, .5)], [1., 0.]))
             found = service.retrieve("呼吸", 1)
