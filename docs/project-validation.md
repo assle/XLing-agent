@@ -34,11 +34,11 @@ docker compose -p xling-closing -f docker-compose.yml \
 | --- | --- | --- | --- |
 | 日常对话、LOW 支持至计划反馈 | `scripts/closing/browser-support.mjs` | [日常与LOW](../assets/closing-videos/daily-low-support.webm) | 日常直接回复；四维信息完整后生成计划；完成一项并保存提前反馈 |
 | MEDIUM 支持至计划反馈 | `scripts/closing/browser-mid-support.mjs` | [MEDIUM](../assets/closing-videos/medium-support.webm) | 实际安全记录含 MEDIUM；计划和反馈持久化 |
-| HIGH 暂停、重启与审核恢复 | `scripts/closing/browser-high-review.mjs` | [用户视角](../assets/closing-videos/high-user-restart.webm)、[审核视角](../assets/closing-videos/high-reviewer.webm) | 待审核新消息 409；容器重启仍待审核；批准后恢复；重复决定 404 且无重复消息 |
+| HIGH 专业人工支持 | `pytest -q tests/test_human_support.py tests/test_pending_review_chat.py`；`node --experimental-vm-modules tests/admin-tasks-ui.test.mjs` | 新流程待补录 | 等待与处理中均可继续留言；接手、人工回复、站外联系与三类处置落库；重复操作冲突或去重；超时不终结记录；旧录屏仅证明已退休的恢复流程 |
 | 无记忆隔离 | `scripts/closing/browser-no-memory.mjs` | [无记忆](../assets/closing-videos/no-memory.webm) | 新无记忆会话不读确认卡片；当前会话历史保留；诊断日志无长期背景/卡片读取事件 |
 | 工具失败、重试与幂等 | `scripts/closing/browser-tool-verified.mjs` | [工具重试](../assets/closing-videos/tool-retry-idempotency.webm) | 本地 SMTP 首次 451；15 秒后自动成功；重复登记和调用后仍为两任务、一台账行、一成功通知 |
 
-脚本使用隔离测试身份；不得改为生产账号。复跑生成的视频及执行结果写入 `.scratch/closing-evidence/`。当前版本固定的六段成功录屏以 [验证清单](../evals/reports/closing-runtime/manifest.json) 中的仓库相对路径及 SHA256 为准；原始结果 JSON 的绝对路径保留拍摄时的执行上下文。脚本返回成功只是流程证据，不代表专业支持或治疗成功；提前反馈只验证保存和分流，不是实际等待 24 小时后的效果。
+脚本使用隔离测试身份；不得改为生产账号。复跑生成的视频及执行结果写入 `.scratch/closing-evidence/`。既有六段成功录屏以 [验证清单](../evals/reports/closing-runtime/manifest.json) 中的仓库相对路径及 SHA256 为准；其中 HIGH 录屏属于已退休的图恢复流程，不能作为当前人工支持验收证据。原始结果 JSON 的绝对路径保留拍摄时的执行上下文。脚本返回成功只是流程证据，不代表专业支持或治疗成功；提前反馈只验证保存和分流，不是实际等待 24 小时后的效果。
 
 本机执行脚本的已验证形式为：
 
@@ -48,7 +48,7 @@ env PLAYWRIGHT_BROWSERS_PATH=/Users/assle/dev/mindbridge-py/.scratch/closing-run
   scripts/closing/browser-support.mjs
 ```
 
-其他浏览器入口替换最后的脚本名；涉及容器重启的 HIGH 脚本应在其他请求完成后执行。工具演示先在另一终端运行 `.venv/bin/python scripts/closing/smtp-sink.py`，再用同一项目和基础覆盖文件加 `-f scripts/closing/compose.smtp.yml` 启动 app。将 `scripts/closing/tool-idempotency.py` 复制到容器 `/tmp/closing-tool-idempotency.py` 后运行工具录屏脚本；结束时恢复基础覆盖文件的 app，并停止本机接收端。
+其他既有浏览器入口替换最后的脚本名。工具演示先在另一终端运行 `.venv/bin/python scripts/closing/smtp-sink.py`，再用同一项目和基础覆盖文件加 `-f scripts/closing/compose.smtp.yml` 启动 app。将 `scripts/closing/tool-idempotency.py` 复制到容器 `/tmp/closing-tool-idempotency.py` 后运行工具录屏脚本；结束时恢复基础覆盖文件的 app，并停止本机接收端。
 
 ## 验证边界
 

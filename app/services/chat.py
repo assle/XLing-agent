@@ -40,6 +40,8 @@ class PreparedChat:
     cbt_event: dict | None
     action_plan_event: dict | None
     direct_response: str | None = None
+    support_status: str | None = None
+    acknowledgment_saved: bool = False
 
 
 RuntimeFactory = Callable[[Session, Settings], AgentRuntime]
@@ -71,10 +73,6 @@ class ChatDependencies:
             # 默认运行观察器不执行操作；测试可替换它以记录运行结果。
             observe_run=lambda run: None,
         )
-
-
-class PendingReviewError(ValueError):
-    """The conversation is paused until its review has completed."""
 
 
 class SessionBusyError(ValueError):
@@ -154,10 +152,12 @@ class ChatService:
             )
             if prepared.pending_review:
                 ack = prepared.direct_response or PromptTemplates.crisis_acknowledgment()
-                self.save_message(user, prepared.session, MessageRole.ASSISTANT, ack)
+                if not prepared.acknowledgment_saved:
+                    self.save_message(user, prepared.session, MessageRole.ASSISTANT, ack)
                 diagnostics.emit("chat.waiting_review", requires_review=True)
                 yield sse("pending_review", ChatStreamEvent(
                     type="pending_review", sessionId=session_id, content=ack,
+                    supportStatus=prepared.support_status or "pending",
                 ).model_dump())
                 if prepared.report_id is not None:
                     error = await self._dispatch_report(prepared.report_id, prepared.risk_level)
@@ -205,7 +205,6 @@ class ChatService:
         原文用于业务记录，脱敏文本供模型使用；执行器无论成功失败都尝试关闭异步资源。
         数据库保存成功后才追加短期记忆，返回后续推送需要的明确字段。
         """
-        self.ensure_chat_available(user, request.sessionId)
         if isinstance(request.message, ActionPlanObjectMessage):
             text = f"选择了 24 小时行动计划 #{request.message.id}"
             model_input = request.message
@@ -222,6 +221,20 @@ class ChatService:
                 raise SessionBusyError()
             self._active_sessions.add(session.public_id)
             self._active_session_id = session.public_id
+        active_review = self.active_human_support(session.id)
+        if active_review is not None:
+            ack = PromptTemplates.crisis_acknowledgment()
+            with diagnostics.stage("support_turn.follow_up_save"):
+                self.turns.save_human_support_follow_up(
+                    user=user, session=session, review=active_review, content=text, acknowledgment=ack,
+                )
+            self.memory.append(session.public_id, MessageRole.USER.value, text)
+            self.memory.append(session.public_id, MessageRole.ASSISTANT.value, ack)
+            return PreparedChat(
+                session=session, messages=[], report_id=None, risk_level=None, pending_review=True,
+                cbt_event=None, action_plan_event=None, direct_response=ack,
+                support_status=active_review.status, acknowledgment_saved=True,
+            )
         with diagnostics.stage("runtime.create"):
             runtime = self.runtime_factory(self.db, self.settings)
         try:
@@ -266,6 +279,7 @@ class ChatService:
                 _action_plan_payload(agent_run.action_plan_event) if agent_run.action_plan_event else None
             ),
             direct_response=agent_run.direct_response,
+            support_status=persisted.review.status if persisted.review is not None else None,
         )
 
     async def _dispatch_report(self, report_id: int, risk_level: str | None) -> str | None:
@@ -302,15 +316,17 @@ class ChatService:
         self.db.flush()
         return session
 
-    def ensure_chat_available(self, user: UserAccount, public_id: str | None) -> None:
-        if public_id and self.db.query(ReviewRequest.id).join(
-            ChatSession, ReviewRequest.session_id == ChatSession.id,
-        ).filter(
-            ChatSession.public_id == public_id,
-            ChatSession.user_id == user.id,
-            ReviewRequest.status == "pending",
-        ).first():
-            raise PendingReviewError("当前会话正在等待审核，请等待审核完成或创建新会话。")
+    def active_human_support(self, session_id: int) -> ReviewRequest | None:
+        """返回仍允许用户补充留言的人工支持记录。"""
+        return (
+            self.db.query(ReviewRequest)
+            .filter(
+                ReviewRequest.session_id == session_id,
+                ReviewRequest.status.in_(["pending", "in_progress"]),
+            )
+            .order_by(ReviewRequest.created_at.desc())
+            .first()
+        )
 
     def save_message(self, user: UserAccount, session: ChatSession, role: MessageRole, content: str) -> None:
         """保存一条消息并更新会话时间，再同步到短期缓存。

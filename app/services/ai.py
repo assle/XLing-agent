@@ -17,10 +17,8 @@ from app.schemas.dtos import AiMessage
 # history 用于补充最近上下文；返回消息列表，不执行模型调用。
 # PromptTemplates.answer_system_prompt：按日常对话或心理支持类型构造回复要求。
 # risk 为高风险时增加安全处理要求，context 提供检索资料，display_name 提供称呼。
-# PromptTemplates.crisis_acknowledgment：返回等待人工审核期间使用的固定确认消息。
-# 无需模型生成，告知用户消息已进入审核并提供现实求助方向。
-# PromptTemplates.fallback_response：返回人工拒绝或恢复失败时使用的固定安全回复。
-# 返回预设文本，不调用模型或发送通知。
+# PromptTemplates.crisis_acknowledgment：返回人工支持等待或处理中的固定确认消息。
+# 无需模型生成，告知用户消息已进入专业支持流程并提供现实求助方向。
 # PromptTemplates.sub_query_prompt：请求模型围绕一个问题生成若干替代检索查询。
 # query 是原问题，n 是期望数量；输出格式要求会在调用后再次检查。
 # PromptTemplates.rerank_prompt：把查询和候选资料摘要组织成相关性评分请求。
@@ -72,18 +70,9 @@ class PromptTemplates:
         """Fixed acknowledgment sent to the student while a high-risk message
         is pending counselor review (NOT an AI-generated reply)."""
         return (
-            "我听到了你，你现在的感受很重要。你的消息已进入人工审核流程。"
-            "如果你现在处于紧急情况，请立刻联系身边可信任的人、"
+            "我听到了你，你现在的感受很重要。你的消息已进入专业支持流程，支持人员会查看你补充的情况。"
+            "你可以继续留言补充情况。如果你现在处于紧急情况，请立刻联系身边可信任的人、"
             "当地紧急服务或部署方提供的专业支持资源。你不是一个人。"
-        )
-
-    @staticmethod
-    def fallback_response() -> str:
-        """Fixed safety response sent when a counselor rejects a high-risk message
-        (NOT an AI-generated reply)."""
-        return (
-            "人工审核已收到并重视你的消息。如果你现在需要帮助，"
-            "请立刻联系身边可信任的人、当地紧急服务或部署方提供的专业支持资源。"
         )
 
     @staticmethod

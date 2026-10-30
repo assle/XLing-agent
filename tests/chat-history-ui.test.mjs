@@ -37,7 +37,8 @@ const conversation = {
   pendingReview: false, noMemory: false,
   messages: [
     { role: "USER", content: "虚构用户消息" },
-    { role: "ASSISTANT", content: "虚构回复" }
+    { role: "ASSISTANT", content: "虚构回复" },
+    { role: "SUPPORT", content: "虚构人工回复", senderLabel: "支持人员" }
   ]
 };
 const sessions = [{
@@ -74,6 +75,9 @@ assert.match(rows[0].html, /class="message-role">我<\/div>/);
 assert.equal(rows[0].bubble.textContent, "虚构用户消息");
 assert.equal(rows[1].className, "message assistant");
 assert.match(rows[1].html, /class="message-role">Xling<\/div>/);
+assert.equal(rows[2].className, "message support");
+assert.match(rows[2].html, /class="message-role">支持人员<\/div>/);
+assert.equal(rows[2].bubble.textContent, "虚构人工回复");
 
 // The UTC instant crosses midnight in Shanghai, rather than displaying the stored UTC clock locally.
 await module.namespace.loadSessionList();

@@ -4,7 +4,8 @@ Covers:
   - PrivacySanitizer (phone/email/id/name redaction)
   - build_review_summary (desensitized summary)
   - create_with_context (handoff reason, desensitized summary)
-  - mark_decision (approve/reject/refer/monitor + audit fields)
+  - mark_decision (refer/monitor/complete + audit fields)
+  - legacy approve/reject decisions are unavailable
   - Invalid handoff reason / decision raises
   - Already reviewed can't be re-decided
   - _to_dict includes new fields
@@ -177,101 +178,90 @@ def test_create_with_invalid_handoff_raises():
 # mark_decision
 # ---------------------------------------------------------------------------
 
-def test_mark_decision_approve():
-    """批准待审核记录并附备注与审核人。
-
-    检查决定、状态、人员和处理时间均保存。
-    """
+def test_mark_decision_complete():
     _clean()
     svc = _svc()
     try:
         review = svc.create_with_context(1, 1, "t", handoff_reason="USER_REQUEST")
-        result = svc.mark_decision(review.id, "approve", "looks ok", "admin")
-        assert result.reviewer_decision == "approve"
-        assert result.reviewer_note == "looks ok"
+        svc.claim(review.id, "admin")
+        result = svc.mark_decision(
+            review.id, "complete", "已核对安全安排", "admin", completion_basis="用户已确认现实支持安排",
+        )
+        assert result.reviewer_decision == "complete"
+        assert result.reviewer_note == "已核对安全安排"
+        assert result.completion_basis == "用户已确认现实支持安排"
         assert result.reviewed_by == "admin"
-        assert result.status == "approved"
+        assert result.status == "completed"
         assert result.reviewed_at is not None
     finally:
         svc.db.close()
 
-def test_mark_decision_reject():
-    """拒绝一条待审核记录。
 
-    检查状态转换为已拒绝。
-    """
+def test_legacy_approve_and_reject_are_rejected():
     _clean()
     svc = _svc()
     try:
         review = svc.create_with_context(1, 1, "t")
-        result = svc.mark_decision(review.id, "reject")
-        assert result.status == "rejected"
+        svc.claim(review.id, "admin")
+        for decision in ("approve", "reject"):
+            try:
+                svc.mark_decision(review.id, decision)
+                assert False, "legacy decision must be rejected"
+            except ValueError:
+                pass
     finally:
         svc.db.close()
 
-def test_mark_decision_refer():
-    """提交转介对象和下一步说明。
 
-    检查字段、用户提示及实际会话消息保存一致。
-    """
+def test_mark_decision_refer():
     _clean()
     svc = _svc()
     try:
         review = svc.create_with_context(1, 1, "t")
+        svc.claim(review.id, "admin")
         result = svc.mark_decision(
-            review.id,
-            "refer",
-            "请尽快联系学校心理中心",
-            "admin",
-            referral_target="学校心理中心",
-            next_step="今天联系值班老师",
+            review.id, "refer", "请尽快联系学校心理中心", "admin",
+            referral_target="学校心理中心", next_step="今天联系值班老师", follow_up_owner="值班老师",
         )
         assert result.status == "referred"
         assert result.referral_target == "学校心理中心"
         assert result.next_step == "今天联系值班老师"
+        assert result.follow_up_owner == "值班老师"
         message = svc.student_message(result)
         assert "学校心理中心" in message
         assert "今天联系值班老师" in message
-        persisted = svc.persist_student_message(result)
-        assert persisted == message
-        assert svc.db.query(ChatMessage).filter(ChatMessage.content == message).count() == 1
+        persisted = svc.db.query(ChatMessage).filter(ChatMessage.content == message).one()
+        assert persisted.review_id == review.id
+        assert persisted.role == "SUPPORT"
     finally:
         svc.db.close()
 
-def test_mark_decision_monitor():
-    """提交持续关注负责人和时间。
 
-    检查保存字段及用户提示中包含相同后续安排。
-    """
+def test_mark_decision_monitor():
     _clean()
     svc = _svc()
     try:
         review = svc.create_with_context(1, 1, "t")
+        svc.claim(review.id, "admin")
         result = svc.mark_decision(
-            review.id,
-            "monitor",
-            follow_up_owner="辅导员李老师",
-            follow_up_at=datetime(2026, 8, 27, 10, 0),
+            review.id, "monitor", follow_up_owner="李老师", follow_up_at=datetime(2026, 8, 27, 10, 0),
         )
         assert result.status == "monitoring"
-        assert result.follow_up_owner == "辅导员李老师"
+        assert result.follow_up_owner == "李老师"
         assert result.follow_up_at == datetime(2026, 8, 27, 10, 0)
         message = svc.student_message(result)
-        assert "辅导员李老师" in message
+        assert "李老师" in message
         assert "2026-08-27 10:00" in message
     finally:
         svc.db.close()
 
 
-def test_refer_requires_target_and_next_step():
-    """只提交转介决定而没有行动详情。
-
-    检查抛错并提示缺少转介目标。
-    """
+def test_refer_requires_target_next_step_and_owner():
     _clean()
     svc = _svc()
     try:
         review = svc.create_with_context(1, 1, "t")
+        svc.claim(review.id, "admin")
         try:
             svc.mark_decision(review.id, "refer")
             assert False, "referral details are required"
@@ -282,16 +272,13 @@ def test_refer_requires_target_and_next_step():
 
 
 def test_blank_refer_fields_are_rejected():
-    """把转介对象填成空白。
-
-    检查去空白后的无效字段不能被当作已填写。
-    """
     _clean()
     svc = _svc()
     try:
         review = svc.create_with_context(1, 1, "t")
+        svc.claim(review.id, "admin")
         try:
-            svc.mark_decision(review.id, "refer", referral_target=" ", next_step="下一步")
+            svc.mark_decision(review.id, "refer", referral_target=" ", next_step="下一步", follow_up_owner="负责人")
             assert False, "blank referral target is not actionable"
         except ValueError:
             pass
@@ -300,14 +287,11 @@ def test_blank_refer_fields_are_rejected():
 
 
 def test_monitor_requires_owner_and_follow_up_time():
-    """缺少负责人和时间时提交持续关注。
-
-    检查拒绝并指出所需字段。
-    """
     _clean()
     svc = _svc()
     try:
         review = svc.create_with_context(1, 1, "t")
+        svc.claim(review.id, "admin")
         try:
             svc.mark_decision(review.id, "monitor")
             assert False, "monitoring details are required"
@@ -316,11 +300,8 @@ def test_monitor_requires_owner_and_follow_up_time():
     finally:
         svc.db.close()
 
-def test_invalid_decision_raises():
-    """提交未知审核决定。
 
-    要求明确报错，避免状态进入未定义分支。
-    """
+def test_invalid_decision_raises():
     _clean()
     svc = _svc()
     try:
@@ -333,18 +314,16 @@ def test_invalid_decision_raises():
     finally:
         svc.db.close()
 
-def test_cannot_re_decide():
-    """先批准后再尝试拒绝同一条记录。
 
-    检查已处理审核不能再次决定。
-    """
+def test_cannot_re_decide():
     _clean()
     svc = _svc()
     try:
         review = svc.create_with_context(1, 1, "t")
-        svc.mark_decision(review.id, "approve")
+        svc.claim(review.id, "admin")
+        svc.mark_decision(review.id, "complete", "处理记录", "admin", completion_basis="完成依据")
         try:
-            svc.mark_decision(review.id, "reject")
+            svc.mark_decision(review.id, "monitor", follow_up_owner="负责人", follow_up_at=datetime(2026, 8, 27))
             assert False, "Should have raised"
         except ValueError:
             pass

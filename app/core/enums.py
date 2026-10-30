@@ -4,6 +4,7 @@ from enum import Enum
 class MessageRole(str, Enum):
     USER = "USER"
     ASSISTANT = "ASSISTANT"
+    SUPPORT = "SUPPORT"
     SYSTEM = "SYSTEM"
 
 
@@ -34,6 +35,7 @@ class ToolStatus(str, Enum):
 class ToolJobKind(str, Enum):
     EXCEL_REPORT = "EXCEL_REPORT"
     RISK_ALERT = "RISK_ALERT"
+    ESCALATION_ALERT = "ESCALATION_ALERT"
 
 
 class ToolJobStatus(str, Enum):

@@ -160,55 +160,6 @@ class LangGraphAgentRuntimeService:
         state = await self.graph.aget_state({"configurable": {"thread_id": thread_id}})
         return RuntimeStateSnapshot(dict(state.values), tuple(state.next))
 
-    async def resume(self, thread_id: str, approved: bool) -> AgentRunResult:
-        """Resume only a valid new-format interruption; unavailable state has a fixed safe result."""
-        from langgraph.types import Command
-
-        config = {"configurable": {"thread_id": thread_id}}
-        try:
-            with diagnostics.stage("checkpoint.read", thread_id=thread_id):
-                await self._ensure_checkpointer()
-                existing = await self.graph.aget_state(config)
-            if (
-                not GraphState.__required_keys__.issubset(existing.values)
-                or "risk_guardian_gate" not in existing.next
-                or existing.values.get("risk_level") != RiskLevel.HIGH.value
-                or existing.values.get("intent") not in {IntentType.CONSULT.value, IntentType.RISK.value}
-                or not existing.values.get("assessment")
-            ):
-                diagnostics.degraded("checkpoint.read", "checkpoint_unavailable")
-                return self._degraded_result()
-            # Validation is of this graph's state, never a conversion of retired checkpoints.
-            saved = self._result(existing.values, pending_review=True)
-            if saved.assessment is None or (
-                saved.assessment.risk != RiskLevel.HIGH
-                and not (saved.assessment.risk == RiskLevel.MEDIUM and saved.trajectory_rising)
-            ):
-                diagnostics.degraded("checkpoint.read", "checkpoint_unavailable")
-                return self._degraded_result()
-        except Exception as exc:
-            diagnostics.degraded("checkpoint.read", "checkpoint_unavailable", exc)
-            return self._degraded_result()
-        diagnostics.bind(origin_run_id=existing.values["original_run_id"], thread_id=thread_id)
-        with diagnostics.stage("graph.resume", review_action="approve" if approved else "reject"):
-            await self.graph.ainvoke(Command(resume={"approved": approved}), config=config)
-            await self._record_checkpoint_activity(thread_id)
-            snapshot = await self.graph.aget_state(config)
-        diagnostics.emit("graph.completed", requires_review=False)
-        result = self._result(snapshot.values)
-        if not approved:
-            result.fallback_response = PromptTemplates.fallback_response()
-            result.response_messages = []
-        return result
-
-    @staticmethod
-    def _degraded_result() -> AgentRunResult:
-        return AgentRunResult(
-            intent=IntentType.RISK, risk_level=RiskLevel.HIGH, assessment=None,
-            retrieved_knowledge=[], response_messages=[], steps=[],
-            fallback_response=PromptTemplates.fallback_response(), degraded=True,
-        )
-
     @staticmethod
     def _result(state: dict[str, Any], *, pending_review: bool = False) -> AgentRunResult:
         assessment = state["assessment"]
@@ -372,7 +323,7 @@ class LangGraphAgentRuntimeService:
         graph.add_edge("risk_guardian", "risk_guardian_gate")
         graph.add_conditional_edges(
             "risk_guardian_gate", self._route_after_gate,
-            {"approved": "counselor", "rejected": END, "support": "knowledge", "resources": "companion"},
+            {"human_support": END, "support": "knowledge", "resources": "companion"},
         )
         graph.add_edge("knowledge", "cbt")
         graph.add_conditional_edges("cbt", self._route_after_cbt, {"handled": END, "skip": "counselor"})
@@ -635,19 +586,17 @@ class LangGraphAgentRuntimeService:
         }
 
     async def _risk_guardian_gate(self, state: GraphState) -> GraphUpdate:
-        if state["risk_level"] != RiskLevel.HIGH.value:
-            return {"review_decision": None}
-        from langgraph.types import interrupt
-
-        decision = interrupt({"risk": "HIGH", "summary": (state["assessment"] or {}).get("summary", "")})
-        return {"review_decision": "approved" if decision["approved"] else "rejected"}
+        if state["risk_level"] == RiskLevel.HIGH.value:
+            return {"awaiting_review": True, "response_messages": []}
+        return {"awaiting_review": False}
 
     def _route_after_gate(self, state: GraphState) -> str:
-        route = state["review_decision"] or (
+        high_risk = state["risk_level"] == RiskLevel.HIGH.value
+        route = "human_support" if high_risk else (
             "resources" if is_deployment_resource_question(state["model_input"]) else "support"
         )
         diagnostics.emit("branch.selected", route=route, risk_level=state["risk_level"],
-                         requires_review=state["risk_level"] == RiskLevel.HIGH.value)
+                         requires_review=high_risk)
         return route
 
     async def _knowledge_node(self, state: GraphState) -> GraphUpdate:

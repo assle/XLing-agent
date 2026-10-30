@@ -93,13 +93,13 @@ async function switchSession(publicId) {
     const response = await api(`/api/sessions/${publicId}`);
     const data = await response.json();
     if (state.sessionId !== publicId) return;
-    setReviewPending(data.pendingReview);
+    setReviewPending(data.pendingReview, data.supportStatus);
     els.messages.innerHTML = "";
     if (!data.messages || data.messages.length === 0) {
       els.messages.innerHTML = welcomeHtml();
     } else {
       for (const msg of data.messages) {
-        const role = msg.role.toLowerCase() === "user" ? "user" : "assistant";
+        const role = ["user", "support"].includes(msg.role.toLowerCase()) ? msg.role.toLowerCase() : "assistant";
         addMessage(role, msg.content);
       }
     }
@@ -116,13 +116,15 @@ async function switchSession(publicId) {
   highlightActiveSession();
 }
 
-function setReviewPending(pending) {
+function setReviewPending(pending, supportStatus = null) {
   clearTimeout(reviewTimer);
   state.pendingReview = Boolean(pending);
-  els.sendButton.disabled = state.sending || state.pendingReview;
-  els.messageInput.disabled = state.pendingReview;
-  if (!state.pendingReview || !state.sessionId) return;
-  setPill(els.sessionBadge, "REVIEW", "warn");
+  state.supportStatus = supportStatus || (state.pendingReview ? "pending" : null);
+  els.sendButton.disabled = state.sending;
+  els.messageInput.disabled = false;
+  const active = ["pending", "in_progress"].includes(state.supportStatus);
+  if (!active || !state.sessionId) return;
+  setPill(els.sessionBadge, state.supportStatus === "pending" ? "待接手" : "已接手", "warn");
   const sessionId = state.sessionId;
   reviewTimer = setTimeout(async () => {
     if (state.sessionId !== sessionId || !state.auth.token) return;
@@ -130,10 +132,15 @@ function setReviewPending(pending) {
       const response = await api(`/api/sessions/${sessionId}`);
       const data = await response.json();
       if (state.sessionId !== sessionId) return;
-      if (data.pendingReview) setReviewPending(true);
-      else await switchSession(sessionId);
+      if (["pending", "in_progress"].includes(data.supportStatus)) {
+        setReviewPending(data.pendingReview, data.supportStatus);
+      } else {
+        await switchSession(sessionId);
+      }
     } catch {
-      if (state.sessionId === sessionId && state.auth.token) setReviewPending(true);
+      if (state.sessionId === sessionId && state.auth.token) {
+        setReviewPending(state.pendingReview, state.supportStatus);
+      }
     }
   }, 3000);
 }
@@ -217,7 +224,7 @@ function addMessage(role, content) {
   const row = document.createElement("article");
   row.className = `message ${role}`;
   row.innerHTML = `
-    <div class="message-role">${role === "user" ? "我" : "Xling"}</div>
+    <div class="message-role">${role === "user" ? "我" : role === "support" ? "支持人员" : "Xling"}</div>
     <div class="bubble"></div>
   `;
   row.querySelector(".bubble").textContent = content;
@@ -259,7 +266,7 @@ export async function sendActionPlanObject(message) {
 }
 
 async function sendChatMessage(message, displayText) {
-  if (state.sending || (state.sessionId && state.pendingReview) || isAdmin(state.profile)) return;
+  if (state.sending || isAdmin(state.profile)) return;
   state.sending = true;
   const wasNewSession = !state.sessionId;
   els.sendButton.disabled = true;
@@ -300,10 +307,10 @@ async function sendChatMessage(message, displayText) {
         }
         if (eventData.type === "pending_review") {
           pendingReview = true;
-          setReviewPending(true);
+          const supportStatus = eventData.supportStatus || "pending";
+          setReviewPending(supportStatus === "pending", supportStatus);
           raw = eventData.content || "";
           assistant.textContent = raw;
-          setPill(els.sessionBadge, "REVIEW", "warn");
         }
         if (eventData.type === "token") {
           raw += eventData.content || "";
@@ -332,7 +339,7 @@ async function sendChatMessage(message, displayText) {
     setPill(els.sessionBadge, "ERROR", "danger");
   } finally {
     state.sending = false;
-    els.sendButton.disabled = state.pendingReview;
+    els.sendButton.disabled = false;
     // 新会话的第一条消息发送后，刷新历史列表让该会话出现
     if (wasNewSession && state.sessionId) {
       loadSessionList();

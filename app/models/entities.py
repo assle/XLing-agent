@@ -176,12 +176,17 @@ class CheckIn(Base):
 
 class ChatMessage(Base):
     __tablename__ = "chat_messages"
+    __table_args__ = (
+        UniqueConstraint("review_id", "role", "client_request_id", name="uq_chat_message_client_request"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user_accounts.id"))
     session_id: Mapped[int] = mapped_column(ForeignKey("chat_sessions.id"))
+    review_id: Mapped[Optional[int]] = mapped_column(ForeignKey("review_requests.id"), nullable=True, index=True)
     role: Mapped[str] = mapped_column(String(32))
     content: Mapped[str] = mapped_column(Text)
+    client_request_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
 
     session: Mapped[ChatSession] = relationship(back_populates="messages")
@@ -242,6 +247,7 @@ class AlertRecord(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     report_id: Mapped[int] = mapped_column(Integer, index=True)
     channel: Mapped[str] = mapped_column(String(64))
+    notification_kind: Mapped[str] = mapped_column(String(32), default="RISK_ALERT")
     recipient: Mapped[str] = mapped_column(String(256))
     status: Mapped[str] = mapped_column(String(32))
     message: Mapped[str] = mapped_column(Text)
@@ -324,6 +330,43 @@ class ReviewRequest(Base):
     next_step: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     follow_up_owner: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
     follow_up_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    completion_basis: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    claimed_by: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    claimed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    escalation_count: Mapped[int] = mapped_column(Integer, default=0)
+    last_escalated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     status: Mapped[str] = mapped_column(String(32), index=True, default="pending")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
     reviewed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+
+class SupportAuditEvent(Base):
+    """人工支持过程的追加式审计记录，正文仍保存在原业务记录中。"""
+
+    __tablename__ = "support_audit_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    review_id: Mapped[int] = mapped_column(ForeignKey("review_requests.id"), index=True)
+    event_type: Mapped[str] = mapped_column(String(32), index=True)
+    actor: Mapped[str] = mapped_column(String(64))
+    payload_json: Mapped[str] = mapped_column(Text, default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+
+
+class OffsiteContactRecord(Base):
+    """只保存人工处置需要的站外联系方式、时间、结果和下一步。"""
+
+    __tablename__ = "offsite_contact_records"
+    __table_args__ = (
+        UniqueConstraint("review_id", "client_request_id", name="uq_offsite_contact_client_request"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    review_id: Mapped[int] = mapped_column(ForeignKey("review_requests.id"), index=True)
+    contact_method: Mapped[str] = mapped_column(String(32))
+    contacted_at: Mapped[datetime] = mapped_column(DateTime)
+    outcome: Mapped[str] = mapped_column(Text)
+    next_step: Mapped[str] = mapped_column(Text)
+    client_request_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    recorded_by: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
