@@ -7,10 +7,16 @@ from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.security import require_admin
 from app.models.entities import UserAccount
-from app.schemas.dtos import KnowledgeIngestRequest, KnowledgeIngestResponse, ReviewDecisionRequest
+from app.schemas.dtos import (
+    HumanReplyRequest,
+    KnowledgeIngestRequest,
+    KnowledgeIngestResponse,
+    OffsiteContactRequest,
+    ReviewDecisionRequest,
+)
 from app.services.knowledge import KnowledgeService
 from app.services.report import ReportService
-from app.services.review import REVIEW_DECISIONS, ReviewService
+from app.services.review import ReviewConflictError, ReviewOutcome, ReviewService
 
 router = APIRouter()
 
@@ -118,64 +124,91 @@ def list_reviews(
     # 按查询参数返回全部审核记录或仅待处理记录。
     # all 默认为 False；排序和字段整理统一由审核服务负责。
     reviews = ReviewService(db, get_settings())
-    return reviews.list_all() if all else reviews.list_pending()
+    return reviews.list_all() if all else reviews.list_active()
+
+
+@router.post("/api/admin/reviews/{review_id}/claim")
+def claim_review(
+    review_id: int,
+    user: Annotated[UserAccount, Depends(require_admin)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    try:
+        review = ReviewService(db, get_settings()).claim(review_id, user.username)
+        return {"status": review.status, "claimedBy": review.claimed_by, "claimedAt": review.claimed_at}
+    except ReviewConflictError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+
+@router.post("/api/admin/reviews/{review_id}/reply")
+def reply_to_user(
+    review_id: int,
+    request: HumanReplyRequest,
+    user: Annotated[UserAccount, Depends(require_admin)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    try:
+        message = ReviewService(db, get_settings()).reply(
+            review_id, request.content, user.username, request.clientRequestId,
+        )
+        return {"status": "in_progress", "messageId": message.id}
+    except ReviewConflictError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+
+@router.post("/api/admin/reviews/{review_id}/contact")
+def record_offsite_contact(
+    review_id: int,
+    request: OffsiteContactRequest,
+    user: Annotated[UserAccount, Depends(require_admin)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    try:
+        contact = ReviewService(db, get_settings()).record_offsite_contact(
+            review_id,
+            contact_method=request.contactMethod,
+            contacted_at=request.contactedAt,
+            outcome=request.outcome,
+            next_step=request.nextStep,
+            recorded_by=user.username,
+            client_request_id=request.clientRequestId,
+        )
+        return {"status": "in_progress", "contactId": contact.id}
+    except ReviewConflictError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
 
 
 @router.post("/api/admin/reviews/{review_id}/decision")
-async def decide_review(
+def decide_review(
     review_id: int,
     request: ReviewDecisionRequest,
     user: Annotated[UserAccount, Depends(require_admin)],
     db: Annotated[Session, Depends(get_db)],
 ):
-    # 校验并执行授权审核人员提交的决定，返回处理状态及用户消息摘要。
-    # 放行或拒绝会尝试恢复暂停的对话；恢复降级时标记安全升级，其余决定直接记录并保存对应用户消息。
-    # 不存在或不再待处理的记录返回 404；决定内容不合法时返回 400。
-    decision = (request.decision or "").strip().lower()
-    # 统一去除空白并转成小写后，再按允许的决定集合进行校验。
-    if decision not in REVIEW_DECISIONS:
-        raise HTTPException(400, f"Invalid decision: {decision}. Valid: {sorted(REVIEW_DECISIONS)}")
-
-    reviews = ReviewService(db, get_settings())
-    review = reviews.get_review(review_id)
-    if review is None or review.status != "pending":
-        raise HTTPException(404, f"Review {review_id} not found or not pending")
-
-    decision_details = {
-        "referral_target": request.referralTarget,
-        "next_step": request.nextStep,
-        "follow_up_owner": request.followUpOwner,
-        "follow_up_at": request.followUpAt,
-    }
-
-    def record_decision():
-        """使用外层已校验的决定及处理详情更新审核记录。
-
-        闭包直接使用当前审核编号、人员名称和请求内容，避免各处理分支重复拼装参数。
-        """
-        return reviews.mark_decision(
-            review_id,
-            decision,
-            request.note or "",
-            user.username,
-            **decision_details,
-        )
-
     try:
-        if decision in {"approve", "reject"}:
-            response_text, degraded = await reviews.resume_and_respond(
-                review,
-                approved=decision == "approve",
-            )
-            # 恢复流程已转入安全降级时，不再把这次操作记录成普通放行或拒绝。
-            if degraded:
-                reviews.mark_escalated(review_id)
-                return {"status": "escalated", "responsePreview": response_text[:200]}
-            decided = record_decision()
-            return {"status": decided.status, "responsePreview": response_text[:200]}
-
-        decided = record_decision()
-        student_message = reviews.persist_student_message(decided)
-        return {"status": decided.status, "studentMessage": student_message or None}
+        outcome = ReviewOutcome(
+            decision=request.decision,
+            note=request.note or "",
+            referral_target=request.referralTarget,
+            next_step=request.nextStep,
+            follow_up_owner=request.followUpOwner,
+            follow_up_at=request.followUpAt,
+            completion_basis=request.completionBasis,
+        )
+        decided = ReviewService(db, get_settings()).mark_decision(review_id, outcome, user.username)
+        message = ReviewService.support_outcome_message(decided)
+        return {
+            "status": decided.status,
+            "supportOutcomeMessage": message,
+            "studentMessage": message,
+        }
+    except ReviewConflictError as exc:
+        raise HTTPException(409, str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc

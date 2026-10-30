@@ -61,8 +61,6 @@ class AgentRunResult:
     response_messages: list[AiMessage]
     steps: list[AgentStep]
     pending_review: bool = False
-    fallback_response: str | None = None
-    degraded: bool = False
     trajectory_rising: bool = False
     trajectory_trend: str = ""
     cbt_event: CbtEvent | None = None

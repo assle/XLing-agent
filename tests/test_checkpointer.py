@@ -237,73 +237,30 @@ def test_same_thread_two_runs():
     assert snapshot.values["intent"] == IntentType.CHAT.value
 
 
-def test_async_sqlite_checkpoint_resumes_after_runtime_restart(tmp_path):
-    """关闭首次执行器连接后，用新实例从同一临时文件批准恢复。
-
-    检查没有降级且已准备回复。
-    """
+def test_async_sqlite_high_risk_terminal_state_survives_runtime_restart(tmp_path):
+    """高风险状态跨运行时保留，但没有可恢复节点或 AI 回复。"""
     async def scenario():
-        """建立文件状态库并暂停会话，关闭连接后重新创建执行器。
-
-        批准恢复并关闭新连接，返回结果给外层断言。
-        """
         path = str(tmp_path / "checkpoints.db")
         runtime_a = _make_runtime("async_sqlite", path)
-        user, session = _user_session("persistent-approve-001")
+        user, session = _user_session("persistent-human-support-001")
         interrupted = await runtime_a.run(user, session, "我不想活了")
         assert interrupted.pending_review is True
         await runtime_a.aclose()
 
         runtime_b = _make_runtime("async_sqlite", path)
-        resumed = await runtime_b.resume("persistent-approve-001", approved=True)
+        snapshot = await runtime_b.aget_state(session.public_id)
         await runtime_b.aclose()
-        return resumed
+        return snapshot
 
-    result = asyncio.run(scenario())
+    snapshot = asyncio.run(scenario())
+    assert snapshot.next == ()
+    assert snapshot.values["awaiting_review"] is True
+    assert snapshot.values["response_messages"] == []
 
-    assert result.degraded is False
-    assert result.pending_review is False
-    assert result.response_messages
 
-
-def test_async_sqlite_checkpoint_preserves_reject_path_after_restart(tmp_path):
-    """从同一状态文件的新实例拒绝暂停会话。
-
-    检查正常恢复拒绝路径，保留固定回复且没有模型输入。
-    """
+def test_expired_persistent_checkpoint_is_cleaned_without_resume(tmp_path):
+    """过期状态仍按既有检查点策略清理，不进入旧恢复路径。"""
     async def scenario():
-        """先保存高风险暂停状态并关闭原连接，再用新实例拒绝。
-
-        通过实际文件读取检查状态可跨实例保留。
-        """
-        path = str(tmp_path / "checkpoints.db")
-        runtime_a = _make_runtime("async_sqlite", path)
-        user, session = _user_session("persistent-reject-001")
-        await runtime_a.run(user, session, "我不想活了")
-        await runtime_a.aclose()
-
-        runtime_b = _make_runtime("async_sqlite", path)
-        resumed = await runtime_b.resume("persistent-reject-001", approved=False)
-        await runtime_b.aclose()
-        return resumed
-
-    result = asyncio.run(scenario())
-
-    assert result.degraded is False
-    assert result.fallback_response
-    assert result.response_messages == []
-
-
-def test_expired_persistent_checkpoint_safely_degrades(tmp_path):
-    """把已保存会话的活动时间设为很久以前。
-
-    新实例恢复时应清理过期状态并安全降级。
-    """
-    async def scenario():
-        """准备暂停状态后直接修改临时活动表时间。
-
-        重新初始化触发过期清理，再尝试批准并返回结果。
-        """
         path = str(tmp_path / "checkpoints.db")
         runtime_a = _make_runtime("async_sqlite", path)
         user, session = _user_session("persistent-expired-001")
@@ -313,56 +270,23 @@ def test_expired_persistent_checkpoint_safely_degrades(tmp_path):
         connection = sqlite3.connect(path)
         connection.execute(
             "UPDATE xling_checkpoint_activity SET updated_at = ? WHERE thread_id = ?",
-            ("2000-01-01T00:00:00", "persistent-expired-001"),
+            ("2000-01-01T00:00:00", session.public_id),
         )
         connection.commit()
         connection.close()
 
         runtime_b = _make_runtime("async_sqlite", path)
-        result = await runtime_b.resume("persistent-expired-001", approved=True)
+        snapshot = await runtime_b.aget_state(session.public_id)
         await runtime_b.aclose()
-        return result
+        return snapshot
 
-    result = asyncio.run(scenario())
-
-    assert result.degraded is True
-    assert result.fallback_response
-
-
-def test_corrupt_paused_business_state_uses_safe_fallback():
-    """A HIGH-risk pause cannot resume as an ordinary chat or without its assessment."""
-    async def scenario(update, thread_id):
-        runtime = _make_runtime("memory")
-        user, session = _user_session(thread_id)
-        interrupted = await runtime.run(user, session, "我不想活了")
-        assert interrupted.pending_review
-        config = {"configurable": {"thread_id": thread_id}}
-        await runtime.graph.aupdate_state(config, update, as_node="risk_guardian")
-        return await runtime.resume(thread_id, approved=True)
-
-    updates = [
-        {"intent": "CHAT"},
-        {"assessment": None},
-        {"assessment": {}},
-        {"assessment": {
-            "emotion": "ANXIETY", "emotion_score": 2.0, "risk": "LOW",
-            "confidence": 0.8, "summary": "low risk", "model_version": "test",
-        }},
-        {"assessment": {
-            "emotion": "DEPRESSED", "emotion_score": 3.0, "risk": "MEDIUM",
-            "confidence": 0.8, "summary": "medium risk", "model_version": "test",
-        }},
-    ]
-    for index, update in enumerate(updates):
-        result = asyncio.run(scenario(update, f"corrupt-native-business-{index}"))
-        assert result.degraded
-        assert result.fallback_response
-        assert result.response_messages == []
-        assert not result.pending_review
+    snapshot = asyncio.run(scenario())
+    assert snapshot.next == ()
+    assert snapshot.values == {}
 
 
-def test_rising_medium_assessment_can_resume_high_risk_review():
-    """A legitimate trajectory escalation remains recoverable after invariant checks."""
+def test_rising_medium_assessment_enters_terminal_human_support():
+    """轨迹升级保留原评估和高风险交接结果，图直接终止。"""
     from app.core.enums import EmotionLabel, RiskLevel
     from app.services.assessment import PsychologyAssessment
     from app.services.risk_trajectory import RiskTrajectoryService
@@ -385,17 +309,17 @@ def test_rising_medium_assessment_can_resume_high_risk_review():
         user, session = _user_session("native-rising-medium-review")
 
         async def scenario():
-            paused = await runtime.run(user, session, "最近压力很大，睡不着")
-            assert paused.pending_review
-            assert paused.assessment.risk == RiskLevel.MEDIUM
-            assert paused.risk_level == RiskLevel.HIGH
-            assert paused.trajectory_rising
-            return await runtime.resume(session.public_id, approved=True)
+            result = await runtime.run(user, session, "最近压力很大，睡不着")
+            snapshot = await runtime.aget_state(session.public_id)
+            return result, snapshot
 
-        result = asyncio.run(scenario())
-        assert not result.degraded
-        assert result.response_messages
+        result, snapshot = asyncio.run(scenario())
+        assert result.pending_review
+        assert result.assessment.risk == RiskLevel.MEDIUM
         assert result.risk_level == RiskLevel.HIGH
+        assert result.trajectory_rising
+        assert result.response_messages == []
+        assert snapshot.next == ()
     finally:
         db.close()
         harness.close()

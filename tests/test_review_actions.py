@@ -85,12 +85,16 @@ def test_refer_decision_persists_action_and_student_message():
     检查审核字段已保存、状态为已转介，并实际新增用户可见会话消息。
     """
     review_id = _seed_review()
+    headers = _auth(_admin_token())
+    claimed = client.post(f"/api/admin/reviews/{review_id}/claim", headers=headers)
+    assert claimed.status_code == 200
     response = client.post(
         f"/api/admin/reviews/{review_id}/decision",
         json={
             "decision": "refer",
             "referralTarget": "学校心理中心",
             "nextStep": "今天联系值班老师",
+            "followUpOwner": "值班老师",
         },
         headers=_auth(_admin_token()),
     )

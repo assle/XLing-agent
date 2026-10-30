@@ -139,7 +139,7 @@ def test_daily_http_turns_persist_messages_and_have_independent_complete_traces(
     assert marker not in json.dumps(records) + terminal.out + terminal.err
 
 
-def test_paused_http_turn_is_protected_and_review_reconstruction_links_its_original_run(native_api, capsys):
+def test_high_risk_http_turn_continues_as_human_support_without_graph_resume(native_api, capsys):
     harness, settings, user_headers, reviewer_headers = native_api
     marker = "PRIVATE-SYNTHETIC-HIGH-RISK-CONTENT"
     paused = _events(harness.client.post(
@@ -152,13 +152,11 @@ def test_paused_http_turn_is_protected_and_review_reconstruction_links_its_origi
     pending = harness.client.get("/api/admin/reviews", headers=reviewer_headers).json()
     assert len(pending) == 1
     review_id = pending[0]["reviewId"]
-    original_records = _records(settings)
-    original_id = next(row["run_id"] for row in original_records if row["event"] == "chat.request.start")
-    original = [row for row in original_records if row["run_id"] == original_id]
-    assert "node.risk_guardian_gate.interrupted" in {row["event"] for row in original}
-    assert "graph.interrupted" in {row["event"] for row in original}
+    original = _records(settings)
+    assert "node.risk_guardian_gate.end" in {row["event"] for row in original}
+    assert "graph.completed" in {row["event"] for row in original}
+    assert "graph.interrupted" not in {row["event"] for row in original}
     assert not any(row["event"].endswith(".failed") for row in original)
-    assert not any(row["event"] == "chat.stream.start" for row in original)
     saved = next(row for row in original if row["event"] == "support_turn.persisted")
     assert saved["review_id"] == review_id
     assert saved["user_message_id"] > 0
@@ -166,51 +164,47 @@ def test_paused_http_turn_is_protected_and_review_reconstruction_links_its_origi
     assert {row["report_id"] for row in registered} == {saved["report_id"]}
     assert len({row["job_id"] for row in registered}) == 2
 
-    blocked = harness.client.post(
+    followed_up = _events(harness.client.post(
         "/api/chat/stream", json={"sessionId": session_id, "message": "继续说"}, headers=user_headers,
-    )
-    assert blocked.status_code == 409
-    assert harness.client.get(f"/api/sessions/{session_id}", headers=user_headers).json() == waiting
-    rejection = next(row for row in _records(settings) if row["event"] == "chat.blocked")
-    assert rejection["reason_code"] == "PENDING_REVIEW"
-    assert not any(
-        row["run_id"] == rejection["run_id"] and row["event"] == "graph.run.start"
-        for row in _records(settings)
-    )
+    ))
+    assert [name for name, _ in followed_up] == ["meta", "pending_review", "done"]
+    supplemented = harness.client.get(f"/api/sessions/{session_id}", headers=user_headers).json()
+    assert supplemented["supportStatus"] == "pending"
+    assert len(supplemented["messages"]) == 4
+
     unrelated = _events(harness.client.post(
         "/api/chat/stream", json={"message": "Python 怎么排序列表？"}, headers=user_headers,
     ))
     assert unrelated[-1][0] == "done"
 
-    # Reconstruct the HTTP client. Production chat already closed its SQLite runtime;
-    # the review endpoint builds a new runtime from the saved checkpoint file.
     harness.client.close()
     harness.client = TestClient(harness.app)
-    approved = harness.client.post(
+    legacy = harness.client.post(
         f"/api/admin/reviews/{review_id}/decision", json={"decision": "approve"}, headers=reviewer_headers,
     )
-    assert approved.status_code == 200, approved.text
-    assert approved.json()["status"] == "approved"
+    assert legacy.status_code == 400
+    claimed = harness.client.post(f"/api/admin/reviews/{review_id}/claim", headers=reviewer_headers)
+    assert claimed.status_code == 200
+    replied = harness.client.post(
+        f"/api/admin/reviews/{review_id}/reply", json={"content": "支持人员已查看你的补充"},
+        headers=reviewer_headers,
+    )
+    assert replied.status_code == 200
+    completed = harness.client.post(
+        f"/api/admin/reviews/{review_id}/decision",
+        json={"decision": "complete", "note": "已核对安排", "completionBasis": "已确认现实支持"},
+        headers=reviewer_headers,
+    )
+    assert completed.status_code == 200
     restored = harness.client.get(f"/api/sessions/{session_id}", headers=user_headers).json()
     assert restored["pendingReview"] is False
-    assert len(restored["messages"]) == 3
-    assert restored["messages"][-1]["content"].startswith(approved.json()["responsePreview"])
-    continued = _events(harness.client.post(
-        "/api/chat/stream", json={"sessionId": session_id, "message": "Python 怎么排序？"}, headers=user_headers,
-    ))
-    assert continued[-1][0] == "done"
+    assert restored["supportStatus"] == "completed"
+    assert restored["messages"][-2]["senderLabel"] == "支持人员"
+    assert restored["messages"][-1]["senderLabel"] == "支持人员"
 
     records = _records(settings)
-    review_start = next(row for row in records if row["event"] == "review.request.start")
-    assert review_start["run_id"] != original_id
-    assert review_start["review_id"] == review_id
-    review = [row for row in records if row["run_id"] == review_start["run_id"]]
-    assert {
-        "graph.resume.end", "review.restore.end", "review.stream.end", "review.save.end", "review.request.end",
-    } <= {row["event"] for row in review}
-    assert review[-1]["origin_run_id"] == original_id
-    assert next(row for row in review if row["event"] == "review.waited")["wait_ms"] >= 0
-    assert review[-1]["duration_ms"] >= 0
+    assert not any(row["event"].startswith("graph.resume") for row in records)
+    assert not any(row["event"].startswith("review.restore") for row in records)
     terminal = capsys.readouterr()
     assert marker not in json.dumps(records) + terminal.out + terminal.err
 

@@ -132,11 +132,15 @@ def test_conversation_message_dates_are_utc_and_roles_retain_the_storage_contrac
     for endpoint in ("/api/sessions/time-session", "/api/admin/conversations/time-session"):
         response = harness.client.get(endpoint, headers=headers)
         assert response.status_code == 200
-        assert response.json()["messages"][0] == {"role": "USER", "content": "虚构消息", "createdAt": UTC_TIME}
+        assert response.json()["messages"][0] == {
+            "role": "USER", "content": "虚构消息", "createdAt": UTC_TIME, "senderLabel": None,
+        }
 
 
 def test_review_follow_up_offset_round_trips_through_naive_utc_storage(seeded_api):
     harness, headers, review_id = seeded_api
+    claimed = harness.client.post(f"/api/admin/reviews/{review_id}/claim", headers=headers)
+    assert claimed.status_code == 200
     response = harness.client.post(f"/api/admin/reviews/{review_id}/decision", headers=headers, json={
         "decision": "monitor", "followUpOwner": "虚构负责人", "followUpAt": "2026-10-02T10:00:00+08:00",
     })

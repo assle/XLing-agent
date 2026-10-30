@@ -187,17 +187,15 @@ def test_crisis_acknowledgment_is_fixed_message():
 
 
 # ---------------------------------------------------------------------------
-# 暂停时等待的是审核关口节点，收到决定后才能继续。
+# 高风险在评估后直接进入专业支持结果，不暂停等待 AI 恢复决定。
 # ---------------------------------------------------------------------------
 
-def test_interrupted_state_has_gate_pending():
-    """高风险暂停后读取保存状态。
-
-    检查等待继续的节点是审核关口，便于之后恢复。
-    """
+def test_high_risk_graph_finishes_without_resumable_gate():
     runtime = _setup_runtime(LangGraphAgentRuntimeService)
     user, session = _user_session("interrupt-next-001")
-    asyncio.run(runtime.run(user, session, "我不想活了"))
+    result = asyncio.run(runtime.run(user, session, "我不想活了"))
     state = runtime.get_state("interrupt-next-001")
-    assert state.next  # non-empty -> interrupted
-    assert "risk_guardian_gate" in state.next  # gate node paused, awaiting resume
+    assert result.pending_review is True
+    assert state.next == ()
+    assert state.values["awaiting_review"] is True
+    assert state.values["response_messages"] == []

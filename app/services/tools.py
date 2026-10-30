@@ -10,10 +10,34 @@ from sqlalchemy.orm import Session
 
 from app.core import diagnostics
 from app.core.config import Settings
-from app.core.enums import ToolStatus
+from app.core.enums import ToolJobKind, ToolStatus
 from app.models.entities import AlertRecord, ExcelRecord, SafetyAssessmentRecord, UserAccount
 
 EXCEL_WRITE_LOCK = threading.RLock()
+
+_NOTIFICATION_PROPERTIES = {
+    ToolJobKind.RISK_ALERT: {
+        "label": "高风险预警",
+        "recipient_settings": ("alert_email_to",),
+        "missing_recipient": "ALERT_EMAIL_TO",
+        "subject_setting": "alert_email_subject_prefix",
+        "heading": "Xling 检测到一条高风险安全预警，请尽快由授权审核团队安排跟进。",
+    },
+    ToolJobKind.ESCALATION_ALERT: {
+        "label": "人工支持超时升级",
+        "recipient_settings": ("escalation_alert_email_to", "alert_email_to"),
+        "missing_recipient": "ESCALATION_ALERT_EMAIL_TO 或 ALERT_EMAIL_TO",
+        "subject_setting": None,
+        "heading": "Xling 人工支持等待超时，请备用或上级支持人员尽快接手；需求仍未终结。",
+    },
+    ToolJobKind.FOLLOW_UP_REMINDER: {
+        "label": "持续关注到期提醒",
+        "recipient_settings": ("alert_email_to",),
+        "missing_recipient": "ALERT_EMAIL_TO",
+        "subject_setting": None,
+        "heading": "Xling 持续关注安排已到期，请负责人按记录跟进；此提醒不代表人工已经完成跟进。",
+    },
+}
 
 
 class ToolOrchestrationService:
@@ -101,102 +125,93 @@ class ToolOrchestrationService:
                     workbook.close()
         return deleted
 
-    def notify(self, report: SafetyAssessmentRecord) -> AlertRecord:
-        """根据投递模式处理风险通知并保存结果。
-
-        已有成功记录时复用；log 模式只登记，smtp 模式通过邮件服务器发送，未知模式或配置缺失登记失败。
-        邮件发送异常转为失败记录，调用方须检查返回状态。
-        """
-        with diagnostics.stage("tool.notification", report_id=report.id):
+    def notify(
+        self, report: SafetyAssessmentRecord, *, kind: ToolJobKind = ToolJobKind.RISK_ALERT,
+    ) -> AlertRecord:
+        """按任务类型投递通知，分别记录真实结果，复用同类型成功记录。"""
+        properties = _NOTIFICATION_PROPERTIES[kind]
+        label = properties["label"]
+        with diagnostics.stage("tool.notification", report_id=report.id, notification_kind=kind.value):
             existing = (
                 self.db.query(AlertRecord)
-                .filter(AlertRecord.report_id == report.id, AlertRecord.status == ToolStatus.SUCCESS.value)
+                .filter(
+                    AlertRecord.report_id == report.id,
+                    AlertRecord.notification_kind == kind.value,
+                    AlertRecord.status == ToolStatus.SUCCESS.value,
+                )
                 .first()
             )
             if existing is not None:
                 diagnostics.emit("tool.reused", tool="notification", report_id=report.id)
                 return existing
-            recipient = self.settings.alert_email_to.strip() or "unconfigured"
+            recipient = ", ".join(self._recipients(kind)) or "unconfigured"
             mode = self.settings.alert_email_delivery_mode.strip().lower()
-            # 记录模式没有外部邮件投递；成功表示通知已记录。
             if mode == "log":
                 return self._save_alert(
-                    report,
-                    recipient if recipient != "unconfigured" else "log",
-                    ToolStatus.SUCCESS.value,
-                    f"高风险预警已记录：reportId={report.id}，deliveryMode=log",
+                    report, recipient if recipient != "unconfigured" else "log", ToolStatus.SUCCESS.value,
+                    f"{label}已记录：reportId={report.id}，deliveryMode=log", notification_kind=kind.value,
                 )
             if mode != "smtp":
                 diagnostics.degraded("tool.notification", "unknown_delivery_mode", report_id=report.id)
                 return self._save_alert(
-                    report,
-                    recipient,
-                    ToolStatus.FAILED.value,
-                    f"高风险预警邮件未发送：未知投递模式 {self.settings.alert_email_delivery_mode}",
+                    report, recipient, ToolStatus.FAILED.value,
+                    f"{label}邮件未发送：未知投递模式 {self.settings.alert_email_delivery_mode}",
+                    notification_kind=kind.value,
                 )
-            # 先检查必要配置，避免缺少地址时仍尝试连接邮件服务器。
-            missing = self._missing_email_config()
+            missing = self._missing_email_config(kind)
             if missing:
                 diagnostics.degraded("tool.notification", "missing_email_configuration", report_id=report.id)
                 return self._save_alert(
-                    report,
-                    recipient,
-                    ToolStatus.FAILED.value,
-                    f"高风险预警邮件未发送：缺少配置 {', '.join(missing)}",
+                    report, recipient, ToolStatus.FAILED.value,
+                    f"{label}邮件未发送：缺少配置 {', '.join(missing)}", notification_kind=kind.value,
                 )
             try:
-                # 只有真实发送模式且配置齐全才进入邮件连接过程。
-                self._send_alert_email(report)
+                self._send_alert_email(report, kind)
             except Exception as exc:
                 diagnostics.degraded("tool.notification", "email_delivery_failed", exc, report_id=report.id)
                 return self._save_alert(
-                    report,
-                    recipient,
-                    ToolStatus.FAILED.value,
-                    f"高风险预警邮件发送失败：{type(exc).__name__}: {exc}",
+                    report, recipient, ToolStatus.FAILED.value,
+                    f"{label}邮件发送失败：{type(exc).__name__}: {exc}", notification_kind=kind.value,
                 )
-            return self._save_alert(report, recipient, ToolStatus.SUCCESS.value, f"高风险预警邮件已发送：reportId={report.id}")
+            return self._save_alert(
+                report, recipient, ToolStatus.SUCCESS.value,
+                f"{label}邮件已发送：reportId={report.id}", notification_kind=kind.value,
+            )
 
-    def _save_alert(self, report: SafetyAssessmentRecord, recipient: str, status: str, message: str) -> AlertRecord:
-        """保存通知的收件人、状态和结果文字。
-
-        提交数据库后返回记录；状态由调用方传入，本方法不执行邮件投递。
-        """
+    def _save_alert(
+        self, report: SafetyAssessmentRecord, recipient: str, status: str, message: str,
+        *, notification_kind: str = "RISK_ALERT",
+    ) -> AlertRecord:
+        """保存通知的收件人、状态和结果文字。"""
         record = AlertRecord(
-            report_id=report.id,
-            channel="email",
-            recipient=recipient,
-            status=status,
-            message=message,
+            report_id=report.id, channel="email", notification_kind=notification_kind,
+            recipient=recipient, status=status, message=message,
         )
         self.db.add(record)
         self.db.commit()
         return record
 
-    def _missing_email_config(self) -> list[str]:
-        """检查邮件发送所需的服务器、发件人和收件人配置。
-
-        返回缺失项名称，不验证网络连通性或账号密码是否正确。
-        """
+    def _missing_email_config(self, kind: ToolJobKind) -> list[str]:
+        """检查邮件发送所需的服务器、发件人和当前通知类型的收件人配置。"""
         missing = []
         if not self.settings.smtp_host.strip():
             missing.append("SMTP_HOST")
         if not self._sender():
             missing.append("ALERT_EMAIL_FROM 或 SMTP_USERNAME")
-        if not self._recipients():
-            missing.append("ALERT_EMAIL_TO")
+        if not self._recipients(kind):
+            missing.append(_NOTIFICATION_PROPERTIES[kind]["missing_recipient"])
         return missing
 
-    def _send_alert_email(self, report: SafetyAssessmentRecord) -> None:
-        """组装风险通知并通过配置的邮件连接发送。
-
-        优先采用建立连接即加密的方式，否则可按配置升级为加密连接；连接用完后自动关闭。
-        """
+    def _send_alert_email(self, report: SafetyAssessmentRecord, kind: ToolJobKind) -> None:
+        """按共享通知属性组装邮件并通过配置的邮件连接发送。"""
+        properties = _NOTIFICATION_PROPERTIES[kind]
         message = EmailMessage()
-        message["Subject"] = f"{self.settings.alert_email_subject_prefix} reportId={report.id}"
+        subject_setting = properties["subject_setting"]
+        subject = getattr(self.settings, subject_setting) if subject_setting else properties["label"]
+        message["Subject"] = f"{subject} reportId={report.id}"
         message["From"] = self._sender()
-        message["To"] = ", ".join(self._recipients())
-        message.set_content(self._email_body(report))
+        message["To"] = ", ".join(self._recipients(kind))
+        message.set_content(self._email_body(report, kind))
 
         context = ssl.create_default_context()
         if self.settings.smtp_use_ssl:
@@ -225,17 +240,14 @@ class ToolOrchestrationService:
             server.login(self.settings.smtp_username, self.settings.smtp_password)
         server.send_message(message)
 
-    def _email_body(self, report: SafetyAssessmentRecord) -> str:
-        """根据安全评估记录和关联用户信息构造邮件正文。
-
-        当前正文包含用户标识、摘要及原始消息；不调用脱敏器，不应把它描述为脱敏摘要。
-        """
+    def _email_body(self, report: SafetyAssessmentRecord, kind: ToolJobKind) -> str:
+        """按通知类型构造正文；正文包含原始消息，不应描述为脱敏摘要。"""
         user = self.db.get(UserAccount, report.user_id)
         username = user.username if user else f"userId={report.user_id}"
         display_name = user.display_name if user else ""
         return "\n".join(
             [
-                "Xling 检测到一条高风险安全预警，请尽快由授权审核团队安排跟进。",
+                _NOTIFICATION_PROPERTIES[kind]["heading"],
                 "",
                 f"报告ID：{report.id}",
                 f"用户：{display_name} ({username})" if display_name else f"用户：{username}",
@@ -257,10 +269,13 @@ class ToolOrchestrationService:
         """
         return self.settings.alert_email_from.strip() or self.settings.smtp_username.strip()
 
-    def _recipients(self) -> list[str]:
-        """将逗号或分号分隔的收件人配置转换成列表。
-
-        去掉空白与空项，不在此验证地址格式或去重。
-        """
-        normalized = self.settings.alert_email_to.replace(";", ",")
+    def _recipients(self, kind: ToolJobKind) -> list[str]:
+        """按共享映射选择当前通知类型的接收方，不回退虚构地址。"""
+        configured = ""
+        for setting_name in _NOTIFICATION_PROPERTIES[kind]["recipient_settings"]:
+            value = getattr(self.settings, setting_name).strip()
+            if value:
+                configured = value
+                break
+        normalized = configured.replace(";", ",")
         return [recipient.strip() for recipient in normalized.split(",") if recipient.strip()]

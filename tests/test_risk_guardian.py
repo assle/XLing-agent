@@ -123,7 +123,7 @@ def test_chat_intent_skips_risk_guardian():
     assert not result.pending_review
 
 
-def test_resume_does_not_repeat_risk_assessment():
+def test_high_risk_assessment_runs_once_before_terminal_handoff():
     runtime = _make_runtime('{"emotion":"HIGH_RISK","emotionScore":4.0,"risk":"HIGH","confidence":0.9,"summary":"danger"}')
     original = runtime.assessment.aassess
     calls = []
@@ -133,10 +133,11 @@ def test_resume_does_not_repeat_risk_assessment():
         return await original(text)
 
     runtime.assessment.aassess = counted
-    interrupted = _run(runtime, IntentType.RISK, "我不想活了", thread_id="risk-once-on-resume")
-    assert interrupted.pending_review
-    resumed = asyncio.run(runtime.resume("risk-once-on-resume", approved=True))
-    assert resumed.response_messages
+    result = _run(runtime, IntentType.RISK, "我不想活了", thread_id="risk-once-human-support")
+    snapshot = asyncio.run(runtime.aget_state("risk-once-human-support"))
+    assert result.pending_review
+    assert result.response_messages == []
+    assert snapshot.next == ()
     assert calls == ["我不想活了"]
 
 

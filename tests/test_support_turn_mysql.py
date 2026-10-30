@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from datetime import UTC, datetime
 
 import pytest
 from sqlalchemy import create_engine, make_url
@@ -13,12 +14,15 @@ from app.core.enums import EmotionLabel, IntentType, RiskLevel
 from app.models.entities import (
     ChatMessage,
     ChatSession,
+    OffsiteContactRecord,
     ReviewRequest,
     SafetyAssessmentRecord,
+    SupportAuditEvent,
     ToolJob,
     UserAccount,
 )
 from app.services.assessment import PsychologyAssessment
+from app.services.review import ReviewOutcome, ReviewService
 from app.services.support_turn import SupportTurnTransaction
 
 MYSQL_TEST_DATABASE_URL = os.getenv("MYSQL_TEST_DATABASE_URL", "")
@@ -117,3 +121,69 @@ def test_mysql_fault_injection_rolls_back_the_whole_support_turn(mysql_db, stage
     assert mysql_db.query(SafetyAssessmentRecord).count() == 0
     assert mysql_db.query(ReviewRequest).count() == 0
     assert mysql_db.query(ToolJob).count() == 0
+
+
+def _seed_human_review(db):
+    user, session = _seed(db)
+    report = SafetyAssessmentRecord(
+        user_id=user.id, session_id=session.id, content="我不想活了", intent="RISK",
+        emotion="HIGH_RISK", emotion_score=4.0, risk_level="HIGH", confidence=0.95, summary="高风险",
+    )
+    db.add(report)
+    db.flush()
+    review = ReviewRequest(
+        session_id=session.id, report_id=report.id, thread_id=session.public_id,
+        risk_summary="高风险", status="pending",
+    )
+    db.add(review)
+    db.commit()
+    return user, session, review
+
+
+def test_mysql_human_support_follow_up_rolls_back_both_messages(mysql_db):
+    user, session, review = _seed_human_review(mysql_db)
+
+    def fail(stage: str) -> None:
+        if stage == "human_support_follow_up":
+            raise RuntimeError("fail after follow up")
+
+    with pytest.raises(RuntimeError, match="fail after follow up"):
+        SupportTurnTransaction(mysql_db, Settings(), fault_injector=fail).save_human_support_follow_up(
+            user=user, session=session, review=review, content="补充情况", acknowledgment="已收到",
+        )
+
+    assert mysql_db.query(ChatMessage).count() == 0
+    assert mysql_db.get(ReviewRequest, review.id).status == "pending"
+
+
+@pytest.mark.parametrize("stage", ["human_reply", "offsite_contact", "outcome"])
+def test_mysql_human_action_and_audit_roll_back_together(mysql_db, stage):
+    _, _, review = _seed_human_review(mysql_db)
+    settings = Settings()
+    ReviewService(mysql_db, settings).claim(review.id, "admin")
+
+    def fail(current_stage: str) -> None:
+        if current_stage == stage:
+            raise RuntimeError(f"fail after {stage}")
+
+    service = ReviewService(mysql_db, settings, fault_injector=fail)
+    with pytest.raises(RuntimeError, match=f"fail after {stage}"):
+        if stage == "human_reply":
+            service.reply(review.id, "人工回复", "admin", "mysql-reply-1")
+        elif stage == "offsite_contact":
+            service.record_offsite_contact(
+                review.id, contact_method="电话", contacted_at=datetime(2026, 10, 30, tzinfo=UTC),
+                outcome="已联系", next_step="继续跟进", recorded_by="admin", client_request_id="mysql-contact-1",
+            )
+        else:
+            service.mark_decision(
+                review.id,
+                ReviewOutcome(decision="complete", note="处理记录", completion_basis="完成依据"),
+                "admin",
+            )
+
+    assert mysql_db.get(ReviewRequest, review.id).status == "in_progress"
+    assert mysql_db.query(ChatMessage).count() == 0
+    assert mysql_db.query(OffsiteContactRecord).count() == 0
+    assert mysql_db.query(SupportAuditEvent).filter_by(review_id=review.id).count() == 1
+    assert mysql_db.query(SupportAuditEvent).filter_by(review_id=review.id).one().event_type == "claimed"

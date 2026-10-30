@@ -49,7 +49,7 @@ Caddy 会自动为你的域名签发 HTTPS 证书（通过 Let's Encrypt）。
 - 访问 `https://your-domain.com/api/privacy` 查看隐私说明（无需登录）
 - 访问 `https://your-domain.com/actuator/health` 检查接口存活状态
 
-健康接口的 `UP` 表示接口可以响应，不逐个验证数据库、远程回答模型或本地分类器；管理页面中的 `READY` 也只是组件说明。实际联调需确认普通回复、心理支持分类、高风险暂停与人工审核恢复均能完成，分类输出与失败位置可按 [ADR-0012](adr/0012-langgraph-runtime-and-local-diagnostics.md) 查看执行诊断。
+健康接口的 `UP` 表示接口可以响应，不逐个验证数据库、远程回答模型或本地分类器；管理页面中的 `READY` 也只是组件说明。实际联调需确认普通回复、心理支持分类，以及高风险固定确认、继续留言、人工接手、回复、站外联系和三类处置均能完成；不再验证批准后的图恢复。分类输出与失败位置可按 [ADR-0012](adr/0012-langgraph-runtime-and-local-diagnostics.md) 查看执行诊断，人工支持契约见 [ADR-0018](adr/0018-high-risk-human-support.md)。
 
 ## 架构
 
@@ -69,6 +69,8 @@ Internet -> Caddy (80/443, auto-HTTPS) -> App (8080, internal)
 - `JWT_SECRET_KEY` 必须设置（缺失时启动失败）
 - `MYSQL_PASSWORD` / `MYSQL_ROOT_PASSWORD` 必须使用强密码
 - `AI_PROVIDER=openai` 时，`OPENAI_API_KEY` 是远程回答服务所需凭据；知识向量可通过 `EMBEDDING_BASE_URL` / `EMBEDDING_API_KEY` 单独配置，留空时使用回答接口配置
+- `ESCALATION_ALERT_EMAIL_TO` 配置人工支持超时升级接收方，留空时回退 `ALERT_EMAIL_TO`；部署验收必须核对真实接收方可收到通知，不能只检查队列状态
+- 真实专业支持人员、站外联系方式和线下转介能力由部署机构配置并验收；系统状态、通知或完成记录不代表现实服务已经完成
 - 密码使用 bcrypt 存储，登录使用 24h JWT
 
 ## 备份
@@ -99,7 +101,7 @@ docker compose up -d app
 
 命令清理旧会话及关联安全评估、审核、任务、行动计划和反馈，清理对应会话缓存、配置检查点及 WAL/SHM、失效清理任务和本地台账导出。账户、支持背景、记忆卡片、独立筛查和知识、模型、配置继续保留；不会清空整个 Redis、数据目录或数据卷。
 
-返回 JSON 的 `completed=true` 且退出码为 0，才表示各存储核验完成。失败会报告阶段与固定原因或异常类别；SQL 未提交时保留退休编号供离线重试。重启后使用不携带旧会话编号的新请求；待审核会话暂停发送，审核结束后界面自动恢复。
+返回 JSON 的 `completed=true` 且退出码为 0，才表示各存储核验完成。失败会报告阶段与固定原因或异常类别；SQL 未提交时保留退休编号供离线重试。重启后使用不携带旧会话编号的新请求；人工支持等待与处理中都可继续留言，终结后不再轮询。高风险工作流升级不恢复旧中断检查点，也不执行旧数据迁移。
 
 ## 回滚
 

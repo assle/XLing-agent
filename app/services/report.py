@@ -122,14 +122,8 @@ class ReportService:
         session = self.db.query(ChatSession).filter(ChatSession.public_id == public_id).first()
         if session is None:
             raise ValueError("Session not found")
-        rows = self.db.query(ChatMessage).filter(ChatMessage.session_id == session.id).order_by(ChatMessage.created_at.asc()).all()
-        return ConversationResponse(
-            sessionId=session.public_id,
-            title=session.title,
-            noMemory=session.no_memory,
-            pendingReview=self._pending_review(session.id),
-            messages=[ConversationMessageResponse(role=row.role, content=row.content, createdAt=row.created_at) for row in rows],
-        )
+        return self._conversation_response(session)
+
     def list_sessions(self, user_id: int) -> list[dict]:
         """列出指定用户最近更新的最多五十个会话。
 
@@ -165,19 +159,42 @@ class ReportService:
         ).first()
         if session is None:
             return None
-        rows = self.db.query(ChatMessage).filter(ChatMessage.session_id == session.id).order_by(ChatMessage.created_at.asc()).all()
+        return self._conversation_response(session)
+
+    def _conversation_response(self, session: ChatSession) -> ConversationResponse:
+        """统一构造两个会话读取入口的状态、消息和发送者标识。"""
+        rows = (
+            self.db.query(ChatMessage)
+            .filter(ChatMessage.session_id == session.id)
+            .order_by(ChatMessage.created_at.asc())
+            .all()
+        )
         return ConversationResponse(
             sessionId=session.public_id,
             title=session.title,
             noMemory=session.no_memory,
             pendingReview=self._pending_review(session.id),
-            messages=[ConversationMessageResponse(role=row.role, content=row.content, createdAt=row.created_at) for row in rows],
+            supportStatus=self._support_status(session.id),
+            messages=[ConversationMessageResponse(
+                role=row.role, content=row.content, createdAt=row.created_at,
+                senderLabel="支持人员" if row.role == "SUPPORT" else None,
+            ) for row in rows],
         )
 
     def _pending_review(self, session_id: int) -> bool:
         return self.db.query(ReviewRequest.id).filter(
-            ReviewRequest.session_id == session_id, ReviewRequest.status == "pending",
+            ReviewRequest.session_id == session_id,
+            ReviewRequest.status.in_(["pending", "in_progress"]),
         ).first() is not None
+
+    def _support_status(self, session_id: int) -> str | None:
+        review = (
+            self.db.query(ReviewRequest)
+            .filter(ReviewRequest.session_id == session_id)
+            .order_by(ReviewRequest.created_at.desc())
+            .first()
+        )
+        return review.status if review is not None else None
 
     def _report_response(self, report: SafetyAssessmentRecord) -> ReportResponse:
         """补充评估记录关联的用户名称和会话公开编号。
