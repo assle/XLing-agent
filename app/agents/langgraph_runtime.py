@@ -69,7 +69,6 @@ class GraphState(TypedDict):
     steps: list[dict[str, Any]]
     trajectory_rising: bool
     trajectory_trend: str
-    review_decision: str | None
     cbt_event: dict[str, Any] | None
     action_plan_event: dict[str, Any] | None
     direct_response: str | None
@@ -138,7 +137,7 @@ class LangGraphAgentRuntimeService:
             "assessment": None, "memory_brief": "无相关历史记忆。",
             "support_background_context": "", "memory_cards_context": "", "model_history": [],
             "knowledge_query": "", "retrieved_knowledge": [], "response_messages": [], "steps": [],
-            "trajectory_rising": False, "trajectory_trend": "", "review_decision": None,
+            "trajectory_rising": False, "trajectory_trend": "",
             "cbt_event": None, "action_plan_event": None, "direct_response": None,
             "object_message": object_message, "awaiting_review": False,
             **restored,

@@ -36,6 +36,7 @@ class ToolJobKind(str, Enum):
     EXCEL_REPORT = "EXCEL_REPORT"
     RISK_ALERT = "RISK_ALERT"
     ESCALATION_ALERT = "ESCALATION_ALERT"
+    FOLLOW_UP_REMINDER = "FOLLOW_UP_REMINDER"
 
 
 class ToolJobStatus(str, Enum):

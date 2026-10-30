@@ -16,7 +16,7 @@ from app.schemas.dtos import (
 )
 from app.services.knowledge import KnowledgeService
 from app.services.report import ReportService
-from app.services.review import REVIEW_DECISIONS, ReviewConflictError, ReviewService
+from app.services.review import ReviewConflictError, ReviewOutcome, ReviewService
 
 router = APIRouter()
 
@@ -124,7 +124,7 @@ def list_reviews(
     # 按查询参数返回全部审核记录或仅待处理记录。
     # all 默认为 False；排序和字段整理统一由审核服务负责。
     reviews = ReviewService(db, get_settings())
-    return reviews.list_all() if all else reviews.list_pending()
+    return reviews.list_all() if all else reviews.list_active()
 
 
 @router.post("/api/admin/reviews/{review_id}/claim")
@@ -191,22 +191,23 @@ def decide_review(
     user: Annotated[UserAccount, Depends(require_admin)],
     db: Annotated[Session, Depends(get_db)],
 ):
-    decision = (request.decision or "").strip().lower()
-    if decision not in REVIEW_DECISIONS:
-        raise HTTPException(400, f"Invalid decision: {decision}. Valid: {sorted(REVIEW_DECISIONS)}")
     try:
-        decided = ReviewService(db, get_settings()).mark_decision(
-            review_id,
-            decision,
-            request.note or "",
-            user.username,
+        outcome = ReviewOutcome(
+            decision=request.decision,
+            note=request.note or "",
             referral_target=request.referralTarget,
             next_step=request.nextStep,
             follow_up_owner=request.followUpOwner,
             follow_up_at=request.followUpAt,
             completion_basis=request.completionBasis,
         )
-        return {"status": decided.status, "studentMessage": ReviewService.student_message(decided)}
+        decided = ReviewService(db, get_settings()).mark_decision(review_id, outcome, user.username)
+        message = ReviewService.support_outcome_message(decided)
+        return {
+            "status": decided.status,
+            "supportOutcomeMessage": message,
+            "studentMessage": message,
+        }
     except ReviewConflictError as exc:
         raise HTTPException(409, str(exc)) from exc
     except ValueError as exc:
