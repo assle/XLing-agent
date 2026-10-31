@@ -94,7 +94,7 @@ def _user_session(public_id: str):
 def test_langgraph_high_risk_interrupts():
     """通过图执行器处理明确高风险表达。
 
-    检查快速安全步骤位于最前，评估保存且进入待审核，普通回复列表为空。
+    检查评估保存且进入待审核，普通回复列表为空。
     """
     runtime = _setup_runtime(LangGraphAgentRuntimeService)
     user, session = _user_session("interrupt-high-001")
@@ -105,9 +105,6 @@ def test_langgraph_high_risk_interrupts():
     assert len(result.response_messages) == 0  # 审核前尚未准备普通支持回复。
     assert result.assessment is not None
     assert result.assessment.risk == RiskLevel.HIGH
-    assert result.quick_safety_checked is True
-    assert result.quick_risk_flagged is True
-    assert result.steps[0].action == "QUICK_SAFETY_CHECK"
 
 
 def test_langgraph_high_risk_skips_knowledge_retrieval():
@@ -144,15 +141,13 @@ def test_langgraph_assesses_support_before_knowledge():
 def test_langgraph_chat_no_interrupt():
     """运行普通编程问题。
 
-    检查完成快速安全检查但未标记高风险，直接准备回复。
+    检查直接准备回复。
     """
     runtime = _setup_runtime(LangGraphAgentRuntimeService)
     user, session = _user_session("interrupt-chat-001")
     result = asyncio.run(runtime.run(user, session, "帮我写一段 Python 代码"))
     assert result.pending_review is False
     assert len(result.response_messages) > 0
-    assert result.quick_safety_checked is True
-    assert result.quick_risk_flagged is False
 
 
 # ---------------------------------------------------------------------------

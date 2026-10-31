@@ -65,8 +65,6 @@ class AgentRunResult:
     trajectory_trend: str = ""
     cbt_event: CbtEvent | None = None
     action_plan_event: ActionPlanEvent | None = None
-    quick_safety_checked: bool = False
-    quick_risk_flagged: bool = False
     direct_response: str | None = None
 
     @property

@@ -55,7 +55,6 @@ class GraphState(TypedDict):
     no_memory: bool
     model_input: str
     original_run_id: str
-    quick_risk_flagged: bool
     intent: str | None
     risk_level: str
     assessment: dict[str, Any] | None
@@ -133,7 +132,7 @@ class LangGraphAgentRuntimeService:
             "display_name": user.display_name, "no_memory": bool(session.no_memory),
             "model_input": model_input if isinstance(model_input, str) else "",
             "original_run_id": diagnostics.current_run_id() or str(uuid4()),
-            "quick_risk_flagged": False, "intent": None, "risk_level": RiskLevel.LOW.value,
+            "intent": None, "risk_level": RiskLevel.LOW.value,
             "assessment": None, "memory_brief": "无相关历史记忆。",
             "support_background_context": "", "memory_cards_context": "", "model_history": [],
             "knowledge_query": "", "retrieved_knowledge": [], "response_messages": [], "steps": [],
@@ -180,7 +179,6 @@ class LangGraphAgentRuntimeService:
                 plan_id=plan["plan_id"], items=[ActionPlanItemEvent(**item) for item in plan["items"]],
                 feedback_due_at=plan["feedback_due_at"],
             ) if plan else None,
-            quick_safety_checked=True, quick_risk_flagged=state["quick_risk_flagged"],
             direct_response=state["direct_response"],
         )
 
@@ -298,7 +296,6 @@ class LangGraphAgentRuntimeService:
         graph = StateGraph(GraphState)
         nodes = {
             "object_entry": self._object_message_node,
-            "quick_safety": self._quick_safety_node,
             "memory": self._memory_node,
             "supervisor": self._supervisor_node,
             "risk_guardian": self._risk_guardian_node,
@@ -312,9 +309,8 @@ class LangGraphAgentRuntimeService:
             graph.add_node(name, self._observed_node(name, node))
         graph.set_entry_point("object_entry")
         graph.add_conditional_edges(
-            "object_entry", self._route_after_object_message, {"handled": END, "text": "quick_safety"},
+            "object_entry", self._route_after_object_message, {"handled": END, "text": "memory"},
         )
-        graph.add_edge("quick_safety", "memory")
         graph.add_edge("memory", "supervisor")
         graph.add_conditional_edges(
             "supervisor", self._route_after_supervisor, {"chat": "companion", "support": "risk_guardian"},
@@ -485,15 +481,6 @@ class LangGraphAgentRuntimeService:
             "direct_response": confirmation, "awaiting_review": bool(safety_message),
         }
 
-    async def _quick_safety_node(self, state: GraphState) -> GraphUpdate:
-        flagged = has_high_risk_signal(state["model_input"])
-        diagnostics.emit("safety.checked", quick_risk_flagged=flagged)
-        return {
-            "quick_risk_flagged": flagged,
-            "steps": self._steps(state, "SafetyGuard", "QUICK_SAFETY_CHECK",
-                                 "explicit high-risk signal detected" if flagged else "no explicit high-risk signal"),
-        }
-
     async def _memory_node(self, state: GraphState) -> GraphUpdate:
         history = self.memory.load_recent(state["thread_id"])
         source = "redis"
@@ -539,8 +526,7 @@ class LangGraphAgentRuntimeService:
 
     def _route_after_supervisor(self, state: GraphState) -> str:
         route = "chat" if state["intent"] == IntentType.CHAT.value else "support"
-        diagnostics.emit("branch.selected", route=route, intent=state["intent"],
-                         quick_risk_flagged=state["quick_risk_flagged"])
+        diagnostics.emit("branch.selected", route=route, intent=state["intent"])
         return route
 
     async def _risk_guardian_node(self, state: GraphState) -> GraphUpdate:
