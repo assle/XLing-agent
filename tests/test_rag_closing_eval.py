@@ -1,5 +1,6 @@
 import asyncio
 import json
+import math
 
 import pytest
 
@@ -20,14 +21,39 @@ def test_source_name_and_shared_keywords_do_not_replace_required_evidence():
     relevant = SearchResult(3, "risk-policy.md", "出现立即危险，应立即联系现实支持。", .7)
     row = score_case(case(), [irrelevant, unrelated_source, relevant], 4)
     assert row["firstRelevantRank"] == 3
+    assert row["recallAtK"] == 1
+    assert row["precisionAtK"] == .25
     assert row["reciprocalRank"] == 1 / 3
+    assert row["ndcgAtK"] == .5
     assert [item["relevant"] for item in row["retrieved"]] == [False, False, True]
+
+
+def test_recall_and_ndcg_use_all_expected_evidence():
+    multi_evidence_case = {
+        "id": "multi-evidence", "answerable": True, "safetyCritical": False,
+        "expectedEvidence": [
+            {"source": "risk-policy.md", "requiredSpans": ["立即联系现实支持"]},
+            {"source": "campus-mental-health.md", "requiredSpans": ["预约咨询"]},
+        ],
+    }
+    found = [
+        SearchResult(1, "other.md", "无关内容", .9),
+        SearchResult(2, "risk-policy.md", "立即联系现实支持", .8),
+    ]
+    row = score_case(multi_evidence_case, found, 4)
+    assert row["recallAtK"] == .5
+    assert row["precisionAtK"] == .25
+    assert row["ndcgAtK"] == pytest.approx((1 / math.log2(3)) / (1 + 1 / math.log2(3)))
 
 
 def test_evidence_beyond_top_k_does_not_count_as_hit():
     noise = SearchResult(1, "risk-policy.md", "LOW 日常支持", .9)
     relevant = SearchResult(2, "risk-policy.md", "立即联系现实支持", .8)
-    assert score_case(case(), [noise, relevant], 1)["hit"] is False
+    row = score_case(case(), [noise, relevant], 1)
+    assert row["hit"] is False
+    assert row["recallAtK"] == 0
+    assert row["precisionAtK"] == 0
+    assert row["ndcgAtK"] == 0
 
 
 def test_unanswerable_queries_have_separate_denominator_and_empty_critical_subset_is_unknown():
@@ -38,9 +64,15 @@ def test_unanswerable_queries_have_separate_denominator_and_empty_critical_subse
     summary = summarize([known, unknown])
     assert summary["answerableCases"] == 1
     assert summary["hitAt4"] == 1
+    assert summary["recallAt4"] == 1
+    assert summary["precisionAt4"] == .25
+    assert summary["ndcgAt4"] == 1
     assert summary["unanswerableCases"] == 1
     unknown_only = summarize([unknown])
     assert unknown_only["hitAt4"] is None
+    assert unknown_only["recallAt4"] is None
+    assert unknown_only["precisionAt4"] is None
+    assert unknown_only["ndcgAt4"] is None
     assert unknown_only["safetyEvidenceMissRate"] is None
 
 

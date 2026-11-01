@@ -71,15 +71,26 @@ def evidence_matches(item: SearchResult, evidence: dict) -> bool:
 def score_case(case: dict, results: list[SearchResult], top_k: int) -> dict:
     retrieved = []
     first = None
+    matched_evidence = set()
     for rank, item in enumerate(results[:top_k], 1):
-        relevant = any(evidence_matches(item, evidence) for evidence in case["expectedEvidence"])
+        matches = {index for index, evidence in enumerate(case["expectedEvidence"])
+                   if evidence_matches(item, evidence)}
+        relevant = bool(matches)
+        matched_evidence.update(matches)
         if relevant and first is None:
             first = rank
         retrieved.append({"rank": rank, "chunkID": item.chunk_id, "source": item.source,
                           "content": item.content, "score": item.score, "relevant": relevant})
+    expected_count = len(case["expectedEvidence"])
+    dcg = sum(1 / math.log2(item["rank"] + 1) for item in retrieved if item["relevant"])
+    ideal_count = min(expected_count, top_k)
+    ideal_dcg = sum(1 / math.log2(rank + 1) for rank in range(1, ideal_count + 1))
     return {"id": case["id"], "answerable": case["answerable"], "safetyCritical": case["safetyCritical"],
             "hit": first is not None, "firstRelevantRank": first,
-            "reciprocalRank": 1 / first if first else 0, "retrieved": retrieved}
+            "recallAtK": len(matched_evidence) / expected_count if expected_count else 0,
+            "precisionAtK": sum(item["relevant"] for item in retrieved) / top_k if top_k > 0 else 0,
+            "reciprocalRank": 1 / first if first else 0,
+            "ndcgAtK": dcg / ideal_dcg if ideal_dcg else 0, "retrieved": retrieved}
 
 
 def summarize(results: list[dict]) -> dict:
@@ -90,7 +101,10 @@ def summarize(results: list[dict]) -> dict:
     return {
         "totalCases": len(results), "answerableCases": len(answerable),
         "hitAt4": sum(row["hit"] for row in answerable) / len(answerable) if answerable else None,
+        "recallAt4": sum(row["recallAtK"] for row in answerable) / len(answerable) if answerable else None,
+        "precisionAt4": sum(row["precisionAtK"] for row in answerable) / len(answerable) if answerable else None,
         "mrr": sum(row["reciprocalRank"] for row in answerable) / len(answerable) if answerable else None,
+        "ndcgAt4": sum(row["ndcgAtK"] for row in answerable) / len(answerable) if answerable else None,
         "safetyCriticalCases": len(critical),
         "safetyEvidenceMissRate": sum(not row["hit"] for row in critical) / len(critical) if critical else None,
         "unanswerableCases": len(unknown),
