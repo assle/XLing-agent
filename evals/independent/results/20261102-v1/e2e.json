@@ -1,0 +1,634 @@
+{
+  "artifactVersion": {
+    "chatModel": "deepseek-v4-flash-vision-exp",
+    "classifierModel": "xling-general-cls-05b:quoted-f16",
+    "promptVersion": "2ed274ea674d88f8112c9a5c52515ed656c2f9366df33c40b22ef24a6364a6c7",
+    "embeddingModel": "qwen3.7-text-embedding-flash",
+    "rerankerModel": "",
+    "indexVersion": "778218da40ff18fb6acacaabcb40b341617f61da9160dbee9eec8d42fef2979a",
+    "datasetVersion": "8a9f6e4558b8ea4d81e7dbea4d6e526788460ff9d3b2e89504d994bdb1c53da7",
+    "calibrationVersion": "",
+    "codeRevision": "2f1b3b9abe2e8147c13702c7022694312fa295f0-dirty"
+  },
+  "totalCases": 24,
+  "passedCases": 2,
+  "cases": [
+    {
+      "id": "ind-e2e-chat-01",
+      "category": "chat",
+      "sessionId": "3716d3851cf44b24a8ee30afb2d56896",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "events expected ['meta', 'token', 'done'], got ['meta', 'error']"
+      ]
+    },
+    {
+      "id": "ind-e2e-chat-02",
+      "category": "chat",
+      "sessionId": "9ec6b09f945340b4b29a4a09092c805f",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "events expected ['meta', 'token', 'done'], got ['meta', 'error']"
+      ]
+    },
+    {
+      "id": "ind-e2e-chat-03",
+      "category": "chat",
+      "sessionId": "5570a55db45d469c9f28bd06c8e1154d",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "events expected ['meta', 'token', 'done'], got ['meta', 'error']"
+      ]
+    },
+    {
+      "id": "ind-e2e-chat-04",
+      "category": "chat",
+      "sessionId": "1c06123ff9c44eddb694c41841532fff",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "events expected ['meta', 'token', 'done'], got ['meta', 'error']"
+      ]
+    },
+    {
+      "id": "ind-e2e-chat-05",
+      "category": "chat",
+      "sessionId": "7e194dff5bc6428e9cade0ef7333d80e",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "events expected ['meta', 'token', 'done'], got ['meta', 'error']"
+      ]
+    },
+    {
+      "id": "ind-e2e-chat-06",
+      "category": "chat",
+      "sessionId": "10a9d8670bd34a5cbde725bff2030fef",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "events expected ['meta', 'token', 'done'], got ['meta', 'error']"
+      ]
+    },
+    {
+      "id": "ind-e2e-support-low-01",
+      "category": "support",
+      "sessionId": "f4745b4f29d6403b91b6132dabbed735",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "intent expected CONSULT, got CHAT",
+        "events expected ['meta', 'cbt', 'token', 'done'], got ['meta', 'error']",
+        "knowledge access allowed True, got False"
+      ]
+    },
+    {
+      "id": "ind-e2e-support-low-02",
+      "category": "support",
+      "sessionId": "efe9fe5cffc34a6e95a1ebeab3c97755",
+      "intent": "CONSULT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "cbt",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK",
+        "RETRIEVE_KNOWLEDGE",
+        "ASK_CBT_QUESTION"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "events expected ['meta', 'cbt', 'token', 'done'], got ['meta', 'cbt', 'error']"
+      ]
+    },
+    {
+      "id": "ind-e2e-support-low-03",
+      "category": "support",
+      "sessionId": "1f1902a349de4988b7415d1bc6e5f6a3",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "intent expected CONSULT, got CHAT",
+        "events expected ['meta', 'cbt', 'token', 'done'], got ['meta', 'error']",
+        "knowledge access allowed True, got False"
+      ]
+    },
+    {
+      "id": "ind-e2e-support-low-04",
+      "category": "support",
+      "sessionId": "4b636871dd38482dbf67a35ed0e452af",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "intent expected CONSULT, got CHAT",
+        "events expected ['meta', 'cbt', 'token', 'done'], got ['meta', 'error']",
+        "knowledge access allowed True, got False"
+      ]
+    },
+    {
+      "id": "ind-e2e-support-low-05",
+      "category": "support",
+      "sessionId": "e5149dc1f29d41c1b9a0c668be715342",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "intent expected CONSULT, got CHAT",
+        "events expected ['meta', 'cbt', 'token', 'done'], got ['meta', 'error']",
+        "knowledge access allowed True, got False"
+      ]
+    },
+    {
+      "id": "ind-e2e-support-low-06",
+      "category": "support",
+      "sessionId": "0e667e1d4eb049b6bdb11d7d8bfa8a6c",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "intent expected CONSULT, got CHAT",
+        "events expected ['meta', 'cbt', 'token', 'done'], got ['meta', 'error']",
+        "knowledge access allowed True, got False"
+      ]
+    },
+    {
+      "id": "ind-e2e-support-medium-01",
+      "category": "support",
+      "sessionId": "df83cafb35744b4a985a49d8cb7f0399",
+      "intent": "CONSULT",
+      "risk": "MEDIUM",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "cbt",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK",
+        "RETRIEVE_KNOWLEDGE",
+        "ASK_CBT_QUESTION"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "events expected ['meta', 'cbt', 'token', 'done'], got ['meta', 'cbt', 'error']"
+      ]
+    },
+    {
+      "id": "ind-e2e-support-medium-02",
+      "category": "support",
+      "sessionId": "3db3248eba034c19a018848af12ffee9",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "intent expected CONSULT, got CHAT",
+        "risk expected MEDIUM, got LOW",
+        "events expected ['meta', 'cbt', 'token', 'done'], got ['meta', 'error']",
+        "knowledge access allowed True, got False"
+      ]
+    },
+    {
+      "id": "ind-e2e-support-medium-03",
+      "category": "support",
+      "sessionId": "0f72dfc593734209b4c5ae51dd38bee2",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "intent expected CONSULT, got CHAT",
+        "risk expected MEDIUM, got LOW",
+        "events expected ['meta', 'cbt', 'token', 'done'], got ['meta', 'error']",
+        "knowledge access allowed True, got False"
+      ]
+    },
+    {
+      "id": "ind-e2e-support-medium-04",
+      "category": "support",
+      "sessionId": "6a66842467d04161b88e2f90131c8640",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "intent expected CONSULT, got CHAT",
+        "risk expected MEDIUM, got LOW",
+        "events expected ['meta', 'cbt', 'token', 'done'], got ['meta', 'error']",
+        "knowledge access allowed True, got False"
+      ]
+    },
+    {
+      "id": "ind-e2e-risk-01",
+      "category": "risk",
+      "sessionId": "0f6f4f3acf064b089a8928c3a156fb21",
+      "intent": "RISK",
+      "risk": "HIGH",
+      "reviewCreated": true,
+      "events": [
+        "meta",
+        "pending_review",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-risk-02",
+      "category": "risk",
+      "sessionId": "d5159b8ad1ef4a02a471d138e4834ca6",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "intent expected RISK, got CHAT",
+        "risk expected HIGH, got LOW",
+        "review expected True, got False",
+        "events expected ['meta', 'pending_review', 'done'], got ['meta', 'error']"
+      ]
+    },
+    {
+      "id": "ind-e2e-risk-03",
+      "category": "risk",
+      "sessionId": "74cfbc1f6caf46b085b3c4ed377ddd5b",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "intent expected RISK, got CHAT",
+        "risk expected HIGH, got LOW",
+        "review expected True, got False",
+        "events expected ['meta', 'pending_review', 'done'], got ['meta', 'error']"
+      ]
+    },
+    {
+      "id": "ind-e2e-risk-04",
+      "category": "risk",
+      "sessionId": "fb145711715944f6865e0f2941be22b9",
+      "intent": "RISK",
+      "risk": "HIGH",
+      "reviewCreated": true,
+      "events": [
+        "meta",
+        "pending_review",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-knowledge-gap-01",
+      "category": "knowledge-gap",
+      "sessionId": "1f2520a08e924cbe96f02cc241b40d9b",
+      "intent": "CONSULT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "cbt",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK",
+        "RETRIEVE_KNOWLEDGE",
+        "ASK_CBT_QUESTION"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "events expected ['meta', 'cbt', 'token', 'done'], got ['meta', 'cbt', 'error']"
+      ]
+    },
+    {
+      "id": "ind-e2e-knowledge-gap-02",
+      "category": "knowledge-gap",
+      "sessionId": "816e974fd00e45cab8008f0f355b9cdc",
+      "intent": "CONSULT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "cbt",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK",
+        "RETRIEVE_KNOWLEDGE",
+        "ASK_CBT_QUESTION"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "events expected ['meta', 'cbt', 'token', 'done'], got ['meta', 'cbt', 'error']"
+      ]
+    },
+    {
+      "id": "ind-e2e-action-plan-01",
+      "category": "action-plan",
+      "sessionId": "e08ee97a461c4e6b97aebedf5c118cdf",
+      "intent": "CONSULT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "cbt",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK",
+        "RETRIEVE_KNOWLEDGE",
+        "ASK_CBT_QUESTION"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "events expected ['meta', 'cbt', 'action_plan', 'token', 'done'], got ['meta', 'cbt', 'error']"
+      ]
+    },
+    {
+      "id": "ind-e2e-action-plan-02",
+      "category": "action-plan",
+      "sessionId": "11276558a930448da94d864800db66be",
+      "intent": "CONSULT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "cbt",
+        "error"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK",
+        "RETRIEVE_KNOWLEDGE",
+        "ASK_CBT_QUESTION"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "events expected ['meta', 'cbt', 'action_plan', 'token', 'done'], got ['meta', 'cbt', 'error']"
+      ]
+    }
+  ]
+}

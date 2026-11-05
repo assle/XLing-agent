@@ -15,6 +15,7 @@ from evals.classifier.runner import (
     normalize_label,
 )
 from evals.config import EvalSettings
+from tests.support import make_test_settings
 
 # ---------------------------------------------------------------------------
 # normalize_label
@@ -176,7 +177,8 @@ def test_classifier_eval_report_contains_artifact_version(tmp_path):
         json.dumps({"input": "最近很焦虑", "output": "焦虑"}, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
-    settings = EvalSettings(
+    settings = make_test_settings(
+        EvalSettings,
         cls_eval_dataset=str(dataset),
         cls_eval_output=str(tmp_path / "report.json"),
         cls_eval_summary_output=str(tmp_path / "summary.json"),

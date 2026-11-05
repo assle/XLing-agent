@@ -13,7 +13,11 @@ from app.core.time import utc_now
 from app.core.versioning import ArtifactVersionResolver
 from app.services.bge_retrieval import BgeM3Retriever
 from app.services.knowledge import KnowledgeService
-from app.services.vector_store import FALLBACK_RETRIEVAL_LABEL, PRIMARY_RETRIEVAL_LABEL
+from app.services.vector_store import (
+    DENSE_PRIMARY_RETRIEVAL_LABEL,
+    FALLBACK_RETRIEVAL_LABEL,
+    PRIMARY_RETRIEVAL_LABEL,
+)
 from evals.config import EvalSettings, get_eval_settings
 
 logger = logging.getLogger(__name__)
@@ -57,14 +61,20 @@ def evaluate(
                 getattr(service.vector_store, "error", "") or "未知原因",
                 FALLBACK_RETRIEVAL_LABEL,
             )
-        dataset_path = Path(settings.rag_eval_dataset)
+        dataset_path = settings.resolve_path(settings.rag_eval_dataset)
         raw = dataset_path.read_text(encoding="utf-8")
         try:
             cases = json.loads(raw)
         except json.JSONDecodeError:
             cases = [json.loads(line) for line in raw.splitlines() if line.strip()]
         retrieve_fn = _build_retrieve_fn(service, strategy, settings)
-        results = [evaluate_case(retrieve_fn, case, settings.rag_eval_top_k) for case in cases]
+        results = [
+            evaluate_case(
+                retrieve_fn, case, settings.rag_eval_top_k,
+                with_diagnostics=strategy == "hybrid-rrf",
+            )
+            for case in cases
+        ]
         retrieval_label = _retrieval_label(service, strategy)
         strategy_label = _strategy_label(strategy, retrieval_label)
         report = compute_report(
@@ -82,15 +92,15 @@ def evaluate(
         report["comparisonEligible"] = (
             strategy in {"bge-m3", "bge-m3-rerank"}
             or (
-                strategy == "hybrid-rrf"
+                strategy in {"dense-primary", "hybrid-rrf"}
                 and service.vector_store.can_embed
                 and not service.vector_fallback_used
             )
         )
-        report["artifactVersion"] = ArtifactVersionResolver(eval_settings).current(
-            settings.rag_eval_dataset
-        ).to_dict()
-        output_path, summary_path = _strategy_paths(strategy, settings)
+        report["artifactVersion"] = ArtifactVersionResolver(eval_settings).current(dataset_path).to_dict()
+        output_path, summary_path = (
+            settings.resolve_path(path) for path in _strategy_paths(strategy, settings)
+        )
         _write_json(report, output_path)
         _write_json(build_eval_summary(report), summary_path)
         return report
@@ -123,6 +133,15 @@ def compute_report(
         "mrr": sum(item["reciprocalRank"] for item in results) / total,
         "ndcgAtK": sum(item["ndcgAtK"] for item in results) / total,
         "hitRate": len(hits) / total,
+        "targetSourceRecallAtK": sum(
+            item.get("targetSourceRecallAtK", item["recallAtK"]) for item in results
+        ) / total,
+        "answerRelevanceHitRate": sum(
+            1.0 if item.get("answerRelevanceHit", item["hit"]) else 0.0 for item in results
+        ) / total,
+        "reviewedRelevanceCases": sum(
+            1 for item in results if item.get("relevanceAnnotationStatus") == "human-approved"
+        ),
         "averageFirstRelevantRank": sum(item["firstRelevantRank"] for item in hits) / max(1, len(hits)),
         "p95LatencyMs": latencies[p95_index] if latencies else 0.0,
         "safetyCriticalCases": len(safety_cases),
@@ -147,6 +166,9 @@ def build_eval_summary(report: dict) -> dict:
         "mrr": report["mrr"],
         "ndcgAtK": report["ndcgAtK"],
         "hitRate": report["hitRate"],
+        "targetSourceRecallAtK": report.get("targetSourceRecallAtK", report["recallAtK"]),
+        "answerRelevanceHitRate": report.get("answerRelevanceHitRate", report["hitRate"]),
+        "reviewedRelevanceCases": report.get("reviewedRelevanceCases", 0),
         "averageFirstRelevantRank": report["averageFirstRelevantRank"],
         "p95LatencyMs": report.get("p95LatencyMs", 0.0),
         "safetyCriticalCases": report.get("safetyCriticalCases", 0),
@@ -160,23 +182,36 @@ def build_eval_summary(report: dict) -> dict:
     }
 
 
-def evaluate_case(retrieve_fn, case: dict, top_k: int) -> dict:
-    """执行一次检索，按来源或词项判断相关性并记录排序指标。
+def evaluate_case(retrieve_fn, case: dict, top_k: int, with_diagnostics: bool = False) -> dict:
+    """分别计算目标来源召回与回答相关性，并按需保存分阶段检索轨迹。
 
-    当前 recallAtK 实际是本题是否至少命中一次的零一值；precisionAtK 以请求的 top_k 为分母。
+    旧 hit/recallAtK 保留为回答相关性口径；额外相关来源只有人工审核后才计入。
     只计检索调用的耗时，后续指标整理时间不计入该延迟。
     """
+    trace: dict = {}
     started = time.perf_counter()
-    retrieved = retrieve_fn(case["question"], top_k)
+    if with_diagnostics:
+        retrieved = retrieve_fn(case["question"], top_k, trace=trace)
+    else:
+        retrieved = retrieve_fn(case["question"], top_k)
     # 这里只测检索调用耗时，相关性判断与报告整理不包含在内。
     latency_ms = (time.perf_counter() - started) * 1000.0
     expected_sources = {source.lower() for source in case.get("expectedSources", [])}
+    review = case.get("relevanceReview") or {}
+    human_approved = review.get("status") == "approved" and review.get("reviewer") == "human"
+    relevant_sources = set(expected_sources)
+    if human_approved:
+        relevant_sources.update(source.lower() for source in case.get("relevantSources", []))
     expected_terms = [term.lower() for term in case.get("expectedTerms", [])]
     items = []
     first_rank = 0
+    target_first_rank = 0
     relevant_count = 0
     for index, item in enumerate(retrieved, start=1):
-        relevant = is_relevant(item.source, item.content, expected_sources, expected_terms)
+        target_match = item.source.lower() in expected_sources
+        relevant = is_relevant(item.source, item.content, relevant_sources, expected_terms)
+        if target_match and target_first_rank == 0:
+            target_first_rank = index
         if relevant:
             relevant_count += 1
             if first_rank == 0:
@@ -186,18 +221,27 @@ def evaluate_case(retrieve_fn, case: dict, top_k: int) -> dict:
             "chunkId": item.chunk_id,
             "source": item.source,
             "score": item.score,
+            "targetSourceMatch": target_match,
             "relevant": relevant,
             "preview": " ".join(item.content.split())[:160],
         })
     # 至少找到一个相关结果就算本题命中；不是对所有真实相关文档计算完整召回。
     hit = first_rank > 0
-    return {
+    target_hit = target_first_rank > 0
+    result = {
         "id": case["id"],
         "question": case["question"],
         "expectedSources": case.get("expectedSources", []),
         "expectedTerms": case.get("expectedTerms", []),
+        "relevantSources": case.get("relevantSources", []) if human_approved else [],
+        "relevanceReview": review if human_approved else {},
+        "relevanceAnnotationStatus": "human-approved" if human_approved else "target-only-unreviewed",
         "retrieved": items,
         "hit": hit,
+        "answerRelevanceHit": hit,
+        "targetSourceHit": target_hit,
+        "targetSourceFirstRank": target_first_rank,
+        "targetSourceRecallAtK": 1.0 if target_hit else 0.0,
         "firstRelevantRank": first_rank,
         "recallAtK": 1.0 if hit else 0.0,
         "precisionAtK": relevant_count / top_k if top_k > 0 else 0.0,
@@ -206,6 +250,9 @@ def evaluate_case(retrieve_fn, case: dict, top_k: int) -> dict:
         "latencyMs": round(latency_ms, 4),
         "safetyCritical": "risk-policy.md" in expected_sources,
     }
+    if with_diagnostics:
+        result["diagnostics"] = trace
+    return result
 
 
 def is_relevant(source: str, content: str, expected_sources: set[str], expected_terms: list[str]) -> bool:
@@ -308,7 +355,7 @@ def _build_ai_client(settings: EvalSettings, strategy: str):
 
     多查询、排名融合和模型重排返回客户端，其余方案返回 None。
     """
-    if strategy in ("multi-query", "hybrid-rrf", "llm-rerank", "hyde-rerank"):
+    if strategy in ("multi-query", "dense-primary", "hybrid-rrf", "llm-rerank", "hyde-multi-query", "hyde-rerank"):
         from app.services.ai import AiClient
         return AiClient(settings)
     return None
@@ -322,8 +369,10 @@ def _strategy_label(strategy: str, retrieval_label: str) -> str:
     labels = {
         "baseline": retrieval_label,
         "multi-query": f"multi-query + {retrieval_label}",
+        "dense-primary": DENSE_PRIMARY_RETRIEVAL_LABEL,
         "hybrid-rrf": f"multi-query + hybrid-RRF (k=60) + {retrieval_label}",
         "llm-rerank": f"multi-query + hybrid-RRF + LLM-rerank + {retrieval_label}",
+        "hyde-multi-query": "multi-query + direct + HyDE + RRF (k=60)",
         "hyde-rerank": "direct + HyDE + RRF (k=60) + LLM-rerank + cliff cutoff",
         "bge-m3": "BGE-M3",
         "bge-m3-rerank": "BGE-M3 + bge-reranker-v2-m3",
@@ -332,45 +381,15 @@ def _strategy_label(strategy: str, retrieval_label: str) -> str:
 
 
 def _build_retrieve_fn(service: KnowledgeService, strategy: str, settings: EvalSettings):
-    """把方案选择转换成接收查询和结果数量的可调用函数。
-
-    匿名函数分别转发默认、多查询或融合入口；模型重排使用下方闭包，未知方案回到默认检索。
-    """
-    if strategy == "baseline":
-        # 该匿名函数统一接收查询和数量，再转发默认检索入口。
-        return lambda q, k: service.retrieve(q, k)
-    if strategy == "multi-query":
-        # 多查询方案保持相同调用形式，便于逐例评估统一使用。
-        return lambda q, k: service.retrieve_multi_query(q, k)
+    """把评测方案转发给统一实验入口，组合细节留在知识 Module 内。"""
     if strategy == "hybrid-rrf":
-        # 每条改写查询都使用排名融合检索，再由多查询入口合并去重。
-        return lambda q, k: service.retrieve_multi_query(q, k, base_retrieve=service.retrieve_hybrid_rrf)
-    if strategy in {"llm-rerank", "hyde-rerank"}:
-        from app.services.knowledge import SearchResult as _SR
-        pool = settings.rag_eval_rerank_candidate_pool
-
-        def _retrieve(q: str, k: int):
-            """先取得候选，再由模型评分；HyDE 策略最后按分数落差截断。"""
-            candidates = (
-                service.retrieve_hyde(q, pool) if strategy == "hyde-rerank"
-                else service.retrieve_multi_query(q, pool, base_retrieve=service.retrieve_hybrid_rrf)
-            )
-            if not candidates or not service.ai_client:
-                return candidates[:k] if candidates else []
-            candidate_dicts = [
-                {"source": c.source, "content": c.content, "chunk_id": c.chunk_id}
-                for c in candidates
-            ]
-            scored = service.ai_client.rerank(q, candidate_dicts)
-            index_to_score = {idx: score for idx, score in scored}
-            reranked = [
-                _SR(c.chunk_id, c.source, c.content, index_to_score.get(i, 0.0))
-                for i, c in enumerate(candidates)
-            ]
-            reranked.sort(key=lambda r: r.score, reverse=True)
-            return service._cliff_cutoff(reranked, k) if strategy == "hyde-rerank" else reranked[:k]
-        return _retrieve
-    # 把统一的查询和数量参数传给默认检索入口。
+        return lambda q, k, trace=None: service.retrieve_experiment(
+            q, strategy, k, trace=trace,
+        )
+    if strategy in {"multi-query", "dense-primary", "hyde-multi-query", "llm-rerank", "hyde-rerank"}:
+        return lambda q, k: service.retrieve_experiment(
+            q, strategy, k, candidate_pool=settings.rag_eval_rerank_candidate_pool,
+        )
     return lambda q, k: service.retrieve(q, k)
 
 
@@ -385,6 +404,10 @@ def _strategy_paths(strategy: str, settings: EvalSettings) -> tuple[str, str]:
             settings.rag_eval_output.replace(".json", "-multi-query.json"),
             settings.rag_eval_multi_query_output,
         ),
+        "dense-primary": (
+            settings.rag_eval_output.replace(".json", "-dense-primary.json"),
+            settings.rag_eval_output.replace(".json", "-dense-primary-summary.json"),
+        ),
         "hybrid-rrf": (
             settings.rag_eval_output.replace(".json", "-hybrid-rrf.json"),
             settings.rag_eval_hybrid_rrf_output,
@@ -392,6 +415,10 @@ def _strategy_paths(strategy: str, settings: EvalSettings) -> tuple[str, str]:
         "llm-rerank": (
             settings.rag_eval_output.replace(".json", "-llm-rerank.json"),
             settings.rag_eval_llm_rerank_output,
+        ),
+        "hyde-multi-query": (
+            settings.rag_eval_output.replace(".json", "-hyde-multi-query.json"),
+            settings.rag_eval_hyde_multi_query_output,
         ),
         "hyde-rerank": (
             settings.rag_eval_output.replace(".json", "-hyde-rerank.json"),
@@ -416,13 +443,15 @@ COMPARISON_STRATEGIES = [
     "multi-query",
     "hybrid-rrf",
     "llm-rerank",
+    "hyde-multi-query",
+    "hyde-rerank",
     "bge-m3",
     "bge-m3-rerank",
 ]
 
 
 def build_comparison(settings: EvalSettings | None = None) -> dict:
-    """读取六种检索方案已有摘要，比较质量并生成候选采用建议。
+    """读取八种检索方案已有摘要，比较质量并生成候选采用建议。
 
     缺失文件标记未运行；最高平均倒数排名方案与基线计算差值。
     当前参照优先选择排名融合方案，建议是否可比依据参照记录的资格标志，不重新验证所有报告的数据集一致性。
@@ -433,13 +462,15 @@ def build_comparison(settings: EvalSettings | None = None) -> dict:
         "multi-query": settings.rag_eval_multi_query_output,
         "hybrid-rrf": settings.rag_eval_hybrid_rrf_output,
         "llm-rerank": settings.rag_eval_llm_rerank_output,
+        "hyde-multi-query": settings.rag_eval_hyde_multi_query_output,
+        "hyde-rerank": settings.rag_eval_hyde_rerank_output,
         "bge-m3": settings.rag_eval_bge_summary_output,
         "bge-m3-rerank": settings.rag_eval_bge_rerank_summary_output,
     }
 
     strategies: list[dict[str, Any]] = []
     for name in COMPARISON_STRATEGIES:
-        path = Path(path_map[name])
+        path = settings.resolve_path(path_map[name])
         # 缺失报告与已有但指标较低不同：前者标记未运行，不补成零分参与比较。
         if path.exists():
             summary = json.loads(path.read_text(encoding="utf-8"))
@@ -587,11 +618,11 @@ def write_comparison(settings: EvalSettings | None = None) -> tuple[str, str]:
     comparison = build_comparison(settings)
     md = format_comparison_markdown(comparison)
 
-    json_path = Path(settings.rag_eval_comparison_output)
+    json_path = settings.resolve_path(settings.rag_eval_comparison_output)
     json_path.parent.mkdir(parents=True, exist_ok=True)
     json_path.write_text(json.dumps(comparison, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    md_path = Path(settings.rag_eval_comparison_md_output)
+    md_path = settings.resolve_path(settings.rag_eval_comparison_md_output)
     md_path.parent.mkdir(parents=True, exist_ok=True)
     md_path.write_text(md, encoding="utf-8")
 
@@ -604,8 +635,10 @@ if __name__ == "__main__":
     valid = {
         "baseline",
         "multi-query",
+        "dense-primary",
         "hybrid-rrf",
         "llm-rerank",
+        "hyde-multi-query",
         "hyde-rerank",
         "bge-m3",
         "bge-m3-rerank",

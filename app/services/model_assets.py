@@ -15,7 +15,7 @@ def finetuned_model_status(settings: Settings) -> dict:
     gguf_path = model_dir / settings.finetuned_model_file
     modelfile_path = model_dir / "Modelfile"
     return {
-        "name": settings.finetuned_model_name,
+        "name": settings.ollama_model,
         "directory": str(model_dir.relative_to(root)) if model_dir.is_relative_to(root) else str(model_dir),
         "ggufFile": settings.finetuned_model_file,
         "ggufExists": gguf_path.exists(),
@@ -30,5 +30,4 @@ def resolve_model_dir(settings: Settings) -> Path:
 
     相对路径以项目根目录解释，绝对路径保持不变。
     """
-    path = Path(settings.finetuned_model_dir)
-    return path if path.is_absolute() else settings.project_root / path
+    return settings.resolve_path(settings.finetuned_model_dir)

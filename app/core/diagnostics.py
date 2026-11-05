@@ -53,9 +53,7 @@ class _SafeFileHandler(RotatingFileHandler):
 def configure(settings: Settings) -> None:
     """Initialize the fixed rotation policy, without making logging a startup gate."""
     global _handler, _path, _configured
-    log_dir = Path(settings.diagnostic_log_dir)
-    if not log_dir.is_absolute():
-        log_dir = settings.project_root / log_dir
+    log_dir = settings.resolve_path(settings.diagnostic_log_dir)
     path = log_dir / "execution.jsonl"
     with _lock:
         if _configured and _path == path and _handler is not None:

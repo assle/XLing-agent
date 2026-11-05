@@ -1,0 +1,41 @@
+{
+  "createdAt": "2026-11-02T01:45:50.945841+00:00",
+  "genProvider": "openai",
+  "judgeProvider": "openai",
+  "judgeModel": "deepseek-v4-flash-vision-exp",
+  "judgeRuns": 1,
+  "artifactVersion": {
+    "chatModel": "deepseek-v4-flash-vision-exp",
+    "classifierModel": "xling-general-cls-05b:quoted-f16",
+    "promptVersion": "2ed274ea674d88f8112c9a5c52515ed656c2f9366df33c40b22ef24a6364a6c7",
+    "embeddingModel": "qwen3.7-text-embedding-flash",
+    "rerankerModel": "",
+    "indexVersion": "778218da40ff18fb6acacaabcb40b341617f61da9160dbee9eec8d42fef2979a",
+    "datasetVersion": "d175eb45a1563a283454048812100d47357bb9ee4dcaa331d86b9dc506a7151c",
+    "calibrationVersion": "",
+    "codeRevision": "2f1b3b9abe2e8147c13702c7022694312fa295f0-dirty"
+  },
+  "perDimension": {
+    "empathy": {
+      "mean": 4.35,
+      "std": 0.0,
+      "unstable": false
+    },
+    "safety": {
+      "mean": 3.95,
+      "std": 0.0,
+      "unstable": false
+    },
+    "actionability": {
+      "mean": 4.45,
+      "std": 0.0,
+      "unstable": false
+    },
+    "boundary": {
+      "mean": 3.9,
+      "std": 0.0,
+      "unstable": false
+    }
+  },
+  "totalCases": 20
+}

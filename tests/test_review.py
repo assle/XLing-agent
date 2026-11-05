@@ -7,7 +7,6 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.core.config import Settings
 from app.core.database import Base
 from app.core.enums import MessageRole, ToolJobKind
 from app.core.time import utc_now
@@ -21,6 +20,7 @@ from app.models.entities import (
     UserAccount,
 )
 from app.services.review import ReviewOutcome, ReviewService, ReviewTimeoutWorker
+from tests.support import make_test_settings
 
 
 def _make_db():
@@ -63,7 +63,7 @@ def test_active_list_contains_pending_and_in_progress_but_not_terminal():
     _seed_review(db, "thread-001", status="pending")
     _seed_review(db, "thread-002", status="in_progress")
     _seed_review(db, "thread-003", status="completed")
-    items = ReviewService(db, Settings(ai_provider="mock")).list_active()
+    items = ReviewService(db, make_test_settings(ai_provider="mock")).list_active()
     assert {item["status"] for item in items} == {"pending", "in_progress"}
     assert len(items) == 2
     assert all(item["riskSummary"] for item in items)
@@ -72,7 +72,7 @@ def test_active_list_contains_pending_and_in_progress_but_not_terminal():
 def test_active_list_includes_context():
     db = _make_db()
     _seed_review(db, "thread-ctx-001", status="pending")
-    item = ReviewService(db, Settings(ai_provider="mock")).list_active()[0]
+    item = ReviewService(db, make_test_settings(ai_provider="mock")).list_active()[0]
     assert item["threadId"] == "thread-ctx-001"
     assert item["emotion"] == "HIGH_RISK"
     assert item["studentMessage"] == "我不想活了"
@@ -83,7 +83,7 @@ def test_active_list_includes_context():
 def test_legacy_approve_and_reject_are_invalid():
     db = _make_db()
     review_id = _seed_review(db, "thread-legacy-decision")
-    service = ReviewService(db, Settings(ai_provider="mock"))
+    service = ReviewService(db, make_test_settings(ai_provider="mock"))
     for decision in ("approve", "reject"):
         with pytest.raises(ValueError, match="Invalid decision"):
             service.mark_decision(review_id, ReviewOutcome(decision=decision), "owner")
@@ -95,7 +95,7 @@ def test_active_list_orders_by_risk_then_wait():
     _seed_review(db, "thread-med-old", minutes_ago=30, risk_level="MEDIUM")
     _seed_review(db, "thread-high-new", minutes_ago=1)
     _seed_review(db, "thread-high-old", minutes_ago=20)
-    items = ReviewService(db, Settings(ai_provider="mock")).list_active()
+    items = ReviewService(db, make_test_settings(ai_provider="mock")).list_active()
     assert [item["threadId"] for item in items] == ["thread-high-old", "thread-high-new", "thread-med-old"]
 
 
@@ -105,7 +105,7 @@ def test_timeout_adds_non_terminal_audit_and_one_alert_job():
     review = db.get(ReviewRequest, review_id)
     review.claimed_by = "owner"
     db.commit()
-    service = ReviewService(db, Settings(ai_provider="mock", review_timeout_minutes=15))
+    service = ReviewService(db, make_test_settings(ai_provider="mock", review_timeout_minutes=15))
 
     assert service.escalate_timed_out() == [review_id]
     assert service.escalate_timed_out() == []
@@ -125,7 +125,7 @@ def test_timeout_worker_runs_without_admin_list_request():
     factory = sessionmaker(bind=engine)
     db = factory()
     review_id = _seed_review(db, "thread-worker-timeout-001", status="pending", minutes_ago=20)
-    settings = Settings(ai_provider="mock", review_timeout_minutes=15)
+    settings = make_test_settings(ai_provider="mock", review_timeout_minutes=15)
     worker = ReviewTimeoutWorker(settings, session_factory=factory)
 
     assert worker.run_once() == [review_id]
@@ -141,7 +141,7 @@ def test_due_follow_up_reminder_is_enqueued_once_without_completing_support():
     factory = sessionmaker(bind=engine)
     db = factory()
     review_id = _seed_review(db, "thread-follow-up-reminder")
-    settings = Settings(ai_provider="mock", review_timeout_minutes=15)
+    settings = make_test_settings(ai_provider="mock", review_timeout_minutes=15)
     service = ReviewService(db, settings)
     service.claim(review_id, "owner")
     review = service.mark_decision(
@@ -179,7 +179,7 @@ def test_due_follow_up_reminder_is_enqueued_once_without_completing_support():
 def test_timeout_skips_recent_reviews():
     db = _make_db()
     review_id = _seed_review(db, "thread-recent-001", status="pending", minutes_ago=5)
-    service = ReviewService(db, Settings(ai_provider="mock", review_timeout_minutes=15))
+    service = ReviewService(db, make_test_settings(ai_provider="mock", review_timeout_minutes=15))
     assert service.escalate_timed_out() == []
     review = service.get_review(review_id)
     assert review.status == "pending"

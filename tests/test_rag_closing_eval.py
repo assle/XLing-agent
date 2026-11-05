@@ -1,5 +1,6 @@
 import asyncio
 import json
+import math
 
 import pytest
 
@@ -20,14 +21,39 @@ def test_source_name_and_shared_keywords_do_not_replace_required_evidence():
     relevant = SearchResult(3, "risk-policy.md", "出现立即危险，应立即联系现实支持。", .7)
     row = score_case(case(), [irrelevant, unrelated_source, relevant], 4)
     assert row["firstRelevantRank"] == 3
+    assert row["recallAtK"] == 1
+    assert row["precisionAtK"] == .25
     assert row["reciprocalRank"] == 1 / 3
+    assert row["ndcgAtK"] == .5
     assert [item["relevant"] for item in row["retrieved"]] == [False, False, True]
+
+
+def test_recall_and_ndcg_use_all_expected_evidence():
+    multi_evidence_case = {
+        "id": "multi-evidence", "answerable": True, "safetyCritical": False,
+        "expectedEvidence": [
+            {"source": "risk-policy.md", "requiredSpans": ["立即联系现实支持"]},
+            {"source": "campus-mental-health.md", "requiredSpans": ["预约咨询"]},
+        ],
+    }
+    found = [
+        SearchResult(1, "other.md", "无关内容", .9),
+        SearchResult(2, "risk-policy.md", "立即联系现实支持", .8),
+    ]
+    row = score_case(multi_evidence_case, found, 4)
+    assert row["recallAtK"] == .5
+    assert row["precisionAtK"] == .25
+    assert row["ndcgAtK"] == pytest.approx((1 / math.log2(3)) / (1 + 1 / math.log2(3)))
 
 
 def test_evidence_beyond_top_k_does_not_count_as_hit():
     noise = SearchResult(1, "risk-policy.md", "LOW 日常支持", .9)
     relevant = SearchResult(2, "risk-policy.md", "立即联系现实支持", .8)
-    assert score_case(case(), [noise, relevant], 1)["hit"] is False
+    row = score_case(case(), [noise, relevant], 1)
+    assert row["hit"] is False
+    assert row["recallAtK"] == 0
+    assert row["precisionAtK"] == 0
+    assert row["ndcgAtK"] == 0
 
 
 def test_unanswerable_queries_have_separate_denominator_and_empty_critical_subset_is_unknown():
@@ -38,9 +64,15 @@ def test_unanswerable_queries_have_separate_denominator_and_empty_critical_subse
     summary = summarize([known, unknown])
     assert summary["answerableCases"] == 1
     assert summary["hitAt4"] == 1
+    assert summary["recallAt4"] == 1
+    assert summary["precisionAt4"] == .25
+    assert summary["ndcgAt4"] == 1
     assert summary["unanswerableCases"] == 1
     unknown_only = summarize([unknown])
     assert unknown_only["hitAt4"] is None
+    assert unknown_only["recallAt4"] is None
+    assert unknown_only["precisionAt4"] is None
+    assert unknown_only["ndcgAt4"] is None
     assert unknown_only["safetyEvidenceMissRate"] is None
 
 
@@ -110,7 +142,7 @@ def test_cancelled_second_arm_keeps_first_reply_and_attempt_count(tmp_path, monk
     monkeypatch.setattr(closing, "AiClient", Client)
     output = tmp_path / "answers.json"
     with pytest.raises(asyncio.CancelledError):
-        asyncio.run(closing.run_answers(Settings(_env_file=None, ai_provider="openai"), retrieval, output))
+        asyncio.run(closing.run_answers(Settings(_env_file=None, ai_provider="openai", openai_api_key="test-only"), retrieval, output))
     result = json.loads(output.read_text())
     assert result["status"] == "interrupted"
     assert result["attempts"] == 2
@@ -118,7 +150,7 @@ def test_cancelled_second_arm_keeps_first_reply_and_attempt_count(tmp_path, monk
     assert sorted(item["status"] for item in arms.values()) == ["completed", "started"]
     assert any(item.get("reply") == "first completed engineering test observation" for item in arms.values())
     with pytest.raises(FileExistsError):
-        asyncio.run(closing.run_answers(Settings(_env_file=None, ai_provider="openai"), retrieval, output))
+        asyncio.run(closing.run_answers(Settings(_env_file=None, ai_provider="openai", openai_api_key="test-only"), retrieval, output))
 
 
 def test_local_answer_model_identity_and_neutral_review_material(tmp_path, monkeypatch):
@@ -161,7 +193,7 @@ def test_truncated_or_empty_generations_cannot_enter_answer_comparison(tmp_path,
     monkeypatch.setattr(closing, "AiClient", Client)
     output = tmp_path / "answers.json"
     with pytest.raises(RuntimeError, match="Complete nonempty generations"):
-        asyncio.run(closing.run_answers(Settings(_env_file=None, ai_provider="openai"), retrieval, output))
+        asyncio.run(closing.run_answers(Settings(_env_file=None, ai_provider="openai", openai_api_key="test-only"), retrieval, output))
     result = json.loads(output.read_text())
     assert result["status"] == "invalid-generation" and result["comparisonEligible"] is False
     assert {a["status"] for a in result["pairs"][0]["arms"].values()} == {"empty-response", "incomplete-response"}

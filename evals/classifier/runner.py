@@ -166,13 +166,13 @@ def evaluate(settings: EvalSettings | None = None, provider: str | None = None, 
     settings = settings or get_eval_settings()
     provider = provider or settings.cls_eval_ai_provider
 
-    dataset_path = Path(settings.cls_eval_dataset)
+    dataset_path = settings.resolve_path(settings.cls_eval_dataset)
     rows = load_dataset(dataset_path)
     logger.info("Loaded %d cases from %s", len(rows), dataset_path)
 
     resolved_model = model or settings.cls_eval_model or settings.ollama_classifier_model
     base_url = settings.cls_eval_base_url or settings.ollama_base_url
-    api_key = settings.cls_eval_api_key or settings.openai_api_key
+    api_key = (settings.cls_eval_api_key or settings.openai_api_key).get_secret_value()
 
     results: list[dict] = []
     started = time.perf_counter()
@@ -218,12 +218,12 @@ def evaluate(settings: EvalSettings | None = None, provider: str | None = None, 
         "cases": results,
     }
 
-    report_path = Path(settings.cls_eval_output)
+    report_path = settings.resolve_path(settings.cls_eval_output)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     summary = {k: v for k, v in report.items() if k != "cases"}
-    summary_path = Path(settings.cls_eval_summary_output)
+    summary_path = settings.resolve_path(settings.cls_eval_summary_output)
     summary_path.parent.mkdir(parents=True, exist_ok=True)
     summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
 

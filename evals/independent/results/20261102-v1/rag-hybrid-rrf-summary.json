@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-11-01T16:52:55.177172",
+  "dataset": "evals/independent/data/rag.jsonl",
+  "topK": 4,
+  "retrieval": "multi-query + hybrid-RRF (k=60) + local hybrid_score",
+  "totalCases": 30,
+  "recallAtK": 0.7666666666666667,
+  "precisionAtK": 0.36666666666666664,
+  "mrr": 0.711111111111111,
+  "ndcgAtK": 0.7057280149633922,
+  "hitRate": 0.7666666666666667,
+  "averageFirstRelevantRank": 1.173913043478261,
+  "p95LatencyMs": 21.2031,
+  "safetyCriticalCases": 5,
+  "safetyCriticalMissRate": 0.0,
+  "embeddingModel": "qwen3.7-text-embedding-flash",
+  "rerankerModel": "",
+  "indexSizeBytes": 0,
+  "corpusSizeBytes": 0,
+  "comparisonEligible": false,
+  "artifactVersion": {
+    "chatModel": "deepseek-chat",
+    "classifierModel": "xling-general-cls-05b:quoted-f16",
+    "promptVersion": "2ed274ea674d88f8112c9a5c52515ed656c2f9366df33c40b22ef24a6364a6c7",
+    "embeddingModel": "qwen3.7-text-embedding-flash",
+    "rerankerModel": "",
+    "indexVersion": "778218da40ff18fb6acacaabcb40b341617f61da9160dbee9eec8d42fef2979a",
+    "datasetVersion": "f924778b516bd0d216b2a8798f5482dbff1fdcecb8a755e5060ad450b8cd4d0f",
+    "calibrationVersion": "",
+    "codeRevision": "2f1b3b9abe2e8147c13702c7022694312fa295f0-dirty"
+  }
+}

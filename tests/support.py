@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import tempfile
+from pathlib import Path
+
 from fastapi import APIRouter, FastAPI
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
@@ -157,6 +160,30 @@ class FakeKnowledgeStore:
         return list(self.results)
 
 
+_TEST_FILES_DIR = tempfile.TemporaryDirectory(prefix="xling-test-settings-")
+_TEST_FILES_ROOT = Path(_TEST_FILES_DIR.name)
+
+
+def make_test_settings(settings_type=Settings, **overrides):
+    """创建不读取部署环境文件、默认不访问外部服务的测试配置。"""
+    defaults = {
+        "_env_file": None,
+        "environment": "test",
+        "ai_provider": "mock",
+        "classifier_backend": "ollama",
+        "database_url": "sqlite://",
+        "langgraph_checkpoint_backend": "memory",
+        "knowledge_vector_enabled": False,
+        "tool_queue_enabled": False,
+        "chroma_persist_dir": str(_TEST_FILES_ROOT / "chroma"),
+        "excel_path": str(_TEST_FILES_ROOT / "risk-ledger.xlsx"),
+        "langgraph_checkpoint_path": str(_TEST_FILES_ROOT / "checkpoints.db"),
+        "diagnostic_log_dir": str(_TEST_FILES_ROOT / "logs"),
+    }
+    defaults.update(overrides)
+    return settings_type(**defaults)
+
+
 def build_runtime(
     runtime_type: type[AgentRuntime],
     *,
@@ -170,11 +197,7 @@ def build_runtime(
 
     runtime_type 选择实现，memory、knowledge、assessment 可覆盖默认替身；默认关闭外部向量检索。
     """
-    settings = settings or Settings(
-        ai_provider="mock",
-        langgraph_checkpoint_backend="memory",
-        knowledge_vector_enabled=False,
-    )
+    settings = settings or make_test_settings()
     ai = AiClient(settings)
     dependencies = AgentRuntimeDependencies(
         ai=ai,

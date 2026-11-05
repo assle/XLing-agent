@@ -1,5 +1,7 @@
 from functools import lru_cache
 
+from pydantic import SecretStr
+
 from app.core.config import Settings
 
 
@@ -21,6 +23,7 @@ class EvalSettings(Settings):
     rag_eval_hybrid_rrf_output: str = "target/rag-eval-hybrid-rrf.json"
     rag_eval_llm_rerank_output: str = "target/rag-eval-llm-rerank.json"
     rag_eval_hyde_rerank_output: str = "target/rag-eval-hyde-rerank.json"
+    rag_eval_hyde_multi_query_output: str = "target/rag-eval-hyde-multi-query.json"
     rag_eval_bge_output: str = "target/rag-eval-bge-m3.json"
     rag_eval_bge_summary_output: str = "target/rag-eval-bge-m3-summary.json"
     rag_eval_bge_rerank_output: str = "target/rag-eval-bge-m3-rerank.json"
@@ -31,7 +34,7 @@ class EvalSettings(Settings):
     rag_eval_ai_provider: str = "mock"
     rag_eval_comparison_output: str = "target/rag-eval-comparison.json"
     rag_eval_comparison_md_output: str = "target/rag-eval-comparison.md"
-    rag_eval_api_key: str = ""
+    rag_eval_api_key: SecretStr = SecretStr("")
     rag_eval_base_url: str = ""
     rag_eval_model: str = ""
 
@@ -39,7 +42,7 @@ class EvalSettings(Settings):
     risk_eval_output: str = "target/risk-eval-report.json"
     risk_eval_summary_output: str = "target/risk-eval-summary.json"
     risk_eval_ai_provider: str = "mock"
-    risk_eval_api_key: str = ""
+    risk_eval_api_key: SecretStr = SecretStr("")
     risk_eval_base_url: str = ""
     risk_eval_model: str = ""
     risk_calibration_dataset: str = "target/risk-calibration-inputs.json"
@@ -57,14 +60,14 @@ class EvalSettings(Settings):
     quality_eval_output: str = "target/quality-eval-report.json"
     quality_eval_summary_output: str = "target/quality-eval-summary.json"
     quality_eval_gen_provider: str = "mock"
-    quality_eval_gen_api_key: str = ""
+    quality_eval_gen_api_key: SecretStr = SecretStr("")
     quality_eval_gen_base_url: str = ""
     quality_eval_gen_model: str = ""
     quality_eval_gen_temperature: float = 0.3
     quality_eval_judge_provider: str = "openai"
     quality_eval_judge_model: str = "gpt-4o"
     quality_eval_judge_base_url: str = "https://api.openai.com/v1"
-    quality_eval_judge_api_key: str = ""
+    quality_eval_judge_api_key: SecretStr = SecretStr("")
     quality_eval_judge_temperature: float = 0.0
     quality_eval_judge_runs: int = 3
 
@@ -72,7 +75,7 @@ class EvalSettings(Settings):
     cls_eval_output: str = "target/cls-eval-report.json"
     cls_eval_summary_output: str = "target/cls-eval-summary.json"
     cls_eval_ai_provider: str = "mock"
-    cls_eval_api_key: str = ""
+    cls_eval_api_key: SecretStr = SecretStr("")
     cls_eval_base_url: str = ""
     cls_eval_model: str = ""
 

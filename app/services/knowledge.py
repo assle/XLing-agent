@@ -18,7 +18,12 @@ from app.models.entities import KnowledgeChunk, KnowledgeSource
 from app.services.bge_retrieval import BgeRetrieverUnavailable
 from app.services.chunking import chunk_text, semantic_chunk_text
 from app.services.lexical_index import lexical_index, tokenize
-from app.services.vector_store import FALLBACK_RETRIEVAL_LABEL, PRIMARY_RETRIEVAL_LABEL, ChromaKnowledgeStore
+from app.services.vector_store import (
+    DENSE_PRIMARY_RETRIEVAL_LABEL,
+    FALLBACK_RETRIEVAL_LABEL,
+    PRIMARY_RETRIEVAL_LABEL,
+    ChromaKnowledgeStore,
+)
 
 
 @dataclass
@@ -54,8 +59,7 @@ class KnowledgeService:
         identity = ["semantic-sentence-v1" if semantic else "structural-sentence-v1", content,
                     self.settings.knowledge_chunk_size, self.settings.knowledge_chunk_overlap]
         if semantic:
-            identity.extend([self.settings.openai_embedding_model,
-                             self.settings.embedding_base_url or self.settings.openai_base_url])
+            identity.extend([self.settings.openai_embedding_model, self.settings.effective_embedding_base_url])
         return hashlib.sha256(json.dumps(identity, ensure_ascii=False).encode()).hexdigest()
 
     @staticmethod
@@ -108,7 +112,7 @@ class KnowledgeService:
             except Exception as exc:
                 vector_error = f"{type(exc).__name__}: {exc}"
         primary_label = (
-            "multi-query + Chroma dense/BM25 RRF (k=60)"
+            DENSE_PRIMARY_RETRIEVAL_LABEL
             if self.settings.knowledge_retrieval_strategy == "multi_query_hybrid_rrf"
             else PRIMARY_RETRIEVAL_LABEL
         )
@@ -191,9 +195,9 @@ class KnowledgeService:
             return self._retrieve_current(query, top_k)
 
     def _retrieve_current(self, query: str, top_k: int) -> list[SearchResult]:
-        """按配置的线上检索策略分派；默认多查询＋混合 RRF，归一化加权保留为可选。"""
+        """默认多查询 dense 主检索；归一化加权和本地降级路径保留。"""
         if self.settings.knowledge_retrieval_strategy == "multi_query_hybrid_rrf":
-            return self.retrieve_multi_query(query, top_k, base_retrieve=self.retrieve_hybrid_rrf)
+            return self._retrieve_multi_query(query, top_k, base_retrieve=self._retrieve_dense_primary)
         return self._retrieve_normalized_fusion(query, top_k)
 
     def _retrieve_normalized_fusion(self, query: str, top_k: int) -> list[SearchResult]:
@@ -236,40 +240,115 @@ class KnowledgeService:
         """
         return await asyncio.to_thread(self.retrieve, query, top_k)
 
-    def retrieve_multi_query(self, query: str, top_k: int | None = None, base_retrieve=None) -> list[SearchResult]:
+    def retrieve_experiment(
+        self,
+        query: str,
+        strategy: str,
+        top_k: int | None = None,
+        *,
+        candidate_pool: int = 20,
+        trace: dict | None = None,
+    ) -> list[SearchResult]:
+        """通过单一离线入口执行检索实验，隐藏各策略的组合细节。"""
+        top_k = top_k or self.settings.knowledge_top_k
+        if strategy == "multi-query":
+            return self._retrieve_multi_query(query, top_k)
+        if strategy == "dense-primary":
+            return self._retrieve_multi_query(
+                query, top_k, base_retrieve=self._retrieve_dense_primary,
+            )
+        if strategy == "hybrid-rrf":
+            return self._retrieve_multi_query(
+                query, top_k, base_retrieve=self._retrieve_hybrid_rrf, trace=trace,
+            )
+        if strategy == "hyde-multi-query":
+            return self._retrieve_multi_query(query, top_k, base_retrieve=self._retrieve_hyde)
+        if strategy not in {"llm-rerank", "hyde-rerank"}:
+            raise ValueError(f"Unknown retrieval experiment strategy: {strategy}")
+
+        candidates = (
+            self._retrieve_hyde(query, candidate_pool)
+            if strategy == "hyde-rerank"
+            else self._retrieve_multi_query(
+                query, candidate_pool, base_retrieve=self._retrieve_hybrid_rrf,
+            )
+        )
+        if not candidates or not self.ai_client:
+            return candidates[:top_k] if candidates else []
+        candidate_dicts = [
+            {"source": item.source, "content": item.content, "chunk_id": item.chunk_id}
+            for item in candidates
+        ]
+        scored = self.ai_client.rerank(query, candidate_dicts)
+        index_to_score = {index: score for index, score in scored}
+        reranked = [
+            SearchResult(
+                item.chunk_id, item.source, item.content, index_to_score.get(index, 0.0),
+            )
+            for index, item in enumerate(candidates)
+        ]
+        reranked.sort(key=lambda item: item.score, reverse=True)
+        return self._cliff_cutoff(reranked, top_k) if strategy == "hyde-rerank" else reranked[:top_k]
+
+    @staticmethod
+    def _trace_rows(results: list[SearchResult]) -> list[dict]:
+        """把诊断阶段的检索结果转换为稳定、紧凑的可序列化记录。"""
+        return [
+            {"rank": rank, "chunkId": item.chunk_id, "source": item.source, "score": item.score}
+            for rank, item in enumerate(results, start=1)
+        ]
+
+    def _retrieve_multi_query(
+        self, query: str, top_k: int | None = None, base_retrieve=None, trace: dict | None = None,
+    ) -> list[SearchResult]:
         """为一个问题生成多条查询，逐条检索后按片段编号合并。
 
         重复片段保留最高分，按分数排序后限制数量；没有模型客户端时直接使用单查询。
+        trace 仅由离线诊断传入，记录各阶段排名，不改变检索行为。
         """
         top_k = top_k or self.settings.knowledge_top_k
         base_retrieve = base_retrieve or self.retrieve
+        if trace is not None:
+            trace.update({"originalQuery": query, "queries": []})
         if not self.ai_client:
-            return base_retrieve(query, top_k)
-        try:
-            sub_queries = self.ai_client.generate_sub_queries(query, n=3)
-        except Exception as exc:
-            # 线上默认策略下，远程改写失败不得让检索整体失败，降级为单查询。
-            diagnostics.degraded("knowledge.multi_query", "sub_query_unavailable", exc)
             sub_queries = [query]
-        if not sub_queries:
-            sub_queries = [query]
+        else:
+            try:
+                generated = self.ai_client.generate_sub_queries(query, n=3)
+            except Exception as exc:
+                # 线上默认策略下，远程改写失败不得让检索整体失败，降级为单查询。
+                diagnostics.degraded("knowledge.multi_query", "sub_query_unavailable", exc)
+                generated = []
+            # 原查询始终参与召回，改写只补充表达，不替代用户原始约束。
+            sub_queries = list(dict.fromkeys([query, *generated]))
         seen: dict[int | None, SearchResult] = {}
         # 各查询依次执行，按片段编号去重；分数更高的重复命中替换旧结果。
         for sq in sub_queries:
-            for result in base_retrieve(sq, top_k):
+            query_trace = {"query": sq}
+            if trace is not None:
+                trace["queries"].append(query_trace)
+            if trace is not None and base_retrieve in (self._retrieve_hybrid_rrf, self._retrieve_dense_primary):
+                results = base_retrieve(sq, top_k, trace=query_trace)
+            else:
+                results = base_retrieve(sq, top_k)
+            for result in results:
                 key = result.chunk_id
                 # 同编号只保留当前最高分；不同查询的分数直接比较，没有额外校准。
                 if key not in seen or result.score > seen[key].score:
                     seen[key] = result
         # 按结果对象上的当前分数降序排列，保留更相关的候选。
         merged = sorted(seen.values(), key=lambda r: r.score, reverse=True)
-        return self._expand_best(merged[:top_k], top_k)
+        returned = self._expand_best(merged[:top_k], top_k)
+        if trace is not None:
+            trace["merged"] = self._trace_rows(merged)
+            trace["returned"] = self._trace_rows(returned)
+        return returned
 
-    def retrieve_hyde(self, query: str, top_k: int | None = None) -> list[SearchResult]:
+    def _retrieve_hyde(self, query: str, top_k: int | None = None) -> list[SearchResult]:
         """用原问题与 HyDE 两路向量结果做 RRF；失败时保留原问题检索。
 
         假设性文字只参与检索，不会进入回答上下文。该入口供离线对照使用，
-        不改变当前在线默认的 dense + BM25 归一化融合。
+        不改变当前在线默认的多查询 dense 主检索。
         """
         top_k = top_k or self.settings.knowledge_top_k
         pool = top_k * 3
@@ -311,7 +390,29 @@ class KnowledgeService:
                 break
         return ranked[:cutoff]
 
-    def retrieve_hybrid_rrf(self, query: str, top_k: int | None = None) -> list[SearchResult]:
+    def _retrieve_dense_primary(
+        self, query: str, top_k: int | None = None, trace: dict | None = None,
+    ) -> list[SearchResult]:
+        """有效向量路径只按 dense 名次返回；向量不可用时使用本地混合兜底。"""
+        top_k = top_k or self.settings.knowledge_top_k
+        vector_results = self._retrieve_vector(query, top_k * 3)
+        if trace is not None:
+            trace["dense"] = self._trace_rows(vector_results)
+        if not vector_results:
+            fallback = self._retrieve_hybrid(query, top_k)
+            if trace is not None:
+                trace["fallback"] = self._trace_rows(fallback)
+            return fallback
+        returned = self._expand_best(vector_results, top_k)
+        if trace is not None:
+            trace["bm25"] = []
+            trace["fused"] = self._trace_rows(vector_results[:top_k])
+            trace["returned"] = self._trace_rows(returned)
+        return returned
+
+    def _retrieve_hybrid_rrf(
+        self, query: str, top_k: int | None = None, trace: dict | None = None,
+    ) -> list[SearchResult]:
         """分别取得向量或备用结果及关键词结果，再按名次融合。
 
         离线 RRF 对照每路候选数量为 top_k 的三倍；向量不可用时直接回退，不重复融合词法信号。
@@ -320,12 +421,23 @@ class KnowledgeService:
         top_k = top_k or self.settings.knowledge_top_k
         pool = top_k * 3
         vector_results = self._retrieve_vector(query, pool)
+        if trace is not None:
+            trace["dense"] = self._trace_rows(vector_results)
         if not vector_results:
-            return self._retrieve_hybrid(query, top_k)
+            fallback = self._retrieve_hybrid(query, top_k)
+            if trace is not None:
+                trace["fallback"] = self._trace_rows(fallback)
+            return fallback
         # 关键词通道同样参与排序融合，不因向量通道已有结果而跳过。
         bm25_results = self._retrieve_bm25(query, pool)
         fused = self._rrf_fuse([vector_results, bm25_results], top_k)
-        return self._expand_best(fused, top_k)
+        returned = self._expand_best(fused, top_k)
+        if trace is not None:
+            trace["bm25"] = self._trace_rows(bm25_results)
+            trace["fused"] = self._trace_rows(fused)
+            trace["returned"] = self._trace_rows(returned)
+        return returned
+
     def _retrieve_bm25(self, query: str, top_k: int) -> list[SearchResult]:
         """Reuse content-keyed BM25 weights and visit only query term postings.
 
@@ -343,21 +455,23 @@ class KnowledgeService:
         return rows, lexical_index(tuple(row.content for row in rows))
 
     @staticmethod
-    def _rrf_fuse(result_lists: list[list[SearchResult]], top_k: int, k: int = 60) -> list[SearchResult]:
-        """通过排名倒数融合多份检索结果。
-
-        同一片段在各列表中的分数累计为 1/(k+名次)，名次从一开始；保留首次遇到的正文与来源。
-        """
-        scores: dict[int | None, float] = {}
+    def _rrf_fuse(
+        result_lists: list[list[SearchResult]], top_k: int, k: int = 60,
+        agreement_weight: float = 0.01,
+    ) -> list[SearchResult]:
+        """以最佳单路 RRF 名次为主，第二路只提供有界一致性奖励。"""
+        channel_scores: dict[int | None, list[float]] = {}
         best: dict[int | None, SearchResult] = {}
         for result_list in result_lists:
             for rank, result in enumerate(result_list, start=1):
                 key = result.chunk_id
-                # 累加的是名次转换后的分数，排名越靠前贡献越大，不直接相加原始相似度。
-                scores[key] = scores.get(key, 0.0) + 1.0 / (k + rank)
+                channel_scores.setdefault(key, []).append(1.0 / (k + rank))
                 if key not in best:
                     best[key] = result
-        # 按各片段累计的排名融合分数排序。
+        scores = {
+            key: max(values) + agreement_weight * (sum(values) - max(values))
+            for key, values in channel_scores.items()
+        }
         fused = sorted(scores.keys(), key=lambda key: scores[key], reverse=True)
         return [
             SearchResult(best[key].chunk_id, best[key].source, best[key].content, scores[key])

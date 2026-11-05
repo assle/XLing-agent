@@ -29,8 +29,10 @@ class PromptTemplates:
         return [
             AiMessage(role="system", content=(
                 "你是一个用户意图分类器，只做意图识别，不回答问题。"
-                "只输出 CHAT、CONSULT、RISK 之一。CHAT 包含普通闲聊、学习、编程和通用事务；"
-                "CONSULT 包含压力、焦虑、低落、失眠、情绪倾诉；RISK 包含自杀、自残、伤人或即时危险信号。"
+                "只输出 CHAT、CONSULT、RISK 之一。CHAT 包含普通闲聊、学习、编程、通用事务，"
+                "以及只询问心理中心或部署机构电话、预约、值班人员和位置的事实查询；"
+                "CONSULT 包含压力、焦虑、低落、失眠、情绪倾诉和寻求心理支持；"
+                "RISK 包含自杀、自残、伤人或即时危险信号。资源查询中的困扰或危险信号仍按 CONSULT 或 RISK 处理。"
             )),
             AiMessage(role="user", content=f"最近上下文：\n{format_history(history)}\n\n当前输入：\n{user_input}"),
         ]
@@ -42,6 +44,7 @@ class PromptTemplates:
                 "你是 Xling，一个面向一般用户的日常陪伴与支持助手。"
                 "普通学习、编程和通用问题请自然、准确、直接地回答。"
                 "不要主动做心理测评，不要输出风险等级、心理标签、诊断结论或报告口吻。"
+                "机构电话、人员、地点、开放时间和预约安排只能依据检索资料；资料不足时明确说明不知道，不编造。"
                 f"用户显示名：{display_name}"
             )
             if context:
@@ -84,6 +87,20 @@ class PromptTemplates:
                 '示例：["查询1","查询2","查询3"]'
             )),
             AiMessage(role="user", content=query),
+        ]
+
+    @staticmethod
+    def high_risk_context_prompt(text: str) -> list[AiMessage]:
+        """复核危险相关文字是否代表当前用户自身风险，并给出完整情绪标签。"""
+        return [
+            AiMessage(role="system", content=(
+                "你是安全语境复核员，只判断当前用户是否正在表达自身自伤、自杀、伤人或即时危险。"
+                "只输出正常、焦虑、低落、高风险之一，不要解释。"
+                "否定、比喻、影视剧情、新闻报道、知识讨论或第三人称中的危险文字，不代表当前用户自身高风险；"
+                "此时根据用户其余明确情绪选择正常、焦虑或低落。"
+                "如果完整文本仍表达当前用户自身危险，或语境含糊到无法排除危险，输出高风险。"
+            )),
+            AiMessage(role="user", content=text),
         ]
 
     @staticmethod
@@ -362,7 +379,7 @@ class AiClient:
 
         从配置组装授权头、模型和生成参数；网络或响应格式异常不在此回退。
         """
-        headers = {"Authorization": f"Bearer {self.settings.openai_api_key}"}
+        headers = {"Authorization": f"Bearer {self.settings.openai_api_key.get_secret_value()}"}
         payload = {
             "model": self.settings.openai_model,
             "messages": [m.model_dump() for m in messages],
@@ -391,7 +408,7 @@ class AiClient:
 
         请求完成或失败后关闭客户端，返回第一个候选回复的正文。
         """
-        headers = {"Authorization": f"Bearer {self.settings.openai_api_key}"}
+        headers = {"Authorization": f"Bearer {self.settings.openai_api_key.get_secret_value()}"}
         payload = {
             "model": self.settings.openai_model,
             "messages": [m.model_dump() for m in messages],
@@ -409,7 +426,7 @@ class AiClient:
 
         只解析以 data 开头的事件，遇到结束标记停止；没有正文的事件不产生文本片段。
         """
-        headers = {"Authorization": f"Bearer {self.settings.openai_api_key}"}
+        headers = {"Authorization": f"Bearer {self.settings.openai_api_key.get_secret_value()}"}
         payload = {
             "model": self.settings.openai_model,
             "messages": [m.model_dump() for m in messages],
@@ -466,10 +483,13 @@ class AiClient:
             return json.dumps({"items": [
                 {"content": content, "order": order} for order, content in enumerate(FALLBACK_ITEMS)
             ]}, ensure_ascii=False)
+        if "安全语境复核员" in system:
+            return self._mock_classify(last)
         if "意图分类器" in system:
-            if has_high_risk_signal(last):
+            current_input = last.rsplit("当前输入：\n", 1)[-1]
+            if has_high_risk_signal(current_input):
                 return "RISK"
-            if has_consult_signal(last):
+            if has_consult_signal(current_input):
                 return "CONSULT"
             return "CHAT"
         if "当前由 CounselorAgent" in system:
@@ -507,13 +527,61 @@ CONSULT_WORDS = [
 DEPRESSED_WORDS = ["抑郁", "低落", "崩溃", "难过", "丧失", "提不起", "行尸", "压抑", "无意义", "累赘", "想哭", "发呆", "机械", "低沉", "提不起兴趣"]
 
 
-def has_high_risk_signal(text: str) -> bool:
-    """检查文本中是否出现预设的明确高风险词组。
+_NON_SELF_HIGH_RISK_MARKERS = (
+    "电影", "小说", "剧情", "角色", "主角", "新闻", "报道", "慢性自杀",
+    "老师说", "同学说", "同事说", "朋友说", "弟弟", "妹妹", "哥哥", "姐姐", "开玩笑说",
+)
+_NEGATED_HIGH_RISK_PHRASES = (
+    "不是想自杀", "没有自杀", "没想过自杀", "从没想过自杀",
+    "不是想自残", "没有自残", "没想过自残", "从没想过自残",
+    "不是想伤害自己", "没有伤害自己", "没想过伤害自己", "从没想过伤害自己",
+    "没有伤害别人", "没想过伤害别人", "没有伤害他人", "没想过伤害他人",
+    "没有结束生命", "没想过结束生命", "从没想过结束生命",
+    "没有轻生", "没想过轻生", "从没想过轻生", "没有不想活", "不是不想活",
+)
+_IMPLICIT_HIGH_RISK_REVIEW_PHRASES = (
+    "一次吃完", "一次全吃", "吞了一整瓶", "整瓶安眠药", "把药全装", "药一次全吃", "把绳子系", "绳子系好",
+    "最后一条消息", "不会再联系", "写好遗书", "发了遗言", "准备好刀",
+    "take all the pills", "goodbye letter", "final message",
+)
 
-    转成小写后按子串匹配，命中任意词组即返回 True；不分析否定、引用等语境。
+
+def has_high_risk_signal(text: str) -> bool:
+    """判断危险词是否处于可直接升级的明确自身风险语境。
+
+    否定、引用、剧情、新闻、比喻和他人表达不直接升级，但仍可进入后续完整评估；
+    双重否定不按排除语境处理，避免把真实危险误放行。
     """
     normalized = text.lower()
-    return any(word in normalized for word in HIGH_RISK_WORDS)
+    if not any(word in normalized for word in HIGH_RISK_WORDS):
+        return False
+    if any(marker in normalized for marker in ("不是没", "并非没", "不是没有")):
+        return True
+    if any(marker in normalized for marker in _NON_SELF_HIGH_RISK_MARKERS):
+        return False
+    return not any(phrase in normalized for phrase in _NEGATED_HIGH_RISK_PHRASES)
+
+
+def has_non_self_high_risk_context(text: str) -> bool:
+    """识别决策头 HIGH 仍需完整语境复核的否定、引用或第三人称表达。"""
+    normalized = text.lower()
+    if not any(word in normalized for word in HIGH_RISK_WORDS):
+        return False
+    if any(marker in normalized for marker in ("不是没", "并非没", "不是没有")):
+        return False
+    return (
+        any(marker in normalized for marker in _NON_SELF_HIGH_RISK_MARKERS)
+        or any(phrase in normalized for phrase in _NEGATED_HIGH_RISK_PHRASES)
+    )
+
+
+def has_implicit_high_risk_review_signal(text: str) -> bool:
+    """识别需要生成式安全复核的隐晦即时危险组合信号。
+
+    这些信号只改变复核路径，不直接决定风险等级，也不替代模型对完整语境的判断。
+    """
+    normalized = text.lower()
+    return any(phrase in normalized for phrase in _IMPLICIT_HIGH_RISK_REVIEW_PHRASES)
 
 
 def has_consult_signal(text: str) -> bool:

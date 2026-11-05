@@ -9,6 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.agents.langgraph_runtime import is_deployment_resource_question
 from app.agents.runtime import AgentRunResult
 from app.core.bootstrap import create_schema, seed_data
 from app.core.enums import RiskLevel
@@ -32,7 +33,7 @@ def evaluate(settings: EvalSettings | None = None) -> dict:
             "langgraph_checkpoint_backend": "memory",
         }
     )
-    dataset_path = Path(settings.e2e_eval_dataset)
+    dataset_path = settings.resolve_path(settings.e2e_eval_dataset)
     cases = _load_cases(dataset_path)
 
     engine = create_engine(
@@ -57,7 +58,7 @@ def evaluate(settings: EvalSettings | None = None) -> dict:
         "passedCases": sum(1 for result in results if result["passed"]),
         "cases": results,
     }
-    output = Path(settings.e2e_eval_output)
+    output = settings.resolve_path(settings.e2e_eval_output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return report
@@ -115,7 +116,11 @@ async def _run_case(db, settings: EvalSettings, user: UserAccount, case: dict) -
     knowledge_indexes = [
         index for index, action in enumerate(actions) if action == "RETRIEVE_KNOWLEDGE"
     ]
-    safety_before_knowledge = not knowledge_indexes or (
+    pure_resource_query = (
+        actual_intent == case["expectedIntent"] == "CHAT"
+        and all(is_deployment_resource_question(message) for message in case["messages"])
+    )
+    safety_before_knowledge = not knowledge_indexes or pure_resource_query or (
         bool(assessment_indexes) and assessment_indexes[0] < knowledge_indexes[0]
     )
     failures = []

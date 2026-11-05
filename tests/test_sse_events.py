@@ -21,13 +21,12 @@ from dataclasses import replace
 
 import app.services.chat as chat_module
 from app.agents.runtime import ActionPlanEvent, ActionPlanItemEvent, AgentRunResult, AgentStep, CbtEvent
-from app.core.config import Settings
 from app.core.enums import EmotionLabel, IntentType, RiskLevel
 from app.core.security import hash_password
 from app.models.entities import ChatSession, ReviewRequest, UserAccount
 from app.schemas.dtos import AiMessage, ChatRequest
 from app.services.assessment import PsychologyAssessment
-from tests.support import DatabaseHarness
+from tests.support import DatabaseHarness, make_test_settings
 
 # ---------------------------------------------------------------------------
 # Setup
@@ -35,7 +34,7 @@ from tests.support import DatabaseHarness
 
 _TestSession = DatabaseHarness().sessions
 
-_settings = Settings(ai_provider="mock", langgraph_checkpoint_backend="memory", knowledge_vector_enabled=False)
+_settings = make_test_settings(ai_provider="mock", langgraph_checkpoint_backend="memory", knowledge_vector_enabled=False)
 
 db = _TestSession()
 user = UserAccount(username="sse-student", display_name="SSE 学生", password_hash=hash_password("s"))

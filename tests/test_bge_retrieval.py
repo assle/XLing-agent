@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import numpy as np
 
-from app.core.config import Settings
 from app.models.entities import KnowledgeChunk
 from app.services.bge_retrieval import BgeM3Retriever, FlagEmbeddingBackend
 from app.services.knowledge import KnowledgeService
-from tests.support import DatabaseHarness
+from tests.support import DatabaseHarness, make_test_settings
 
 
 class FakeBgeBackend:
@@ -54,7 +53,7 @@ def test_knowledge_retrieve_uses_bge_candidates_then_dedicated_reranker():
         retriever = BgeM3Retriever(FakeBgeBackend(), candidate_pool=2, rerank=True)
         knowledge = KnowledgeService(
             db,
-            Settings(knowledge_vector_enabled=False),
+            make_test_settings(knowledge_vector_enabled=False),
             retriever=retriever,
         )
 
@@ -87,7 +86,7 @@ def test_optional_bge_runtime_error_falls_back_to_current_retriever():
         db.commit()
         knowledge = KnowledgeService(
             db,
-            Settings(knowledge_vector_enabled=False, bge_required=False),
+            make_test_settings(knowledge_vector_enabled=False, bge_required=False),
             retriever=BgeM3Retriever(BrokenBgeBackend(), rerank=False),
         )
 

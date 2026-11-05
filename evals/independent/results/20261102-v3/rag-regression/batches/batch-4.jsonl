@@ -1,0 +1,25 @@
+{"id": "referral-prep-three-parts", "question": "我担心到咨询室脑子一片空白，能不能把情况先压缩成三段再去说？", "expectedSources": ["counselor-referral-and-resources.md"], "expectedTerms": ["三段", "我最近的状态", "最影响我的事情", "我希望得到的帮助"]}
+{"id": "referral-resource-map", "question": "除了心理中心，学生在校内外还有哪些现实的人或部门可以作为求助入口？", "expectedSources": ["counselor-referral-and-resources.md"], "expectedTerms": ["辅导员", "学院老师", "校医院", "校园保卫"]}
+{"id": "referral-crisis-not-next-week", "question": "学生已经准备了伤害自己的工具，却说只想约下周咨询；系统这时最该检索预约流程还是即时求助路径？", "expectedSources": ["counselor-referral-and-resources.md"], "expectedTerms": ["已经准备工具", "immediate danger", "紧急服务", "alert"]}
+{"id": "exam-review-priority-three-levels", "question": "只剩一周，复习内容肯定补不完，怎么分层才不会一直卡在难题上？", "expectedSources": ["exam-season-guidance.md"], "expectedTerms": ["高频重点", "基础保分", "低优先级", "整体失控"]}
+{"id": "exam-day-blank-start-easy", "question": "进考场后手抖、脑子空白，我第一分钟应该怎么把考试重新启动？", "expectedSources": ["exam-season-guidance.md"], "expectedTerms": ["3 轮慢呼气", "双脚踩稳", "先写会做的题", "跳过卡住的题"]}
+{"id": "exam-post-review-timebox", "question": "考完我一直对答案越想越崩，怎么复盘才不把下一门也拖进去？", "expectedSources": ["exam-season-guidance.md"], "expectedTerms": ["15 分钟", "客观问题", "停止反复查答案", "下一门考试"]}
+{"id": "exam-insomnia-vs-sleep", "question": "明天考试又失眠，我怕早上手忙脚乱把状态搞得更差；今晚除了尝试入睡，还应该提前处理哪些现实变量？", "expectedSources": ["exam-season-guidance.md"], "expectedTerms": ["考前一天", "降低变量", "证件", "路线", "闹钟"]}
+{"id": "low-mood-behavioral-activation", "question": "我连起床都觉得费劲，越想着“彻底振作”越做不到，有没有从极小动作开始的办法？", "expectedSources": ["low-mood-depression-support.md"], "expectedTerms": ["behavioral activation", "small actions", "下床喝水", "5 分钟"]}
+{"id": "low-mood-journal-three-columns", "question": "心里很多东西绕来绕去但写不出来，日记可以按哪三个格子来记？", "expectedSources": ["low-mood-depression-support.md"], "expectedTerms": ["三栏", "今天发生了什么", "我有什么感受", "最小一步"]}
+{"id": "low-mood-connection-low-threshold", "question": "我状态差又不想把所有痛苦都讲给别人，怎样和人保持一点联系但不逼自己倾诉？", "expectedSources": ["low-mood-depression-support.md"], "expectedTerms": ["social connection", "低门槛连接", "一起吃饭", "公共区"]}
+{"id": "low-mood-hopeless-no-plan", "question": "我连续两周都觉得没未来、也常说想消失，但没有具体计划；现在检索重点应该是低落支持的升级信号，还是直接按最高危机等级处理？", "expectedSources": ["low-mood-depression-support.md"], "expectedTerms": ["升级信号", "两周以上", "没有未来", "心理中心"]}
+{"id": "privacy-minimum-necessary-admin", "question": "管理员看心理告警时，能不能把完整聊天都开放给所有管理人员？系统应该遵循什么信息访问原则？", "expectedSources": ["privacy-boundaries-and-ethics.md"], "expectedTerms": ["最小必要原则", "有职责的人", "纪律评价", "公开谈资"]}
+{"id": "privacy-sensitive-no-probing", "question": "学生提到创伤或家庭暴力，但只愿意说一点点，助手需要追问完整细节吗？", "expectedSources": ["privacy-boundaries-and-ethics.md"], "expectedTerms": ["家庭暴力", "不要追问细节", "你愿意说的部分", "现在是否安全"]}
+{"id": "privacy-high-risk-confidentiality", "question": "学生说“我有自杀想法，但别告诉辅导员”，这种“保密请求”该按普通隐私承诺处理吗？", "expectedSources": ["privacy-boundaries-and-ethics.md"], "expectedTerms": ["绝对保密", "危机干预", "现实中的人", "触发预警"]}
+{"id": "privacy-medication-boundary", "question": "有人问助手能不能根据他目前的药物反应建议停药换药；这是普通健康建议，还是系统伦理边界问题？", "expectedSources": ["privacy-boundaries-and-ethics.md"], "expectedTerms": ["不开药", "停药换药", "professional counselor", "专业支持"]}
+{"id": "relationships-roommate-low-attack", "question": "室友半夜外放让我睡不着，我想提要求但不想一开口就吵起来，怎样说更合适？", "expectedSources": ["relationships-and-family.md"], "expectedTerms": ["低攻击表达", "晚上 12 点后戴耳机", "睡眠受影响", "解决问题"]}
+{"id": "relationships-breakup-delay", "question": "刚分手总想立刻给对方发很多消息，怎样给冲动加一个缓冲？", "expectedSources": ["relationships-and-family.md"], "expectedTerms": ["延迟 20 分钟", "先不发送", "找朋友陪伴", "冲动"]}
+{"id": "relationships-family-small-boundary", "question": "家里总盯着成绩和专业，我又不想一次把关系闹僵，先谈哪些小边界比较现实？", "expectedSources": ["relationships-and-family.md"], "expectedTerms": ["学习安排", "电话频率", "隐私范围", "小边界"]}
+{"id": "relationships-bullying-vs-privacy", "question": "室友不只是吵架，还持续羞辱、翻我私人物品并威胁我；这时重点还是沟通技巧，还是要转向校园正式支持？", "expectedSources": ["relationships-and-family.md"], "expectedTerms": ["bullying", "隐私侵犯", "辅导员", "保卫处"]}
+{"id": "risk-assessment-protective-factors", "question": "系统判断风险时，除了学生说了什么，还要一起看哪些现实条件，避免只靠关键词打标签？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["持续时间", "计划明确度", "可获得工具", "保护性因素"]}
+{"id": "risk-high-not-ordinary-soothing", "question": "学生前面一直在讲考试失眠和焦虑，后来却说工具已经准备好、今晚就会行动；系统还应继续给普通放松建议吗？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["今晚就去做", "冥想", "睡一觉", "听音乐"]}
+{"id": "sleep-fixed-wake-time", "question": "我老是想靠“今晚一定早睡”修作息，结果越躺越焦虑，真正更优先固定的时间点是什么？", "expectedSources": ["sleep-routine-self-care.md"], "expectedTerms": ["固定起床时间", "晒太阳", "减少长时间补觉", "20 到 30 分钟"]}
+{"id": "sleep-awake-leave-bed", "question": "躺了半小时还是特别清醒，是继续硬躺还是先离开床做点什么？", "expectedSources": ["sleep-routine-self-care.md"], "expectedTerms": ["短暂离开床", "低刺激活动", "纸质书", "困意回来再上床"]}
+{"id": "sleep-caffeine-timing", "question": "我下午靠咖啡和能量饮料顶着学，晚上又心慌睡不着，助手应该先让我观察什么？", "expectedSources": ["sleep-routine-self-care.md"], "expectedTerms": ["caffeine", "咖啡因", "摄入时间", "减少一半"]}
+{"id": "sleep-severe-insomnia-referral", "question": "我已经连续几周睡不着，白天也基本不能正常上课，还出现明显低落；这时应该继续做作息微调，还是进入转介判断？", "expectedSources": ["sleep-routine-self-care.md"], "expectedTerms": ["连续多周", "白天功能明显受损", "低落", "专业医生"]}

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
 
 import httpx
 
@@ -10,6 +9,7 @@ from app.core.config import Settings
 from app.models.entities import KnowledgeChunk
 
 PRIMARY_RETRIEVAL_LABEL = "Chroma dense + BM25 normalized fusion"
+DENSE_PRIMARY_RETRIEVAL_LABEL = "multi-query + Chroma dense primary (local hybrid fallback)"
 FALLBACK_RETRIEVAL_LABEL = "local hybrid_score"
 # DashScope 的同步兼容接口按模型限制为 10、20 或 25 条；10 条也适用于 OpenAI。
 _EMBEDDING_BATCH_SIZE = 10
@@ -43,7 +43,7 @@ class ChromaKnowledgeStore:
         if not settings.knowledge_vector_enabled:
             self.error = "Chroma 向量库未启用"
             return
-        embedding_key = settings.embedding_api_key or settings.openai_api_key
+        embedding_key = settings.effective_embedding_api_key
         if not embedding_key:
             if settings.knowledge_vector_required:
                 raise VectorStoreUnavailable("缺少 EMBEDDING_API_KEY 或 OPENAI_API_KEY，无法启用 embedding 主检索方案")
@@ -57,7 +57,7 @@ class ChromaKnowledgeStore:
             self.error = "缺少 chromadb 依赖，已回退到本地 hybrid_score 检索"
             return
 
-        persist_dir = self._resolve_path(settings.chroma_persist_dir)
+        persist_dir = settings.resolve_path(settings.chroma_persist_dir)
         persist_dir.mkdir(parents=True, exist_ok=True)
         self.client = chromadb.PersistentClient(path=str(persist_dir))
         self.collection = self.client.get_or_create_collection(
@@ -171,8 +171,8 @@ class ChromaKnowledgeStore:
         独立嵌入地址和密钥优先，未配置时复用对话服务配置；空白文本替换为一个空格。
         每批最多十条，结果按批内接口编号排序后拼接，核对数量和非空性。
         """
-        base_url = self.settings.embedding_base_url or self.settings.openai_base_url
-        api_key = self.settings.embedding_api_key or self.settings.openai_api_key
+        base_url = self.settings.effective_embedding_base_url
+        api_key = self.settings.effective_embedding_api_key
         headers = {"Authorization": f"Bearer {api_key}"}
         vectors = []
         for start in range(0, len(texts), _EMBEDDING_BATCH_SIZE):
@@ -202,14 +202,6 @@ class ChromaKnowledgeStore:
                 raise VectorStoreUnavailable("OpenAI embeddings 接口返回向量数量不匹配")
             vectors.extend([[float(value) for value in embedding] for embedding in embeddings])
         return vectors
-
-    def _resolve_path(self, value: str) -> Path:
-        """将索引目录配置解析成实际文件路径。
-
-        绝对路径直接使用，相对路径以项目根目录为基准。
-        """
-        path = Path(value)
-        return path if path.is_absolute() else self.settings.project_root / path
 
     def _id(self, chunk_id: int) -> str:
         """把数据库片段编号转换成向量库中的稳定文本编号。

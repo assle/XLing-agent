@@ -1,11 +1,11 @@
 from app.api.routes import router
-from app.core.config import Settings
 from app.core.security import hash_password
 from app.models.entities import ChatSession, ReviewRequest, SafetyAssessmentRecord, UserAccount
+from tests.support import make_test_settings
 
 
 def test_waiting_human_support_accepts_follow_up_without_running_ai(api_harness_factory, monkeypatch):
-    settings = Settings(
+    settings = make_test_settings(
         ai_provider="mock", langgraph_checkpoint_backend="memory", knowledge_vector_enabled=False,
         redis_url="redis://127.0.0.1:1/0",
     )

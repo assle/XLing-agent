@@ -1,0 +1,30 @@
+{"id":"ind-rag-risk-01","question":"高风险事件的安全评估应如何记录，台账和通知任务采用什么投递方式？","expectedSources":["risk-policy.md"],"expectedTerms":["records a safety assessment","persistent queue","authorized review team"]}
+{"id":"ind-rag-risk-02","question":"同样都是情绪低落，有无立即自伤意图会怎样改变 MEDIUM 与 HIGH 的处置？","expectedSources":["risk-policy.md"],"expectedTerms":["MEDIUM","HIGH","immediate danger","self-harm"]}
+{"id":"ind-rag-risk-03","question":"评估一条危机消息时，计划、工具和保护性因素分别要看什么？","expectedSources":["risk-policy.md"],"expectedTerms":["计划明确度","可获得工具","保护性因素"]}
+{"id":"ind-rag-risk-04","question":"高危预警触发后，系统会通知哪个经过配置的授权团队？","expectedSources":["risk-policy.md"],"expectedTerms":["notifies","authorized review team","configured"]}
+{"id":"ind-rag-risk-05","question":"面对正在表达自杀意图的学生，回复除了直接还应保持什么语气并连接什么支持？","expectedSources":["risk-policy.md"],"expectedTerms":["empathetic","direct","human support"]}
+{"id":"ind-rag-campus-01","question":"第一次寻求专业支持前，可以怎样整理问题开始时间、睡眠食欲变化与日常影响？","expectedSources":["professional-support-and-resources.md"],"expectedTerms":["when the concern began","changes in sleep or appetite","effects on daily life"]}
+{"id":"ind-rag-campus-02","question":"学生要求助手确诊并开药时，哪些事必须由合格专业人员处理？","expectedSources":["general-mental-health-support.md"],"expectedTerms":["does not diagnose conditions","prescribe medication","qualified professional"]}
+{"id":"ind-rag-campus-03","question":"情绪持续低落时，日记、小行动和社交连接可以怎样配合使用？","expectedSources":["low-mood-depression-support.md"],"expectedTerms":["journaling","small actions","social connection"]}
+{"id":"ind-rag-campus-04","question":"心理助手如何用平静、尊重、不评判的方式给出可执行建议？","expectedSources":["general-mental-health-support.md"],"expectedTerms":["calm","respectful","practical","non-judgmental"]}
+{"id":"ind-rag-academic-01","question":"面对迟迟不想开写的课程报告，丑版初稿和十分钟启动怎么结合？","expectedSources":["academic-stress-and-burnout.md"],"expectedTerms":["10 分钟启动法","丑版初稿","procrastination"]}
+{"id":"ind-rag-academic-02","question":"课程、助教工作和家庭责任叠在一起让人麻木时，应先盘点哪些负荷？","expectedSources":["academic-stress-and-burnout.md"],"expectedTerms":["burnout","工作或课程","兼职","家庭责任"]}
+{"id":"ind-rag-academic-03","question":"课题停滞时找导师沟通，怎样按进展、卡点、已尝试方法和所需帮助来准备？","expectedSources":["academic-stress-and-burnout.md"],"expectedTerms":["当前进展","卡点","已经尝试的方法","具体帮助"]}
+{"id":"ind-rag-adjustment-01","question":"转入陌生校区后，可以用哪些固定安排和固定联系建立生活锚点？","expectedSources":["adjustment-and-transition.md"],"expectedTerms":["固定吃饭或休息安排","每周联系一个熟人","适用支持资源的位置"]}
+{"id":"ind-rag-adjustment-02","question":"考虑换专业时，除了兴趣，还要核对哪些现实条件、可能路径和替代方案？","expectedSources":["adjustment-and-transition.md"],"expectedTerms":["选择条件","现实要求","可能路径","替代方案"]}
+{"id":"ind-rag-anxiety-01","question":"在会议室突然恐慌时，四拍吸气、六拍呼气具体要做几轮？","expectedSources":["anxiety-panic-grounding.md"],"expectedTerms":["4-6 呼吸","4 拍吸气","6 拍呼气","5 轮"]}
+{"id":"ind-rag-anxiety-02","question":"考试前把‘还没复习完’想成‘一定失败’，如何用事实、猜测和下一步三栏拆开？","expectedSources":["anxiety-panic-grounding.md"],"expectedTerms":["事实","猜测","下一步"]}
+{"id":"ind-rag-referral-01","question":"哪些持续困扰或日常功能下降的情况适合连接现实专业支持？","expectedSources":["professional-support-and-resources.md"],"expectedTerms":["persistent","affects daily functioning","hard to manage alone"]}
+{"id":"ind-rag-referral-02","question":"为什么寻求专业支持应被说成正常的下一步，而不是疾病标签？","expectedSources":["professional-support-and-resources.md"],"expectedTerms":["normal next step","label or diagnosis"]}
+{"id":"ind-rag-referral-03","question":"存在立即危险和明确自伤计划时，为什么不能用常规预约替代紧急联系？","expectedSources":["professional-support-and-resources.md"],"expectedTerms":["local emergency services","trusted person","routine appointment"]}
+{"id":"ind-rag-exam-01","question":"复习只剩几天时，如何区分高频重点、基础保分和低优先级内容？","expectedSources":["exam-season-guidance.md"],"expectedTerms":["高频重点","基础保分","低优先级"]}
+{"id":"ind-rag-exam-02","question":"一场考砸后想不停对答案，怎样用十五分钟限时复盘保护下一门？","expectedSources":["exam-season-guidance.md"],"expectedTerms":["15 分钟","客观问题","停止反复查答案","下一门考试"]}
+{"id":"ind-rag-lowmood-01","question":"早上连起床都困难时，行为激活为什么建议从下床喝水和五分钟动作开始？","expectedSources":["low-mood-depression-support.md"],"expectedTerms":["behavioral activation","下床喝水","5 分钟"]}
+{"id":"ind-rag-lowmood-02","question":"不想详细倾诉时，一起吃饭或待在有陪伴的空间怎样形成低门槛社交连接？","expectedSources":["low-mood-depression-support.md"],"expectedTerms":["低门槛连接","一起吃饭","有人陪伴的空间"]}
+{"id":"ind-rag-privacy-01","question":"心理告警信息为什么不能向所有管理员开放完整聊天记录？","expectedSources":["privacy-boundaries-and-ethics.md"],"expectedTerms":["最小必要原则","有服务职责的人","不相关的评价"]}
+{"id":"ind-rag-privacy-02","question":"学生只愿意透露少量家庭暴力经历时，助手该问什么、不该追问什么？","expectedSources":["privacy-boundaries-and-ethics.md"],"expectedTerms":["不要追问不必要的细节","你愿意说的部分","现在是否安全"]}
+{"id":"ind-rag-privacy-03","question":"学生要求对自杀想法绝对保密时，为什么必要的安全处理优先于普通保密承诺？","expectedSources":["privacy-boundaries-and-ethics.md"],"expectedTerms":["绝对保密","必要的安全处理","授权审核流程"]}
+{"id":"ind-rag-relationship-01","question":"室友深夜外放时，怎样用低攻击表达提出十二点后戴耳机的具体请求？","expectedSources":["relationships-and-family.md"],"expectedTerms":["低攻击表达","晚上 12 点后戴耳机","睡眠受影响"]}
+{"id":"ind-rag-relationship-02","question":"分手后想连续发消息时，二十分钟延迟和朋友陪伴怎样帮助缓冲冲动？","expectedSources":["relationships-and-family.md"],"expectedTerms":["延迟 20 分钟","先不发送","找朋友陪伴"]}
+{"id":"ind-rag-sleep-01","question":"调整作息时为什么先固定起床时间，而不是强迫自己立刻早睡？","expectedSources":["sleep-routine-self-care.md"],"expectedTerms":["固定起床时间","晒太阳","减少长时间补觉"]}
+{"id":"ind-rag-sleep-02","question":"躺下二十分钟仍很清醒时，离床做低刺激活动后应该何时再回床？","expectedSources":["sleep-routine-self-care.md"],"expectedTerms":["短暂离开床","低刺激活动","困意回来再上床"]}

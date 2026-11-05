@@ -3,13 +3,15 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from app.core.config import Settings
 from app.models.entities import KnowledgeChunk
 from app.services.ai import AiClient
 from app.services.knowledge import KnowledgeService, SearchResult
 from evals.config import EvalSettings
 from evals.rag.runner import _build_retrieve_fn, evaluate
-from tests.support import DatabaseHarness
+from tests.support import DatabaseHarness, make_test_settings
 
 
 class FakeAi:
@@ -18,6 +20,9 @@ class FakeAi:
 
     def generate_hyde_document(self, query: str) -> str:
         return self.document
+
+    def generate_sub_queries(self, query: str, n: int = 3) -> list[str]:
+        return ["改写一", "改写二"][:n]
 
     def rerank(self, query: str, candidates: list[dict]) -> list[tuple[int, float]]:
         scores = [9.0, 8.8, 8.7, 2.0, 1.0]
@@ -49,7 +54,7 @@ def test_hyde_uses_direct_and_hypothetical_rankings_with_rrf(monkeypatch):
                 return [SearchResult(row.id, row.source, row.content, 1.0) for row in ranked]
 
             monkeypatch.setattr(service, "_retrieve_vector", search)
-            found = service.retrieve_hyde("短问题", 2)
+            found = service._retrieve_hyde("短问题", 2)
 
             assert queries == ["短问题", "短问题\n假设性说明"]
             assert [item.chunk_id for item in found] == [rows[1].id, rows[0].id]
@@ -76,7 +81,7 @@ def test_hyde_failure_keeps_direct_vector_results(monkeypatch):
                 lambda query, top_k: [SearchResult(row.id, row.source, row.content, 0.8)],
             )
 
-            found = service.retrieve_hyde("睡眠", 1)
+            found = service._retrieve_hyde("睡眠", 1)
 
             assert [item.chunk_id for item in found] == [row.id]
     finally:
@@ -93,14 +98,37 @@ def test_cliff_cutoff_respects_minimum_maximum_and_empty_input():
     assert KnowledgeService._cliff_cutoff(ranked, 0) == []
 
 
+def test_hyde_multi_query_applies_hyde_to_original_and_each_rewrite_without_rerank():
+    harness = DatabaseHarness()
+    try:
+        with harness.sessions() as db:
+            service = make_service(db, FakeAi())
+            queries = []
+
+            def hyde(query: str, top_k: int):
+                queries.append(query)
+                return [SearchResult(len(queries), "source", f"正文 {query}", float(len(queries)))]
+
+            service._retrieve_hyde = hyde
+            service._expand_best = lambda ranked, top_k: ranked
+            settings = make_test_settings(EvalSettings, _env_file=None)
+
+            found = _build_retrieve_fn(service, "hyde-multi-query", settings)("原问题", 2)
+
+            assert queries == ["原问题", "改写一", "改写二"]
+            assert [item.chunk_id for item in found] == [3, 2]
+    finally:
+        harness.close()
+
+
 def test_hyde_eval_strategy_applies_rerank_before_cliff_cutoff():
     harness = DatabaseHarness()
     try:
         with harness.sessions() as db:
             service = make_service(db, FakeAi())
             candidates = [SearchResult(i, "source", f"正文 {i}", 0.0) for i in range(5)]
-            service.retrieve_hyde = lambda query, top_k: candidates
-            settings = EvalSettings(_env_file=None, rag_eval_rerank_candidate_pool=5)
+            service._retrieve_hyde = lambda query, top_k: candidates
+            settings = make_test_settings(EvalSettings, _env_file=None, rag_eval_rerank_candidate_pool=5)
 
             found = _build_retrieve_fn(service, "hyde-rerank", settings)("问题", 4)
 
@@ -109,14 +137,18 @@ def test_hyde_eval_strategy_applies_rerank_before_cliff_cutoff():
         harness.close()
 
 
-def test_hyde_eval_writes_independent_report_and_summary():
+@pytest.mark.parametrize(("strategy", "output_field"), [
+    ("hyde-rerank", "rag_eval_hyde_rerank_output"),
+    ("hyde-multi-query", "rag_eval_hyde_multi_query_output"),
+])
+def test_hyde_eval_writes_independent_report_and_summary(strategy, output_field):
     import tempfile
 
     with tempfile.TemporaryDirectory() as tmp:
         output_dir = Path(tmp)
         report_path = output_dir / "report.json"
         summary_path = output_dir / "summary.json"
-        settings = EvalSettings(_env_file=None).model_copy(update={
+        settings = make_test_settings(EvalSettings, _env_file=None).model_copy(update={
             "rag_eval_dataset": "evals/rag/xling-rag-eval.jsonl",
             "rag_eval_database_url": f"sqlite:///{output_dir / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -124,10 +156,10 @@ def test_hyde_eval_writes_independent_report_and_summary():
             "rag_eval_ai_provider": "mock",
             "rag_eval_output": str(report_path),
             "rag_eval_baseline_output": str(output_dir / "baseline.json"),
-            "rag_eval_hyde_rerank_output": str(summary_path),
+            output_field: str(summary_path),
         })
 
-        report = evaluate(settings, strategy="hyde-rerank")
+        report = evaluate(settings, strategy=strategy)
 
         assert report["totalCases"] == 100
         assert "HyDE" in report["retrieval"]

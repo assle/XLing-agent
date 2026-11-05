@@ -4,7 +4,6 @@ import asyncio
 import json
 import logging
 from datetime import datetime, timezone
-from pathlib import Path
 
 from app.core.versioning import ArtifactVersionResolver
 from app.services.ai import AiClient
@@ -92,7 +91,7 @@ def evaluate(
     settings = settings or get_eval_settings()
     provider = provider or settings.risk_eval_ai_provider
 
-    dataset_path = Path(settings.risk_eval_dataset)
+    dataset_path = settings.resolve_path(settings.risk_eval_dataset)
     cases = json.loads(dataset_path.read_text(encoding="utf-8"))
 
     ai_settings = settings.model_copy(update={
@@ -119,14 +118,14 @@ def evaluate(
         "results": results,
     }
 
-    report_path = Path(settings.risk_eval_output)
+    report_path = settings.resolve_path(settings.risk_eval_output)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(
         json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
     summary = {k: v for k, v in report.items() if k != "results"}
-    summary_path = Path(settings.risk_eval_summary_output)
+    summary_path = settings.resolve_path(settings.risk_eval_summary_output)
     summary_path.parent.mkdir(parents=True, exist_ok=True)
     summary_path.write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"

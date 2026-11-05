@@ -23,17 +23,17 @@ cp .env.production.example .env
 # - DOMAIN=your-domain.com
 # - CADDY_EMAIL=your-email@example.com
 # - JWT_SECRET_KEY=<随机 32+ 字符密钥>
+# - ENVIRONMENT=production
 # - MYSQL_PASSWORD=<强密码>
 # - MYSQL_ROOT_PASSWORD=<强密码>
 # - OPENAI_BASE_URL / OPENAI_API_KEY / OPENAI_MODEL=<同一远程回答服务的配置>
-# - OLLAMA_CLASSIFIER_MODEL / OLLAMA_CLASSIFIER_MODEL_FILE=<已准备的分类器名称与定义>
 ```
 
-生产样例默认使用 `AI_PROVIDER=openai`：回答依赖兼容 OpenAI 的远程接口，风险分类使用 Compose 中的独立 Ollama 服务。模型角色、请求契约和知识向量配置见 [README 的真实模型联调](../README.md#真实模型联调)。
+生产样例默认使用 `AI_PROVIDER=openai`：回答和需要完整文本理解的安全语境复核依赖兼容 OpenAI 的远程接口；风险主分类默认使用应用内决策头，Compose 中的独立 Ollama 服务承担普通低置信复核与故障回退。分类器名称、定义文件和输入契约使用当前代码默认值，只有更换模型时才需要同时覆盖 `OLLAMA_CLASSIFIER_MODEL`、`OLLAMA_CLASSIFIER_MODEL_FILE` 和 `CLASSIFIER_INPUT_FORMAT`。模型角色、请求契约和知识向量配置见 [Docker 操作指南](docker-operations.md#真实模型联调)。生产模式必须使用 `ENVIRONMENT=production`；旧 `APP_ENV` 及其他移除变量的迁移见[配置迁移说明](docker-operations.md#从旧配置迁移)。
 
-`OLLAMA_BASE_URL` 默认是 `http://ollama:11434`。启动时添加 `--profile models`，`ollama-init` 会从只读挂载的项目 `models/` 目录注册分类器到 `ollama-data` 数据卷，不需要宿主机 Ollama。若使用外部模型服务，可省略该 profile 并把 `OLLAMA_BASE_URL` 改为应用容器实际可达的地址。
+启动时添加 `--profile models`，`ollama-init` 会从只读挂载的项目 `models/` 目录注册分类器到 `ollama-data` 数据卷，不需要宿主机 Ollama。Compose 将应用容器内的 `OLLAMA_BASE_URL` 固定为 `http://ollama:11434`，该地址不能用于宿主机进程。
 
-默认分类后端为应用内单次前向决策头（`CLASSIFIER_BACKEND=decision_head`），需要 `DECISION_HEAD_*` 配置指向的 HF 基座、LoRA 适配器、决策头与温度校准文件（本机实验产物，不随源码分发）。这些权重缺失或加载失败不会阻断启动，分类自动回退到上述 Ollama 生成式分类器并记录降级事件；纯 Ollama 部署可显式设 `CLASSIFIER_BACKEND=ollama` 避免重复加载尝试。分层阈值（`CLASSIFIER_HIGH_RISK_THRESHOLD` 等）为工程初始值，可按部署方评测结果覆盖。
+默认分类后端为应用内单次前向决策头（`CLASSIFIER_BACKEND=decision_head`）。部署方通过 `DECISION_HEAD_BUNDLE_DIR` 选择一个模型包，包内固定包含 `base/`、`adapter/`、`head.pt`、`calibration.json` 和 `system-prompt.txt`，不再分别配置五个路径。权重为本机实验产物，不随源码分发；缺失或加载失败不会阻断启动，分类自动回退到上述 Ollama 生成式分类器并记录降级事件。纯 Ollama 部署可显式设 `CLASSIFIER_BACKEND=ollama` 避免重复加载尝试。分层阈值与回退语义保持 [ADR-0016](adr/0016-decision-head-classifier-layered-safety.md) 不变。
 
 ### 3. 启动服务
 

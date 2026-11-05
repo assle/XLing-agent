@@ -15,7 +15,6 @@ from __future__ import annotations
 import jwt as pyjwt
 
 from app.api.routes import router
-from app.core.config import get_settings
 from app.core.security import (
     create_access_token,
     decode_access_token,
@@ -23,7 +22,7 @@ from app.core.security import (
     verify_password,
 )
 from app.models.entities import UserAccount
-from tests.support import ApiHarness
+from tests.support import ApiHarness, make_test_settings
 
 # ---------------------------------------------------------------------------
 # Test database + app setup
@@ -154,18 +153,19 @@ def test_jwt_tampered_token_rejected():
         db.close()
 
 
-def test_jwt_expired_token_rejected():
+def test_jwt_expired_token_rejected(monkeypatch):
     """构造过期时间已经过去的凭证并尝试解码。
 
     当前异常捕获也包含用来表示未抛错的断言，验证力度有限。
     """
-    settings = get_settings()
+    settings = make_test_settings()
+    monkeypatch.setattr("app.core.security.get_settings", lambda: settings)
     expired_payload = {
         "sub": "1", "username": "student", "roles": ["ROLE_USER"],
         "exp": 1, "iat": 1,
     }
     expired_token = pyjwt.encode(
-        expired_payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
+        expired_payload, settings.jwt_secret_key.get_secret_value(), algorithm=settings.jwt_algorithm
     )
     try:
         decode_access_token(expired_token)

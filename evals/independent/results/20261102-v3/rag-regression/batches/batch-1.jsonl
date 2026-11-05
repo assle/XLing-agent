@@ -1,0 +1,25 @@
+{"id": "risk-high-self-harm-direct", "question": "学生明确说想自杀或者伤害自己时，系统应该怎么处理？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["HIGH", "self-harm", "suicide", "alert"]}
+{"id": "risk-high-suicide-plan", "question": "如果学生说已经想好了自杀计划，这在风险策略里属于什么等级？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["HIGH", "suicide", "plans", "immediate danger"]}
+{"id": "risk-high-hurt-others", "question": "学生表示打算伤害别人，RAG 应该检索到哪类风险处置规则？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["HIGH", "hurt oneself or others", "immediate danger", "alert"]}
+{"id": "risk-high-severe-hopelessness", "question": "一个学生反复表达严重绝望，还暗示自己撑不下去了，风险等级应如何判断？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["HIGH", "severe hopelessness", "immediate danger", "human support"]}
+{"id": "risk-high-immediate-danger", "question": "哪些语言会被视为 immediate danger，需要进入高风险流程？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["HIGH", "immediate danger", "self-harm", "suicide"]}
+{"id": "risk-high-record-report", "question": "高风险学生出现后，系统是否需要记录心理报告？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["HIGH", "records the report", "心理报告", "Excel"]}
+{"id": "risk-high-excel-ledger", "question": "HIGH 风险事件为什么要写入 Excel 台账？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["HIGH", "Excel ledger", "台账", "MCP"]}
+{"id": "risk-high-alert-counselor", "question": "当判断为高风险时，系统要不要通知辅导员或管理员？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["HIGH", "alert", "counselors", "administrators"]}
+{"id": "risk-high-response-tone", "question": "高风险回复的语气应该是怎样的？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["empathetic", "direct", "human support", "稳定"]}
+{"id": "risk-high-human-support", "question": "遇到高风险表达时，回复里应该鼓励学生联系谁？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["HIGH", "trusted person", "professional support", "immediate human support"]}
+{"id": "risk-medium-persistent-anxiety", "question": "学生长期持续焦虑但没有自伤计划，属于什么风险等级？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["MEDIUM", "persistent anxiety", "without immediate self-harm intent"]}
+{"id": "risk-medium-insomnia-loneliness", "question": "长期失眠、孤独和持续焦虑但没有自伤计划，属于什么风险等级？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["MEDIUM", "insomnia", "loneliness", "emotional distress"]}
+{"id": "risk-medium-low-mood-pressure", "question": "学生说最近情绪很低落、压力很大，但没有立即危险信号，应该检索什么风险定义？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["MEDIUM", "low mood", "pressure", "emotional distress"]}
+{"id": "risk-medium-emotional-distress", "question": "明显情绪困扰但没有明确自伤意图时，风险策略怎么分类？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["MEDIUM", "emotional distress", "without immediate self-harm intent"]}
+{"id": "risk-medium-no-immediate-intent", "question": "没有立即自伤意图这一点在中风险判断里有什么作用？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["MEDIUM", "without immediate self-harm intent", "没有明确"]}
+{"id": "risk-medium-cannot-sleep", "question": "学生连续很多天睡不着并伴随焦虑，风险等级可能是什么？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["MEDIUM", "insomnia", "persistent anxiety", "失眠"]}
+{"id": "risk-medium-lonely-pressure", "question": "一个学生说自己很孤独、学业压力很重，但没有提到自杀，应归入哪类风险？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["MEDIUM", "loneliness", "pressure", "without immediate"]}
+{"id": "risk-low-mild-stress", "question": "普通聊天或轻微压力，没有自伤信号时属于什么风险等级？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["LOW", "mild stress", "no self-harm signals"]}
+{"id": "risk-low-ordinary-anxiety", "question": "一般焦虑但没有危险信号，风险策略会怎么标记？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["LOW", "ordinary anxiety", "no self-harm signals"]}
+{"id": "risk-low-normal-chat", "question": "学生只是普通聊天，系统是否应该进入高风险预警？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["LOW", "normal chat", "普通聊天"]}
+{"id": "risk-low-no-self-harm", "question": "没有 self-harm 或 suicide 信号的轻微压力如何定级？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["LOW", "self-harm", "suicide", "no self-harm signals"]}
+{"id": "risk-levels-overview", "question": "系统的风险等级一共有哪几类？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["LOW", "MEDIUM", "HIGH", "风险等级"]}
+{"id": "risk-compare-medium-high", "question": "中风险和高风险的关键区别是什么？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["MEDIUM", "HIGH", "immediate danger", "self-harm"]}
+{"id": "risk-self-harm-signal", "question": "出现 self-harm 信号时，风险规则会如何处理？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["self-harm", "HIGH", "alert", "immediate danger"]}
+{"id": "risk-suicide-keyword", "question": "suicide 这样的关键词在风险判断里意味着什么？", "expectedSources": ["risk-policy.md"], "expectedTerms": ["suicide", "HIGH", "immediate danger"]}

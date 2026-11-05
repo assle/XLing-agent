@@ -126,11 +126,6 @@ def local_app_processes() -> list[int]:
     return processes
 
 
-def _path(settings: Settings, value: str) -> Path:
-    path = Path(value).expanduser()
-    return path.absolute() if path.is_absolute() else (settings.project_root / path).absolute()
-
-
 def _preserved_counts(db: Session) -> dict[str, int]:
     counts = {
         model.__tablename__: db.query(model).count()
@@ -181,24 +176,24 @@ def reset_local_conversations(
         keys = [key for thread_id in sorted(thread_ids) for key in (
             f"xling:short-term-memory:{thread_id}", f"xling:cbt-state:{thread_id}",
         )]
-        checkpoint = _path(settings, settings.langgraph_checkpoint_path)
-        ledger = _path(settings, settings.excel_path)
-        ledger_files = {ledger, *(_path(settings, row.file_path) for row in db.query(ExcelRecord).all())}
+        checkpoint = settings.resolve_path(settings.langgraph_checkpoint_path)
+        ledger = settings.resolve_path(settings.excel_path)
+        ledger_files = {ledger, *(settings.resolve_path(row.file_path) for row in db.query(ExcelRecord).all())}
         if any(path.suffix.lower() != ".xlsx" or path.parent.resolve() != ledger.parent.resolve() for path in ledger_files):
             raise ResetRefused("ledger-is-outside-local-export-scope")
         if checkpoint.suffix.lower() not in {".db", ".sqlite", ".sqlite3"}:
             raise ResetRefused("checkpoint-is-not-sqlite-file")
         files = {checkpoint, Path(f"{checkpoint}-wal"), Path(f"{checkpoint}-shm"), *ledger_files}
         preserved_folders = [
-            _path(settings, settings.chroma_persist_dir),
-            _path(settings, settings.finetuned_model_dir),
+            settings.resolve_path(settings.chroma_persist_dir),
+            settings.resolve_path(settings.finetuned_model_dir),
             settings.project_root / "models",
             settings.project_root / "knowledge",
         ]
         if any(path.resolve().is_relative_to(folder.resolve()) for path in files for folder in preserved_folders):
             raise ResetRefused("retired-file-is-preserved-asset")
         database_file = bound_url.database
-        sql_path = _path(settings, str(database_file)) if bound_url.get_backend_name() == "sqlite" and database_file not in {None, "", ":memory:"} else None
+        sql_path = settings.resolve_path(str(database_file)) if bound_url.get_backend_name() == "sqlite" and database_file not in {None, "", ":memory:"} else None
         if sql_path and any(path.resolve() == sql_path.resolve() for path in files):
             raise ResetRefused("retired-file-is-business-database")
         if any(path.is_dir() for path in files):

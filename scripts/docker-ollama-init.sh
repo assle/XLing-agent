@@ -13,9 +13,9 @@ create_model() {
     ollama create "$model_name" -f "$model_file"
 }
 
-classifier_name="${OLLAMA_CLASSIFIER_MODEL:-xling-cls-3b-ft:latest}"
+classifier_name="${OLLAMA_CLASSIFIER_MODEL:-xling-general-cls-05b:quoted-f16}"
 classifier_directory="${OLLAMA_CLASSIFIER_MODEL_DIR:-${classifier_name%%:*}}"
-classifier_definition="${OLLAMA_CLASSIFIER_MODEL_FILE:-Modelfile}"
+classifier_definition="${OLLAMA_CLASSIFIER_MODEL_FILE:-Modelfile.quoted-f16}"
 create_model "$classifier_name" "$classifier_directory" "$classifier_definition"
 
 if [ "${AI_PROVIDER:-ollama}" = "ollama" ]; then

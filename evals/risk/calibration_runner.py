@@ -25,9 +25,9 @@ def collect_calibration_inputs(
     """
     settings = settings or get_eval_settings()
     source_rows = json.loads(
-        Path(settings.risk_calibration_source_dataset).read_text(encoding="utf-8")
+        settings.resolve_path(settings.risk_calibration_source_dataset).read_text(encoding="utf-8")
     )
-    split = json.loads(Path(settings.risk_calibration_split).read_text(encoding="utf-8"))
+    split = json.loads(settings.resolve_path(settings.risk_calibration_split).read_text(encoding="utf-8"))
     calibration_ids = set(split["calibration"])
     test_ids = set(split["test"])
     # 校准拟合用的样本不能同时用于最终测试，先检查编号交集。
@@ -55,8 +55,8 @@ def collect_calibration_inputs(
     calibration = collect(calibration_ids)
     test = collect(test_ids)
     for rows, output in (
-        (calibration, Path(settings.risk_calibration_dataset)),
-        (test, Path(settings.risk_calibration_test_dataset)),
+        (calibration, settings.resolve_path(settings.risk_calibration_dataset)),
+        (test, settings.resolve_path(settings.risk_calibration_test_dataset)),
     ):
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -85,8 +85,8 @@ def evaluate_calibration(settings: EvalSettings | None = None) -> dict:
     根据代码内门槛生成建议及参数文件，不实际部署；scoreSource 是配置推导标签，本函数直接读取文件分数，不能证明其真实来源。
     """
     settings = settings or get_eval_settings()
-    calibration_path = Path(settings.risk_calibration_dataset)
-    test_path = Path(settings.risk_calibration_test_dataset)
+    calibration_path = settings.resolve_path(settings.risk_calibration_dataset)
+    test_path = settings.resolve_path(settings.risk_calibration_test_dataset)
     calibration_rows = json.loads(calibration_path.read_text(encoding="utf-8"))
     test_rows = json.loads(test_path.read_text(encoding="utf-8"))
 
@@ -151,7 +151,7 @@ def evaluate_calibration(settings: EvalSettings | None = None) -> dict:
     )
 
     artifact = engine.to_dict()
-    artifact_path = Path(settings.risk_calibration_artifact_output)
+    artifact_path = settings.resolve_path(settings.risk_calibration_artifact_output)
     artifact_path.parent.mkdir(parents=True, exist_ok=True)
     artifact_path.write_text(json.dumps(artifact, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -189,7 +189,7 @@ def evaluate_calibration(settings: EvalSettings | None = None) -> dict:
             for row, decision in zip(test_rows, decisions, strict=True)
         ],
     }
-    output_path = Path(settings.risk_calibration_output)
+    output_path = settings.resolve_path(settings.risk_calibration_output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return report
@@ -331,14 +331,14 @@ def _data_split_evidence(
 
     比较精确文本交集，并另查同源改写分组；没有精确重复不等于没有同源泄漏。
     """
-    training_path = Path(settings.risk_training_dataset)
-    validation_path = Path(settings.risk_validation_dataset)
+    training_path = settings.resolve_path(settings.risk_training_dataset)
+    validation_path = settings.resolve_path(settings.risk_validation_dataset)
     training_texts = _jsonl_texts(training_path)
     validation_texts = _jsonl_texts(validation_path)
     calibration_texts = {_row_text(row) for row in calibration_rows}
     test_texts = {_row_text(row) for row in test_rows}
     groups_verified = _source_groups_verified(
-        Path(settings.risk_calibration_split),
+        settings.resolve_path(settings.risk_calibration_split),
         calibration_rows,
         test_rows,
     )
@@ -357,11 +357,11 @@ def _data_split_evidence(
         "training": _split_descriptor(training_path, len(training_texts)),
         "validation": _split_descriptor(validation_path, len(validation_texts)),
         "calibration": _split_descriptor(
-            Path(settings.risk_calibration_dataset),
+            settings.resolve_path(settings.risk_calibration_dataset),
             len(calibration_rows),
         ),
         "test": _split_descriptor(
-            Path(settings.risk_calibration_test_dataset),
+            settings.resolve_path(settings.risk_calibration_test_dataset),
             len(test_rows),
         ),
         "exactTextOverlap": overlaps,

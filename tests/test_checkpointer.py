@@ -17,13 +17,12 @@ import json
 import sqlite3
 
 from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
-from app.core.config import Settings
 from app.core.enums import IntentType
 from app.models.entities import ActionPlan, ChatSession, UserAccount
 from app.schemas.dtos import AiMessage
 from app.services.action_plan import ActionPlanService
 from app.services.checkin import CheckInService
-from tests.support import DatabaseHarness, FakeMemoryStore, build_runtime
+from tests.support import DatabaseHarness, FakeMemoryStore, build_runtime, make_test_settings
 
 
 def _make_runtime(backend: str, checkpoint_path: str | None = None, checkpointer=None) -> LangGraphAgentRuntimeService:
@@ -36,7 +35,7 @@ def _make_runtime(backend: str, checkpoint_path: str | None = None, checkpointer
         kwargs["langgraph_checkpoint_path"] = checkpoint_path
     runtime = build_runtime(
         LangGraphAgentRuntimeService,
-        settings=Settings(**kwargs),
+        settings=make_test_settings(**kwargs),
         memory=FakeMemoryStore([
             AiMessage(role="user", content="你好"),
             AiMessage(role="assistant", content="你好呀"),

@@ -1,0 +1,1688 @@
+{
+  "createdAt": "2026-11-02T05:05:42.854134",
+  "dataset": "evals/independent/results/20261102-v3/rag-regression/batches/batch-4.jsonl",
+  "topK": 4,
+  "retrieval": "multi-query + Chroma dense primary (local hybrid fallback)",
+  "totalCases": 25,
+  "recallAtK": 0.92,
+  "precisionAtK": 0.57,
+  "mrr": 0.9,
+  "ndcgAtK": 0.8805109780074051,
+  "hitRate": 0.92,
+  "targetSourceRecallAtK": 0.88,
+  "answerRelevanceHitRate": 0.92,
+  "reviewedRelevanceCases": 0,
+  "averageFirstRelevantRank": 1.0434782608695652,
+  "p95LatencyMs": 3874.0058,
+  "safetyCriticalCases": 2,
+  "safetyCriticalMissRate": 0.0,
+  "results": [
+    {
+      "id": "referral-prep-three-parts",
+      "question": "我担心到咨询室脑子一片空白，能不能把情况先压缩成三段再去说？",
+      "expectedSources": [
+        "counselor-referral-and-resources.md"
+      ],
+      "expectedTerms": [
+        "三段",
+        "我最近的状态",
+        "最影响我的事情",
+        "我希望得到的帮助"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 21,
+          "source": "exam-season-guidance.md",
+          "score": 0.6634601267487373,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 考试季心理支持 ## 考前一周 考前一周可以把复习内容分成高频重点、基础保分、低优先级三层。 先覆盖高频和基础，避免陷入某个难题导致整体失控。 每天安排固定休息和吃饭，不要用完全熬夜换短期安全感。 如果用户复习时不断走神，可以使用番茄钟或 25 分钟块，但要允许低状态版本：10 分钟也算开始。 每个学习块只设一个具"
+        },
+        {
+          "rank": 2,
+          "chunkId": 16,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.661738469071034,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 焦虑、恐慌与稳定技术 ## 焦虑认知整理 当身体稍微稳定后，可以帮助用户区分事实、猜测和下一步。 事实是已经发生或可以验证的信息，例如“明天要提交任务”“还有三章没复习”。 猜测是对结果的预警，例如“我一定会失败”“别人肯定觉得我很差”。 下一步是能在 10 到 30 分钟内完成的行动，例如列提纲、做一道题、确认任"
+        },
+        {
+          "rank": 3,
+          "chunkId": 18,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.6597804352189744,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 焦虑、恐慌与稳定技术 ## 什么时候建议求助 Xling 可以提供稳定技巧和求助路径，但不能诊断焦虑障碍，不能开药，也不能替代专业人员。 用户如果正在服药，应联系开药医生，助手不提供药物调整建议。"
+        },
+        {
+          "rank": 4,
+          "chunkId": 13,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.659094522016164,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 焦虑、恐慌与稳定技术 焦虑 anxiety 是心理支持中常见的主题。 用户可能因为工作任务、考试、就业、家庭期待、人际评价或长期不确定性而出现紧张、心慌、胸闷、手抖、胃部不适、注意力下降、反复检查和灾难化想法。 Xling 帮助用户先降低生理唤醒，再把问题拆成可处理的部分。"
+        }
+      ],
+      "hit": false,
+      "answerRelevanceHit": false,
+      "targetSourceHit": false,
+      "targetSourceFirstRank": 0,
+      "targetSourceRecallAtK": 0.0,
+      "firstRelevantRank": 0,
+      "recallAtK": 0.0,
+      "precisionAtK": 0.0,
+      "reciprocalRank": 0.0,
+      "ndcgAtK": 0.0,
+      "latencyMs": 3074.6988,
+      "safetyCritical": false
+    },
+    {
+      "id": "referral-resource-map",
+      "question": "除了心理中心，学生在校内外还有哪些现实的人或部门可以作为求助入口？",
+      "expectedSources": [
+        "counselor-referral-and-resources.md"
+      ],
+      "expectedTerms": [
+        "辅导员",
+        "学院老师",
+        "校医院",
+        "校园保卫"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 25,
+          "source": "general-mental-health-support.md",
+          "score": 0.6874163854543419,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# General Mental Health Support Xling provides non-diagnostic mental health support for anxiety, low mood, sleep disruption, work stress, family and relationshi"
+        },
+        {
+          "rank": 2,
+          "chunkId": 6,
+          "source": "academic-stress-and-burnout.md",
+          "score": 0.6752412255194324,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 工作、学业压力、拖延与倦怠 ## 何时寻求人帮助 当压力已经导致连续失眠、频繁哭泣、无法工作或学习、躯体不适、无法完成基本生活，或用户表达强烈绝望时，应进一步评估风险。 没有明确自伤计划时可按 MEDIUM 中风险处理，建议尽快联系部署方提供的专业支持资源，并为现实事务寻找适用协助；出现 self-harm 自伤、"
+        },
+        {
+          "rank": 3,
+          "chunkId": 17,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.6728676119602448,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 焦虑、恐慌与稳定技术 ## 焦虑认知整理 当身体稍微稳定后，可以帮助用户区分事实、猜测和下一步。 事实是已经发生或可以验证的信息，例如“明天要提交任务”“还有三章没复习”。 猜测是对结果的预警，例如“我一定会失败”“别人肯定觉得我很差”。 下一步是能在 10 到 30 分钟内完成的行动，例如列提纲、做一道题、确认任"
+        },
+        {
+          "rank": 4,
+          "chunkId": 5,
+          "source": "academic-stress-and-burnout.md",
+          "score": 0.6584827758910435,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 工作、学业压力、拖延与倦怠 ## 何时寻求人帮助 当压力已经导致连续失眠、频繁哭泣、无法工作或学习、躯体不适、无法完成基本生活，或用户表达强烈绝望时，应进一步评估风险。 没有明确自伤计划时可按 MEDIUM 中风险处理，建议尽快联系部署方提供的专业支持资源，并为现实事务寻找适用协助；出现 self-harm 自伤、"
+        }
+      ],
+      "hit": false,
+      "answerRelevanceHit": false,
+      "targetSourceHit": false,
+      "targetSourceFirstRank": 0,
+      "targetSourceRecallAtK": 0.0,
+      "firstRelevantRank": 0,
+      "recallAtK": 0.0,
+      "precisionAtK": 0.0,
+      "reciprocalRank": 0.0,
+      "ndcgAtK": 0.0,
+      "latencyMs": 2949.9203,
+      "safetyCritical": false
+    },
+    {
+      "id": "referral-crisis-not-next-week",
+      "question": "学生已经准备了伤害自己的工具，却说只想约下周咨询；系统这时最该检索预约流程还是即时求助路径？",
+      "expectedSources": [
+        "counselor-referral-and-resources.md"
+      ],
+      "expectedTerms": [
+        "已经准备工具",
+        "immediate danger",
+        "紧急服务",
+        "alert"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 55,
+          "source": "risk-policy.md",
+          "score": 0.7305448300704204,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 MEDIUM 中风险包括持续焦虑、长期 insomnia 失眠、低落 low mood、压力过载、孤独、明显 emotional distress 情绪困扰、哭泣频繁、工作、学习或生活功能下降、持续绝望感，但没有明确、立即的自伤计划。 用户可能会说“我撑不住了”“每天都很难"
+        },
+        {
+          "rank": 2,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.7169645001988965,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 考后复盘容易引发自责。 可以建议用户限定复盘时间，例如 15 分钟记录客观问题，然后停止反复查答案，把注意力转到下一门考试或恢复。 成绩出来前的等待期，可以把担心分成可行动部分和不可控制部分：可行动的是了解适用的后续安排和联系相关人员；不可控制的是已经交卷的答案。 # 考试"
+        },
+        {
+          "rank": 3,
+          "chunkId": 17,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.7160622418471845,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 焦虑、恐慌与稳定技术 ## 什么时候建议求助 如果焦虑持续多周、伴随严重 insomnia 失眠、频繁惊恐发作 panic attack、无法工作或学习、无法进食、反复躯体不适，或用户开始用伤害自己来缓解焦虑，应建议尽快联系部署方提供的专业支持资源或适用的健康服务机构。 若用户出现 self-harm 自伤、sui"
+        },
+        {
+          "rank": 4,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.712738315604268,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": false,
+      "targetSourceFirstRank": 0,
+      "targetSourceRecallAtK": 0.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3864.6479,
+      "safetyCritical": false
+    },
+    {
+      "id": "exam-review-priority-three-levels",
+      "question": "只剩一周，复习内容肯定补不完，怎么分层才不会一直卡在难题上？",
+      "expectedSources": [
+        "exam-season-guidance.md"
+      ],
+      "expectedTerms": [
+        "高频重点",
+        "基础保分",
+        "低优先级",
+        "整体失控"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 20,
+          "source": "exam-season-guidance.md",
+          "score": 0.7295276703436768,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 考试季心理支持 考试季 exam season 可能把睡眠、焦虑、自我评价和人际比较集中放大。 备考用户可能出现考前失眠、复习效率下降、反复刷题仍不安心、看到他人进度后崩溃、担心失败或害怕让家人失望。 Xling 应帮助用户优先稳住并完成考试。 考试压力是通用支持中的一个主题，不限定所有用户的身份。 # 考试季心理"
+        },
+        {
+          "rank": 2,
+          "chunkId": 22,
+          "source": "exam-season-guidance.md",
+          "score": 0.6803729730297793,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 考后复盘容易引发自责。 可以建议用户限定复盘时间，例如 15 分钟记录客观问题，然后停止反复查答案，把注意力转到下一门考试或恢复。 成绩出来前的等待期，可以把担心分成可行动部分和不可控制部分：可行动的是了解适用的后续安排和联系相关人员；不可控制的是已经交卷的答案。"
+        },
+        {
+          "rank": 3,
+          "chunkId": 21,
+          "source": "exam-season-guidance.md",
+          "score": 0.6801293276486879,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考前一天和考试当天 考前一天重点是降低变量：准备证件、文具、准考信息、路线和闹钟；不要在睡前大量摄入刺激内容；如果睡不着，进行慢呼气和低刺激活动。 提醒用户，一晚睡不好不等于考试一定失败。 考试当天，如果出现心慌、手抖、脑子空白，可以建议先做 3 轮慢呼气，把双脚踩稳，先写会做的题，跳过卡住的"
+        },
+        {
+          "rank": 4,
+          "chunkId": 19,
+          "source": "exam-season-guidance.md",
+          "score": 0.6796527862355451,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 考试季心理支持 考试季 exam season 可能把睡眠、焦虑、自我评价和人际比较集中放大。 备考用户可能出现考前失眠、复习效率下降、反复刷题仍不安心、看到他人进度后崩溃、担心失败或害怕让家人失望。 Xling 应帮助用户优先稳住并完成考试。 考试压力是通用支持中的一个主题，不限定所有用户的身份。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3147.4425,
+      "safetyCritical": false
+    },
+    {
+      "id": "exam-day-blank-start-easy",
+      "question": "进考场后手抖、脑子空白，我第一分钟应该怎么把考试重新启动？",
+      "expectedSources": [
+        "exam-season-guidance.md"
+      ],
+      "expectedTerms": [
+        "3 轮慢呼气",
+        "双脚踩稳",
+        "先写会做的题",
+        "跳过卡住的题"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 21,
+          "source": "exam-season-guidance.md",
+          "score": 0.7317250907629637,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考前一周 考前一周可以把复习内容分成高频重点、基础保分、低优先级三层。 先覆盖高频和基础，避免陷入某个难题导致整体失控。 每天安排固定休息和吃饭，不要用完全熬夜换短期安全感。 如果用户复习时不断走神，可以使用番茄钟或 25 分钟块，但要允许低状态版本：10 分钟也算开始。 每个学习块只设一个具"
+        },
+        {
+          "rank": 2,
+          "chunkId": 13,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.7315978532314451,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 焦虑、恐慌与稳定技术 焦虑 anxiety 是心理支持中常见的主题。 用户可能因为工作任务、考试、就业、家庭期待、人际评价或长期不确定性而出现紧张、心慌、胸闷、手抖、胃部不适、注意力下降、反复检查和灾难化想法。 Xling 帮助用户先降低生理唤醒，再把问题拆成可处理的部分。"
+        },
+        {
+          "rank": 3,
+          "chunkId": 14,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.7175956426246185,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 焦虑、恐慌与稳定技术 ## 基本回应顺序 当用户说“我快崩溃了”“我心跳很快”“我感觉控制不了自己”时，先回应身体和情绪：“听起来你的身体正在进入高度警觉状态，这很难受，我们可以先做一个短步骤让它降下来。 ”确认安全后，提供一个简单的 grounding 或 breathing 技术。 五感着陆 grounding"
+        },
+        {
+          "rank": 4,
+          "chunkId": 15,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.713071068876905,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 焦虑、恐慌与稳定技术 ## 基本回应顺序 这个练习帮助把注意力从灾难化想法拉回当前环境，可根据家中、工作场所或学习环境调整。 呼吸练习 breathing 可以建议 4-6 呼吸：用 4 拍吸气，6 拍呼气，连续 5 轮。 重点是延长呼气，而不是憋气。 如果用户正在明显恐慌，不要要求复杂步骤，可以只说“把双脚踩在地"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.25,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0,
+      "latencyMs": 3143.7959,
+      "safetyCritical": false
+    },
+    {
+      "id": "exam-post-review-timebox",
+      "question": "考完我一直对答案越想越崩，怎么复盘才不把下一门也拖进去？",
+      "expectedSources": [
+        "exam-season-guidance.md"
+      ],
+      "expectedTerms": [
+        "15 分钟",
+        "客观问题",
+        "停止反复查答案",
+        "下一门考试"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 22,
+          "source": "exam-season-guidance.md",
+          "score": 0.7725912456093013,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考前一天和考试当天 考前一天重点是降低变量：准备证件、文具、准考信息、路线和闹钟；不要在睡前大量摄入刺激内容；如果睡不着，进行慢呼气和低刺激活动。 提醒用户，一晚睡不好不等于考试一定失败。 考试当天，如果出现心慌、手抖、脑子空白，可以建议先做 3 轮慢呼气，把双脚踩稳，先写会做的题，跳过卡住的"
+        },
+        {
+          "rank": 2,
+          "chunkId": 13,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.6930829730552179,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 焦虑、恐慌与稳定技术 焦虑 anxiety 是心理支持中常见的主题。 用户可能因为工作任务、考试、就业、家庭期待、人际评价或长期不确定性而出现紧张、心慌、胸闷、手抖、胃部不适、注意力下降、反复检查和灾难化想法。 Xling 帮助用户先降低生理唤醒，再把问题拆成可处理的部分。"
+        },
+        {
+          "rank": 3,
+          "chunkId": 21,
+          "source": "exam-season-guidance.md",
+          "score": 0.6904131441440154,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考前一天和考试当天 考前一天重点是降低变量：准备证件、文具、准考信息、路线和闹钟；不要在睡前大量摄入刺激内容；如果睡不着，进行慢呼气和低刺激活动。 提醒用户，一晚睡不好不等于考试一定失败。 考试当天，如果出现心慌、手抖、脑子空白，可以建议先做 3 轮慢呼气，把双脚踩稳，先写会做的题，跳过卡住的"
+        },
+        {
+          "rank": 4,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.6830944023632091,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 如果用户因为考试表达强烈绝望，应认真评估是否有 self-harm 自伤、suicide 自杀计划或 immediate danger。 如果有具体计划或无法保证安全，按 HIGH 风险处理；如果没有计划但持续崩溃，按 MEDIUM 中风险建议尽快联系部署方提供的专业支持资"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.75,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 0.9060254355346824,
+      "latencyMs": 3006.8702,
+      "safetyCritical": false
+    },
+    {
+      "id": "exam-insomnia-vs-sleep",
+      "question": "明天考试又失眠，我怕早上手忙脚乱把状态搞得更差；今晚除了尝试入睡，还应该提前处理哪些现实变量？",
+      "expectedSources": [
+        "exam-season-guidance.md"
+      ],
+      "expectedTerms": [
+        "考前一天",
+        "降低变量",
+        "证件",
+        "路线",
+        "闹钟"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 21,
+          "source": "exam-season-guidance.md",
+          "score": 0.7538939983719014,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考前一周 考前一周可以把复习内容分成高频重点、基础保分、低优先级三层。 先覆盖高频和基础，避免陷入某个难题导致整体失控。 每天安排固定休息和吃饭，不要用完全熬夜换短期安全感。 如果用户复习时不断走神，可以使用番茄钟或 25 分钟块，但要允许低状态版本：10 分钟也算开始。 每个学习块只设一个具"
+        },
+        {
+          "rank": 2,
+          "chunkId": 63,
+          "source": "sleep-routine-self-care.md",
+          "score": 0.7322894264937231,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 睡眠、作息与基础自我照顾 ## 失眠时的处理 如果躺下 20 到 30 分钟仍很清醒，可以建议用户短暂离开床，做低刺激活动，例如看纸质书、听低刺激音频、整理桌面，困意回来再上床。 减少反复看时间引起的焦虑。 对重要任务或考试前失眠，可以提醒用户：一晚睡不好不等于任务一定失败。 可以准备第二天的安排，例如早餐、提前出"
+        },
+        {
+          "rank": 3,
+          "chunkId": 19,
+          "source": "exam-season-guidance.md",
+          "score": 0.71759772866198,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 考试季心理支持 考试季 exam season 可能把睡眠、焦虑、自我评价和人际比较集中放大。 备考用户可能出现考前失眠、复习效率下降、反复刷题仍不安心、看到他人进度后崩溃、担心失败或害怕让家人失望。 Xling 应帮助用户优先稳住并完成考试。 考试压力是通用支持中的一个主题，不限定所有用户的身份。"
+        },
+        {
+          "rank": 4,
+          "chunkId": 60,
+          "source": "sleep-routine-self-care.md",
+          "score": 0.7020441584917881,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 睡眠、作息与基础自我照顾 用户常见的睡眠 sleep 困扰包括入睡困难、凌晨醒来、睡前刷手机停不下来、重要任务或考试前失眠、居住环境噪音、昼夜颠倒、白天嗜睡、咖啡因摄入过多和焦虑复盘。 Xling 可以提供睡眠卫生 sleep hygiene 和作息 routine 支持，但不能把严重失眠简单归因于“不自律”。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.5,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 0.9197207891481874,
+      "latencyMs": 3335.6576,
+      "safetyCritical": false
+    },
+    {
+      "id": "low-mood-behavioral-activation",
+      "question": "我连起床都觉得费劲，越想着“彻底振作”越做不到，有没有从极小动作开始的办法？",
+      "expectedSources": [
+        "low-mood-depression-support.md"
+      ],
+      "expectedTerms": [
+        "behavioral activation",
+        "small actions",
+        "下床喝水",
+        "5 分钟"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 28,
+          "source": "low-mood-depression-support.md",
+          "score": 0.7866579460244987,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 情绪低落与日常支持 用户表达低 mood、情绪低落、空心、无意义、孤独、疲惫、想哭、对什么都没兴趣时，Xling 应承认其感受并提供可执行的小步骤。 不要急着要求“看开一点”或“积极起来”。 可以先回应：“听起来你已经消耗了很久。 ” # 情绪低落与日常支持 ## 日常低落的支持策略 低落表达不等于诊断 depre"
+        },
+        {
+          "rank": 2,
+          "chunkId": 3,
+          "source": "academic-stress-and-burnout.md",
+          "score": 0.6961142798904901,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 工作、学业压力、拖延与倦怠 ## 压力拆解 当用户说“事情太多了”“我完全做不下去”时，可以先帮助其把压力拆成三类：必须今天处理的任务、可以本周处理的任务、暂时只能接受不完美的任务。 拆分后再建议一个最小行动，例如打开文档写标题、做一道题、确认截止时间或列出任务范围。 拖延 procrastination 可能与焦"
+        },
+        {
+          "rank": 3,
+          "chunkId": 29,
+          "source": "low-mood-depression-support.md",
+          "score": 0.6883393457219128,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 情绪低落与日常支持 ## 日常低落的支持策略 规律饮食睡眠是基础支持。 用户在低落时可能出现昼夜颠倒、食欲变化、长时间刷手机或逃避社交。 可以先固定一个起床时间，保证一顿稳定饭，减少夜间独处和自责循环。 journaling 日记记录可以帮助用户整理混乱感。 可以写三栏：今天发生了什么，我有什么感受，我能做的最小一"
+        },
+        {
+          "rank": 4,
+          "chunkId": 63,
+          "source": "sleep-routine-self-care.md",
+          "score": 0.6751619733890053,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 睡眠、作息与基础自我照顾 ## 失眠时的处理 如果躺下 20 到 30 分钟仍很清醒，可以建议用户短暂离开床，做低刺激活动，例如看纸质书、听低刺激音频、整理桌面，困意回来再上床。 减少反复看时间引起的焦虑。 对重要任务或考试前失眠，可以提醒用户：一晚睡不好不等于任务一定失败。 可以准备第二天的安排，例如早餐、提前出"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.5,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 0.9197207891481874,
+      "latencyMs": 3460.6285,
+      "safetyCritical": false
+    },
+    {
+      "id": "low-mood-journal-three-columns",
+      "question": "心里很多东西绕来绕去但写不出来，日记可以按哪三个格子来记？",
+      "expectedSources": [
+        "low-mood-depression-support.md"
+      ],
+      "expectedTerms": [
+        "三栏",
+        "今天发生了什么",
+        "我有什么感受",
+        "最小一步"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 29,
+          "source": "low-mood-depression-support.md",
+          "score": 0.6758543016806273,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 情绪低落与日常支持 ## 日常低落的支持策略 低落表达不等于诊断 depression。 助手可以借鉴“行为激活 behavioral activation”的小行动 small actions 思路，不要求用户一次性改变生活。 小行动可以是下床喝水、洗脸、打开窗、吃一点东西、到楼下走 5 分钟、把一项任务缩小到第"
+        },
+        {
+          "rank": 2,
+          "chunkId": 16,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.6488327445913872,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 焦虑、恐慌与稳定技术 ## 焦虑认知整理 当身体稍微稳定后，可以帮助用户区分事实、猜测和下一步。 事实是已经发生或可以验证的信息，例如“明天要提交任务”“还有三章没复习”。 猜测是对结果的预警，例如“我一定会失败”“别人肯定觉得我很差”。 下一步是能在 10 到 30 分钟内完成的行动，例如列提纲、做一道题、确认任"
+        },
+        {
+          "rank": 3,
+          "chunkId": 2,
+          "source": "academic-stress-and-burnout.md",
+          "score": 0.6480678227683266,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 工作、学业压力、拖延与倦怠 工作和学业压力可能来自交付期限、任务负荷、评价、就业、考试、论文、实习或家庭期待。 Xling 需要同时承认现实压力和情绪消耗，不要把所有问题都归结为时间管理差。 考试和大学学业压力保留为适用场景的一部分。 # 工作、学业压力、拖延与倦怠 ## 压力拆解 当用户说“事情太多了”“我完全做"
+        },
+        {
+          "rank": 4,
+          "chunkId": 33,
+          "source": "low-mood-depression-support.md",
+          "score": 0.6446526402818503,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 情绪低落与日常支持 ## 升级信号 助手不能诊断抑郁症，不能开药，不能承诺替代长期咨询。 它可以帮助用户把痛苦说清楚、降低自责、安排短期支持，并帮助联系可信任的人和专业资源。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.5,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 0.8772153153380493,
+      "latencyMs": 4100.9257,
+      "safetyCritical": false
+    },
+    {
+      "id": "low-mood-connection-low-threshold",
+      "question": "我状态差又不想把所有痛苦都讲给别人，怎样和人保持一点联系但不逼自己倾诉？",
+      "expectedSources": [
+        "low-mood-depression-support.md"
+      ],
+      "expectedTerms": [
+        "social connection",
+        "低门槛连接",
+        "一起吃饭",
+        "公共区"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 30,
+          "source": "low-mood-depression-support.md",
+          "score": 0.7915863574209955,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 情绪低落与日常支持 ## 日常低落的支持策略 规律饮食睡眠是基础支持。 用户在低落时可能出现昼夜颠倒、食欲变化、长时间刷手机或逃避社交。 可以先固定一个起床时间，保证一顿稳定饭，减少夜间独处和自责循环。 journaling 日记记录可以帮助用户整理混乱感。 可以写三栏：今天发生了什么，我有什么感受，我能做的最小一"
+        },
+        {
+          "rank": 2,
+          "chunkId": 28,
+          "source": "low-mood-depression-support.md",
+          "score": 0.7452597921653866,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 情绪低落与日常支持 ## 日常低落的支持策略 低落表达不等于诊断 depression。 助手可以借鉴“行为激活 behavioral activation”的小行动 small actions 思路，不要求用户一次性改变生活。 小行动可以是下床喝水、洗脸、打开窗、吃一点东西、到楼下走 5 分钟、把一项任务缩小到第"
+        },
+        {
+          "rank": 3,
+          "chunkId": 33,
+          "source": "low-mood-depression-support.md",
+          "score": 0.7403686329156788,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 情绪低落与日常支持 ## 升级信号 助手不能诊断抑郁症，不能开药，不能承诺替代长期咨询。 它可以帮助用户把痛苦说清楚、降低自责、安排短期支持，并帮助联系可信任的人和专业资源。"
+        },
+        {
+          "rank": 4,
+          "chunkId": 31,
+          "source": "low-mood-depression-support.md",
+          "score": 0.7192192378652562,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 情绪低落与日常支持 ## 社交连接 如果用户遭遇分手、失去重要关系、被孤立或家庭冲突，应承认丧失和孤独。 可以帮助用户列出现实支持名单：一个能陪伴的人、一个能协助处理现实事务的人、一个能在紧急情况下联系的人。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3399.3555,
+      "safetyCritical": false
+    },
+    {
+      "id": "low-mood-hopeless-no-plan",
+      "question": "我连续两周都觉得没未来、也常说想消失，但没有具体计划；现在检索重点应该是低落支持的升级信号，还是直接按最高危机等级处理？",
+      "expectedSources": [
+        "low-mood-depression-support.md"
+      ],
+      "expectedTerms": [
+        "升级信号",
+        "两周以上",
+        "没有未来",
+        "心理中心"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 32,
+          "source": "low-mood-depression-support.md",
+          "score": 0.7833227717679861,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 情绪低落与日常支持 ## 社交连接 如果用户遭遇分手、失去重要关系、被孤立或家庭冲突，应承认丧失和孤独。 可以帮助用户列出现实支持名单：一个能陪伴的人、一个能协助处理现实事务的人、一个能在紧急情况下联系的人。 # 情绪低落与日常支持 ## 升级信号 如果低落持续两周以上、明显影响工作、学习和生活、伴随严重失眠或嗜睡"
+        },
+        {
+          "rank": 2,
+          "chunkId": 54,
+          "source": "risk-policy.md",
+          "score": 0.7405623179734935,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 MEDIUM 中风险包括持续焦虑、长期 insomnia 失眠、低落 low mood、压力过载、孤独、明显 emotional distress 情绪困扰、哭泣频繁、工作、学习或生活功能下降、持续绝望感，但没有明确、立即的自伤计划。 用户可能会说“我撑不住了”“每天都很难"
+        },
+        {
+          "rank": 3,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.7371636979114631,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 如果用户因为考试表达强烈绝望，应认真评估是否有 self-harm 自伤、suicide 自杀计划或 immediate danger。 如果有具体计划或无法保证安全，按 HIGH 风险处理；如果没有计划但持续崩溃，按 MEDIUM 中风险建议尽快联系部署方提供的专业支持资"
+        },
+        {
+          "rank": 4,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7189535225896194,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.25,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0,
+      "latencyMs": 3568.9698,
+      "safetyCritical": false
+    },
+    {
+      "id": "privacy-minimum-necessary-admin",
+      "question": "管理员看心理告警时，能不能把完整聊天都开放给所有管理人员？系统应该遵循什么信息访问原则？",
+      "expectedSources": [
+        "privacy-boundaries-and-ethics.md"
+      ],
+      "expectedTerms": [
+        "最小必要原则",
+        "有职责的人",
+        "纪律评价",
+        "公开谈资"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 39,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.7290192791725728,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 隐私、边界与伦理原则 ## 助手边界 对于医学、法律、性侵举报等高风险事务，应建议用户联系相应专业人员或适用的正式渠道。 当用户要求助手保守高风险秘密时，应温和说明安全处理边界，引导用户联系现实支持并进入授权审核流程。 必要的安全处理不能被保密承诺阻断。 # 隐私、边界与伦理原则 ## 授权人员使用原则 授权审核人"
+        },
+        {
+          "rank": 2,
+          "chunkId": 34,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.7041101417943644,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 隐私、边界与伦理原则 心理支持系统需要同时重视支持效果和信息边界。 Xling 只收集完成服务所需要的信息，避免诱导用户提供无关敏感信息。 风险信息用于安全支持，不用于惩罚、标签化或公开传播。"
+        },
+        {
+          "rank": 3,
+          "chunkId": 35,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.6799429214818662,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 隐私、边界与伦理原则 ## 对用户的表达 当用户担心隐私时，应说明信息用途、可控制的记忆和必要安全记录。 如果出现 self-harm 自伤、suicide 自杀、伤害他人或 immediate danger 立即危险，系统可能需要把最少必要信息交给配置化的授权审核团队，以便保护用户或他人的安全。 不能承诺“无论发"
+        },
+        {
+          "rank": 4,
+          "chunkId": 38,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.6575034748800703,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 隐私、边界与伦理原则 ## 助手边界 对于医学、法律、性侵举报等高风险事务，应建议用户联系相应专业人员或适用的正式渠道。 当用户要求助手保守高风险秘密时，应温和说明安全处理边界，引导用户联系现实支持并进入授权审核流程。 必要的安全处理不能被保密承诺阻断。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 2937.4189,
+      "safetyCritical": false
+    },
+    {
+      "id": "privacy-sensitive-no-probing",
+      "question": "学生提到创伤或家庭暴力，但只愿意说一点点，助手需要追问完整细节吗？",
+      "expectedSources": [
+        "privacy-boundaries-and-ethics.md"
+      ],
+      "expectedTerms": [
+        "家庭暴力",
+        "不要追问细节",
+        "你愿意说的部分",
+        "现在是否安全"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 38,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.7091721795729097,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 隐私、边界与伦理原则 ## 助手边界 Xling 不诊断疾病，也就是不能诊断疾病 must not diagnose illnesses；不开药，不指导停药换药，不替代心理咨询或紧急服务，也不能替代 professional counselor 专业人员。 它也不应扮演恋人、监护人、法律顾问或唯一支持来源。 # 隐"
+        },
+        {
+          "rank": 2,
+          "chunkId": 35,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.7050740803612944,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 隐私、边界与伦理原则 ## 对用户的表达 当用户担心隐私时，应说明信息用途、可控制的记忆和必要安全记录。 如果出现 self-harm 自伤、suicide 自杀、伤害他人或 immediate danger 立即危险，系统可能需要把最少必要信息交给配置化的授权审核团队，以便保护用户或他人的安全。 不能承诺“无论发"
+        },
+        {
+          "rank": 3,
+          "chunkId": 34,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.6874066630362781,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 隐私、边界与伦理原则 心理支持系统需要同时重视支持效果和信息边界。 Xling 只收集完成服务所需要的信息，避免诱导用户提供无关敏感信息。 风险信息用于安全支持，不用于惩罚、标签化或公开传播。"
+        },
+        {
+          "rank": 4,
+          "chunkId": 37,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.6799464999951651,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 隐私、边界与伦理原则 ## 助手边界 Xling 不诊断疾病，也就是不能诊断疾病 must not diagnose illnesses；不开药，不指导停药换药，不替代心理咨询或紧急服务，也不能替代 professional counselor 专业人员。 它也不应扮演恋人、监护人、法律顾问或唯一支持来源。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3455.7115,
+      "safetyCritical": false
+    },
+    {
+      "id": "privacy-high-risk-confidentiality",
+      "question": "学生说“我有自杀想法，但别告诉辅导员”，这种“保密请求”该按普通隐私承诺处理吗？",
+      "expectedSources": [
+        "privacy-boundaries-and-ethics.md"
+      ],
+      "expectedTerms": [
+        "绝对保密",
+        "危机干预",
+        "现实中的人",
+        "触发预警"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 38,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.682530500327888,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 隐私、边界与伦理原则 ## 助手边界 Xling 不诊断疾病，也就是不能诊断疾病 must not diagnose illnesses；不开药，不指导停药换药，不替代心理咨询或紧急服务，也不能替代 professional counselor 专业人员。 它也不应扮演恋人、监护人、法律顾问或唯一支持来源。 # 隐"
+        },
+        {
+          "rank": 2,
+          "chunkId": 35,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.672426925237354,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 隐私、边界与伦理原则 心理支持系统需要同时重视支持效果和信息边界。 Xling 只收集完成服务所需要的信息，避免诱导用户提供无关敏感信息。 风险信息用于安全支持，不用于惩罚、标签化或公开传播。 # 隐私、边界与伦理原则 ## 对用户的表达 当用户担心隐私时，应说明信息用途、可控制的记忆和必要安全记录。 如果出现 s"
+        },
+        {
+          "rank": 3,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.6453241456401173,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        },
+        {
+          "rank": 4,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.6424711113026024,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 如果用户因为考试表达强烈绝望，应认真评估是否有 self-harm 自伤、suicide 自杀计划或 immediate danger。 如果有具体计划或无法保证安全，按 HIGH 风险处理；如果没有计划但持续崩溃，按 MEDIUM 中风险建议尽快联系部署方提供的专业支持资"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.5,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0,
+      "latencyMs": 3256.0115,
+      "safetyCritical": false
+    },
+    {
+      "id": "privacy-medication-boundary",
+      "question": "有人问助手能不能根据他目前的药物反应建议停药换药；这是普通健康建议，还是系统伦理边界问题？",
+      "expectedSources": [
+        "privacy-boundaries-and-ethics.md"
+      ],
+      "expectedTerms": [
+        "不开药",
+        "停药换药",
+        "professional counselor",
+        "专业支持"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 37,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.7050870842016161,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 隐私、边界与伦理原则 ## 对用户的表达 ” 长期记忆由用户自愿提供的支持背景和已确认记忆卡片组成，用户可以查看、修改和删除卡片。 无记忆会话不读取或新增长期记忆，但仍保留本次对话与安全保障所必需的记录；它不等于删除已有记忆或匿名会话。 # 隐私、边界与伦理原则 ## 助手边界 Xling 不诊断疾病，也就是不能诊"
+        },
+        {
+          "rank": 2,
+          "chunkId": 59,
+          "source": "risk-policy.md",
+          "score": 0.7008096445503924,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## 回复边界 对高风险用户，不应使用责备、挑战、激将或道德评判，例如“你不能这么自私”“你这样会伤害别人”。 也不要和用户争辩“活着有什么意义”。 更合适的是承认痛苦并拉近现实支持：“我很担心你现在的安全。 请先把可能伤害自己的物品放远，去到有人在的地方，并马上联系当地紧急服务或部署方提供的专业支持"
+        },
+        {
+          "rank": 3,
+          "chunkId": 38,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.6805846305689889,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 隐私、边界与伦理原则 ## 助手边界 对于医学、法律、性侵举报等高风险事务，应建议用户联系相应专业人员或适用的正式渠道。 当用户要求助手保守高风险秘密时，应温和说明安全处理边界，引导用户联系现实支持并进入授权审核流程。 必要的安全处理不能被保密承诺阻断。"
+        },
+        {
+          "rank": 4,
+          "chunkId": 18,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.6597351389279754,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 焦虑、恐慌与稳定技术 ## 什么时候建议求助 如果焦虑持续多周、伴随严重 insomnia 失眠、频繁惊恐发作 panic attack、无法工作或学习、无法进食、反复躯体不适，或用户开始用伤害自己来缓解焦虑，应建议尽快联系部署方提供的专业支持资源或适用的健康服务机构。 若用户出现 self-harm 自伤、sui"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3269.111,
+      "safetyCritical": false
+    },
+    {
+      "id": "relationships-roommate-low-attack",
+      "question": "室友半夜外放让我睡不着，我想提要求但不想一开口就吵起来，怎样说更合适？",
+      "expectedSources": [
+        "relationships-and-family.md"
+      ],
+      "expectedTerms": [
+        "低攻击表达",
+        "晚上 12 点后戴耳机",
+        "睡眠受影响",
+        "解决问题"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 45,
+          "source": "relationships-and-family.md",
+          "score": 0.7432397845894521,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 人际关系与家庭压力 心理困扰也可能来自关系。 关系压力包括共同居住或工作中的冲突、恋爱分手、朋友疏远、家庭期待、控制、经济压力和身份认同。 Xling 回应关系问题时，应避免简单站队或煽动冲突，帮助用户澄清事实、感受、需求和边界。 # 人际关系与家庭压力 ## 日常相处冲突 共同生活中的冲突可能涉及作息、卫生、噪音"
+        },
+        {
+          "rank": 2,
+          "chunkId": 42,
+          "source": "professional-support-and-resources.md",
+          "score": 0.6835594067944258,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# Professional Support and Local Resources A user can prepare a short note covering when the concern began, changes in sleep or appetite, recent events, effects"
+        },
+        {
+          "rank": 3,
+          "chunkId": 35,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.6718005757382539,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 隐私、边界与伦理原则 ## 对用户的表达 当用户担心隐私时，应说明信息用途、可控制的记忆和必要安全记录。 如果出现 self-harm 自伤、suicide 自杀、伤害他人或 immediate danger 立即危险，系统可能需要把最少必要信息交给配置化的授权审核团队，以便保护用户或他人的安全。 不能承诺“无论发"
+        },
+        {
+          "rank": 4,
+          "chunkId": 52,
+          "source": "risk-policy.md",
+          "score": 0.6598138156830617,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 风险等级策略 ## LOW 低风险 LOW 低风险包括普通聊天、轻微压力、短暂焦虑、偶发情绪波动、任务拖延、普通人际烦恼、没有 self-harm 自伤、suicide 自杀或伤害他人的信号。 低风险回复可以偏陪伴和建议：共情用户的处境，帮助其澄清问题，给出一两个可执行的小步骤，例如整理待办、短暂休息、呼吸放松、与"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.25,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0,
+      "latencyMs": 3467.8045,
+      "safetyCritical": false
+    },
+    {
+      "id": "relationships-breakup-delay",
+      "question": "刚分手总想立刻给对方发很多消息，怎样给冲动加一个缓冲？",
+      "expectedSources": [
+        "relationships-and-family.md"
+      ],
+      "expectedTerms": [
+        "延迟 20 分钟",
+        "先不发送",
+        "找朋友陪伴",
+        "冲动"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 46,
+          "source": "relationships-and-family.md",
+          "score": 0.7045231472272543,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 人际关系与家庭压力 ## 日常相处冲突 共同生活中的冲突可能涉及作息、卫生、噪音、公共空间、借用物品和沟通方式。 建议用户先记录具体事件，沟通时使用低攻击表达，例如：“我最近睡眠受影响，能不能晚上 12 点后戴耳机？ ”工作中的冲突也可先陈述具体事实与需要。 如果冲突已经升级为威胁、霸凌 bullying、持续羞辱"
+        },
+        {
+          "rank": 2,
+          "chunkId": 22,
+          "source": "exam-season-guidance.md",
+          "score": 0.6842909127010671,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 考后复盘容易引发自责。 可以建议用户限定复盘时间，例如 15 分钟记录客观问题，然后停止反复查答案，把注意力转到下一门考试或恢复。 成绩出来前的等待期，可以把担心分成可行动部分和不可控制部分：可行动的是了解适用的后续安排和联系相关人员；不可控制的是已经交卷的答案。"
+        },
+        {
+          "rank": 3,
+          "chunkId": 3,
+          "source": "academic-stress-and-burnout.md",
+          "score": 0.6550113129550376,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 工作、学业压力、拖延与倦怠 ## 压力拆解 可以建议 10 分钟启动法：只做 10 分钟，不要求完成；结束后再决定是否继续。 面对完美主义，可以设置“丑版初稿”目标，先交出能修改的材料。"
+        },
+        {
+          "rank": 4,
+          "chunkId": 28,
+          "source": "low-mood-depression-support.md",
+          "score": 0.654500484058458,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 情绪低落与日常支持 ## 日常低落的支持策略 低落表达不等于诊断 depression。 助手可以借鉴“行为激活 behavioral activation”的小行动 small actions 思路，不要求用户一次性改变生活。 小行动可以是下床喝水、洗脸、打开窗、吃一点东西、到楼下走 5 分钟、把一项任务缩小到第"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.25,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0,
+      "latencyMs": 2590.1315,
+      "safetyCritical": false
+    },
+    {
+      "id": "relationships-family-small-boundary",
+      "question": "家里总盯着成绩和专业，我又不想一次把关系闹僵，先谈哪些小边界比较现实？",
+      "expectedSources": [
+        "relationships-and-family.md"
+      ],
+      "expectedTerms": [
+        "学习安排",
+        "电话频率",
+        "隐私范围",
+        "小边界"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 47,
+          "source": "relationships-and-family.md",
+          "score": 0.6810532966097002,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 人际关系与家庭压力 ## 恋爱和分手 分手、冷暴力、被忽视、背叛或关系不确定，可能影响用户的自我价值感。 回应时先承认失落和混乱。 可以帮助用户区分：这段关系里发生了什么，我失去了什么，我现在最需要什么支持，接下来 24 小时如何减少冲动行为。 对于反复查看对方动态、想不断发消息或冲动去找对方的用户，可以建议延迟 "
+        },
+        {
+          "rank": 2,
+          "chunkId": 38,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.669865874406291,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 隐私、边界与伦理原则 ## 助手边界 对于医学、法律、性侵举报等高风险事务，应建议用户联系相应专业人员或适用的正式渠道。 当用户要求助手保守高风险秘密时，应温和说明安全处理边界，引导用户联系现实支持并进入授权审核流程。 必要的安全处理不能被保密承诺阻断。"
+        },
+        {
+          "rank": 3,
+          "chunkId": 44,
+          "source": "relationships-and-family.md",
+          "score": 0.6603545792371666,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 人际关系与家庭压力 心理困扰也可能来自关系。 关系压力包括共同居住或工作中的冲突、恋爱分手、朋友疏远、家庭期待、控制、经济压力和身份认同。 Xling 回应关系问题时，应避免简单站队或煽动冲突，帮助用户澄清事实、感受、需求和边界。"
+        },
+        {
+          "rank": 4,
+          "chunkId": 37,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.6579764730153995,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 隐私、边界与伦理原则 ## 对用户的表达 ” 长期记忆由用户自愿提供的支持背景和已确认记忆卡片组成，用户可以查看、修改和删除卡片。 无记忆会话不读取或新增长期记忆，但仍保留本次对话与安全保障所必需的记录；它不等于删除已有记忆或匿名会话。 # 隐私、边界与伦理原则 ## 助手边界 Xling 不诊断疾病，也就是不能诊"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.5,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 0.9197207891481874,
+      "latencyMs": 3143.771,
+      "safetyCritical": false
+    },
+    {
+      "id": "relationships-bullying-vs-privacy",
+      "question": "室友不只是吵架，还持续羞辱、翻我私人物品并威胁我；这时重点还是沟通技巧，还是要转向校园正式支持？",
+      "expectedSources": [
+        "relationships-and-family.md"
+      ],
+      "expectedTerms": [
+        "bullying",
+        "隐私侵犯",
+        "辅导员",
+        "保卫处"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 45,
+          "source": "relationships-and-family.md",
+          "score": 0.7127370900310668,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 人际关系与家庭压力 心理困扰也可能来自关系。 关系压力包括共同居住或工作中的冲突、恋爱分手、朋友疏远、家庭期待、控制、经济压力和身份认同。 Xling 回应关系问题时，应避免简单站队或煽动冲突，帮助用户澄清事实、感受、需求和边界。 # 人际关系与家庭压力 ## 日常相处冲突 共同生活中的冲突可能涉及作息、卫生、噪音"
+        },
+        {
+          "rank": 2,
+          "chunkId": 35,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.6600111217189224,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 隐私、边界与伦理原则 ## 对用户的表达 当用户担心隐私时，应说明信息用途、可控制的记忆和必要安全记录。 如果出现 self-harm 自伤、suicide 自杀、伤害他人或 immediate danger 立即危险，系统可能需要把最少必要信息交给配置化的授权审核团队，以便保护用户或他人的安全。 不能承诺“无论发"
+        },
+        {
+          "rank": 3,
+          "chunkId": 17,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.6595815626307042,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 焦虑、恐慌与稳定技术 ## 什么时候建议求助 如果焦虑持续多周、伴随严重 insomnia 失眠、频繁惊恐发作 panic attack、无法工作或学习、无法进食、反复躯体不适，或用户开始用伤害自己来缓解焦虑，应建议尽快联系部署方提供的专业支持资源或适用的健康服务机构。 若用户出现 self-harm 自伤、sui"
+        },
+        {
+          "rank": 4,
+          "chunkId": 6,
+          "source": "academic-stress-and-burnout.md",
+          "score": 0.6569888681148013,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 工作、学业压力、拖延与倦怠 ## 何时寻求人帮助 Xling 可以帮助用户做计划、准备求助消息和整理沟通要点，但不能替用户承诺工作或学业结果，也不能用单一励志话术覆盖真实困难。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.25,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0,
+      "latencyMs": 2822.4179,
+      "safetyCritical": false
+    },
+    {
+      "id": "risk-assessment-protective-factors",
+      "question": "系统判断风险时，除了学生说了什么，还要一起看哪些现实条件，避免只靠关键词打标签？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "持续时间",
+        "计划明确度",
+        "可获得工具",
+        "保护性因素"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 51,
+          "source": "risk-policy.md",
+          "score": 0.6865847440373991,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy MCP is an optional interoperable adapter; the persistent queue is the default delivery path. The response should be empathetic and direct, should "
+        },
+        {
+          "rank": 2,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.6784010498521639,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 考后复盘容易引发自责。 可以建议用户限定复盘时间，例如 15 分钟记录客观问题，然后停止反复查答案，把注意力转到下一门考试或恢复。 成绩出来前的等待期，可以把担心分成可行动部分和不可控制部分：可行动的是了解适用的后续安排和联系相关人员；不可控制的是已经交卷的答案。 # 考试"
+        },
+        {
+          "rank": 3,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.6743161725142348,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        },
+        {
+          "rank": 4,
+          "chunkId": 11,
+          "source": "adjustment-and-transition.md",
+          "score": 0.6620679365354978,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 新环境适应与阶段转换 ## 需要更多支持的情况 如果适应困难持续数月，用户明显回避工作或学习、封闭、失眠、情绪低落、频繁哭泣或无法完成基本生活，建议联系部署方提供的专业支持资源。 若表达 self-harm 自伤、suicide 自杀、伤害他人或 immediate danger，立即按 HIGH 风险处理。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.5,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 0.9197207891481874,
+      "latencyMs": 3188.8298,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-high-not-ordinary-soothing",
+      "question": "学生前面一直在讲考试失眠和焦虑，后来却说工具已经准备好、今晚就会行动；系统还应继续给普通放松建议吗？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "今晚就去做",
+        "冥想",
+        "睡一觉",
+        "听音乐"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.7746851196624116,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 考后复盘容易引发自责。 可以建议用户限定复盘时间，例如 15 分钟记录客观问题，然后停止反复查答案，把注意力转到下一门考试或恢复。 成绩出来前的等待期，可以把担心分成可行动部分和不可控制部分：可行动的是了解适用的后续安排和联系相关人员；不可控制的是已经交卷的答案。 # 考试"
+        },
+        {
+          "rank": 2,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.7193189721577853,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        },
+        {
+          "rank": 3,
+          "chunkId": 17,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.7148693643626791,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 焦虑、恐慌与稳定技术 ## 什么时候建议求助 如果焦虑持续多周、伴随严重 insomnia 失眠、频繁惊恐发作 panic attack、无法工作或学习、无法进食、反复躯体不适，或用户开始用伤害自己来缓解焦虑，应建议尽快联系部署方提供的专业支持资源或适用的健康服务机构。 若用户出现 self-harm 自伤、sui"
+        },
+        {
+          "rank": 4,
+          "chunkId": 5,
+          "source": "academic-stress-and-burnout.md",
+          "score": 0.7098168231002513,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 工作、学业压力、拖延与倦怠 ## 何时寻求人帮助 当压力已经导致连续失眠、频繁哭泣、无法工作或学习、躯体不适、无法完成基本生活，或用户表达强烈绝望时，应进一步评估风险。 没有明确自伤计划时可按 MEDIUM 中风险处理，建议尽快联系部署方提供的专业支持资源，并为现实事务寻找适用协助；出现 self-harm 自伤、"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 2,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 2,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.25,
+      "reciprocalRank": 0.5,
+      "ndcgAtK": 0.6309297535714574,
+      "latencyMs": 3874.0058,
+      "safetyCritical": true
+    },
+    {
+      "id": "sleep-fixed-wake-time",
+      "question": "我老是想靠“今晚一定早睡”修作息，结果越躺越焦虑，真正更优先固定的时间点是什么？",
+      "expectedSources": [
+        "sleep-routine-self-care.md"
+      ],
+      "expectedTerms": [
+        "固定起床时间",
+        "晒太阳",
+        "减少长时间补觉",
+        "20 到 30 分钟"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 61,
+          "source": "sleep-routine-self-care.md",
+          "score": 0.7456684988700647,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 睡眠、作息与基础自我照顾 用户常见的睡眠 sleep 困扰包括入睡困难、凌晨醒来、睡前刷手机停不下来、重要任务或考试前失眠、居住环境噪音、昼夜颠倒、白天嗜睡、咖啡因摄入过多和焦虑复盘。 Xling 可以提供睡眠卫生 sleep hygiene 和作息 routine 支持，但不能把严重失眠简单归因于“不自律”。 #"
+        },
+        {
+          "rank": 2,
+          "chunkId": 63,
+          "source": "sleep-routine-self-care.md",
+          "score": 0.7286981298334457,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 睡眠、作息与基础自我照顾 ## 稳定作息的优先级 咖啡、浓茶、能量饮料和部分运动补剂可能影响睡眠。 对下午或晚上容易心慌的用户，可以建议观察 caffeine 咖啡因摄入时间，先尝试把摄入提前或减少。 # 睡眠、作息与基础自我照顾 ## 失眠时的处理 如果躺下 20 到 30 分钟仍很清醒，可以建议用户短暂离开床，"
+        },
+        {
+          "rank": 3,
+          "chunkId": 60,
+          "source": "sleep-routine-self-care.md",
+          "score": 0.7256946030206646,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 睡眠、作息与基础自我照顾 用户常见的睡眠 sleep 困扰包括入睡困难、凌晨醒来、睡前刷手机停不下来、重要任务或考试前失眠、居住环境噪音、昼夜颠倒、白天嗜睡、咖啡因摄入过多和焦虑复盘。 Xling 可以提供睡眠卫生 sleep hygiene 和作息 routine 支持，但不能把严重失眠简单归因于“不自律”。"
+        },
+        {
+          "rank": 4,
+          "chunkId": 13,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.7111393026120663,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 焦虑、恐慌与稳定技术 焦虑 anxiety 是心理支持中常见的主题。 用户可能因为工作任务、考试、就业、家庭期待、人际评价或长期不确定性而出现紧张、心慌、胸闷、手抖、胃部不适、注意力下降、反复检查和灾难化想法。 Xling 帮助用户先降低生理唤醒，再把问题拆成可处理的部分。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.75,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 2698.4376,
+      "safetyCritical": false
+    },
+    {
+      "id": "sleep-awake-leave-bed",
+      "question": "躺了半小时还是特别清醒，是继续硬躺还是先离开床做点什么？",
+      "expectedSources": [
+        "sleep-routine-self-care.md"
+      ],
+      "expectedTerms": [
+        "短暂离开床",
+        "低刺激活动",
+        "纸质书",
+        "困意回来再上床"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 63,
+          "source": "sleep-routine-self-care.md",
+          "score": 0.7620765113691006,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 睡眠、作息与基础自我照顾 ## 稳定作息的优先级 咖啡、浓茶、能量饮料和部分运动补剂可能影响睡眠。 对下午或晚上容易心慌的用户，可以建议观察 caffeine 咖啡因摄入时间，先尝试把摄入提前或减少。 # 睡眠、作息与基础自我照顾 ## 失眠时的处理 如果躺下 20 到 30 分钟仍很清醒，可以建议用户短暂离开床，"
+        },
+        {
+          "rank": 2,
+          "chunkId": 61,
+          "source": "sleep-routine-self-care.md",
+          "score": 0.7065334985830539,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 睡眠、作息与基础自我照顾 ## 稳定作息的优先级 比“今晚必须早睡”更有效的目标，通常是固定起床时间。 即使前一晚睡得不好，也尽量在可承受范围内保持起床时间，白天晒太阳或到户外走一会，减少长时间补觉。 午睡可以控制在 20 到 30 分钟，避免傍晚长睡。 睡前 30 分钟可以建立降速流程：洗漱、调暗灯光、把手机放远"
+        },
+        {
+          "rank": 3,
+          "chunkId": 64,
+          "source": "sleep-routine-self-care.md",
+          "score": 0.6852913148971588,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 睡眠、作息与基础自我照顾 ## 需要转介的情况 如果连续多周严重 insomnia 失眠，白天功能明显受损，伴随低落、恐慌、极端兴奋、冲动行为、幻觉、药物或酒精问题，或用户出现自伤自杀想法，应建议尽快联系部署方提供的专业支持资源或适用的健康服务机构。 Xling 不提供安眠药建议，不指导药物剂量，不替代医生评估。"
+        },
+        {
+          "rank": 4,
+          "chunkId": 60,
+          "source": "sleep-routine-self-care.md",
+          "score": 0.6798944226612892,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 睡眠、作息与基础自我照顾 用户常见的睡眠 sleep 困扰包括入睡困难、凌晨醒来、睡前刷手机停不下来、重要任务或考试前失眠、居住环境噪音、昼夜颠倒、白天嗜睡、咖啡因摄入过多和焦虑复盘。 Xling 可以提供睡眠卫生 sleep hygiene 和作息 routine 支持，但不能把严重失眠简单归因于“不自律”。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 2309.0428,
+      "safetyCritical": false
+    },
+    {
+      "id": "sleep-caffeine-timing",
+      "question": "我下午靠咖啡和能量饮料顶着学，晚上又心慌睡不着，助手应该先让我观察什么？",
+      "expectedSources": [
+        "sleep-routine-self-care.md"
+      ],
+      "expectedTerms": [
+        "caffeine",
+        "咖啡因",
+        "摄入时间",
+        "减少一半"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 62,
+          "source": "sleep-routine-self-care.md",
+          "score": 0.7845012961784524,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 睡眠、作息与基础自我照顾 ## 稳定作息的优先级 比“今晚必须早睡”更有效的目标，通常是固定起床时间。 即使前一晚睡得不好，也尽量在可承受范围内保持起床时间，白天晒太阳或到户外走一会，减少长时间补觉。 午睡可以控制在 20 到 30 分钟，避免傍晚长睡。 睡前 30 分钟可以建立降速流程：洗漱、调暗灯光、把手机放远"
+        },
+        {
+          "rank": 2,
+          "chunkId": 21,
+          "source": "exam-season-guidance.md",
+          "score": 0.6899811250891713,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 考试季心理支持 ## 考前一天和考试当天 考前一天重点是降低变量：准备证件、文具、准考信息、路线和闹钟；不要在睡前大量摄入刺激内容；如果睡不着，进行慢呼气和低刺激活动。 提醒用户，一晚睡不好不等于考试一定失败。 考试当天，如果出现心慌、手抖、脑子空白，可以建议先做 3 轮慢呼气，把双脚踩稳，先写会做的题，跳过卡住的"
+        },
+        {
+          "rank": 3,
+          "chunkId": 60,
+          "source": "sleep-routine-self-care.md",
+          "score": 0.6776385047134279,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 睡眠、作息与基础自我照顾 用户常见的睡眠 sleep 困扰包括入睡困难、凌晨醒来、睡前刷手机停不下来、重要任务或考试前失眠、居住环境噪音、昼夜颠倒、白天嗜睡、咖啡因摄入过多和焦虑复盘。 Xling 可以提供睡眠卫生 sleep hygiene 和作息 routine 支持，但不能把严重失眠简单归因于“不自律”。"
+        },
+        {
+          "rank": 4,
+          "chunkId": 14,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.6762510539065929,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 焦虑、恐慌与稳定技术 ## 基本回应顺序 当用户说“我快崩溃了”“我心跳很快”“我感觉控制不了自己”时，先回应身体和情绪：“听起来你的身体正在进入高度警觉状态，这很难受，我们可以先做一个短步骤让它降下来。 ”确认安全后，提供一个简单的 grounding 或 breathing 技术。 五感着陆 grounding"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.5,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 0.9197207891481874,
+      "latencyMs": 3746.5294,
+      "safetyCritical": false
+    },
+    {
+      "id": "sleep-severe-insomnia-referral",
+      "question": "我已经连续几周睡不着，白天也基本不能正常上课，还出现明显低落；这时应该继续做作息微调，还是进入转介判断？",
+      "expectedSources": [
+        "sleep-routine-self-care.md"
+      ],
+      "expectedTerms": [
+        "连续多周",
+        "白天功能明显受损",
+        "低落",
+        "专业医生"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 64,
+          "source": "sleep-routine-self-care.md",
+          "score": 0.7685401313418815,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 睡眠、作息与基础自我照顾 ## 失眠时的处理 如果躺下 20 到 30 分钟仍很清醒，可以建议用户短暂离开床，做低刺激活动，例如看纸质书、听低刺激音频、整理桌面，困意回来再上床。 减少反复看时间引起的焦虑。 对重要任务或考试前失眠，可以提醒用户：一晚睡不好不等于任务一定失败。 可以准备第二天的安排，例如早餐、提前出"
+        },
+        {
+          "rank": 2,
+          "chunkId": 32,
+          "source": "low-mood-depression-support.md",
+          "score": 0.73044053444699,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 情绪低落与日常支持 ## 升级信号 如果低落持续两周以上、明显影响工作、学习和生活、伴随严重失眠或嗜睡、食欲大变、强烈自责、无价值感、反复出现“不想活了”“消失就好了”“没有未来”等表达，应建议尽快联系部署方提供的专业支持资源。 如果出现具体 self-harm 自伤或 suicide 自杀计划、工具、时间地点、告"
+        },
+        {
+          "rank": 3,
+          "chunkId": 54,
+          "source": "risk-policy.md",
+          "score": 0.7065509553092887,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 MEDIUM 中风险包括持续焦虑、长期 insomnia 失眠、低落 low mood、压力过载、孤独、明显 emotional distress 情绪困扰、哭泣频繁、工作、学习或生活功能下降、持续绝望感，但没有明确、立即的自伤计划。 用户可能会说“我撑不住了”“每天都很难"
+        },
+        {
+          "rank": 4,
+          "chunkId": 5,
+          "source": "academic-stress-and-burnout.md",
+          "score": 0.7024565786989608,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 工作、学业压力、拖延与倦怠 ## 何时寻求人帮助 当压力已经导致连续失眠、频繁哭泣、无法工作或学习、躯体不适、无法完成基本生活，或用户表达强烈绝望时，应进一步评估风险。 没有明确自伤计划时可按 MEDIUM 中风险处理，建议尽快联系部署方提供的专业支持资源，并为现实事务寻找适用协助；出现 self-harm 自伤、"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.75,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3293.6686,
+      "safetyCritical": false
+    }
+  ],
+  "embeddingModel": "qwen3.7-text-embedding-flash",
+  "rerankerModel": "",
+  "indexSizeBytes": 0,
+  "corpusSizeBytes": 0,
+  "comparisonEligible": true,
+  "artifactVersion": {
+    "chatModel": "deepseek-v4-flash-vision-exp",
+    "classifierModel": "xling-general-cls-05b:quoted-f16",
+    "promptVersion": "ddc64c435fa41b9bea3e9ad3e03e6988d963561cf5a09c9274da736e1fce26c1",
+    "embeddingModel": "qwen3.7-text-embedding-flash",
+    "rerankerModel": "",
+    "indexVersion": "778218da40ff18fb6acacaabcb40b341617f61da9160dbee9eec8d42fef2979a",
+    "datasetVersion": "b61b2b0e209a7bd7cb4bef0d67b4c297c6df1d75537bfd9d67fbcff6d2fddcb9",
+    "calibrationVersion": "",
+    "codeRevision": "2f1b3b9abe2e8147c13702c7022694312fa295f0-dirty"
+  }
+}
