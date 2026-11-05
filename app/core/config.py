@@ -2,10 +2,14 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
+from pydantic import Field, SecretStr, field_serializer, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine import make_url
+from sqlalchemy.exc import ArgumentError
 
 
 class Settings(BaseSettings):
+    environment: Literal["local", "test", "production"] = "local"
     ai_provider: str = "ollama"
     ai_temperature: float = 0.35
     ai_max_tokens: int = 2048
@@ -23,26 +27,29 @@ class Settings(BaseSettings):
     decision_head_device: str = ""
     decision_head_max_length: int = 256
     # 分层安全策略阈值（工程初始值，待新鲜盲测集校准）：高风险直接判定、灰区复核、低置信度与前两名概率差回退。
-    classifier_high_risk_threshold: float = 0.5
-    classifier_high_risk_review_threshold: float = 0.15
-    classifier_low_confidence_threshold: float = 0.70
-    classifier_margin_threshold: float = 0.30
+    classifier_high_risk_threshold: float = Field(default=0.5, ge=0, le=1)
+    classifier_high_risk_review_threshold: float = Field(default=0.15, ge=0, le=1)
+    classifier_low_confidence_threshold: float = Field(default=0.70, ge=0, le=1)
+    classifier_margin_threshold: float = Field(default=0.30, ge=0, le=1)
     finetuned_model_name: str = "xling-qwen2.5-7b-ft:latest"
     finetuned_model_dir: str = "models/xling-qwen2.5-7b-ft"
     finetuned_model_file: str = "xling-qwen2.5-7b-ft-q4_k_m.gguf"
     openai_base_url: str = "https://api.openai.com/v1"
-    openai_api_key: str = ""
+    openai_api_key: SecretStr = SecretStr("")
     openai_model: str = "gpt-4o-mini"
     openai_embedding_model: str = "text-embedding-3-small"
     embedding_base_url: str = ""
-    embedding_api_key: str = ""
-    database_url: str = "mysql+pymysql://xling:xling@127.0.0.1:3306/xling?charset=utf8mb4"
+    embedding_api_key: SecretStr = SecretStr("")
+    database_url: str = Field(
+        default="mysql+pymysql://xling:xling@127.0.0.1:3306/xling?charset=utf8mb4",
+        repr=False,
+    )
     chat_history_limit: int = 10
     knowledge_top_k: int = 4
     # 线上检索策略：兼容值 multi_query_hybrid_rrf 实际为多查询 dense 主检索；normalized_fusion 为归一化加权。
     knowledge_retrieval_strategy: str = "multi_query_hybrid_rrf"
-    knowledge_chunk_size: int = 512
-    knowledge_chunk_overlap: int = 64
+    knowledge_chunk_size: int = Field(default=512, gt=0)
+    knowledge_chunk_overlap: int = Field(default=64, ge=0)
     knowledge_vector_enabled: bool = True
     knowledge_vector_required: bool = False
     bge_embedding_model: str = "BAAI/bge-m3"
@@ -68,7 +75,7 @@ class Settings(BaseSettings):
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_username: str = ""
-    smtp_password: str = ""
+    smtp_password: SecretStr = SecretStr("")
     smtp_use_tls: bool = True
     smtp_use_ssl: bool = False
     smtp_timeout_seconds: float = 10.0
@@ -88,7 +95,7 @@ class Settings(BaseSettings):
     alert_email_rate_limit_per_minute: int = 30
     # 密码校验强度及登录凭证的签名方式、有效时间。
     bcrypt_rounds: int = 12
-    jwt_secret_key: str = "xling-dev-secret-change-in-production"
+    jwt_secret_key: SecretStr = SecretStr("xling-dev-secret-change-in-production")
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 1440
     # 风险轨迹的观察范围与连续上升判断阈值。
@@ -96,6 +103,81 @@ class Settings(BaseSettings):
     risk_trajectory_cross_session_days: int = 7
     risk_trajectory_rising_threshold: int = 3
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    @field_validator("database_url")
+    @classmethod
+    def validate_database_url(cls, value: str) -> str:
+        try:
+            make_url(value)
+        except ArgumentError as exc:
+            raise ValueError("database_url must be a valid SQLAlchemy URL") from exc
+        return value
+
+    @model_validator(mode="after")
+    def validate_classifier_thresholds(self):
+        if self.classifier_high_risk_review_threshold > self.classifier_high_risk_threshold:
+            raise ValueError(
+                "classifier_high_risk_review_threshold must not exceed classifier_high_risk_threshold"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def validate_knowledge_chunks(self):
+        if self.knowledge_chunk_overlap >= self.knowledge_chunk_size:
+            raise ValueError("knowledge_chunk_overlap must be smaller than knowledge_chunk_size")
+        return self
+
+    @model_validator(mode="after")
+    def validate_smtp(self):
+        if self.smtp_use_tls and self.smtp_use_ssl:
+            raise ValueError("smtp_use_tls and smtp_use_ssl cannot both be enabled")
+        if self.alert_email_delivery_mode.strip().lower() == "smtp" and not self.smtp_host.strip():
+            raise ValueError("smtp_host is required when alert_email_delivery_mode is smtp")
+        if bool(self.smtp_username.strip()) != bool(self.smtp_password.get_secret_value()):
+            raise ValueError("smtp_username and smtp_password must be configured together")
+        return self
+
+    @model_validator(mode="after")
+    def validate_provider(self):
+        if self.ai_provider.lower() == "openai" and not self.openai_api_key.get_secret_value().strip():
+            raise ValueError("openai_api_key is required when ai_provider is openai")
+        return self
+
+    @model_validator(mode="after")
+    def validate_production_secrets(self):
+        if self.environment != "production":
+            return self
+        jwt_secret = self.jwt_secret_key.get_secret_value()
+        if not jwt_secret.strip() or jwt_secret == "xling-dev-secret-change-in-production":
+            raise ValueError("jwt_secret_key must be replaced with a production secret")
+        database = make_url(self.database_url)
+        if database.get_backend_name() == "mysql" and (
+            not database.username
+            or not database.password
+            or (database.username == "xling" and database.password == "xling")
+        ):
+            raise ValueError("database_url must contain non-development MySQL credentials in production")
+        return self
+
+    @property
+    def effective_embedding_base_url(self) -> str:
+        return self.embedding_base_url or self.openai_base_url
+
+    @property
+    def effective_embedding_api_key(self) -> str:
+        return self.embedding_api_key.get_secret_value() or self.openai_api_key.get_secret_value()
+
+    @property
+    def safe_database_url(self) -> str:
+        return make_url(self.database_url).render_as_string(hide_password=True)
+
+    @field_serializer("database_url")
+    def serialize_database_url(self, value: str) -> str:
+        return make_url(value).render_as_string(hide_password=True)
+
+    def resolve_path(self, value: str | Path) -> Path:
+        path = Path(value).expanduser()
+        return path if path.is_absolute() else self.project_root / path
 
     @property
     def project_root(self) -> Path:

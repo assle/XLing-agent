@@ -40,7 +40,7 @@ class Embeddings:
         self.network_ms: list[float] = []
 
     def get(self, texts: list[str]) -> np.ndarray:
-        identity = (self.store.settings.embedding_base_url or self.store.settings.openai_base_url,
+        identity = (self.store.settings.effective_embedding_base_url,
                     self.store.settings.openai_embedding_model)
         paths = [self.directory / (hashlib.sha256(json.dumps([identity, text]).encode()).hexdigest() + ".json")
                  for text in texts]
@@ -145,7 +145,7 @@ def run(output: Path) -> None:
     report = {
         "status": "preparing", "datasetSHA256": fingerprint(dataset), "knowledgeSourceSHA256": sources,
         "reviewSHA256": fingerprint(review_path), "embeddingModel": settings.openai_embedding_model,
-        "embeddingHost": urlsplit(settings.embedding_base_url or settings.openai_base_url).hostname,
+        "embeddingHost": urlsplit(settings.effective_embedding_base_url).hostname,
         "protocol": {
             "topK": TOP_K, "contextBudgetChars": CONTEXT_BUDGET, "candidatePool": 12,
             "folds": "leave one topic out; train selects configuration, held-out topic only scores it",

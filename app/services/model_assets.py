@@ -30,5 +30,4 @@ def resolve_model_dir(settings: Settings) -> Path:
 
     相对路径以项目根目录解释，绝对路径保持不变。
     """
-    path = Path(settings.finetuned_model_dir)
-    return path if path.is_absolute() else settings.project_root / path
+    return settings.resolve_path(settings.finetuned_model_dir)

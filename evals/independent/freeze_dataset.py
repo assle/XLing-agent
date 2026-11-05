@@ -35,12 +35,12 @@ def main() -> None:
 
     settings = Settings()
     artifact_paths = [
-        Path(settings.decision_head_head_path),
-        Path(settings.decision_head_calibration_path),
-        Path(settings.decision_head_adapter_dir) / "adapter_config.json",
-        Path(settings.decision_head_adapter_dir) / "adapter_model.safetensors",
-        Path(settings.decision_head_model_dir) / "config.json",
-        ROOT / "finetune/reports/current-classifier/training/system-prompt.txt",
+        settings.resolve_path(settings.decision_head_head_path),
+        settings.resolve_path(settings.decision_head_calibration_path),
+        settings.resolve_path(settings.decision_head_adapter_dir) / "adapter_config.json",
+        settings.resolve_path(settings.decision_head_adapter_dir) / "adapter_model.safetensors",
+        settings.resolve_path(settings.decision_head_model_dir) / "config.json",
+        settings.resolve_path(settings.decision_head_system_prompt_file),
     ]
     missing = [str(path) for path in artifact_paths if not path.is_file()]
     if missing:

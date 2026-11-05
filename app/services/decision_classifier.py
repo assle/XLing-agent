@@ -43,15 +43,16 @@ class DecisionHeadClassifier:
 
     def __init__(self, settings: Settings):
         """按配置加载基座、适配器、决策头与温度校准；任何缺失直接抛错由上层回退。"""
-        root = settings.project_root
         device = settings.decision_head_device or (
             "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
         )
         self._device = device
         self._max_length = settings.decision_head_max_length
         self._input_format = settings.classifier_input_format
-        self._system_prompt = (root / settings.decision_head_system_prompt_file).read_text(encoding="utf-8").strip()
-        calibration = json.loads((root / settings.decision_head_calibration_path).read_text(encoding="utf-8"))
+        prompt_path = settings.resolve_path(settings.decision_head_system_prompt_file)
+        calibration_path = settings.resolve_path(settings.decision_head_calibration_path)
+        self._system_prompt = prompt_path.read_text(encoding="utf-8").strip()
+        calibration = json.loads(calibration_path.read_text(encoding="utf-8"))
         if calibration["labels"] != list(LABELS):
             raise ValueError("温度校准文件的标签顺序与运行时四类定义不一致")
         self._temperature = float(calibration["temperature"])
@@ -59,21 +60,23 @@ class DecisionHeadClassifier:
             raise ValueError("温度校准常数必须大于 0")
         self._model_version = f"decision-head@{Path(settings.decision_head_adapter_dir).parent.name}+t{self._temperature:.3f}"
         dtype = torch.float16 if device in {"mps", "cuda"} else torch.float32
+        model_dir = settings.resolve_path(settings.decision_head_model_dir)
         self._tokenizer = AutoTokenizer.from_pretrained(
-            root / settings.decision_head_model_dir, trust_remote_code=True, local_files_only=True,
+            model_dir, trust_remote_code=True, local_files_only=True,
         )
         base = AutoModelForCausalLM.from_pretrained(
-            root / settings.decision_head_model_dir,
+            model_dir,
             trust_remote_code=True,
             torch_dtype=dtype,
             low_cpu_mem_usage=True,
             local_files_only=True,
         ).to(device)
         base.config.use_cache = False
-        peft_model = PeftModel.from_pretrained(base, root / settings.decision_head_adapter_dir)
+        peft_model = PeftModel.from_pretrained(base, settings.resolve_path(settings.decision_head_adapter_dir))
         # 与训练脚本一致的访问路径：PEFT 包装下的因果语言模型，再取其 transformer 主体。
         self._transformer = peft_model.model.model
-        head_payload = torch.load(root / settings.decision_head_head_path, map_location="cpu", weights_only=True)
+        head_path = settings.resolve_path(settings.decision_head_head_path)
+        head_payload = torch.load(head_path, map_location="cpu", weights_only=True)
         if head_payload["labels"] != list(LABELS):
             raise ValueError("决策头权重标签与运行时四类定义不一致")
         self._head = nn.Linear(head_payload["hiddenSize"], len(LABELS), dtype=torch.float32).to(device)
