@@ -15,7 +15,7 @@ def finetuned_model_status(settings: Settings) -> dict:
     gguf_path = model_dir / settings.finetuned_model_file
     modelfile_path = model_dir / "Modelfile"
     return {
-        "name": settings.finetuned_model_name,
+        "name": settings.ollama_model,
         "directory": str(model_dir.relative_to(root)) if model_dir.is_relative_to(root) else str(model_dir),
         "ggufFile": settings.finetuned_model_file,
         "ggufExists": gguf_path.exists(),

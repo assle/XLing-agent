@@ -67,6 +67,21 @@ def test_relative_paths_resolve_from_project_root_and_absolute_paths_stay_unchan
     assert settings.resolve_path("~/models") == Path.home() / "models"
 
 
+def test_decision_head_bundle_resolves_one_fixed_artifact_layout(tmp_path):
+    bundle_dir = tmp_path / "decision-head"
+    settings = Settings(_env_file=None, decision_head_bundle_dir=str(bundle_dir))
+
+    paths = settings.decision_head_paths
+
+    assert paths.bundle_dir == bundle_dir
+    assert paths.base_dir == bundle_dir / "base"
+    assert paths.adapter_dir == bundle_dir / "adapter"
+    assert paths.head_path == bundle_dir / "head.pt"
+    assert paths.calibration_path == bundle_dir / "calibration.json"
+    assert paths.system_prompt_path == bundle_dir / "system-prompt.txt"
+    assert Settings(_env_file=None).decision_head_bundle_dir == "models/xling-decision-head"
+
+
 @pytest.mark.parametrize(
     "database_url",
     ["not-a-database-url", "mysql+pymysql://app:password@db:not-a-port/xling"],

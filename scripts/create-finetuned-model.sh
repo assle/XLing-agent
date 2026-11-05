@@ -3,7 +3,7 @@ set -euo pipefail
 
 # 定位项目并读取可覆盖的模型名称、目录、文件及上游来源。
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-MODEL_NAME="${FINETUNED_MODEL_NAME:-xling-qwen2.5-7b-ft:latest}"
+MODEL_NAME="${OLLAMA_MODEL:-xling-qwen2.5-7b-ft:latest}"
 MODEL_DIR="${FINETUNED_MODEL_DIR:-$ROOT_DIR/models/xling-qwen2.5-7b-ft}"
 GGUF_FILE="${FINETUNED_MODEL_FILE:-xling-qwen2.5-7b-ft-q4_k_m.gguf}"
 UPSTREAM_GGUF="${UPSTREAM_GGUF:-}"
