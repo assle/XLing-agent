@@ -2,9 +2,11 @@
 
 import { state, api, setPill, isAdmin } from "/app.js";
 import { handlePlanEvent, resetPlanPanel, loadActionPlans, bindActionPlanObjectSender } from "/action-plan.js";
+import { createRealtimeConnection, readSse } from "/sse.js";
 
 const els = {};
-let reviewTimer = null;
+let sessionRealtime = null;
+const seenMessageIds = new Set();
 
 /**
  * 取得聊天元素并绑定发送、新会话、示例语及历史会话点击事件。
@@ -77,72 +79,87 @@ function startNewSession() {
   loadSessionList();
 }
 
-// 切换到历史会话：加载消息、行动计划，并高亮当前会话
-/**
- * 按公开编号读取历史会话，替换消息展示并同步无记忆标志。
- * 同时按当前会话加载行动计划，避免显示其他会话的计划。
- * 请求失败展示错误，最后更新历史列表选中状态。
- */
+export function stopSessionRealtime() {
+  sessionRealtime?.close();
+  sessionRealtime = null;
+}
+
+function updateSupportStatus(supportStatus) {
+  state.supportStatus = supportStatus || null;
+  state.pendingReview = ["pending", "in_progress"].includes(state.supportStatus);
+  els.sendButton.disabled = state.sending;
+  els.messageInput.disabled = false;
+  const labels = { pending: "待接手", in_progress: "已接手", monitoring: "持续关注", referred: "已转介", completed: "已完成" };
+  setPill(els.sessionBadge, labels[state.supportStatus] || "READY", state.pendingReview ? "warn" : "ok");
+}
+
+function renderSessionSnapshot(data) {
+  if (data.sessionId !== state.sessionId) return;
+  seenMessageIds.clear();
+  els.messages.innerHTML = "";
+  if (!data.messages?.length) {
+    els.messages.innerHTML = welcomeHtml();
+  } else {
+    for (const msg of data.messages) {
+      const role = ["user", "support"].includes(msg.role.toLowerCase()) ? msg.role.toLowerCase() : "assistant";
+      addMessage(role, msg.content, msg.messageId);
+    }
+  }
+  state.noMemory = Boolean(data.noMemory);
+  els.noMemoryCheck.checked = state.noMemory;
+  els.noMemoryBadge.hidden = !state.noMemory;
+  updateSupportStatus(data.supportStatus);
+}
+
+function handleSessionEvent(event) {
+  if (event.sessionId !== state.sessionId) return;
+  if (event.type === "support_message") {
+    addMessage("support", event.content || "", event.messageId);
+  }
+  if (["support_message", "status_changed"].includes(event.type)) {
+    updateSupportStatus(event.supportStatus);
+    if (!state.pendingReview) stopSessionRealtime();
+  }
+}
+
+function startSessionRealtime() {
+  stopSessionRealtime();
+  if (!state.sessionId || !state.pendingReview || !state.auth.token) return;
+  const sessionId = state.sessionId;
+  sessionRealtime = createRealtimeConnection({
+    api,
+    path: `/api/sessions/${sessionId}/events`,
+    loadSnapshot: async () => {
+      const response = await api(`/api/sessions/${sessionId}`);
+      return response.json();
+    },
+    onSnapshot: (data) => {
+      renderSessionSnapshot(data);
+      loadActionPlans();
+      highlightActiveSession();
+      if (!state.pendingReview) stopSessionRealtime();
+    },
+    onEvent: handleSessionEvent,
+    onError: () => {}
+  });
+}
+
 async function switchSession(publicId) {
   state.sessionId = publicId;
+  state.supportStatus = null;
+  state.pendingReview = false;
   resetPlanPanel();
   hideCbtTag();
+  stopSessionRealtime();
   setPill(els.sessionBadge, "READY");
   els.messages.innerHTML = `<div class="empty"><p>加载中...</p></div>`;
-  try {
-    const response = await api(`/api/sessions/${publicId}`);
-    const data = await response.json();
-    if (state.sessionId !== publicId) return;
-    setReviewPending(data.pendingReview, data.supportStatus);
-    els.messages.innerHTML = "";
-    if (!data.messages || data.messages.length === 0) {
-      els.messages.innerHTML = welcomeHtml();
-    } else {
-      for (const msg of data.messages) {
-        const role = ["user", "support"].includes(msg.role.toLowerCase()) ? msg.role.toLowerCase() : "assistant";
-        addMessage(role, msg.content);
-      }
-    }
-    // 加载该会话关联的行动计划
-    await loadActionPlans();
-    if (state.sessionId !== publicId) return;
-    // 同步无记忆模式标记
-    state.noMemory = Boolean(data.noMemory);
-    els.noMemoryCheck.checked = state.noMemory;
-    els.noMemoryBadge.hidden = !state.noMemory;
-  } catch (error) {
-    els.messages.innerHTML = `<div class="empty"><p>加载会话失败：${error.message}</p></div>`;
-  }
-  highlightActiveSession();
+  state.pendingReview = true;
+  startSessionRealtime();
 }
 
 function setReviewPending(pending, supportStatus = null) {
-  clearTimeout(reviewTimer);
-  state.pendingReview = Boolean(pending);
-  state.supportStatus = supportStatus || (state.pendingReview ? "pending" : null);
-  els.sendButton.disabled = state.sending;
-  els.messageInput.disabled = false;
-  const active = ["pending", "in_progress"].includes(state.supportStatus);
-  if (!active || !state.sessionId) return;
-  setPill(els.sessionBadge, state.supportStatus === "pending" ? "待接手" : "已接手", "warn");
-  const sessionId = state.sessionId;
-  reviewTimer = setTimeout(async () => {
-    if (state.sessionId !== sessionId || !state.auth.token) return;
-    try {
-      const response = await api(`/api/sessions/${sessionId}`);
-      const data = await response.json();
-      if (state.sessionId !== sessionId) return;
-      if (["pending", "in_progress"].includes(data.supportStatus)) {
-        setReviewPending(data.pendingReview, data.supportStatus);
-      } else {
-        await switchSession(sessionId);
-      }
-    } catch {
-      if (state.sessionId === sessionId && state.auth.token) {
-        setReviewPending(state.pendingReview, state.supportStatus);
-      }
-    }
-  }, 3000);
+  updateSupportStatus(supportStatus || (pending ? "pending" : null));
+  startSessionRealtime();
 }
 
 // 加载会话历史列表
@@ -219,10 +236,13 @@ function clearWelcome() {
  * 创建消息气泡、追加到列表并滚动到底部。
  * 正文通过 textContent 写入，作为文本展示；返回气泡元素供流式片段持续更新。
  */
-function addMessage(role, content) {
+function addMessage(role, content, messageId = null) {
+  if (messageId && seenMessageIds.has(messageId)) return els.messages.querySelector(`[data-message-id="${messageId}"] .bubble`);
   clearWelcome();
+  if (messageId) seenMessageIds.add(messageId);
   const row = document.createElement("article");
   row.className = `message ${role}`;
+  if (messageId) row.dataset.messageId = String(messageId);
   row.innerHTML = `
     <div class="message-role">${role === "user" ? "我" : role === "support" ? "支持人员" : "Xling"}</div>
     <div class="bubble"></div>
@@ -231,23 +251,6 @@ function addMessage(role, content) {
   els.messages.append(row);
   els.messages.scrollTop = els.messages.scrollHeight;
   return row.querySelector(".bubble");
-}
-
-/**
- * 从接收缓冲中拆出以空行结束的完整事件，并逐个交给回调。
- * SSE 是服务端持续向网页推送事件的文本格式；尾部未完整的数据返回给下次接收拼接。
- * 当前仅读取每块首个 data 行，格式或内容解析错误会向外抛出。
- */
-function parseSse(buffer, onEvent) {
-  const parts = buffer.split("\n\n");
-  const rest = parts.pop();
-  for (const part of parts) {
-    // 寻找当前完整事件块中的数据行，其他行不作为消息内容。
-    const dataLine = part.split("\n").find((line) => line.startsWith("data: "));
-    if (!dataLine) continue;
-    onEvent(JSON.parse(dataLine.slice(6)));
-  }
-  return rest;
 }
 
 /**
@@ -284,47 +287,38 @@ async function sendChatMessage(message, displayText) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sessionId: state.sessionId, message, noMemory: state.noMemory })
     });
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
     let streamFailed = false;
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      // 每解析出一个完整事件就更新相应界面；错误标志与待审核标志分别保留。
-      buffer = parseSse(buffer, (eventData) => {
-        if (eventData.type === "meta") {
-          state.sessionId = eventData.sessionId;
-          state.noMemory = Boolean(eventData.noMemory);
-          els.noMemoryBadge.hidden = !state.noMemory;
-        }
-        if (eventData.type === "cbt") {
-          renderCbtTag(eventData);
-        }
-        if (eventData.type === "action_plan") {
-          handlePlanEvent(eventData);
-        }
-        if (eventData.type === "pending_review") {
-          pendingReview = true;
-          const supportStatus = eventData.supportStatus || "pending";
-          setReviewPending(supportStatus === "pending", supportStatus);
-          raw = eventData.content || "";
-          assistant.textContent = raw;
-        }
-        if (eventData.type === "token") {
-          raw += eventData.content || "";
-          assistant.textContent = raw;
-          els.messages.scrollTop = els.messages.scrollHeight;
-        }
-        if (eventData.type === "error") {
-          streamFailed = true;
-          const failure = eventData.message || "回复未完成，请稍后重试。";
-          assistant.textContent = raw.trim() ? `${raw}\n\n${failure}` : failure;
-          setPill(els.sessionBadge, "ERROR", "danger");
-        }
-      });
-    }
+    await readSse(response, (eventData) => {
+      if (eventData.type === "meta") {
+        state.sessionId = eventData.sessionId;
+        state.noMemory = Boolean(eventData.noMemory);
+        els.noMemoryBadge.hidden = !state.noMemory;
+      }
+      if (eventData.type === "cbt") {
+        renderCbtTag(eventData);
+      }
+      if (eventData.type === "action_plan") {
+        handlePlanEvent(eventData);
+      }
+      if (eventData.type === "pending_review") {
+        pendingReview = true;
+        const supportStatus = eventData.supportStatus || "pending";
+        setReviewPending(supportStatus === "pending", supportStatus);
+        raw = eventData.content || "";
+        assistant.textContent = raw;
+      }
+      if (eventData.type === "token") {
+        raw += eventData.content || "";
+        assistant.textContent = raw;
+        els.messages.scrollTop = els.messages.scrollHeight;
+      }
+      if (eventData.type === "error") {
+        streamFailed = true;
+        const failure = eventData.message || "回复未完成，请稍后重试。";
+        assistant.textContent = raw.trim() ? `${raw}\n\n${failure}` : failure;
+        setPill(els.sessionBadge, "ERROR", "danger");
+      }
+    });
     if (!streamFailed && !pendingReview) {
       if (raw.trim()) {
         setPill(els.sessionBadge, "DONE", "ok");

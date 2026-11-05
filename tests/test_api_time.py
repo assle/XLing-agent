@@ -133,7 +133,7 @@ def test_conversation_message_dates_are_utc_and_roles_retain_the_storage_contrac
         response = harness.client.get(endpoint, headers=headers)
         assert response.status_code == 200
         assert response.json()["messages"][0] == {
-            "role": "USER", "content": "虚构消息", "createdAt": UTC_TIME, "senderLabel": None,
+            "role": "USER", "content": "虚构消息", "createdAt": UTC_TIME, "senderLabel": None, "messageId": 1,
         }
 
 

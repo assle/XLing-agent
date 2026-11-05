@@ -18,7 +18,8 @@ from app.models.entities import (
     ToolJob,
     UserAccount,
 )
-from app.services.review import HANDOFF_REASONS
+from app.services.review import HANDOFF_REASONS, ReviewService
+from app.services.support_events import SupportEvent, support_events
 
 
 @dataclass(frozen=True)
@@ -156,6 +157,18 @@ class SupportTurnTransaction:
             for row in [message, report, review, *jobs]:
                 if row is not None:
                     self.db.refresh(row)
+            if review is not None:
+                support_events.publish(SupportEvent(
+                    event_type="review_created",
+                    review_id=review.id,
+                    session_id=session.public_id,
+                    support_status=review.status,
+                    message_id=message.id,
+                    role=message.role,
+                    content=message.content,
+                    created_at=message.created_at,
+                    review=ReviewService(self.db, self.settings).review_snapshot(review),
+                ))
             return PersistedSupportTurn(message, report, review, jobs)
         except Exception:
             # 撤销当前尚未提交的变更并继续抛出原异常；不能撤回之前已经成功的提交。
@@ -193,6 +206,16 @@ class SupportTurnTransaction:
             self.fault_injector("human_support_follow_up")
             self.db.commit()
             self.db.refresh(message)
+            support_events.publish(SupportEvent(
+                event_type="user_message",
+                review_id=review.id,
+                session_id=session.public_id,
+                support_status=review.status,
+                message_id=message.id,
+                role=message.role,
+                content=message.content,
+                created_at=message.created_at,
+            ))
             return message
         except Exception:
             self.db.rollback()

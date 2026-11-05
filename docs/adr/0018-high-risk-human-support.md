@@ -33,9 +33,11 @@ ADR-0003、ADR-0004 和 ADR-0005 中关于高风险中断、恢复与审核条�
 - 事务测试覆盖用户补充消息成对保存或回滚，以及回复、站外联系、处置与审计的一致性。
 - 超时测试覆盖非终结升级、队列任务幂等、无用户兜底消息及备用接收方配置。
 - 浏览器界面覆盖 `pending` 只能接手、`in_progress` 可执行人工操作、终结状态只读。
+- 实时事件补充验证用户留言无需后台刷新、人工回复无需用户轮询、断线快照对齐和草稿保留；传输方式与单进程边界见 ADR-0027。
 
 ## 相关
 
+- [ADR-0027](0027-realtime-human-support-events.md)
 - [ADR-0003](0003-interrupt-node-splitting.md)
 - [ADR-0004](0004-resume-auto-degrade.md)
 - [ADR-0005](0005-conditional-edges-over-command.md)

@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
@@ -17,6 +18,7 @@ from app.schemas.dtos import (
 from app.services.knowledge import KnowledgeService
 from app.services.report import ReportService
 from app.services.review import ReviewConflictError, ReviewOutcome, ReviewService
+from app.services.support_events import support_events
 
 router = APIRouter()
 
@@ -125,6 +127,16 @@ def list_reviews(
     # all 默认为 False；排序和字段整理统一由审核服务负责。
     reviews = ReviewService(db, get_settings())
     return reviews.list_all() if all else reviews.list_active()
+
+
+@router.get("/api/admin/reviews/events")
+def admin_review_events(_: Annotated[UserAccount, Depends(require_admin)]):
+    async def body():
+        subscription = support_events.subscribe(admin=True)
+        async for chunk in support_events.stream(subscription):
+            yield chunk
+
+    return StreamingResponse(body(), media_type="text/event-stream")
 
 
 @router.post("/api/admin/reviews/{review_id}/claim")

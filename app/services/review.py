@@ -24,6 +24,7 @@ from app.models.entities import (
     SupportAuditEvent,
     ToolJob,
 )
+from app.services.support_events import SupportEvent, support_events
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +114,15 @@ class ReviewService:
             ))
             self.db.commit()
             review = self.db.get(ReviewRequest, review_id)
+            assert review is not None
             self.db.refresh(review)
+            support_events.publish(SupportEvent(
+                event_type="status_changed",
+                review_id=review.id,
+                session_id=review.thread_id,
+                support_status=review.status,
+                review=self.review_snapshot(review),
+            ))
             return review
         except Exception:
             self.db.rollback()
@@ -203,7 +212,7 @@ class ReviewService:
             .filter(ReviewRequest.status.in_(["pending", "in_progress"]))
             .all()
         )
-        items = [self._to_dict(r) for r in reviews]
+        items = [self.review_snapshot(r) for r in reviews]
         items.sort(
             key=lambda x: (
                 -_RISK_PRIORITY.get(x.get("riskLevel") or "", 0),
@@ -215,7 +224,7 @@ class ReviewService:
     def list_all(self) -> list[dict]:
         """返回全部记录，活跃人工支持优先，终结记录按处理时间排列。"""
         reviews = self.db.query(ReviewRequest).all()
-        items = [self._to_dict(r) for r in reviews]
+        items = [self.review_snapshot(r) for r in reviews]
         active = [i for i in items if i.get("status") in {"pending", "in_progress"}]
         active.sort(
             key=lambda x: (
@@ -361,6 +370,13 @@ class ReviewService:
         self.db.add(review)
         self.db.commit()
         self.db.refresh(review)
+        support_events.publish(SupportEvent(
+            event_type="review_created",
+            review_id=review.id,
+            session_id=review.thread_id,
+            support_status=review.status,
+            review=self.review_snapshot(review),
+        ))
         return review
 
     def mark_decision(
@@ -442,6 +458,17 @@ class ReviewService:
         self.fault_injector(fault_stage)
         self.db.commit()
         self.db.refresh(message)
+        support_events.publish(SupportEvent(
+            event_type="support_message",
+            review_id=review.id,
+            session_id=session.public_id,
+            support_status=review.status,
+            message_id=message.id,
+            role=message.role,
+            content=message.content,
+            created_at=message.created_at,
+            review=self.review_snapshot(review),
+        ))
         return message
 
     def _get_in_progress(self, review_id: int, actor: str) -> ReviewRequest:
@@ -459,7 +486,7 @@ class ReviewService:
             raise ReviewConflictError(f"Review {review_id} is owned by {review.claimed_by}")
         return review
 
-    def _to_dict(self, review: ReviewRequest) -> dict:
+    def review_snapshot(self, review: ReviewRequest) -> dict:
         """为审核列表组织评估信息、处理详情和最近十条会话消息。
 
         最近消息先倒序截取再恢复时间顺序；等待时长按当前时间减创建时间计算。
@@ -501,7 +528,15 @@ class ReviewService:
             "emotion": report.emotion if report else None,
             "emotionScore": report.emotion_score if report else None,
             "studentMessage": report.content if report else None,
-            "recentContext": [{"role": m.role, "content": m.content} for m in messages],
+            "recentContext": [
+                {
+                    "messageId": m.id,
+                    "role": m.role,
+                    "content": m.content,
+                    "createdAt": utc_isoformat(m.created_at),
+                }
+                for m in messages
+            ],
             "createdAt": utc_isoformat(review.created_at) if review.created_at else None,
             "waitSeconds": (now - review.created_at).total_seconds() if review.created_at else None,
         }
