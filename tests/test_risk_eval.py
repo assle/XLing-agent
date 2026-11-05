@@ -17,6 +17,7 @@ from pathlib import Path
 
 from evals.config import EvalSettings
 from evals.risk.runner import build_summary, compute_metrics, evaluate
+from tests.support import make_test_settings
 
 # ---------------------------------------------------------------------------
 # Pure metrics: compute_metrics
@@ -152,7 +153,7 @@ def test_evaluate_mock_mode_structure():
         dataset_path = tmp_path / "dataset.json"
         dataset_path.write_text(json.dumps(cases, ensure_ascii=False), encoding="utf-8")
 
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "risk_eval_dataset": str(dataset_path),
             "risk_eval_output": str(tmp_path / "report.json"),
             "risk_eval_summary_output": str(tmp_path / "summary.json"),
@@ -194,7 +195,7 @@ def test_evaluate_mock_mode_writes_files():
 
         report_path = tmp_path / "report.json"
         summary_path = tmp_path / "summary.json"
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "risk_eval_dataset": str(dataset_path),
             "risk_eval_output": str(report_path),
             "risk_eval_summary_output": str(summary_path),
@@ -224,7 +225,7 @@ def test_evaluate_mock_mode_keyword_high():
         dataset_path = tmp_path / "dataset.json"
         dataset_path.write_text(json.dumps(cases, ensure_ascii=False), encoding="utf-8")
 
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "risk_eval_dataset": str(dataset_path),
             "risk_eval_output": str(tmp_path / "report.json"),
             "risk_eval_summary_output": str(tmp_path / "summary.json"),
@@ -251,7 +252,7 @@ def test_evaluate_mock_mode_false_positive_trap():
         dataset_path = tmp_path / "dataset.json"
         dataset_path.write_text(json.dumps(cases, ensure_ascii=False), encoding="utf-8")
 
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "risk_eval_dataset": str(dataset_path),
             "risk_eval_output": str(tmp_path / "report.json"),
             "risk_eval_summary_output": str(tmp_path / "summary.json"),

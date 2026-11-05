@@ -9,13 +9,17 @@ Run: python -m pytest tests/test_decision_head_assessment.py
 from __future__ import annotations
 
 import asyncio
+import json
 from types import SimpleNamespace
 
 import pytest
 
+from app.core import diagnostics
 from app.core.enums import EmotionLabel, RiskLevel
+from app.services import decision_classifier
 from app.services.assessment import PsychologicalAssessmentService
 from app.services.decision_classifier import DecisionPrediction
+from tests.support import make_test_settings
 from tests.test_classifier_assessment import FakeClassifierAiClient
 
 LABELS = ("正常", "焦虑", "低落", "高风险")
@@ -172,6 +176,47 @@ def test_decision_head_error_uses_ollama_path():
     result = svc.assess("今天天气不错")
     assert result.emotion == EmotionLabel.NORMAL
     assert svc.ai.classify_count == 1
+
+
+@pytest.mark.parametrize(
+    ("corrupt_calibration", "expected_error"),
+    [(False, "FileNotFoundError"), (True, "JSONDecodeError")],
+    ids=["missing-bundle", "corrupt-calibration"],
+)
+def test_unusable_decision_head_bundle_preserves_fallback_and_diagnostics(
+    tmp_path, monkeypatch, corrupt_calibration, expected_error,
+):
+    bundle_dir = tmp_path / "decision-head"
+    if corrupt_calibration:
+        bundle_dir.mkdir()
+        (bundle_dir / "system-prompt.txt").write_text("只输出分类标签", encoding="utf-8")
+        (bundle_dir / "calibration.json").write_text("{broken", encoding="utf-8")
+    settings = make_test_settings(
+        classifier_backend="decision_head",
+        decision_head_bundle_dir=str(bundle_dir),
+        diagnostic_log_dir=str(tmp_path / "diagnostics"),
+    )
+    monkeypatch.setattr("app.services.assessment.get_settings", lambda: settings)
+    monkeypatch.setattr(decision_classifier, "get_settings", lambda: settings)
+    monkeypatch.setattr(decision_classifier, "_INSTANCE", None)
+    diagnostics.configure(settings)
+    try:
+        svc = PsychologicalAssessmentService(FakeClassifierAiClient("正常"))
+        result = svc.assess("今天天气不错")
+    finally:
+        diagnostics.shutdown()
+
+    assert result.emotion == EmotionLabel.NORMAL
+    assert svc.ai.classify_count == 1
+    events = [
+        json.loads(line)
+        for line in (tmp_path / "diagnostics/execution.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+    degraded = next(
+        event for event in events
+        if event["event"] == "assessment.degraded" and event.get("reason_code") == "decision_head_unavailable"
+    )
+    assert degraded["error_type"] == expected_error
 
 
 def test_both_backends_error_safe_fallback():

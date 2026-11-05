@@ -11,7 +11,7 @@ from app.services.ai import AiClient
 from app.services.knowledge import KnowledgeService, SearchResult
 from evals.config import EvalSettings
 from evals.rag.runner import _build_retrieve_fn, evaluate
-from tests.support import DatabaseHarness
+from tests.support import DatabaseHarness, make_test_settings
 
 
 class FakeAi:
@@ -111,7 +111,7 @@ def test_hyde_multi_query_applies_hyde_to_original_and_each_rewrite_without_rera
 
             service._retrieve_hyde = hyde
             service._expand_best = lambda ranked, top_k: ranked
-            settings = EvalSettings(_env_file=None)
+            settings = make_test_settings(EvalSettings, _env_file=None)
 
             found = _build_retrieve_fn(service, "hyde-multi-query", settings)("原问题", 2)
 
@@ -128,7 +128,7 @@ def test_hyde_eval_strategy_applies_rerank_before_cliff_cutoff():
             service = make_service(db, FakeAi())
             candidates = [SearchResult(i, "source", f"正文 {i}", 0.0) for i in range(5)]
             service._retrieve_hyde = lambda query, top_k: candidates
-            settings = EvalSettings(_env_file=None, rag_eval_rerank_candidate_pool=5)
+            settings = make_test_settings(EvalSettings, _env_file=None, rag_eval_rerank_candidate_pool=5)
 
             found = _build_retrieve_fn(service, "hyde-rerank", settings)("问题", 4)
 
@@ -148,7 +148,7 @@ def test_hyde_eval_writes_independent_report_and_summary(strategy, output_field)
         output_dir = Path(tmp)
         report_path = output_dir / "report.json"
         summary_path = output_dir / "summary.json"
-        settings = EvalSettings(_env_file=None).model_copy(update={
+        settings = make_test_settings(EvalSettings, _env_file=None).model_copy(update={
             "rag_eval_dataset": "evals/rag/xling-rag-eval.jsonl",
             "rag_eval_database_url": f"sqlite:///{output_dir / 'eval.db'}",
             "knowledge_vector_enabled": False,

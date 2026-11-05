@@ -40,6 +40,7 @@ from evals.rag.runner import (
     is_relevant,
     ndcg,
 )
+from tests.support import make_test_settings
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATASET = REPO_ROOT / "evals" / "rag" / "xling-rag-eval.jsonl"
@@ -291,7 +292,7 @@ def test_rag_evaluation_defaults_to_acceptance_top_five():
 
     要求前五项作为当前评估口径。
     """
-    assert EvalSettings().rag_eval_top_k == 5
+    assert make_test_settings(EvalSettings).rag_eval_top_k == 5
 
 
 # ---------------------------------------------------------------------------
@@ -323,7 +324,7 @@ def test_eval_settings_swaps_chroma_dirs_to_eval():
 
     检查向量目录和集合切换为评估专用位置，数据库评估地址保持配置值。
     """
-    base = EvalSettings()
+    base = make_test_settings(EvalSettings)
     eval_settings = _eval_settings(base)
     assert eval_settings.chroma_persist_dir == base.rag_eval_chroma_persist_dir
     assert eval_settings.chroma_collection_name == base.rag_eval_chroma_collection_name
@@ -376,7 +377,7 @@ def test_evaluate_end_to_end_hybrid_fallback():
     """
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,  # no chromadb / key needed
@@ -405,7 +406,7 @@ def test_evaluate_writes_baseline_file():
         tmp_path = Path(tmp)
         baseline_path = tmp_path / "baseline.json"
         report_path = tmp_path / "report.json"
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -476,7 +477,7 @@ def test_strategy_paths_baseline():
 
     检查摘要使用基线专用配置。
     """
-    s = EvalSettings()
+    s = make_test_settings(EvalSettings)
     report, summary = _strategy_paths("baseline", s)
     assert summary == s.rag_eval_baseline_output
 
@@ -486,7 +487,7 @@ def test_strategy_paths_multi_query():
 
     检查使用对应摘要配置而不覆盖其他方案。
     """
-    s = EvalSettings()
+    s = make_test_settings(EvalSettings)
     _, summary = _strategy_paths("multi-query", s)
     assert summary == s.rag_eval_multi_query_output
 
@@ -496,7 +497,7 @@ def test_strategy_paths_hybrid_rrf():
 
     检查摘要路径映射正确。
     """
-    s = EvalSettings()
+    s = make_test_settings(EvalSettings)
     _, summary = _strategy_paths("hybrid-rrf", s)
     assert summary == s.rag_eval_hybrid_rrf_output
 
@@ -506,7 +507,7 @@ def test_strategy_paths_llm_rerank():
 
     检查使用重排专用摘要路径。
     """
-    s = EvalSettings()
+    s = make_test_settings(EvalSettings)
     _, summary = _strategy_paths("llm-rerank", s)
     assert summary == s.rag_eval_llm_rerank_output
 
@@ -574,7 +575,7 @@ def test_evaluate_multi_query_end_to_end():
     """
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -600,7 +601,7 @@ def test_evaluate_multi_query_writes_summary_file():
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
         summary_path = tmp_path / "multi-query.json"
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -630,7 +631,7 @@ def test_evaluate_hybrid_rrf_end_to_end():
     """
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -655,7 +656,7 @@ def test_evaluate_hybrid_rrf_writes_summary_file():
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
         summary_path = tmp_path / "hybrid-rrf.json"
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -682,7 +683,7 @@ def test_evaluate_llm_rerank_end_to_end():
     """
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -727,7 +728,7 @@ def test_evaluate_bge_strategy_reports_models_latency_and_safety_misses():
     """
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -754,7 +755,7 @@ def test_evaluate_llm_rerank_writes_summary_file():
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
         summary_path = tmp_path / "llm-rerank.json"
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "rag_eval_dataset": str(DATASET),
             "rag_eval_database_url": f"sqlite:///{tmp_path / 'eval.db'}",
             "knowledge_vector_enabled": False,
@@ -807,7 +808,7 @@ def test_build_comparison_all_strategies_present():
         _write_fake_summary(tmp_path / "bge.json", {"recallAtK": 0.88, "precisionAtK": 0.58, "mrr": 0.78, "ndcgAtK": 0.68, "hitRate": 0.94})
         _write_fake_summary(tmp_path / "bge-rerank.json", {"recallAtK": 0.92, "precisionAtK": 0.62, "mrr": 0.82, "ndcgAtK": 0.72, "hitRate": 0.96})
 
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "rag_eval_baseline_output": str(tmp_path / "baseline.json"),
             "rag_eval_multi_query_output": str(tmp_path / "multi-query.json"),
             "rag_eval_hybrid_rrf_output": str(tmp_path / "hybrid-rrf.json"),
@@ -838,7 +839,7 @@ def test_build_comparison_missing_strategy():
         tmp_path = Path(tmp)
         _write_fake_summary(tmp_path / "baseline.json", {"recallAtK": 0.80, "precisionAtK": 0.50, "mrr": 0.70, "ndcgAtK": 0.60, "hitRate": 0.90})
 
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "rag_eval_baseline_output": str(tmp_path / "baseline.json"),
             "rag_eval_multi_query_output": str(tmp_path / "missing-mq.json"),
             "rag_eval_hybrid_rrf_output": str(tmp_path / "missing-rrf.json"),
@@ -868,7 +869,7 @@ def test_build_comparison_only_baseline_no_delta():
         _write_fake_summary(tmp_path / "baseline.json", {"recallAtK": 0.80, "precisionAtK": 0.50, "mrr": 0.70, "ndcgAtK": 0.60, "hitRate": 0.90})
         _write_fake_summary(tmp_path / "multi-query.json", {"recallAtK": 0.85, "precisionAtK": 0.55, "mrr": 0.75, "ndcgAtK": 0.65, "hitRate": 0.92})
 
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "rag_eval_baseline_output": str(tmp_path / "baseline.json"),
             "rag_eval_multi_query_output": str(tmp_path / "multi-query.json"),
             "rag_eval_hybrid_rrf_output": str(tmp_path / "missing.json"),
