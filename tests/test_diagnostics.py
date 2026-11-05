@@ -8,11 +8,11 @@ import pytest
 from langgraph.errors import GraphInterrupt
 
 from app.core import diagnostics
-from app.core.config import Settings
+from tests.support import make_test_settings
 
 
 def test_request_can_be_traced_after_completion_and_restart(tmp_path, capsys):
-    settings = Settings(diagnostic_log_dir=str(tmp_path))
+    settings = make_test_settings(diagnostic_log_dir=str(tmp_path))
     diagnostics.configure(settings)
     with diagnostics.execution("chat") as trace:
         trace.bind(session_id=12, thread_id="session-12")
@@ -33,7 +33,7 @@ def test_request_can_be_traced_after_completion_and_restart(tmp_path, capsys):
 
 
 def test_failures_are_locatable_without_sensitive_exception_or_state(tmp_path, capsys):
-    diagnostics.configure(Settings(diagnostic_log_dir=str(tmp_path)))
+    diagnostics.configure(make_test_settings(diagnostic_log_dir=str(tmp_path)))
     marker = "PRIVATE-SYNTHETIC-CONTENT"
     failure = ValueError(marker)
     try:
@@ -57,7 +57,7 @@ def test_failures_are_locatable_without_sensitive_exception_or_state(tmp_path, c
 
 @pytest.mark.parametrize("signal,outcome", [(GraphInterrupt(), "interrupted"), (asyncio.CancelledError(), "cancelled")])
 def test_pause_and_cancel_are_distinct_and_propagate(tmp_path, signal, outcome):
-    diagnostics.configure(Settings(diagnostic_log_dir=str(tmp_path)))
+    diagnostics.configure(make_test_settings(diagnostic_log_dir=str(tmp_path)))
     try:
         with pytest.raises(type(signal)) as caught:
             with diagnostics.execution("chat"):
@@ -75,7 +75,7 @@ def test_pause_and_cancel_are_distinct_and_propagate(tmp_path, signal, outcome):
 def test_log_open_failure_does_not_change_business_result(tmp_path, capsys):
     blocked = tmp_path / "not-a-directory"
     blocked.write_text("occupied")
-    diagnostics.configure(Settings(diagnostic_log_dir=str(blocked)))
+    diagnostics.configure(make_test_settings(diagnostic_log_dir=str(blocked)))
     try:
         with diagnostics.execution("chat"):
             result = "business-result"
@@ -104,7 +104,7 @@ def test_log_write_failure_preserves_result_and_never_renders_exception(tmp_path
         return BrokenStream(stream) if str(file).endswith("execution.jsonl") and mode == "a" else stream
 
     monkeypatch.setattr(builtins, "open", failing_open)
-    diagnostics.configure(Settings(diagnostic_log_dir=str(tmp_path)))
+    diagnostics.configure(make_test_settings(diagnostic_log_dir=str(tmp_path)))
     try:
         with diagnostics.execution("chat"):
             result = "business-result"
@@ -117,7 +117,7 @@ def test_log_write_failure_preserves_result_and_never_renders_exception(tmp_path
 
 
 def test_rotation_keeps_at_most_five_backup_files(tmp_path, capsys):
-    diagnostics.configure(Settings(diagnostic_log_dir=str(tmp_path)))
+    diagnostics.configure(make_test_settings(diagnostic_log_dir=str(tmp_path)))
     try:
         with diagnostics.execution("chat", thread_id="x" * (1024 * 1024)):
             for _ in range(61):
@@ -133,7 +133,7 @@ def test_rotation_keeps_at_most_five_backup_files(tmp_path, capsys):
 
 
 def test_async_executions_keep_their_own_association(tmp_path):
-    diagnostics.configure(Settings(diagnostic_log_dir=str(tmp_path)))
+    diagnostics.configure(make_test_settings(diagnostic_log_dir=str(tmp_path)))
 
     async def request(session_id):
         with diagnostics.execution("chat", session_id=session_id) as trace:
@@ -156,7 +156,7 @@ def test_async_executions_keep_their_own_association(tmp_path):
 
 
 def test_caught_failure_has_reason_type_and_operation_timing(tmp_path):
-    diagnostics.configure(Settings(diagnostic_log_dir=str(tmp_path)))
+    diagnostics.configure(make_test_settings(diagnostic_log_dir=str(tmp_path)))
     try:
         with diagnostics.execution("chat"):
             with diagnostics.stage("assessment"):
@@ -183,7 +183,7 @@ def test_unknown_classifier_response_is_a_safe_timed_degradation(tmp_path, capsy
         def classify(self, text):
             return marker
 
-    diagnostics.configure(Settings(diagnostic_log_dir=str(tmp_path)))
+    diagnostics.configure(make_test_settings(diagnostic_log_dir=str(tmp_path)))
     try:
         with diagnostics.execution("chat"):
             result = PsychologicalAssessmentService(Classifier()).assess("有点担心")

@@ -8,7 +8,6 @@ from sqlalchemy import create_engine, make_url
 from sqlalchemy.orm import sessionmaker
 
 from app.agents.runtime import AgentRunResult
-from app.core.config import Settings
 from app.core.database import Base
 from app.core.enums import EmotionLabel, IntentType, RiskLevel
 from app.models.entities import (
@@ -24,6 +23,7 @@ from app.models.entities import (
 from app.services.assessment import PsychologyAssessment
 from app.services.review import ReviewOutcome, ReviewService
 from app.services.support_turn import SupportTurnTransaction
+from tests.support import make_test_settings
 
 MYSQL_TEST_DATABASE_URL = os.getenv("MYSQL_TEST_DATABASE_URL", "")
 
@@ -106,7 +106,7 @@ def test_mysql_fault_injection_rolls_back_the_whole_support_turn(mysql_db, stage
     with pytest.raises(RuntimeError, match="fail after"):
         SupportTurnTransaction(
             mysql_db,
-            Settings(tool_queue_enabled=True),
+            make_test_settings(tool_queue_enabled=True),
             fault_injector=fail,
         ).save_support_turn(
             user=user,
@@ -148,7 +148,7 @@ def test_mysql_human_support_follow_up_rolls_back_both_messages(mysql_db):
             raise RuntimeError("fail after follow up")
 
     with pytest.raises(RuntimeError, match="fail after follow up"):
-        SupportTurnTransaction(mysql_db, Settings(), fault_injector=fail).save_human_support_follow_up(
+        SupportTurnTransaction(mysql_db, make_test_settings(), fault_injector=fail).save_human_support_follow_up(
             user=user, session=session, review=review, content="补充情况", acknowledgment="已收到",
         )
 
@@ -159,7 +159,7 @@ def test_mysql_human_support_follow_up_rolls_back_both_messages(mysql_db):
 @pytest.mark.parametrize("stage", ["human_reply", "offsite_contact", "outcome"])
 def test_mysql_human_action_and_audit_roll_back_together(mysql_db, stage):
     _, _, review = _seed_human_review(mysql_db)
-    settings = Settings()
+    settings = make_test_settings()
     ReviewService(mysql_db, settings).claim(review.id, "admin")
 
     def fail(current_stage: str) -> None:

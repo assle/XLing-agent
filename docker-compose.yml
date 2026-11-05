@@ -122,6 +122,8 @@ services:
     volumes:
       - ./tests:/app/tests:ro
       - ./pyproject.toml:/app/pyproject.toml:ro
+      - ./scripts:/app/scripts:ro
+      - ./.env.example:/app/.env.example:ro
 
   tests:
     <<: *test-service

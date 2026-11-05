@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import hashlib
 
-from app.core.config import Settings
 from app.core.versioning import ArtifactVersionResolver
+from tests.support import make_test_settings
 
 
 def test_version_manifest_is_stable_and_covers_reproducibility_inputs(tmp_path):
@@ -15,7 +15,7 @@ def test_version_manifest_is_stable_and_covers_reproducibility_inputs(tmp_path):
     knowledge.write_text("备考焦虑支持知识", encoding="utf-8")
     dataset = tmp_path / "eval.jsonl"
     dataset.write_text('{"id":"case-1"}\n', encoding="utf-8")
-    settings = Settings(
+    settings = make_test_settings(
         ai_provider="mock",
         ollama_model="chat-v1",
         ollama_classifier_model="classifier-v1",
@@ -63,7 +63,7 @@ def test_dataset_and_index_versions_change_only_with_their_inputs(tmp_path):
     dataset = tmp_path / "eval.jsonl"
     dataset.write_text("one\n", encoding="utf-8")
     resolver = ArtifactVersionResolver(
-        Settings(ai_provider="mock", knowledge_chunk_size=128),
+        make_test_settings(ai_provider="mock", knowledge_chunk_size=128),
         knowledge_paths=[knowledge],
         code_revision="fixed",
     )

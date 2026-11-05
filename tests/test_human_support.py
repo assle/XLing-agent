@@ -3,11 +3,11 @@ from __future__ import annotations
 from datetime import timedelta
 
 from app.api.routes import router
-from app.core.config import Settings
 from app.core.security import hash_password
 from app.core.time import utc_now
 from app.models.entities import ChatSession, ReviewRequest, SafetyAssessmentRecord, UserAccount
 from app.services.review import ReviewService
+from tests.support import make_test_settings
 
 
 def _seed_support(api_harness_factory):
@@ -267,7 +267,7 @@ def test_timeout_escalates_without_closing_or_messaging_user(api_harness_factory
         review = db.get(ReviewRequest, review_id)
         review.created_at = utc_now() - timedelta(minutes=20)
         db.commit()
-        settings = Settings(tool_queue_enabled=True, review_timeout_minutes=15)
+        settings = make_test_settings(tool_queue_enabled=True, review_timeout_minutes=15)
         assert ReviewService(db, settings).escalate_timed_out() == [review_id]
         assert ReviewService(db, settings).escalate_timed_out() == []
 

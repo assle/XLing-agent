@@ -9,7 +9,7 @@ from fastapi import APIRouter
 
 # 测试默认走生成式/模拟分类路径，不加载真实决策头权重；
 # 决策头分层路径由 tests/test_decision_head_assessment.py 显式注入 backend 验证。
-os.environ.setdefault("CLASSIFIER_BACKEND", "ollama")
+os.environ["CLASSIFIER_BACKEND"] = "ollama"
 LOCAL_MYSQL_TEST_DATABASE_URL = "mysql+pymysql://xling_test:test-only@127.0.0.1:13306/xling_test?charset=utf8mb4"
 os.environ.setdefault("MYSQL_TEST_DATABASE_URL", LOCAL_MYSQL_TEST_DATABASE_URL)
 

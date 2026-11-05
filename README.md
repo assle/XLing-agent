@@ -180,14 +180,14 @@ flowchart TD
 
 ## 快速启动
 
-需要 Docker（用容器打包和运行应用的工具）和 Docker Compose（同时启动多个容器的编排工具）。常用启动、测试、日志及安全清理命令见 [Docker 操作指南](docs/docker-operations.md)。
+需要 Docker（用容器打包和运行应用的工具）和 Docker Compose（同时启动多个容器的编排工具）。应用、MySQL、Redis 和 Caddy 都在 Docker 中运行，本机不需要安装 Python、MySQL 或 Redis。
 
 ```bash
 cp .env.example .env
 docker compose up -d --build
 ```
 
-`.env.example` 默认使用 `AI_PROVIDER=mock`，因此不需要先安装或连接真实模型。应用、MySQL、Redis 和 Caddy 都在 Docker 中运行，本机只需要 Docker 与 Docker Compose，不需要安装 Python、MySQL 或 Redis。启动后访问 `https://localhost`；浏览器可能提示本地证书需要确认。
+本地样例使用 `AI_PROVIDER=mock`，不需要模型权重或模型服务。启动后访问 `https://localhost`；浏览器可能提示本地证书需要确认。
 
 开发演示账号：
 
@@ -196,67 +196,7 @@ docker compose up -d --build
 
 这些账号只用于本地演示，正式部署前必须删除或更换，并在 `.env` 中设置随机且足够长的 `JWT_SECRET_KEY`（登录令牌签名密钥）。
 
-### 真实模型联调
-
-真实模型联调需要同时配置远程回答模型和本地风险分类器。模型服务也在 Docker 中运行，使用 `models` profile 启动：
-
-```bash
-docker compose --profile models up -d --build
-```
-
-`ollama-init` 会把项目 `models/` 中的 GGUF 权重注册到 `ollama-data` 数据卷，原始模型目录只读挂载，不需要在宿主机安装或启动 Ollama。Ollama 镜像默认从国内镜像地址下载，可通过 `OLLAMA_IMAGE` 覆盖。默认注册 `xling-cls-3b-ft:latest`；使用其他已准备的模型定义时，可通过 `OLLAMA_CLASSIFIER_MODEL_DIR` 和 `OLLAMA_CLASSIFIER_MODEL_FILE` 指定。`AI_PROVIDER=ollama` 时还会注册回答模型。
-
-```dotenv
-AI_PROVIDER=openai
-AI_MAX_TOKENS=2048
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_API_KEY=在本机填写有效密钥
-OPENAI_MODEL=gpt-4o-mini
-
-OLLAMA_BASE_URL=http://ollama:11434
-OLLAMA_CLASSIFIER_MODEL=xling-general-cls-05b:quoted-f16
-OLLAMA_CLASSIFIER_MODEL_FILE=Modelfile.quoted-f16
-CLASSIFIER_INPUT_FORMAT=quoted
-```
-
-- `AI_PROVIDER=openai` 表示回答走兼容 OpenAI 的远程 API（应用程序接口）。
-- `AI_MAX_TOKENS` 是单次回答允许生成的最大模型计量单位数，默认 2048；调高会增加响应时间和模型费用。
-- `OPENAI_BASE_URL`、`OPENAI_API_KEY` 和 `OPENAI_MODEL` 必须属于同一个远程服务。
-- `OLLAMA_BASE_URL` 是 Compose 网络中的模型服务地址。`OLLAMA_CLASSIFIER_MODEL` 必须与注册的分类器版本一致，`CLASSIFIER_INPUT_FORMAT` 与其训练输入契约对应；上面的 `quoted-f16` 使用 F16 权重及 `quoted` 输入。数据、输入包装与固定评测结果见 [finetune/README.md](finetune/README.md)，当前选择与配置证据见 [classifier-selection.json](finetune/reports/classifier-selection.json)。
-- 默认分类后端为应用内决策头（`CLASSIFIER_BACKEND=decision_head`），不依赖 Ollama 在线；`DECISION_HEAD_*` 权重为本机实验产物，未准备时自动回退到上述 Ollama 分类器。基础分层策略见 [ADR-0016](docs/adr/0016-decision-head-classifier-layered-safety.md)，语境复核见 [ADR-0023](docs/adr/0023-decision-head-high-risk-context-review.md)，独立严重度判断见 [ADR-0024](docs/adr/0024-risk-severity-beyond-emotion-label.md)；线上默认检索为多查询 dense 主检索，见 [ADR-0026](docs/adr/0026-multilingual-dense-primary-retrieval.md)。
-
-Docker Compose 已传递分类器输入格式。模型分数直接评价分类输出，实际客户端接入、既有风险词规则与完整业务流程分别验证；固定小样本的真实 RAG 对照及复跑入口见 [RAG 评测](evals/rag/README.md)。
-
-工程冻结版本的成功录屏、所测依赖及完整复跑入口见 [工程验证与交付](docs/project-validation.md)。
-
-如需启用真实知识向量检索，还需配置：
-
-```dotenv
-KNOWLEDGE_VECTOR_ENABLED=true
-KNOWLEDGE_VECTOR_REQUIRED=false
-EMBEDDING_BASE_URL=https://your-embedding-provider.example/v1
-EMBEDDING_API_KEY=在本机填写有效密钥
-OPENAI_EMBEDDING_MODEL=向量模型名称
-```
-
-应用启动时会检查知识正文与向量索引是否一致；发现向量条目缺失时会自动补齐。`KNOWLEDGE_VECTOR_REQUIRED=false` 表示向量接口暂时不可用时允许回退到本地检索，避免阻塞应用启动。
-
-本机可变配置统一在 `.env` 中维护，应用容器通过 `env_file` 读取。MySQL 使用 `MYSQL_DATABASE`、`MYSQL_USER`、`MYSQL_PASSWORD` 和 `MYSQL_ROOT_PASSWORD`，Compose 据此生成应用连接地址；管理员密码同时用于容器健康检查。`MYSQL_PORT` 控制仅绑定本机回环地址的 DBeaver 连接端口，默认 `127.0.0.1:3306`，详见 [Docker 操作指南](docs/docker-operations.md)。
-
-### MySQL 事务集成测试
-
-使用独立容器和 `xling_test` 数据库执行完整 Python 测试，包含此前在本机跳过的 4 项事务回滚测试：
-
-```bash
-docker compose --profile test build tests
-docker compose --profile test run --rm tests
-docker compose --profile test stop mysql-test
-docker compose --profile test rm -f mysql-test
-```
-
-只需事务测试时可把第二行中的 `tests` 换成 `mysql-tests`。测试容器中的 `MYSQL_TEST_DATABASE_URL` 已指向 `mysql-test:3306/xling_test`，测试用户只拥有该库的权限。测试会重建表结构；数据库名必须以 `_test` 结尾。测试数据使用临时内存文件系统，不挂载业务 `mysql-data`，也不会随普通 `docker compose up` 启动。
-
-本机直接运行 pytest 且未显式配置 `MYSQL_TEST_DATABASE_URL` 时，MySQL 用例会通过 Docker 自动启动 `mysql-test`，连接 `127.0.0.1:13306`，并在测试会话结束后停止和删除该容器；显式配置外部测试库时不自动管理其生命周期。
+真实模型、环境变量、决策头模型包、MySQL/DBeaver、旧配置迁移、完整测试、日志及安全清理见 [Docker 操作指南](docs/docker-operations.md)。正式部署要求见 [部署指南](docs/deployment-guide.md)，工程冻结版本与复跑证据见 [工程验证与交付](docs/project-validation.md)。
 
 ## 本地开发与验证
 
@@ -280,4 +220,4 @@ git diff --check
 
 文件每 10 MiB 轮转，保留 5 个轮转文件。`DIAGNOSTIC_LOG_DIR` 可指定本地输出目录；默认日志目录已从版本控制和发布包排除。输出故障只提示诊断不可用，不阻断业务；高风险交接记为等待人工支持，取消和真正异常分别记录。
 
-生成式回退分类器统一通过 `docker compose --profile models up -d --build` 启动和注册；原 `scripts/start-ollama.sh` 与模型注册脚本仅保留给历史本机开发流程。默认决策头由应用直接加载 Hugging Face 基座与本地适配器，通过 `DECISION_HEAD_*` 配置，不需要注册到 Ollama。
+模型注册、回答模型名称和决策头模型包的配置入口见 [Docker 操作指南](docs/docker-operations.md#真实模型联调)。

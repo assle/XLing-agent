@@ -13,12 +13,11 @@ from __future__ import annotations
 
 from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
 from app.api.routes import router
-from app.core.config import Settings
 from app.core.security import hash_password
 from app.models.entities import ChatSession, MemoryCard, UserAccount
 from app.schemas.dtos import AiMessage
 from app.services.memory_cards import MemoryCardService
-from tests.support import ApiHarness, build_runtime
+from tests.support import ApiHarness, build_runtime, make_test_settings
 
 _harness = ApiHarness(router)
 _TestSession = _harness.sessions
@@ -334,7 +333,7 @@ def test_no_memory_session_does_not_load_long_term_context(monkeypatch):
     runtime = build_runtime(
         LangGraphAgentRuntimeService,
         db=object(),
-        settings=Settings(ai_provider="mock", langgraph_checkpoint_backend="memory", knowledge_vector_enabled=False),
+        settings=make_test_settings(ai_provider="mock", langgraph_checkpoint_backend="memory", knowledge_vector_enabled=False),
         memory=MemorySpy(),
     )
     # 匿名替身返回可等待的固定摘要，排除模型请求对长期记忆访问测试的干扰。
@@ -393,7 +392,7 @@ def test_normal_session_loads_long_term_context(monkeypatch):
     runtime = build_runtime(
         LangGraphAgentRuntimeService,
         db=object(),
-        settings=Settings(ai_provider="mock", langgraph_checkpoint_backend="memory", knowledge_vector_enabled=False),
+        settings=make_test_settings(ai_provider="mock", langgraph_checkpoint_backend="memory", knowledge_vector_enabled=False),
         memory=MemorySpy(),
     )
     # 返回可等待的固定摘要，隔离模型调用对记忆权限测试的影响。

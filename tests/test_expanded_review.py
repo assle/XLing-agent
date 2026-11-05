@@ -16,15 +16,14 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from app.core.config import Settings
 from app.core.security import hash_password
 from app.models.entities import ChatMessage, ChatSession, ReviewRequest, SafetyAssessmentRecord, UserAccount
 from app.services.privacy import PrivacySanitizer
 from app.services.review import HANDOFF_REASONS, ReviewOutcome, ReviewService
-from tests.support import DatabaseHarness
+from tests.support import DatabaseHarness, make_test_settings
 
 _TestSession = DatabaseHarness().sessions
-_settings = Settings()
+_settings = make_test_settings()
 
 
 def _seed():

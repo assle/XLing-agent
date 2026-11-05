@@ -17,11 +17,10 @@ from __future__ import annotations
 import asyncio
 
 from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
-from app.core.config import Settings
 from app.core.security import hash_password
 from app.models.entities import ActionPlan, ChatSession, UserAccount
 from app.schemas.dtos import AiMessage
-from tests.support import DatabaseHarness, build_runtime
+from tests.support import DatabaseHarness, build_runtime, make_test_settings
 
 # ---------------------------------------------------------------------------
 # Test doubles
@@ -88,7 +87,7 @@ class FakeKnowledge:
 
 _TestSession = DatabaseHarness().sessions
 
-_settings = Settings(ai_provider="mock", langgraph_checkpoint_backend="memory", knowledge_vector_enabled=False)
+_settings = make_test_settings(ai_provider="mock", langgraph_checkpoint_backend="memory", knowledge_vector_enabled=False)
 
 
 def _seed():
