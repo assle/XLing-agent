@@ -13,6 +13,7 @@ import pytest
 from app.core.config import Settings
 from app.schemas.dtos import AiMessage
 from app.services.ai import AiClient
+from tests.support import make_test_settings
 
 
 @pytest.mark.parametrize("usage", [None, {"completion_tokens_details": None}])
@@ -38,7 +39,7 @@ def _mock_settings() -> Settings:
 
     让同步与异步接口比较不依赖真实网络或模型文件。
     """
-    return Settings(ai_provider="mock")
+    return make_test_settings(ai_provider="mock")
 
 
 def _intent_messages() -> list[AiMessage]:

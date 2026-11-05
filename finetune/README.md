@@ -70,7 +70,7 @@ TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 \
 
 ## 包装与复跑依赖
 
-本机 `.env` 显式选择 `xling-general-cls-05b:quoted-f16` 与 `CLASSIFIER_INPUT_FORMAT=quoted`。基座、适配器及 GGUF 权重只保存在本机，GitHub 仓库不包含权重。代码默认 tag 为 `xling-cls-3b-ft:latest`，输入格式默认 `plain`。
+当前应用默认生成式分类器为 `xling-general-cls-05b:quoted-f16`，输入格式为 `quoted`，可通过 `OLLAMA_CLASSIFIER_MODEL` 与 `CLASSIFIER_INPUT_FORMAT` 覆盖。基座、适配器及 GGUF 权重只保存在本机，GitHub 仓库不包含权重。
 
 包装入口的默认参数对应 v1 工件，使用显式参数打包已选适配器。`--shadow` 写入新的隔离目录，并保留原严格资格门槛状态：
 

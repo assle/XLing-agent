@@ -6,7 +6,6 @@ import pytest
 
 from app.agents.langgraph_runtime import LangGraphAgentRuntimeService
 from app.agents.runtime import AgentRunResult
-from app.core.config import Settings
 from app.core.enums import EmotionLabel, IntentType, RiskLevel
 from app.models.entities import (
     ChatMessage,
@@ -20,7 +19,7 @@ from app.schemas.dtos import AiMessage
 from app.services.assessment import PsychologyAssessment
 from app.services.chat import ChatService
 from app.services.support_turn import SupportTurnTransaction
-from tests.support import DatabaseHarness, build_runtime
+from tests.support import DatabaseHarness, build_runtime, make_test_settings
 
 
 def _seed(db):
@@ -67,7 +66,7 @@ def test_support_turn_persists_message_report_review_and_jobs_atomically():
     db = harness.sessions()
     try:
         user, session = _seed(db)
-        persisted = SupportTurnTransaction(db, Settings(tool_queue_enabled=True)).save_support_turn(
+        persisted = SupportTurnTransaction(db, make_test_settings(tool_queue_enabled=True)).save_support_turn(
             user=user,
             session=session,
             content="我不想活了",
@@ -151,7 +150,7 @@ def test_empty_redis_memory_is_rebuilt_from_committed_database_messages():
     db = harness.sessions()
     try:
         user, session = _seed(db)
-        SupportTurnTransaction(db, Settings(tool_queue_enabled=False)).save_support_turn(
+        SupportTurnTransaction(db, make_test_settings(tool_queue_enabled=False)).save_support_turn(
             user=user,
             session=session,
             content="最近压力很大",
@@ -175,7 +174,7 @@ def test_empty_redis_memory_is_rebuilt_from_committed_database_messages():
             LangGraphAgentRuntimeService,
             db=db,
             memory=memory,
-            settings=Settings(ai_provider="mock", langgraph_checkpoint_backend="memory", knowledge_vector_enabled=False),
+            settings=make_test_settings(ai_provider="mock", langgraph_checkpoint_backend="memory", knowledge_vector_enabled=False),
         )
         result = asyncio.run(runtime.run(user, session, "帮我写代码"))
 
@@ -208,7 +207,7 @@ def test_support_turn_rolls_back_every_business_record_after_injected_failure(st
         with pytest.raises(RuntimeError, match="fail after"):
             SupportTurnTransaction(
                 db,
-                Settings(tool_queue_enabled=True),
+                make_test_settings(tool_queue_enabled=True),
                 fault_injector=fail,
             ).save_support_turn(
                 user=user,

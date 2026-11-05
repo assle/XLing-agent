@@ -14,15 +14,14 @@ Run: python -m pytest tests/test_escalation.py
 """
 from __future__ import annotations
 
-from app.core.config import Settings
 from app.core.enums import RiskLevel
 from app.core.security import hash_password
 from app.models.entities import ChatSession, ReviewRequest, SafetyAssessmentRecord, UserAccount
 from app.services.escalation import SAFETY_MESSAGE, SCREENING_SUGGESTION, EscalationService
-from tests.support import DatabaseHarness
+from tests.support import DatabaseHarness, make_test_settings
 
 _TestSession = DatabaseHarness().sessions
-_settings = Settings()
+_settings = make_test_settings()
 
 
 def _seed():

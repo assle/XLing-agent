@@ -8,7 +8,6 @@ from datetime import timedelta
 import pytest
 
 from app.core import diagnostics
-from app.core.config import Settings
 from app.core.enums import ToolJobStatus
 from app.core.time import utc_now
 from app.models.entities import ToolJob
@@ -20,6 +19,7 @@ from app.services.report_dispatch import (
     create_report_dispatcher,
 )
 from app.services.tool_queue import ToolQueueService, ToolQueueWorker
+from tests.support import make_test_settings
 
 
 def test_queue_dispatcher_enqueues_report(database_harness):
@@ -31,7 +31,7 @@ def test_queue_dispatcher_enqueues_report(database_harness):
     try:
         dispatcher = create_report_dispatcher(
             db,
-            Settings(tool_queue_enabled=True),
+            make_test_settings(tool_queue_enabled=True),
         )
         assert isinstance(dispatcher, QueueReportDispatcher)
         asyncio.run(dispatcher.dispatch(42, "HIGH"))
@@ -58,7 +58,7 @@ def test_mcp_dispatcher_is_selected_when_queue_is_disabled():
 
     dispatcher = create_report_dispatcher(
         None,
-        Settings(tool_queue_enabled=False),
+        make_test_settings(tool_queue_enabled=False),
     )
     assert isinstance(dispatcher, McpReportDispatcher)
     dispatcher.client = Client()
@@ -79,7 +79,7 @@ def test_mcp_errors_are_exposed_as_dispatch_errors():
             """
             raise McpToolError("tool failed")
 
-    dispatcher = McpReportDispatcher(Settings(tool_queue_enabled=False))
+    dispatcher = McpReportDispatcher(make_test_settings(tool_queue_enabled=False))
     dispatcher.client = FailingClient()
     with pytest.raises(ReportDispatchError, match="tool failed"):
         asyncio.run(dispatcher.dispatch(7, "HIGH"))
@@ -93,7 +93,7 @@ def test_only_one_worker_can_atomically_claim_a_pending_job(database_harness):
     first = database_harness.sessions()
     second = database_harness.sessions()
     try:
-        settings = Settings(tool_queue_enabled=True)
+        settings = make_test_settings(tool_queue_enabled=True)
         job = ToolQueueService(first, settings).enqueue_report(99, "LOW")[0]
 
         first_claim = ToolQueueService(first, settings).claim_job(job.id)
@@ -113,7 +113,7 @@ def test_worker_recovery_only_requeues_expired_running_jobs(database_harness):
     """
     db = database_harness.sessions()
     try:
-        settings = Settings(tool_queue_enabled=True, tool_queue_lease_seconds=60)
+        settings = make_test_settings(tool_queue_enabled=True, tool_queue_lease_seconds=60)
         service = ToolQueueService(db, settings)
         current, stale = service.enqueue_report(100, "HIGH")
         current.status = ToolJobStatus.RUNNING.value
@@ -133,7 +133,7 @@ def test_worker_recovery_only_requeues_expired_running_jobs(database_harness):
 
 
 def test_idempotent_registration_is_distinct_from_task_execution(database_harness, tmp_path):
-    settings = Settings(diagnostic_log_dir=str(tmp_path))
+    settings = make_test_settings(diagnostic_log_dir=str(tmp_path))
     diagnostics.configure(settings)
     db = database_harness.sessions()
     try:
@@ -156,8 +156,8 @@ def test_background_failure_has_independent_runs_attempts_retry_and_final_failur
 ):
     from app.services import tool_queue
 
-    settings = Settings(
-        diagnostic_log_dir=str(tmp_path), tool_queue_max_attempts=2,
+    settings = make_test_settings(
+        diagnostic_log_dir=str(tmp_path), tool_queue_enabled=True, tool_queue_max_attempts=2,
         tool_queue_poll_interval_seconds=0.01, tool_queue_retry_delay_seconds=0,
     )
     diagnostics.configure(settings)

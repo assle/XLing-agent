@@ -2,10 +2,9 @@
 from __future__ import annotations
 
 from app.api.routes import router
-from app.core.config import Settings
 from app.core.security import hash_password
 from app.models.entities import ReviewRequest, UserAccount
-from tests.support import ApiHarness
+from tests.support import ApiHarness, make_test_settings
 
 _harness = ApiHarness(router)
 _session = _harness.sessions
@@ -48,7 +47,7 @@ def test_online_settings_have_one_retrieval_path_and_no_calibration_switches() -
 
     保持实验能力与当前应用配置边界一致。
     """
-    settings = Settings()
+    settings = make_test_settings()
     for name in (
         "knowledge_retriever",
         "chroma_snapshot_dir",
