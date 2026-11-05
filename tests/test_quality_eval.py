@@ -23,6 +23,7 @@ from evals.quality.runner import (
     compute_quality_summary,
     evaluate,
 )
+from tests.support import make_test_settings
 
 # ---------------------------------------------------------------------------
 # parse_judge_response
@@ -209,7 +210,7 @@ def test_evaluate_mock_mode_structure():
         dataset_path = tmp_path / "dataset.json"
         dataset_path.write_text(json.dumps(cases, ensure_ascii=False), encoding="utf-8")
 
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "quality_eval_dataset": str(dataset_path),
             "quality_eval_output": str(tmp_path / "report.json"),
             "quality_eval_summary_output": str(tmp_path / "summary.json"),
@@ -252,7 +253,7 @@ def test_evaluate_mock_mode_writes_files():
 
         report_path = tmp_path / "report.json"
         summary_path = tmp_path / "summary.json"
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "quality_eval_dataset": str(dataset_path),
             "quality_eval_output": str(report_path),
             "quality_eval_summary_output": str(summary_path),
@@ -283,7 +284,7 @@ def test_evaluate_mock_mode_stable_scores():
         dataset_path = tmp_path / "dataset.json"
         dataset_path.write_text(json.dumps(cases, ensure_ascii=False), encoding="utf-8")
 
-        settings = EvalSettings().model_copy(update={
+        settings = make_test_settings(EvalSettings).model_copy(update={
             "quality_eval_dataset": str(dataset_path),
             "quality_eval_output": str(tmp_path / "report.json"),
             "quality_eval_summary_output": str(tmp_path / "summary.json"),

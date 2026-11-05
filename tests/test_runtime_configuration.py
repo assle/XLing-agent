@@ -27,6 +27,7 @@ def test_environment_mode_defaults_to_local_and_accepts_test_and_production():
     assert Settings(
         _env_file=None,
         environment="production",
+        mysql_root_password="production-only-root-password",
         jwt_secret_key="production-only-signing-key",
         database_url="mysql+pymysql://xling:production-only-password@db/xling",
     ).environment == "production"
@@ -148,6 +149,68 @@ def test_openai_provider_requires_an_api_key():
 
 
 @pytest.mark.parametrize(
+    ("overrides", "field_name"),
+    [
+        ({"ai_provider": "ollama", "ollama_base_url": ""}, "ollama_base_url"),
+        ({"ai_provider": "ollama", "ollama_model": " "}, "ollama_model"),
+        (
+            {"ai_provider": "ollama", "ollama_classifier_model": ""},
+            "ollama_classifier_model",
+        ),
+        (
+            {
+                "ai_provider": "openai",
+                "openai_api_key": "configured-key",
+                "classifier_backend": "ollama",
+                "ollama_base_url": "",
+            },
+            "ollama_base_url",
+        ),
+        (
+            {
+                "ai_provider": "openai",
+                "openai_api_key": "configured-key",
+                "classifier_backend": "decision_head",
+                "ollama_classifier_model": "",
+            },
+            "ollama_classifier_model",
+        ),
+    ],
+)
+def test_ollama_answer_and_classifier_settings_are_required_by_their_consumers(overrides, field_name):
+    with pytest.raises(ValueError, match=field_name):
+        Settings(_env_file=None, **overrides)
+
+
+def test_remote_answers_can_use_local_classifier_without_an_ollama_answer_model():
+    settings = Settings(
+        _env_file=None,
+        ai_provider="openai",
+        openai_api_key="configured-key",
+        ollama_base_url="http://classifier-only:11434",
+        ollama_classifier_model="classifier-only:quoted",
+        ollama_model="",
+    )
+
+    assert settings.ollama_base_url == "http://classifier-only:11434"
+    assert settings.ollama_classifier_model == "classifier-only:quoted"
+
+
+@pytest.mark.parametrize("classifier_backend", ["ollama", "decision_head"])
+def test_mock_provider_does_not_require_ollama_configuration(classifier_backend):
+    settings = Settings(
+        _env_file=None,
+        ai_provider="mock",
+        classifier_backend=classifier_backend,
+        ollama_base_url="",
+        ollama_model="",
+        ollama_classifier_model="",
+    )
+
+    assert settings.ai_provider == "mock"
+
+
+@pytest.mark.parametrize(
     ("jwt_secret_key", "database_url", "field_name"),
     [
         (
@@ -173,9 +236,25 @@ def test_production_rejects_missing_or_development_secrets(jwt_secret_key, datab
         Settings(
             _env_file=None,
             environment="production",
+            mysql_root_password="production-only-root-password",
             jwt_secret_key=jwt_secret_key,
             database_url=database_url,
         )
+
+
+@pytest.mark.parametrize("mysql_root_password", [None, "", "root"])
+def test_production_rejects_missing_or_development_mysql_root_password(mysql_root_password):
+    overrides = {
+        "_env_file": None,
+        "environment": "production",
+        "jwt_secret_key": "production-only-signing-key",
+        "database_url": "mysql+pymysql://app:safe-password@db/xling",
+    }
+    if mysql_root_password is not None:
+        overrides["mysql_root_password"] = mysql_root_password
+
+    with pytest.raises(ValueError, match="mysql_root_password"):
+        Settings(**overrides)
 
 
 def test_secrets_and_database_credentials_are_hidden_from_configuration_output():
@@ -186,6 +265,7 @@ def test_secrets_and_database_credentials_are_hidden_from_configuration_output()
         smtp_username="mailer@example.com",
         smtp_password="smtp-secret-marker",
         jwt_secret_key="jwt-secret-marker",
+        mysql_root_password="mysql-root-secret-marker",
         database_url="mysql+pymysql://app:database-secret-marker@db.example/xling",
     )
 
@@ -193,7 +273,8 @@ def test_secrets_and_database_credentials_are_hidden_from_configuration_output()
     assert settings.embedding_api_key.get_secret_value() == "embedding-secret-marker"
     assert settings.smtp_password.get_secret_value() == "smtp-secret-marker"
     assert settings.jwt_secret_key.get_secret_value() == "jwt-secret-marker"
-    assert settings.safe_database_url == "mysql+pymysql://app:***@db.example/xling"
+    assert settings.mysql_root_password.get_secret_value() == "mysql-root-secret-marker"
+    assert settings.model_dump()["database_url"] == "mysql+pymysql://app:***@db.example/xling"
     representations = (
         str(settings),
         repr(settings),
@@ -205,7 +286,37 @@ def test_secrets_and_database_credentials_are_hidden_from_configuration_output()
         assert "embedding-secret-marker" not in representation
         assert "smtp-secret-marker" not in representation
         assert "jwt-secret-marker" not in representation
+        assert "mysql-root-secret-marker" not in representation
         assert "database-secret-marker" not in representation
+
+
+def test_ollama_initializer_defaults_to_the_runtime_classifier_contract():
+    if Path("/models").exists():
+        pytest.skip("The missing-artifact check requires an absent /models mount")
+    env = os.environ.copy()
+    env["AI_PROVIDER"] = "mock"
+    for key in (
+        "OLLAMA_CLASSIFIER_MODEL",
+        "OLLAMA_CLASSIFIER_MODEL_DIR",
+        "OLLAMA_CLASSIFIER_MODEL_FILE",
+    ):
+        env.pop(key, None)
+
+    result = subprocess.run(
+        ["sh", str(PROJECT_ROOT / "scripts/docker-ollama-init.sh")],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    settings = Settings(_env_file=None)
+
+    assert result.returncode == 1
+    assert result.stderr == (
+        "Missing model definition: "
+        "/models/xling-general-cls-05b/Modelfile.quoted-f16\n"
+    )
+    assert settings.ollama_classifier_model == "xling-general-cls-05b:quoted-f16"
+    assert settings.classifier_input_format == "quoted"
 
 
 def test_local_launcher_preserves_env_file_model_overrides(tmp_path):

@@ -4,6 +4,7 @@ import json
 
 from evals.config import EvalSettings
 from evals.risk.calibration_runner import collect_calibration_inputs, evaluate_calibration
+from tests.support import make_test_settings
 
 
 def test_calibration_eval_writes_model_artifact_and_uncertainty_metrics(tmp_path):
@@ -29,7 +30,8 @@ def test_calibration_eval_writes_model_artifact_and_uncertainty_metrics(tmp_path
     test_path = tmp_path / "test.json"
     calibration_path.write_text(json.dumps(calibration), encoding="utf-8")
     test_path.write_text(json.dumps(test), encoding="utf-8")
-    settings = EvalSettings(
+    settings = make_test_settings(
+        EvalSettings,
         risk_calibration_dataset=str(calibration_path),
         risk_calibration_test_dataset=str(test_path),
         risk_calibration_output=str(tmp_path / "report.json"),
@@ -97,7 +99,8 @@ def test_calibration_split_is_disjoint_and_score_collection_is_reproducible(tmp_
     split_path = tmp_path / "split.json"
     source_path.write_text(json.dumps(source, ensure_ascii=False), encoding="utf-8")
     split_path.write_text(json.dumps(split), encoding="utf-8")
-    settings = EvalSettings(
+    settings = make_test_settings(
+        EvalSettings,
         ai_provider="mock",
         risk_eval_ai_provider="mock",
         risk_calibration_source_dataset=str(source_path),

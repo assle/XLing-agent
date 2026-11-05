@@ -164,7 +164,7 @@ _TEST_FILES_DIR = tempfile.TemporaryDirectory(prefix="xling-test-settings-")
 _TEST_FILES_ROOT = Path(_TEST_FILES_DIR.name)
 
 
-def make_test_settings(**overrides) -> Settings:
+def make_test_settings(settings_type=Settings, **overrides):
     """创建不读取部署环境文件、默认不访问外部服务的测试配置。"""
     defaults = {
         "_env_file": None,
@@ -181,7 +181,7 @@ def make_test_settings(**overrides) -> Settings:
         "diagnostic_log_dir": str(_TEST_FILES_ROOT / "logs"),
     }
     defaults.update(overrides)
-    return Settings(**defaults)
+    return settings_type(**defaults)
 
 
 def build_runtime(

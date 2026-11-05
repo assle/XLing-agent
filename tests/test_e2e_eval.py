@@ -4,6 +4,7 @@ import json
 
 from evals.config import EvalSettings
 from evals.e2e.runner import evaluate
+from tests.support import make_test_settings
 
 
 def test_e2e_eval_runs_the_production_chat_flow_and_records_versions(tmp_path):
@@ -45,8 +46,10 @@ def test_e2e_eval_runs_the_production_chat_flow_and_records_versions(tmp_path):
         "".join(json.dumps(case, ensure_ascii=False) + "\n" for case in cases),
         encoding="utf-8",
     )
-    settings = EvalSettings(
+    settings = make_test_settings(
+        EvalSettings,
         ai_provider="mock",
+        tool_queue_enabled=True,
         knowledge_vector_enabled=False,
         redis_url="redis://127.0.0.1:6399/15",
         redis_socket_timeout_seconds=0.01,
@@ -73,8 +76,10 @@ def test_curated_e2e_baseline_covers_forty_support_loop_cases(tmp_path):
 
     检查全部通过且覆盖日常、支持、风险、知识不足和行动计划五种类型。
     """
-    settings = EvalSettings(
+    settings = make_test_settings(
+        EvalSettings,
         ai_provider="mock",
+        tool_queue_enabled=True,
         knowledge_vector_enabled=False,
         redis_url="redis://127.0.0.1:6399/15",
         redis_socket_timeout_seconds=0.01,

@@ -50,6 +50,7 @@ class Settings(BaseSettings):
         default="mysql+pymysql://xling:xling@127.0.0.1:3306/xling?charset=utf8mb4",
         repr=False,
     )
+    mysql_root_password: SecretStr = SecretStr("root")
     chat_history_limit: int = 10
     knowledge_top_k: int = 4
     # 线上检索策略：兼容值 multi_query_hybrid_rrf 实际为多查询 dense 主检索；normalized_fusion 为归一化加权。
@@ -145,8 +146,16 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_provider(self):
-        if self.ai_provider.lower() == "openai" and not self.openai_api_key.get_secret_value().strip():
+        provider = self.ai_provider.lower()
+        if provider == "openai" and not self.openai_api_key.get_secret_value().strip():
             raise ValueError("openai_api_key is required when ai_provider is openai")
+        if provider != "mock":
+            if not self.ollama_base_url.strip():
+                raise ValueError("ollama_base_url is required for Ollama answers or local classification")
+            if not self.ollama_classifier_model.strip():
+                raise ValueError("ollama_classifier_model is required for local classification and fallback")
+        if provider == "ollama" and not self.ollama_model.strip():
+            raise ValueError("ollama_model is required when ai_provider is ollama")
         return self
 
     @model_validator(mode="after")
@@ -157,12 +166,16 @@ class Settings(BaseSettings):
         if not jwt_secret.strip() or jwt_secret == "xling-dev-secret-change-in-production":
             raise ValueError("jwt_secret_key must be replaced with a production secret")
         database = make_url(self.database_url)
-        if database.get_backend_name() == "mysql" and (
-            not database.username
-            or not database.password
-            or (database.username == "xling" and database.password == "xling")
-        ):
-            raise ValueError("database_url must contain non-development MySQL credentials in production")
+        if database.get_backend_name() == "mysql":
+            mysql_root_password = self.mysql_root_password.get_secret_value()
+            if not mysql_root_password.strip() or mysql_root_password == "root":
+                raise ValueError("mysql_root_password must be replaced with a production secret")
+            if (
+                not database.username
+                or not database.password
+                or (database.username == "xling" and database.password == "xling")
+            ):
+                raise ValueError("database_url must contain non-development MySQL credentials in production")
         return self
 
     @property
@@ -172,10 +185,6 @@ class Settings(BaseSettings):
     @property
     def effective_embedding_api_key(self) -> str:
         return self.embedding_api_key.get_secret_value() or self.openai_api_key.get_secret_value()
-
-    @property
-    def safe_database_url(self) -> str:
-        return make_url(self.database_url).render_as_string(hide_password=True)
 
     @field_serializer("database_url")
     def serialize_database_url(self, value: str) -> str:
