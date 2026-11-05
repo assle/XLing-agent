@@ -1,3 +1,7 @@
+import json
+import os
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -189,47 +193,141 @@ def test_secrets_and_database_credentials_are_hidden_from_configuration_output()
         assert "database-secret-marker" not in representation
 
 
-def test_container_loads_local_settings_from_the_shared_env_file():
-    """应用容器统一读取本地配置，示例文件保留回复上限默认值。"""
-    compose = (PROJECT_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
-    example = (PROJECT_ROOT / ".env.example").read_text(encoding="utf-8")
+def test_local_launcher_preserves_env_file_model_overrides(tmp_path):
+    script_dir = tmp_path / "scripts"
+    script_dir.mkdir()
+    shutil.copy2(PROJECT_ROOT / "scripts/run-dev.sh", script_dir / "run-dev.sh")
+    (tmp_path / ".env").write_text(
+        "AI_PROVIDER=openai\n"
+        "OLLAMA_BASE_URL=http://env-file:11434\n"
+        "OLLAMA_MODEL=env-file-model\n",
+        encoding="utf-8",
+    )
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    uvicorn = bin_dir / "uvicorn"
+    uvicorn.write_text(
+        "#!/usr/bin/env python3\n"
+        "import json, os, sys\n"
+        "from pathlib import Path\n"
+        "values = dict(line.split('=', 1) for line in Path('.env').read_text().splitlines())\n"
+        "keys = ('AI_PROVIDER', 'OLLAMA_BASE_URL', 'OLLAMA_MODEL')\n"
+        "effective = {key: os.environ[key] if key in os.environ else values[key] for key in keys}\n"
+        "print(json.dumps({'arguments': sys.argv[1:], 'effective': effective}))\n",
+        encoding="utf-8",
+    )
+    uvicorn.chmod(0o755)
+    env = os.environ.copy()
+    for key in ("AI_PROVIDER", "OLLAMA_BASE_URL", "OLLAMA_MODEL"):
+        env.pop(key, None)
+    env.update(PATH=f"{bin_dir}:{env['PATH']}", SERVER_HOST="0.0.0.0", SERVER_PORT="9090")
 
-    assert "env_file: .env" in compose
-    assert "AI_MAX_TOKENS=2048" in example
+    result = subprocess.run(
+        [str(script_dir / "run-dev.sh")],
+        cwd=tmp_path,
+        env=env,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    launched = json.loads(result.stdout)
+
+    assert launched["effective"] == {
+        "AI_PROVIDER": "openai",
+        "OLLAMA_BASE_URL": "http://env-file:11434",
+        "OLLAMA_MODEL": "env-file-model",
+    }
+    assert launched["arguments"][-4:] == ["--host", "0.0.0.0", "--port", "9090"]
 
 
-def test_mysql_healthcheck_uses_the_configured_root_password():
-    """检查数据库健康命令使用配置密码而非固定 root 密码。
+def test_local_template_only_overrides_the_demo_provider(monkeypatch):
+    for name in Settings.model_fields:
+        monkeypatch.delenv(name.upper(), raising=False)
+        monkeypatch.delenv(name.lower(), raising=False)
 
-    依据配置文字断言，不建立真实数据库连接。
-    """
-    compose = (PROJECT_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
+    defaults = Settings(_env_file=None)
+    from_template = Settings(_env_file=PROJECT_ROOT / ".env.example")
 
-    assert "-proot" not in compose
-    assert '$${MYSQL_ROOT_PASSWORD}' in compose
-
-
-def test_mysql_is_available_to_local_database_tools_only_on_loopback():
-    """DBeaver 等本机工具使用可配置端口，数据库不绑定到公开网卡。"""
-    compose = (PROJECT_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
-    example = (PROJECT_ROOT / ".env.example").read_text(encoding="utf-8")
-
-    assert '"127.0.0.1:${MYSQL_PORT:-3306}:3306"' in compose
-    assert "MYSQL_PORT=3306" in example
-    assert "MYSQL_DATABASE=xling" in example
-    assert "MYSQL_USER=xling" in example
-    assert "MYSQL_PASSWORD=xling" in example
+    assert from_template.ai_provider == "mock"
+    for name in Settings.model_fields:
+        if name != "ai_provider":
+            assert getattr(from_template, name) == getattr(defaults, name), name
 
 
-def test_project_configuration_does_not_pin_proxy_settings():
-    """代理只允许通过单次命令临时提供，不写入项目配置文件。"""
-    paths = [
-        PROJECT_ROOT / ".env.example",
-        PROJECT_ROOT / "docker-compose.yml",
-        PROJECT_ROOT / "scripts/closing/compose.override.yml",
+def test_compose_does_not_duplicate_application_model_defaults(tmp_path):
+    config = _compose_config(tmp_path, "models")
+
+    assert "AI_PROVIDER" not in config["services"]["app"]["environment"]
+    registration = config["services"]["ollama-init"]["environment"]
+    for key in ("AI_PROVIDER", "OLLAMA_MODEL", "OLLAMA_CLASSIFIER_MODEL"):
+        assert registration[key] == ""
+
+
+def _compose_config(tmp_path, *profiles):
+    if shutil.which("docker") is None:
+        pytest.skip("Docker Compose is required for rendered configuration tests")
+    env_file = tmp_path / ".env"
+    env_file.write_text(
+        "JWT_SECRET_KEY=runtime-test-signing-key\n"
+        "MYSQL_DATABASE=runtime_config_test\n"
+        "MYSQL_USER=runtime_user\n"
+        "MYSQL_PASSWORD=runtime-password\n"
+        "MYSQL_ROOT_PASSWORD=runtime-root-password\n"
+        "MYSQL_PORT=13307\n",
+        encoding="utf-8",
+    )
+    compose_file = tmp_path / "docker-compose.yml"
+    shutil.copy2(PROJECT_ROOT / "docker-compose.yml", compose_file)
+    command = ["docker", "compose"]
+    for profile in profiles:
+        command.extend(["--profile", profile])
+    command.extend(["--env-file", str(env_file), "-f", str(compose_file), "config", "--format", "json"])
+    result = subprocess.run(command, cwd=tmp_path, check=True, capture_output=True, text=True)
+    return json.loads(result.stdout)
+
+
+def test_compose_adapts_mysql_for_the_app_healthcheck_and_local_tools(tmp_path):
+    config = _compose_config(tmp_path)
+    mysql = config["services"]["mysql"]
+    app = config["services"]["app"]
+
+    assert mysql["environment"]["MYSQL_DATABASE"] == "runtime_config_test"
+    assert mysql["environment"]["MYSQL_USER"] == "runtime_user"
+    assert mysql["environment"]["MYSQL_PASSWORD"] == "runtime-password"
+    assert app["environment"]["DATABASE_URL"] == (
+        "mysql+pymysql://runtime_user:runtime-password@mysql:3306/runtime_config_test?charset=utf8mb4"
+    )
+    assert mysql["healthcheck"]["test"] == [
+        "CMD-SHELL",
+        'mysqladmin ping -h 127.0.0.1 -uroot -p"$${MYSQL_ROOT_PASSWORD}" --silent',
     ]
-    for path in paths:
-        content = path.read_text(encoding="utf-8").lower()
-        for variable in ("http_proxy", "https_proxy", "all_proxy", "no_proxy"):
-            assert f"{variable}=" not in content
-            assert f"{variable}:" not in content
+    port = mysql["ports"][0]
+    assert port["host_ip"] == "127.0.0.1"
+    assert port["published"] == "13307"
+    assert port["target"] == 3306
+
+
+def test_mysql_test_profile_uses_an_isolated_ephemeral_database(tmp_path):
+    default_config = _compose_config(tmp_path)
+    test_config = _compose_config(tmp_path, "test")
+
+    assert "mysql-test" not in default_config["services"]
+    mysql = test_config["services"]["mysql-test"]
+    assert mysql["environment"]["MYSQL_DATABASE"] == "xling_test"
+    assert mysql["tmpfs"] == ["/var/lib/mysql"]
+    assert mysql["ports"][0]["host_ip"] == "127.0.0.1"
+    assert mysql["ports"][0]["published"] == "13306"
+    assert test_config["services"]["tests"]["environment"]["DATABASE_URL"] == (
+        "mysql+pymysql://xling_test:test-only@mysql-test:3306/xling_test?charset=utf8mb4"
+    )
+
+
+def test_compose_does_not_inject_proxy_settings(tmp_path):
+    config = _compose_config(tmp_path, "models", "test")
+    proxy_variables = {"http_proxy", "https_proxy", "all_proxy", "no_proxy"}
+
+    for service in config["services"].values():
+        environment_keys = {key.lower() for key in service.get("environment", {})}
+        assert proxy_variables.isdisjoint(environment_keys)
+        build_args = service.get("build", {}).get("args", {})
+        assert proxy_variables.isdisjoint({key.lower() for key in build_args})

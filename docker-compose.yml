@@ -71,13 +71,13 @@ services:
         condition: service_healthy
     environment:
       OLLAMA_HOST: http://ollama:11434
-      AI_PROVIDER: ${AI_PROVIDER:-ollama}
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-xling-qwen2.5-7b-ft:latest}
-      OLLAMA_CLASSIFIER_MODEL: ${OLLAMA_CLASSIFIER_MODEL:-xling-cls-3b-ft:latest}
+      AI_PROVIDER: ${AI_PROVIDER:-}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-}
+      OLLAMA_CLASSIFIER_MODEL: ${OLLAMA_CLASSIFIER_MODEL:-}
       OLLAMA_CLASSIFIER_MODEL_DIR: ${OLLAMA_CLASSIFIER_MODEL_DIR:-}
-      OLLAMA_CLASSIFIER_MODEL_FILE: ${OLLAMA_CLASSIFIER_MODEL_FILE:-Modelfile}
+      OLLAMA_CLASSIFIER_MODEL_FILE: ${OLLAMA_CLASSIFIER_MODEL_FILE:-}
       OLLAMA_ANSWER_MODEL_DIR: ${OLLAMA_ANSWER_MODEL_DIR:-}
-      OLLAMA_ANSWER_MODEL_FILE: ${OLLAMA_ANSWER_MODEL_FILE:-Modelfile}
+      OLLAMA_ANSWER_MODEL_FILE: ${OLLAMA_ANSWER_MODEL_FILE:-}
     entrypoint: ["/bin/sh", "/usr/local/bin/init-models"]
     volumes:
       - ./models:/models:ro
@@ -137,7 +137,6 @@ services:
         condition: service_healthy
     environment:
       # 本机可变配置统一来自 .env；这里只保留容器网络、派生地址和必要校验。
-      AI_PROVIDER: ${AI_PROVIDER:-mock}
       OLLAMA_BASE_URL: http://ollama:11434
       DATABASE_URL: mysql+pymysql://${MYSQL_USER:-xling}:${MYSQL_PASSWORD:-xling}@mysql:3306/${MYSQL_DATABASE:-xling}?charset=utf8mb4
       REDIS_URL: redis://redis:6379/0
