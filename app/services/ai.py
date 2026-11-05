@@ -379,7 +379,7 @@ class AiClient:
 
         从配置组装授权头、模型和生成参数；网络或响应格式异常不在此回退。
         """
-        headers = {"Authorization": f"Bearer {self.settings.openai_api_key}"}
+        headers = {"Authorization": f"Bearer {self.settings.openai_api_key.get_secret_value()}"}
         payload = {
             "model": self.settings.openai_model,
             "messages": [m.model_dump() for m in messages],
@@ -408,7 +408,7 @@ class AiClient:
 
         请求完成或失败后关闭客户端，返回第一个候选回复的正文。
         """
-        headers = {"Authorization": f"Bearer {self.settings.openai_api_key}"}
+        headers = {"Authorization": f"Bearer {self.settings.openai_api_key.get_secret_value()}"}
         payload = {
             "model": self.settings.openai_model,
             "messages": [m.model_dump() for m in messages],
@@ -426,7 +426,7 @@ class AiClient:
 
         只解析以 data 开头的事件，遇到结束标记停止；没有正文的事件不产生文本片段。
         """
-        headers = {"Authorization": f"Bearer {self.settings.openai_api_key}"}
+        headers = {"Authorization": f"Bearer {self.settings.openai_api_key.get_secret_value()}"}
         payload = {
             "model": self.settings.openai_model,
             "messages": [m.model_dump() for m in messages],

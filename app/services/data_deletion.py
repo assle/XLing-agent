@@ -114,6 +114,7 @@ class DataDeletionService:
                 row.file_path for row in self.db.query(ExcelRecord)
                 .filter(ExcelRecord.report_id.in_(report_ids)).all()
             ]]
+            ledger_paths = [str(self.settings.resolve_path(path)) for path in ledger_paths]
             counts["cached_session_keys"] = RedisShortTermMemoryStore(self.settings).delete_sessions(thread_ids)
             counts["ledger_rows"] = ToolOrchestrationService.delete_excel_reports(report_ids, ledger_paths)
             # 把清理任务和业务删除放进同一次提交，确保账户删除后仍有可重试的清理依据。
@@ -200,9 +201,7 @@ class DataDeletionService:
             "async_sqlite",
         }:
             return None
-        path = Path(self.settings.langgraph_checkpoint_path)
-        if not path.is_absolute():
-            path = self.settings.project_root / path
+        path = self.settings.resolve_path(self.settings.langgraph_checkpoint_path)
         if not path.exists():
             return None
         task = CheckpointDeletionTask(

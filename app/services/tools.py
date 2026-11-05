@@ -69,7 +69,7 @@ class ToolOrchestrationService:
                 if existing is not None:
                     diagnostics.emit("tool.reused", tool="excel", report_id=report.id)
                     return existing
-                path = Path(self.settings.excel_path)
+                path = self.settings.resolve_path(self.settings.excel_path)
                 path.parent.mkdir(parents=True, exist_ok=True)
                 if path.exists():
                     workbook = load_workbook(path)
@@ -237,7 +237,7 @@ class ToolOrchestrationService:
         只有配置用户名时才登录；服务器接受邮件不等于收件人已经阅读或最终投递成功。
         """
         if self.settings.smtp_username:
-            server.login(self.settings.smtp_username, self.settings.smtp_password)
+            server.login(self.settings.smtp_username, self.settings.smtp_password.get_secret_value())
         server.send_message(message)
 
     def _email_body(self, report: SafetyAssessmentRecord, kind: ToolJobKind) -> str:

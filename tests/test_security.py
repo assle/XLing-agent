@@ -165,7 +165,7 @@ def test_jwt_expired_token_rejected():
         "exp": 1, "iat": 1,
     }
     expired_token = pyjwt.encode(
-        expired_payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
+        expired_payload, settings.jwt_secret_key.get_secret_value(), algorithm=settings.jwt_algorithm
     )
     try:
         decode_access_token(expired_token)

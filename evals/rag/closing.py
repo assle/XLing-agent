@@ -143,7 +143,7 @@ def run_retrieval(settings: Settings, dataset: Path, review_path: Path, output: 
         "effectiveConfiguration": {
             "chunkSize": settings.knowledge_chunk_size, "chunkOverlap": settings.knowledge_chunk_overlap,
             "neighborExpansion": "only first ranked chunk; previous and next source index",
-            "embeddingEndpointHost": urlsplit(settings.embedding_base_url or settings.openai_base_url).hostname,
+            "embeddingEndpointHost": urlsplit(settings.effective_embedding_base_url).hostname,
         },
         "sourceSHA256": {str(p.relative_to(ROOT)): fingerprint(p) for p in [
             Path(__file__), ROOT / "app/services/knowledge.py", ROOT / "app/services/vector_store.py",

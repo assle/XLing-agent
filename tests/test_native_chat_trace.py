@@ -7,6 +7,7 @@ import json
 
 import httpx
 import pytest
+from pydantic import SecretStr
 from starlette.testclient import TestClient
 
 from app.api import account, admin, support
@@ -213,7 +214,7 @@ def test_http_stream_failure_keeps_completed_stages_and_excludes_provider_error(
     harness, settings, user_headers, _ = native_api
     marker = "PRIVATE-SYNTHETIC-PROVIDER-ERROR"
     settings.ai_provider = "openai"
-    settings.openai_api_key = "synthetic-test-key"
+    settings.openai_api_key = SecretStr("synthetic-test-key")
     original_client = httpx.AsyncClient
 
     class FailingResponse(httpx.AsyncByteStream):
@@ -328,7 +329,7 @@ def test_asgi_disconnect_closes_streams_in_the_request_context_without_saving_pa
     opened_in = []
     closed_in = []
     settings.ai_provider = "openai"
-    settings.openai_api_key = "synthetic-test-key"
+    settings.openai_api_key = SecretStr("synthetic-test-key")
     original_client = httpx.AsyncClient
 
     class Response(httpx.AsyncByteStream):

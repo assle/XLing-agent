@@ -59,8 +59,7 @@ class KnowledgeService:
         identity = ["semantic-sentence-v1" if semantic else "structural-sentence-v1", content,
                     self.settings.knowledge_chunk_size, self.settings.knowledge_chunk_overlap]
         if semantic:
-            identity.extend([self.settings.openai_embedding_model,
-                             self.settings.embedding_base_url or self.settings.openai_base_url])
+            identity.extend([self.settings.openai_embedding_model, self.settings.effective_embedding_base_url])
         return hashlib.sha256(json.dumps(identity, ensure_ascii=False).encode()).hexdigest()
 
     @staticmethod

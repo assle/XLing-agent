@@ -4,7 +4,6 @@ import asyncio
 import json
 import logging
 from datetime import datetime, timezone
-from pathlib import Path
 from statistics import mean, stdev
 
 from app.core.enums import IntentType, RiskLevel
@@ -60,7 +59,7 @@ async def _evaluate_async(settings: EvalSettings, provider: str) -> list[dict]:
     生成与评审使用分别构造的配置；模拟生成时也强制模拟评审，避免误调用真实评审服务。
     样本和重复评分均顺序执行，重复次数需由配置保证为正。
     """
-    dataset_path = Path(settings.quality_eval_dataset)
+    dataset_path = settings.resolve_path(settings.quality_eval_dataset)
     cases = json.loads(dataset_path.read_text(encoding="utf-8"))
 
     gen_settings = settings.model_copy(update={
@@ -167,19 +166,19 @@ def evaluate(
         "judgeRuns": settings.quality_eval_judge_runs,
         "artifactVersion": ArtifactVersionResolver(
             settings.model_copy(update={"ai_provider": provider})
-        ).current(settings.quality_eval_dataset).to_dict(),
+        ).current(settings.resolve_path(settings.quality_eval_dataset)).to_dict(),
         **summary,
         "results": results,
     }
 
-    report_path = Path(settings.quality_eval_output)
+    report_path = settings.resolve_path(settings.quality_eval_output)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(
         json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
     summary_data = build_summary(report)
-    summary_path = Path(settings.quality_eval_summary_output)
+    summary_path = settings.resolve_path(settings.quality_eval_summary_output)
     summary_path.parent.mkdir(parents=True, exist_ok=True)
     summary_path.write_text(
         json.dumps(summary_data, ensure_ascii=False, indent=2), encoding="utf-8"

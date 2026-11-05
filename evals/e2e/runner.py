@@ -33,7 +33,7 @@ def evaluate(settings: EvalSettings | None = None) -> dict:
             "langgraph_checkpoint_backend": "memory",
         }
     )
-    dataset_path = Path(settings.e2e_eval_dataset)
+    dataset_path = settings.resolve_path(settings.e2e_eval_dataset)
     cases = _load_cases(dataset_path)
 
     engine = create_engine(
@@ -58,7 +58,7 @@ def evaluate(settings: EvalSettings | None = None) -> dict:
         "passedCases": sum(1 for result in results if result["passed"]),
         "cases": results,
     }
-    output = Path(settings.e2e_eval_output)
+    output = settings.resolve_path(settings.e2e_eval_output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return report

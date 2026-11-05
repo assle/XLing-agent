@@ -142,7 +142,7 @@ def test_cancelled_second_arm_keeps_first_reply_and_attempt_count(tmp_path, monk
     monkeypatch.setattr(closing, "AiClient", Client)
     output = tmp_path / "answers.json"
     with pytest.raises(asyncio.CancelledError):
-        asyncio.run(closing.run_answers(Settings(_env_file=None, ai_provider="openai"), retrieval, output))
+        asyncio.run(closing.run_answers(Settings(_env_file=None, ai_provider="openai", openai_api_key="test-only"), retrieval, output))
     result = json.loads(output.read_text())
     assert result["status"] == "interrupted"
     assert result["attempts"] == 2
@@ -150,7 +150,7 @@ def test_cancelled_second_arm_keeps_first_reply_and_attempt_count(tmp_path, monk
     assert sorted(item["status"] for item in arms.values()) == ["completed", "started"]
     assert any(item.get("reply") == "first completed engineering test observation" for item in arms.values())
     with pytest.raises(FileExistsError):
-        asyncio.run(closing.run_answers(Settings(_env_file=None, ai_provider="openai"), retrieval, output))
+        asyncio.run(closing.run_answers(Settings(_env_file=None, ai_provider="openai", openai_api_key="test-only"), retrieval, output))
 
 
 def test_local_answer_model_identity_and_neutral_review_material(tmp_path, monkeypatch):
@@ -193,7 +193,7 @@ def test_truncated_or_empty_generations_cannot_enter_answer_comparison(tmp_path,
     monkeypatch.setattr(closing, "AiClient", Client)
     output = tmp_path / "answers.json"
     with pytest.raises(RuntimeError, match="Complete nonempty generations"):
-        asyncio.run(closing.run_answers(Settings(_env_file=None, ai_provider="openai"), retrieval, output))
+        asyncio.run(closing.run_answers(Settings(_env_file=None, ai_provider="openai", openai_api_key="test-only"), retrieval, output))
     result = json.loads(output.read_text())
     assert result["status"] == "invalid-generation" and result["comparisonEligible"] is False
     assert {a["status"] for a in result["pairs"][0]["arms"].values()} == {"empty-response", "incomplete-response"}

@@ -285,8 +285,8 @@ def test_classifier_does_not_override_registered_training_contract(monkeypatch, 
     monkeypatch.setattr(httpx, "post", post)
     monkeypatch.setattr(httpx, "AsyncClient", AsyncClient)
     settings = Settings(
-        _env_file=None, ai_provider="openai", ollama_classifier_model="registered-classifier",
-        classifier_input_format="plain",
+        _env_file=None, ai_provider="openai", openai_api_key="test-only",
+        ollama_classifier_model="registered-classifier", classifier_input_format="plain",
     )
     client = AiClient(settings)
     label = asyncio.run(client.aclassify("有点紧张")) if is_async else client.classify("有点紧张")

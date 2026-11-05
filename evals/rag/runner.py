@@ -61,7 +61,7 @@ def evaluate(
                 getattr(service.vector_store, "error", "") or "未知原因",
                 FALLBACK_RETRIEVAL_LABEL,
             )
-        dataset_path = Path(settings.rag_eval_dataset)
+        dataset_path = settings.resolve_path(settings.rag_eval_dataset)
         raw = dataset_path.read_text(encoding="utf-8")
         try:
             cases = json.loads(raw)
@@ -97,10 +97,10 @@ def evaluate(
                 and not service.vector_fallback_used
             )
         )
-        report["artifactVersion"] = ArtifactVersionResolver(eval_settings).current(
-            settings.rag_eval_dataset
-        ).to_dict()
-        output_path, summary_path = _strategy_paths(strategy, settings)
+        report["artifactVersion"] = ArtifactVersionResolver(eval_settings).current(dataset_path).to_dict()
+        output_path, summary_path = (
+            settings.resolve_path(path) for path in _strategy_paths(strategy, settings)
+        )
         _write_json(report, output_path)
         _write_json(build_eval_summary(report), summary_path)
         return report
@@ -470,7 +470,7 @@ def build_comparison(settings: EvalSettings | None = None) -> dict:
 
     strategies: list[dict[str, Any]] = []
     for name in COMPARISON_STRATEGIES:
-        path = Path(path_map[name])
+        path = settings.resolve_path(path_map[name])
         # 缺失报告与已有但指标较低不同：前者标记未运行，不补成零分参与比较。
         if path.exists():
             summary = json.loads(path.read_text(encoding="utf-8"))
@@ -618,11 +618,11 @@ def write_comparison(settings: EvalSettings | None = None) -> tuple[str, str]:
     comparison = build_comparison(settings)
     md = format_comparison_markdown(comparison)
 
-    json_path = Path(settings.rag_eval_comparison_output)
+    json_path = settings.resolve_path(settings.rag_eval_comparison_output)
     json_path.parent.mkdir(parents=True, exist_ok=True)
     json_path.write_text(json.dumps(comparison, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    md_path = Path(settings.rag_eval_comparison_md_output)
+    md_path = settings.resolve_path(settings.rag_eval_comparison_md_output)
     md_path.parent.mkdir(parents=True, exist_ok=True)
     md_path.write_text(md, encoding="utf-8")
 

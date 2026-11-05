@@ -23,7 +23,7 @@ with SessionLocal() as db:
     tools = ToolOrchestrationService(db, settings)
     tools.write_excel(report)
     tools.notify(report)
-    workbook = load_workbook(settings.excel_path)
+    workbook = load_workbook(settings.resolve_path(settings.excel_path))
     try:
         rows = sum(row[0].value == report_id for row in list(workbook.active.rows)[1:])
     finally:

@@ -111,7 +111,7 @@ class ObservedDeepSeekClient(AiClient):
         with httpx.Client(trust_env=False, timeout=60, transport=httpx.HTTPTransport(retries=0)) as client:
             response = client.post(
                 f"{self.settings.openai_base_url.rstrip('/')}/chat/completions",
-                headers={"Authorization": f"Bearer {self.settings.openai_api_key}"},
+                headers={"Authorization": f"Bearer {self.settings.openai_api_key.get_secret_value()}"},
                 json={
                     "model": self.settings.openai_model,
                     "messages": [message.model_dump() for message in messages],
@@ -179,7 +179,7 @@ def main() -> None:
         ))
     else:
         settings = Settings()
-        if not settings.openai_api_key:
+        if not settings.openai_api_key.get_secret_value():
             raise RuntimeError("Configured answer-model credential is unavailable")
         args.base_url = args.base_url or settings.openai_base_url
         system = args.system_prompt_file.read_text(encoding="utf-8").strip()
