@@ -10,6 +10,8 @@ cp .env.example .env
 
 已有 `.env` 时不要覆盖。正式使用前设置随机且足够长的 `JWT_SECRET_KEY`；真实模型联调还需填写远程回答接口和分类器配置。
 
+本机的数据库、端口、模型、邮件和密钥等可变配置统一在 `.env` 修改。应用容器通过 `env_file` 读取该文件；`docker-compose.yml` 只保留服务结构、容器内部地址和变量引用。`DATABASE_URL` 由 Compose 根据 `MYSQL_DATABASE`、`MYSQL_USER`、`MYSQL_PASSWORD` 自动组装，不需要重复维护。
+
 ## 启动应用
 
 无真实模型的演示模式：
@@ -26,9 +28,23 @@ docker compose --profile models up -d --build
 
 应用启动后访问 `https://localhost`。浏览器可能提示确认本地证书。
 
-`ollama-init` 是一次性模型注册容器，成功后会显示 `Exited (0)`，不是异常，也不需要长期运行。Ollama 默认使用国内镜像 `docker.1ms.run/ollama/ollama:0.1.48`，Python 依赖默认使用阿里云镜像源。
+`ollama-init` 是一次性模型注册容器，成功后会显示 `Exited (0)`，不是异常，也不需要长期运行。Ollama、Python 和 PyTorch 依赖默认使用国内镜像源，可通过 Docker 构建参数覆盖。
 
-如果远程接口需要宿主机代理，默认地址为 `http://host.docker.internal:7897`。代理端口不同时，在 `.env` 中修改 `HTTP_PROXY`、`HTTPS_PROXY`、`http_proxy` 和 `https_proxy`；MySQL、Redis 和 Ollama 已通过 `NO_PROXY` 绕过代理。
+项目配置文件不保存代理地址。单次构建确需代理时，在命令前临时设置 `HTTP_PROXY`、`HTTPS_PROXY`；需要清除 Docker Desktop 自动注入的代理时，使用命令行构建参数 `HTTP_PROXY=`、`HTTPS_PROXY=`、`http_proxy=`、`https_proxy=`，不要写入 `.env` 或 Compose。
+
+## 使用 DBeaver 连接 MySQL
+
+MySQL 容器通过 `MYSQL_PORT` 映射到本机回环地址，默认端口为 3306。修改 `.env` 后执行 `docker compose up -d mysql` 使端口或账号配置生效，再在 DBeaver 中新建 MySQL 连接：
+
+| 字段 | 填写内容 |
+| --- | --- |
+| Server Host | `127.0.0.1` |
+| Port | `.env` 中的 `MYSQL_PORT`，默认 `3306` |
+| Database | `.env` 中的 `MYSQL_DATABASE`，默认 `xling` |
+| Username | `.env` 中的 `MYSQL_USER`，默认 `xling` |
+| Password | `.env` 中的 `MYSQL_PASSWORD`，默认 `xling` |
+
+应用容器内的 `mysql` 主机名只在 Docker 网络中有效，DBeaver 不应填写该主机名。端口映射只绑定 `127.0.0.1`，不向局域网公开数据库。
 
 ## 查看状态与日志
 

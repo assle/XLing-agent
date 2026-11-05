@@ -22,7 +22,9 @@ from app.core.enums import EmotionLabel, IntentType, RiskLevel
 from app.core.time import utc_isoformat, utc_now
 from app.models.entities import ChatMessage, ChatSession, UserAccount
 from app.schemas.dtos import ActionPlanObjectMessage, AiMessage, CheckInSubmitRequest
-from app.services.ai import PromptTemplates, has_consult_signal, has_high_risk_signal
+from app.services.ai import (
+    PromptTemplates, has_consult_signal, has_high_risk_signal, has_implicit_high_risk_review_signal,
+)
 from app.services.assessment import PsychologyAssessment
 from app.services.cbt import DIMENSION_LABELS, CBTService, CBTState
 from app.services.knowledge import SearchResult
@@ -30,19 +32,20 @@ from app.services.memory_cards import MemoryCardService
 from app.services.risk_trajectory import RiskTrajectoryHealth, RiskTrajectoryService
 from app.services.user_profile import UserProfileService
 
-GENERAL_TASK_WORDS = [
-    "java", "python", "javascript", "代码", "编程", "程序", "算法", "数据库", "spring", "maven",
-    "前端", "后端", "项目", "接口", "bug", "报错", "作业", "论文", "翻译", "总结", "解释",
-    "怎么写", "如何", "是什么", "为什么", "给我", "帮我", "推荐", "查询", "天气", "路线",
-]
-
-
 def is_deployment_resource_question(text: str) -> bool:
-    """Identify resource-query wording; this predicate is not a safety decision."""
+    """识别纯部署资源事实查询；该判断本身不构成安全风险评估。"""
     neutral_text = text.replace("心理", "").replace("咨询", "")
-    return (any(word in text for word in ("部署", "机构"))
-            and any(word in text for word in ("热线", "预约"))
-            and not has_consult_signal(neutral_text) and not has_high_risk_signal(text))
+    has_resource_target = any(word in text for word in (
+        "部署", "机构", "心理中心", "心理健康中心", "咨询中心", "支持热线", "心理热线", "值班老师",
+        "心理咨询老师", "心理咨询",
+    ))
+    has_resource_field = any(word in text for word in (
+        "热线", "电话", "预约", "值班", "办公室", "门牌", "地址", "开放时间", "几点", "开门", "联系方式", "姓名",
+        "收费", "费用", "价格", "多少钱",
+    ))
+    return (has_resource_target and has_resource_field
+            and not has_consult_signal(neutral_text) and not has_high_risk_signal(text)
+            and not has_implicit_high_risk_review_signal(text))
 
 
 class GraphState(TypedDict):
@@ -794,8 +797,8 @@ class LangGraphAgentRuntimeService:
         if has_high_risk_signal(lowered):
             diagnostics.emit("classification.completed", intent=IntentType.RISK.value, reason_code="explicit_risk_signal")
             return IntentType.RISK
-        if not has_consult_signal(lowered) and any(word in lowered for word in GENERAL_TASK_WORDS):
-            diagnostics.emit("classification.completed", intent=IntentType.CHAT.value, reason_code="ordinary_task_signal")
+        if is_deployment_resource_question(text):
+            diagnostics.emit("classification.completed", intent=IntentType.CHAT.value, reason_code="deployment_resource_query")
             return IntentType.CHAT
         try:
             with diagnostics.stage("model.classify"):

@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     database_url: str = "mysql+pymysql://xling:xling@127.0.0.1:3306/xling?charset=utf8mb4"
     chat_history_limit: int = 10
     knowledge_top_k: int = 4
-    # 线上检索策略：multi_query_hybrid_rrf（多查询＋混合 RRF，默认）或 normalized_fusion（dense＋BM25 归一化加权）。
+    # 线上检索策略：兼容值 multi_query_hybrid_rrf 实际为多查询 dense 主检索；normalized_fusion 为归一化加权。
     knowledge_retrieval_strategy: str = "multi_query_hybrid_rrf"
     knowledge_chunk_size: int = 512
     knowledge_chunk_overlap: int = 64

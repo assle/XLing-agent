@@ -29,7 +29,7 @@ cp .env.production.example .env
 # - OLLAMA_CLASSIFIER_MODEL / OLLAMA_CLASSIFIER_MODEL_FILE=<已准备的分类器名称与定义>
 ```
 
-生产样例默认使用 `AI_PROVIDER=openai`：回答依赖兼容 OpenAI 的远程接口，风险分类使用 Compose 中的独立 Ollama 服务。模型角色、请求契约和知识向量配置见 [README 的真实模型联调](../README.md#真实模型联调)。
+生产样例默认使用 `AI_PROVIDER=openai`：回答和需要完整文本理解的安全语境复核依赖兼容 OpenAI 的远程接口；风险主分类默认使用应用内决策头，Compose 中的独立 Ollama 服务承担普通低置信复核与故障回退。模型角色、请求契约和知识向量配置见 [README 的真实模型联调](../README.md#真实模型联调)。
 
 `OLLAMA_BASE_URL` 默认是 `http://ollama:11434`。启动时添加 `--profile models`，`ollama-init` 会从只读挂载的项目 `models/` 目录注册分类器到 `ollama-data` 数据卷，不需要宿主机 Ollama。若使用外部模型服务，可省略该 profile 并把 `OLLAMA_BASE_URL` 改为应用容器实际可达的地址。
 

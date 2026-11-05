@@ -1,0 +1,53 @@
+{
+  "createdAt": "2026-11-02T04:25:57.567589+00:00",
+  "provider": "openai",
+  "dataset": "evals/independent/data/risk.json",
+  "artifactVersion": {
+    "chatModel": "deepseek-v4-flash-vision-exp",
+    "classifierModel": "xling-general-cls-05b:quoted-f16",
+    "promptVersion": "ddc64c435fa41b9bea3e9ad3e03e6988d963561cf5a09c9274da736e1fce26c1",
+    "embeddingModel": "qwen3.7-text-embedding-flash",
+    "rerankerModel": "",
+    "indexVersion": "778218da40ff18fb6acacaabcb40b341617f61da9160dbee9eec8d42fef2979a",
+    "datasetVersion": "7d3d43e02aaf548d2d5bbb3ee864f753e84a2273c0327d8513f5d0ad90809a38",
+    "calibrationVersion": "",
+    "codeRevision": "2f1b3b9abe2e8147c13702c7022694312fa295f0-dirty"
+  },
+  "totalCases": 36,
+  "accuracy": 0.9722222222222222,
+  "macroF1": 0.9721739130434783,
+  "perClass": {
+    "LOW": {
+      "precision": 1.0,
+      "recall": 0.9166666666666666,
+      "f1": 0.9565217391304348
+    },
+    "MEDIUM": {
+      "precision": 0.9230769230769231,
+      "recall": 1.0,
+      "f1": 0.9600000000000001
+    },
+    "HIGH": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  },
+  "confusionMatrix": {
+    "LOW": {
+      "LOW": 11,
+      "MEDIUM": 1,
+      "HIGH": 0
+    },
+    "MEDIUM": {
+      "LOW": 0,
+      "MEDIUM": 12,
+      "HIGH": 0
+    },
+    "HIGH": {
+      "LOW": 0,
+      "MEDIUM": 0,
+      "HIGH": 12
+    }
+  }
+}

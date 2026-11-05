@@ -45,7 +45,7 @@ Jev 本身不可自托管；但其开源同类在 2026 年 9–10 月密集出�
 - 透明度最高：**权重、246,678 行训练数据（含逐来源许可证）、训练脚本、逐版本研究记录全部公开**；RTX 3090 约 11 小时可复刻完整训练；明确支持 Apple silicon Mac serving
 - 部署：`strands-decider serve` 直接起 `/v1/systemone` HTTP 服务（Jev 兼容）；另有 Gemma 4 底座 E2B–26B 全系列，E2B 可在 CPU 上跑
 - 基准：v1 JevBench 180/231（与 Clef 不在同一口径，勿直接比分）
-- 局限：2B 通用理解力弱于 9B+；官方示例延迟因硬件而异（README 示例 489 ms 为特定环境，不代表 H100 数据）
+- 局限：2B 通用理解力弱于 9B+；官方示例延迟因硬件而异，README 的 489 ms 来自其特定运行环境，H100 数据单独列出
 - 来源：[GitHub README（含架构、评估、复现说明）](https://github.com/strands-labs/strands-decider)、[AWS Builder 训练文章](https://builder.aws.com)
 
 ### 3.3 Perplexity pplx-decider-v1.1-27b

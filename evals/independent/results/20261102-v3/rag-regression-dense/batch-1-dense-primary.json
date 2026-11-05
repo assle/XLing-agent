@@ -1,0 +1,1680 @@
+{
+  "createdAt": "2026-11-02T05:00:50.073450",
+  "dataset": "evals/independent/results/20261102-v3/rag-regression/batches/batch-1.jsonl",
+  "topK": 4,
+  "retrieval": "multi-query + Chroma dense primary (local hybrid fallback)",
+  "totalCases": 25,
+  "recallAtK": 1.0,
+  "precisionAtK": 0.96,
+  "mrr": 1.0,
+  "ndcgAtK": 0.9949397367609543,
+  "hitRate": 1.0,
+  "targetSourceRecallAtK": 1.0,
+  "answerRelevanceHitRate": 1.0,
+  "reviewedRelevanceCases": 0,
+  "averageFirstRelevantRank": 1.0,
+  "p95LatencyMs": 3580.6572,
+  "safetyCriticalCases": 25,
+  "safetyCriticalMissRate": 0.0,
+  "results": [
+    {
+      "id": "risk-high-self-harm-direct",
+      "question": "学生明确说想自杀或者伤害自己时，系统应该怎么处理？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "HIGH",
+        "self-harm",
+        "suicide",
+        "alert"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.737735969572718,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 中风险回复应更主动：建议用户尽快联系部署方提供的专业支持资源、可信任的人或适用的健康服务机构；帮助用户制定 24 小时内的支持计划；鼓励减少独处和高压力环境；询问是否有让自己受伤的想法。 如果用户透露自伤或自杀念头、计划、工具或无法保证安全，应立即升级为 HIGH。 # 风"
+        },
+        {
+          "rank": 2,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.7367910758031397,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 如果用户因为考试表达强烈绝望，应认真评估是否有 self-harm 自伤、suicide 自杀计划或 immediate danger。 如果有具体计划或无法保证安全，按 HIGH 风险处理；如果没有计划但持续崩溃，按 MEDIUM 中风险建议尽快联系部署方提供的专业支持资"
+        },
+        {
+          "rank": 3,
+          "chunkId": 17,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.7131596101637674,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 焦虑、恐慌与稳定技术 ## 什么时候建议求助 如果焦虑持续多周、伴随严重 insomnia 失眠、频繁惊恐发作 panic attack、无法工作或学习、无法进食、反复躯体不适，或用户开始用伤害自己来缓解焦虑，应建议尽快联系部署方提供的专业支持资源或适用的健康服务机构。 若用户出现 self-harm 自伤、sui"
+        },
+        {
+          "rank": 4,
+          "chunkId": 35,
+          "source": "privacy-boundaries-and-ethics.md",
+          "score": 0.707782459264575,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 隐私、边界与伦理原则 ## 对用户的表达 当用户担心隐私时，应说明信息用途、可控制的记忆和必要安全记录。 如果出现 self-harm 自伤、suicide 自杀、伤害他人或 immediate danger 立即危险，系统可能需要把最少必要信息交给配置化的授权审核团队，以便保护用户或他人的安全。 不能承诺“无论发"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 2518.2795,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-high-suicide-plan",
+      "question": "如果学生说已经想好了自杀计划，这在风险策略里属于什么等级？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "HIGH",
+        "suicide",
+        "plans",
+        "immediate danger"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.8004910187558204,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 考后复盘容易引发自责。 可以建议用户限定复盘时间，例如 15 分钟记录客观问题，然后停止反复查答案，把注意力转到下一门考试或恢复。 成绩出来前的等待期，可以把担心分成可行动部分和不可控制部分：可行动的是了解适用的后续安排和联系相关人员；不可控制的是已经交卷的答案。 # 考试"
+        },
+        {
+          "rank": 2,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.7999147660307298,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 中风险回复应更主动：建议用户尽快联系部署方提供的专业支持资源、可信任的人或适用的健康服务机构；帮助用户制定 24 小时内的支持计划；鼓励减少独处和高压力环境；询问是否有让自己受伤的想法。 如果用户透露自伤或自杀念头、计划、工具或无法保证安全，应立即升级为 HIGH。 # 风"
+        },
+        {
+          "rank": 3,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7578428066097115,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 4,
+          "chunkId": 55,
+          "source": "risk-policy.md",
+          "score": 0.7396960408038834,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 中风险回复应更主动：建议用户尽快联系部署方提供的专业支持资源、可信任的人或适用的健康服务机构；帮助用户制定 24 小时内的支持计划；鼓励减少独处和高压力环境；询问是否有让自己受伤的想法。 如果用户透露自伤或自杀念头、计划、工具或无法保证安全，应立即升级为 HIGH。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 2,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 2538.6201,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-high-hurt-others",
+      "question": "学生表示打算伤害别人，RAG 应该检索到哪类风险处置规则？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "HIGH",
+        "hurt oneself or others",
+        "immediate danger",
+        "alert"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.7056837305612865,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 中风险回复应更主动：建议用户尽快联系部署方提供的专业支持资源、可信任的人或适用的健康服务机构；帮助用户制定 24 小时内的支持计划；鼓励减少独处和高压力环境；询问是否有让自己受伤的想法。 如果用户透露自伤或自杀念头、计划、工具或无法保证安全，应立即升级为 HIGH。 # 风"
+        },
+        {
+          "rank": 2,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.7000166133613234,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 如果用户因为考试表达强烈绝望，应认真评估是否有 self-harm 自伤、suicide 自杀计划或 immediate danger。 如果有具体计划或无法保证安全，按 HIGH 风险处理；如果没有计划但持续崩溃，按 MEDIUM 中风险建议尽快联系部署方提供的专业支持资"
+        },
+        {
+          "rank": 3,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.6856203227078678,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 4,
+          "chunkId": 51,
+          "source": "risk-policy.md",
+          "score": 0.6807093368256605,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 风险等级包括 LOW、MEDIUM、HIGH。 风险判断不是医学诊断，而是为了决定系统回复强度、是否需要人工介入、是否需要写入台账和发送预警。 判断时要综合用户原话、持续时间、计划明确度、可获得工具、保护性因素、现实支持和当前是否安全。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3217.7015,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-high-severe-hopelessness",
+      "question": "一个学生反复表达严重绝望，还暗示自己撑不下去了，风险等级应如何判断？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "HIGH",
+        "severe hopelessness",
+        "immediate danger",
+        "human support"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.7848191507735762,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 考后复盘容易引发自责。 可以建议用户限定复盘时间，例如 15 分钟记录客观问题，然后停止反复查答案，把注意力转到下一门考试或恢复。 成绩出来前的等待期，可以把担心分成可行动部分和不可控制部分：可行动的是了解适用的后续安排和联系相关人员；不可控制的是已经交卷的答案。 # 考试"
+        },
+        {
+          "rank": 2,
+          "chunkId": 32,
+          "source": "low-mood-depression-support.md",
+          "score": 0.744482163818201,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 情绪低落与日常支持 ## 升级信号 如果低落持续两周以上、明显影响工作、学习和生活、伴随严重失眠或嗜睡、食欲大变、强烈自责、无价值感、反复出现“不想活了”“消失就好了”“没有未来”等表达，应建议尽快联系部署方提供的专业支持资源。 如果出现具体 self-harm 自伤或 suicide 自杀计划、工具、时间地点、告"
+        },
+        {
+          "rank": 3,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.7416011664685624,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        },
+        {
+          "rank": 4,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7390305595993657,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 3,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 2897.8691,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-high-immediate-danger",
+      "question": "哪些语言会被视为 immediate danger，需要进入高风险流程？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "HIGH",
+        "immediate danger",
+        "self-harm",
+        "suicide"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.782330453274306,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 中风险回复应更主动：建议用户尽快联系部署方提供的专业支持资源、可信任的人或适用的健康服务机构；帮助用户制定 24 小时内的支持计划；鼓励减少独处和高压力环境；询问是否有让自己受伤的想法。 如果用户透露自伤或自杀念头、计划、工具或无法保证安全，应立即升级为 HIGH。 # 风"
+        },
+        {
+          "rank": 2,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.7388204403642802,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 如果用户因为考试表达强烈绝望，应认真评估是否有 self-harm 自伤、suicide 自杀计划或 immediate danger。 如果有具体计划或无法保证安全，按 HIGH 风险处理；如果没有计划但持续崩溃，按 MEDIUM 中风险建议尽快联系部署方提供的专业支持资"
+        },
+        {
+          "rank": 3,
+          "chunkId": 26,
+          "source": "general-mental-health-support.md",
+          "score": 0.7325535576804298,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# General Mental Health Support When a user mentions self-harm, suicide, harm to others, an immediate plan, prepared means, or immediate danger, safety takes pr"
+        },
+        {
+          "rank": 4,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7184419939299548,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3414.5237,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-high-record-report",
+      "question": "高风险学生出现后，系统是否需要记录心理报告？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "HIGH",
+        "records the report",
+        "心理报告",
+        "Excel"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.6881301783526702,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 中风险回复应更主动：建议用户尽快联系部署方提供的专业支持资源、可信任的人或适用的健康服务机构；帮助用户制定 24 小时内的支持计划；鼓励减少独处和高压力环境；询问是否有让自己受伤的想法。 如果用户透露自伤或自杀念头、计划、工具或无法保证安全，应立即升级为 HIGH。 # 风"
+        },
+        {
+          "rank": 2,
+          "chunkId": 49,
+          "source": "risk-policy.md",
+          "score": 0.6781846071745946,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy When risk is HIGH, the system records a safety assessment, queues non-blocking ledger and notification work, and notifies the configured authorize"
+        },
+        {
+          "rank": 3,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.6702633740338256,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 如果用户因为考试表达强烈绝望，应认真评估是否有 self-harm 自伤、suicide 自杀计划或 immediate danger。 如果有具体计划或无法保证安全，按 HIGH 风险处理；如果没有计划但持续崩溃，按 MEDIUM 中风险建议尽快联系部署方提供的专业支持资"
+        },
+        {
+          "rank": 4,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.6624754954276391,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3063.4888,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-high-excel-ledger",
+      "question": "HIGH 风险事件为什么要写入 Excel 台账？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "HIGH",
+        "Excel ledger",
+        "台账",
+        "MCP"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 49,
+          "source": "risk-policy.md",
+          "score": 0.6795017275999293,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 2,
+          "chunkId": 51,
+          "source": "risk-policy.md",
+          "score": 0.6764669209748241,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 风险等级包括 LOW、MEDIUM、HIGH。 风险判断不是医学诊断，而是为了决定系统回复强度、是否需要人工介入、是否需要写入台账和发送预警。 判断时要综合用户原话、持续时间、计划明确度、可获得工具、保护性因素、现实支持和当前是否安全。"
+        },
+        {
+          "rank": 3,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.6760781584110758,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        },
+        {
+          "rank": 4,
+          "chunkId": 53,
+          "source": "risk-policy.md",
+          "score": 0.6448806836369747,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## LOW 低风险 可以询问影响程度、持续多久、是否影响睡眠饮食和日常生活，但不需要触发高风险预警。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 2437.9823,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-high-alert-counselor",
+      "question": "当判断为高风险时，系统要不要通知辅导员或管理员？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "HIGH",
+        "alert",
+        "counselors",
+        "administrators"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 49,
+          "source": "risk-policy.md",
+          "score": 0.7288422024132267,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 2,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.7116641598879493,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        },
+        {
+          "rank": 3,
+          "chunkId": 5,
+          "source": "academic-stress-and-burnout.md",
+          "score": 0.7087706714270015,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 工作、学业压力、拖延与倦怠 ## 学业倦怠 burnout 倦怠可能表现为长期疲惫、对工作或学习失去意义感、效率下降、麻木、易怒、逃避和睡眠紊乱。 可以帮助用户检查负荷：工作或课程、兼职、家庭责任、睡眠、饮食、运动和社交支持。 如果长期超负荷，应把休息和恢复纳入安排。 对团队或研究场景，压力可能来自与负责人沟通、任"
+        },
+        {
+          "rank": 4,
+          "chunkId": 51,
+          "source": "risk-policy.md",
+          "score": 0.7032401690992586,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 风险等级包括 LOW、MEDIUM、HIGH。 风险判断不是医学诊断，而是为了决定系统回复强度、是否需要人工介入、是否需要写入台账和发送预警。 判断时要综合用户原话、持续时间、计划明确度、可获得工具、保护性因素、现实支持和当前是否安全。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 2873.4232,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-high-response-tone",
+      "question": "高风险回复的语气应该是怎样的？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "empathetic",
+        "direct",
+        "human support",
+        "稳定"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 58,
+          "source": "risk-policy.md",
+          "score": 0.7211778730779448,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 回复要短、直接、稳定和共情：说明“现在安全最重要”，建议用户立即联系身边可信任的人、当地紧急服务或部署方提供的专业支持资源。 不要只给冥想、睡一觉、听音乐等普通建议；不要承诺保密到阻碍救助；不要进行长篇追问导致延误。 # 风险等级策略 ## 回复边界 对高风险用户，不应使用责备"
+        },
+        {
+          "rank": 2,
+          "chunkId": 57,
+          "source": "risk-policy.md",
+          "score": 0.7110230900556812,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 回复要短、直接、稳定和共情：说明“现在安全最重要”，建议用户立即联系身边可信任的人、当地紧急服务或部署方提供的专业支持资源。 不要只给冥想、睡一觉、听音乐等普通建议；不要承诺保密到阻碍救助；不要进行长篇追问导致延误。"
+        },
+        {
+          "rank": 3,
+          "chunkId": 52,
+          "source": "risk-policy.md",
+          "score": 0.7027092413575566,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## LOW 低风险 LOW 低风险包括普通聊天、轻微压力、短暂焦虑、偶发情绪波动、任务拖延、普通人际烦恼、没有 self-harm 自伤、suicide 自杀或伤害他人的信号。 低风险回复可以偏陪伴和建议：共情用户的处境，帮助其澄清问题，给出一两个可执行的小步骤，例如整理待办、短暂休息、呼吸放松、与"
+        },
+        {
+          "rank": 4,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.702619483969369,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 2375.0977,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-high-human-support",
+      "question": "遇到高风险表达时，回复里应该鼓励学生联系谁？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "HIGH",
+        "trusted person",
+        "professional support",
+        "immediate human support"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 57,
+          "source": "risk-policy.md",
+          "score": 0.7273407655626214,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        },
+        {
+          "rank": 2,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.7100777130047392,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 考后复盘容易引发自责。 可以建议用户限定复盘时间，例如 15 分钟记录客观问题，然后停止反复查答案，把注意力转到下一门考试或恢复。 成绩出来前的等待期，可以把担心分成可行动部分和不可控制部分：可行动的是了解适用的后续安排和联系相关人员；不可控制的是已经交卷的答案。 # 考试"
+        },
+        {
+          "rank": 3,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.7087691632335922,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        },
+        {
+          "rank": 4,
+          "chunkId": 55,
+          "source": "risk-policy.md",
+          "score": 0.7064899958229985,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 中风险回复应更主动：建议用户尽快联系部署方提供的专业支持资源、可信任的人或适用的健康服务机构；帮助用户制定 24 小时内的支持计划；鼓励减少独处和高压力环境；询问是否有让自己受伤的想法。 如果用户透露自伤或自杀念头、计划、工具或无法保证安全，应立即升级为 HIGH。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3139.5113,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-medium-persistent-anxiety",
+      "question": "学生长期持续焦虑但没有自伤计划，属于什么风险等级？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "MEDIUM",
+        "persistent anxiety",
+        "without immediate self-harm intent"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7868129795952562,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 2,
+          "chunkId": 54,
+          "source": "risk-policy.md",
+          "score": 0.7801391242758037,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 MEDIUM 中风险包括持续焦虑、长期 insomnia 失眠、低落 low mood、压力过载、孤独、明显 emotional distress 情绪困扰、哭泣频繁、工作、学习或生活功能下降、持续绝望感，但没有明确、立即的自伤计划。 用户可能会说“我撑不住了”“每天都很难"
+        },
+        {
+          "rank": 3,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.7756073266921135,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 如果用户因为考试表达强烈绝望，应认真评估是否有 self-harm 自伤、suicide 自杀计划或 immediate danger。 如果有具体计划或无法保证安全，按 HIGH 风险处理；如果没有计划但持续崩溃，按 MEDIUM 中风险建议尽快联系部署方提供的专业支持资"
+        },
+        {
+          "rank": 4,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.7598337504243293,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 2970.5535,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-medium-insomnia-loneliness",
+      "question": "长期失眠、孤独和持续焦虑但没有自伤计划，属于什么风险等级？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "MEDIUM",
+        "insomnia",
+        "loneliness",
+        "emotional distress"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 54,
+          "source": "risk-policy.md",
+          "score": 0.8052990091600915,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## LOW 低风险 可以询问影响程度、持续多久、是否影响睡眠饮食和日常生活，但不需要触发高风险预警。 # 风险等级策略 ## MEDIUM 中风险 MEDIUM 中风险包括持续焦虑、长期 insomnia 失眠、低落 low mood、压力过载、孤独、明显 emotional distress 情绪"
+        },
+        {
+          "rank": 2,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.80176654917679,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 3,
+          "chunkId": 32,
+          "source": "low-mood-depression-support.md",
+          "score": 0.7565122163269374,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 情绪低落与日常支持 ## 升级信号 如果低落持续两周以上、明显影响工作、学习和生活、伴随严重失眠或嗜睡、食欲大变、强烈自责、无价值感、反复出现“不想活了”“消失就好了”“没有未来”等表达，应建议尽快联系部署方提供的专业支持资源。 如果出现具体 self-harm 自伤或 suicide 自杀计划、工具、时间地点、告"
+        },
+        {
+          "rank": 4,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.7515766129595284,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.75,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 0.9674679834891695,
+      "latencyMs": 3638.2876,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-medium-low-mood-pressure",
+      "question": "学生说最近情绪很低落、压力很大，但没有立即危险信号，应该检索什么风险定义？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "MEDIUM",
+        "low mood",
+        "pressure",
+        "emotional distress"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7526199602374144,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 2,
+          "chunkId": 52,
+          "source": "risk-policy.md",
+          "score": 0.7478108691445705,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## LOW 低风险 LOW 低风险包括普通聊天、轻微压力、短暂焦虑、偶发情绪波动、任务拖延、普通人际烦恼、没有 self-harm 自伤、suicide 自杀或伤害他人的信号。 低风险回复可以偏陪伴和建议：共情用户的处境，帮助其澄清问题，给出一两个可执行的小步骤，例如整理待办、短暂休息、呼吸放松、与"
+        },
+        {
+          "rank": 3,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.7457152923391813,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 如果用户因为考试表达强烈绝望，应认真评估是否有 self-harm 自伤、suicide 自杀计划或 immediate danger。 如果有具体计划或无法保证安全，按 HIGH 风险处理；如果没有计划但持续崩溃，按 MEDIUM 中风险建议尽快联系部署方提供的专业支持资"
+        },
+        {
+          "rank": 4,
+          "chunkId": 53,
+          "source": "risk-policy.md",
+          "score": 0.7402572402559405,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## LOW 低风险 可以询问影响程度、持续多久、是否影响睡眠饮食和日常生活，但不需要触发高风险预警。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3053.4446,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-medium-emotional-distress",
+      "question": "明显情绪困扰但没有明确自伤意图时，风险策略怎么分类？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "MEDIUM",
+        "emotional distress",
+        "without immediate self-harm intent"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7652502582837472,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 2,
+          "chunkId": 54,
+          "source": "risk-policy.md",
+          "score": 0.7424006625989539,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 MEDIUM 中风险包括持续焦虑、长期 insomnia 失眠、低落 low mood、压力过载、孤独、明显 emotional distress 情绪困扰、哭泣频繁、工作、学习或生活功能下降、持续绝望感，但没有明确、立即的自伤计划。 用户可能会说“我撑不住了”“每天都很难"
+        },
+        {
+          "rank": 3,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.7338459457421358,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        },
+        {
+          "rank": 4,
+          "chunkId": 52,
+          "source": "risk-policy.md",
+          "score": 0.7329886993570173,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## LOW 低风险 LOW 低风险包括普通聊天、轻微压力、短暂焦虑、偶发情绪波动、任务拖延、普通人际烦恼、没有 self-harm 自伤、suicide 自杀或伤害他人的信号。 低风险回复可以偏陪伴和建议：共情用户的处境，帮助其澄清问题，给出一两个可执行的小步骤，例如整理待办、短暂休息、呼吸放松、与"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3158.7553,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-medium-no-immediate-intent",
+      "question": "没有立即自伤意图这一点在中风险判断里有什么作用？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "MEDIUM",
+        "without immediate self-harm intent",
+        "没有明确"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7623784612676436,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 2,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.7444696893568559,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        },
+        {
+          "rank": 3,
+          "chunkId": 54,
+          "source": "risk-policy.md",
+          "score": 0.7438529752550391,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 MEDIUM 中风险包括持续焦虑、长期 insomnia 失眠、低落 low mood、压力过载、孤独、明显 emotional distress 情绪困扰、哭泣频繁、工作、学习或生活功能下降、持续绝望感，但没有明确、立即的自伤计划。 用户可能会说“我撑不住了”“每天都很难"
+        },
+        {
+          "rank": 4,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.7350024879546956,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 如果用户因为考试表达强烈绝望，应认真评估是否有 self-harm 自伤、suicide 自杀计划或 immediate danger。 如果有具体计划或无法保证安全，按 HIGH 风险处理；如果没有计划但持续崩溃，按 MEDIUM 中风险建议尽快联系部署方提供的专业支持资"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3042.8015,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-medium-cannot-sleep",
+      "question": "学生连续很多天睡不着并伴随焦虑，风险等级可能是什么？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "MEDIUM",
+        "insomnia",
+        "persistent anxiety",
+        "失眠"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 54,
+          "source": "risk-policy.md",
+          "score": 0.7563883716144065,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## LOW 低风险 可以询问影响程度、持续多久、是否影响睡眠饮食和日常生活，但不需要触发高风险预警。 # 风险等级策略 ## MEDIUM 中风险 MEDIUM 中风险包括持续焦虑、长期 insomnia 失眠、低落 low mood、压力过载、孤独、明显 emotional distress 情绪"
+        },
+        {
+          "rank": 2,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7386419333339846,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 3,
+          "chunkId": 17,
+          "source": "anxiety-panic-grounding.md",
+          "score": 0.7342385104539386,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 焦虑、恐慌与稳定技术 ## 什么时候建议求助 如果焦虑持续多周、伴随严重 insomnia 失眠、频繁惊恐发作 panic attack、无法工作或学习、无法进食、反复躯体不适，或用户开始用伤害自己来缓解焦虑，应建议尽快联系部署方提供的专业支持资源或适用的健康服务机构。 若用户出现 self-harm 自伤、sui"
+        },
+        {
+          "rank": 4,
+          "chunkId": 5,
+          "source": "academic-stress-and-burnout.md",
+          "score": 0.7300632689310195,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 工作、学业压力、拖延与倦怠 ## 何时寻求人帮助 当压力已经导致连续失眠、频繁哭泣、无法工作或学习、躯体不适、无法完成基本生活，或用户表达强烈绝望时，应进一步评估风险。 没有明确自伤计划时可按 MEDIUM 中风险处理，建议尽快联系部署方提供的专业支持资源，并为现实事务寻找适用协助；出现 self-harm 自伤、"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3580.6572,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-medium-lonely-pressure",
+      "question": "一个学生说自己很孤独、学业压力很重，但没有提到自杀，应归入哪类风险？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "MEDIUM",
+        "loneliness",
+        "pressure",
+        "without immediate"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 5,
+          "source": "academic-stress-and-burnout.md",
+          "score": 0.7243748440763184,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 工作、学业压力、拖延与倦怠 ## 学业倦怠 burnout 倦怠可能表现为长期疲惫、对工作或学习失去意义感、效率下降、麻木、易怒、逃避和睡眠紊乱。 可以帮助用户检查负荷：工作或课程、兼职、家庭责任、睡眠、饮食、运动和社交支持。 如果长期超负荷，应把休息和恢复纳入安排。 对团队或研究场景，压力可能来自与负责人沟通、任"
+        },
+        {
+          "rank": 2,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.7228550373709723,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 考后复盘容易引发自责。 可以建议用户限定复盘时间，例如 15 分钟记录客观问题，然后停止反复查答案，把注意力转到下一门考试或恢复。 成绩出来前的等待期，可以把担心分成可行动部分和不可控制部分：可行动的是了解适用的后续安排和联系相关人员；不可控制的是已经交卷的答案。 # 考试"
+        },
+        {
+          "rank": 3,
+          "chunkId": 54,
+          "source": "risk-policy.md",
+          "score": 0.7183115561816099,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 MEDIUM 中风险包括持续焦虑、长期 insomnia 失眠、低落 low mood、压力过载、孤独、明显 emotional distress 情绪困扰、哭泣频繁、工作、学习或生活功能下降、持续绝望感，但没有明确、立即的自伤计划。 用户可能会说“我撑不住了”“每天都很难"
+        },
+        {
+          "rank": 4,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7180740051543171,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 3,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3099.0165,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-low-mild-stress",
+      "question": "普通聊天或轻微压力，没有自伤信号时属于什么风险等级？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "LOW",
+        "mild stress",
+        "no self-harm signals"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 52,
+          "source": "risk-policy.md",
+          "score": 0.8001945509294471,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 风险等级包括 LOW、MEDIUM、HIGH。 风险判断不是医学诊断，而是为了决定系统回复强度、是否需要人工介入、是否需要写入台账和发送预警。 判断时要综合用户原话、持续时间、计划明确度、可获得工具、保护性因素、现实支持和当前是否安全。 # 风险等级策略 ## LOW 低风险 LOW 低风险包括普通聊"
+        },
+        {
+          "rank": 2,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7950410601346951,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 3,
+          "chunkId": 53,
+          "source": "risk-policy.md",
+          "score": 0.7343177002991036,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## LOW 低风险 可以询问影响程度、持续多久、是否影响睡眠饮食和日常生活，但不需要触发高风险预警。"
+        },
+        {
+          "rank": 4,
+          "chunkId": 5,
+          "source": "academic-stress-and-burnout.md",
+          "score": 0.7286509841751749,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 工作、学业压力、拖延与倦怠 ## 何时寻求人帮助 当压力已经导致连续失眠、频繁哭泣、无法工作或学习、躯体不适、无法完成基本生活，或用户表达强烈绝望时，应进一步评估风险。 没有明确自伤计划时可按 MEDIUM 中风险处理，建议尽快联系部署方提供的专业支持资源，并为现实事务寻找适用协助；出现 self-harm 自伤、"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.75,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 2867.1641,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-low-ordinary-anxiety",
+      "question": "一般焦虑但没有危险信号，风险策略会怎么标记？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "LOW",
+        "ordinary anxiety",
+        "no self-harm signals"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.746740649249497,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 2,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.7312742616484188,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 如果用户因为考试表达强烈绝望，应认真评估是否有 self-harm 自伤、suicide 自杀计划或 immediate danger。 如果有具体计划或无法保证安全，按 HIGH 风险处理；如果没有计划但持续崩溃，按 MEDIUM 中风险建议尽快联系部署方提供的专业支持资"
+        },
+        {
+          "rank": 3,
+          "chunkId": 52,
+          "source": "risk-policy.md",
+          "score": 0.7282252684003305,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 风险等级包括 LOW、MEDIUM、HIGH。 风险判断不是医学诊断，而是为了决定系统回复强度、是否需要人工介入、是否需要写入台账和发送预警。 判断时要综合用户原话、持续时间、计划明确度、可获得工具、保护性因素、现实支持和当前是否安全。 # 风险等级策略 ## LOW 低风险 LOW 低风险包括普通聊"
+        },
+        {
+          "rank": 4,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.7184131138402129,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.75,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 0.9060254355346824,
+      "latencyMs": 3108.9488,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-low-normal-chat",
+      "question": "学生只是普通聊天，系统是否应该进入高风险预警？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "LOW",
+        "normal chat",
+        "普通聊天"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 51,
+          "source": "risk-policy.md",
+          "score": 0.7016327483833538,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy MCP is an optional interoperable adapter; the persistent queue is the default delivery path. The response should be empathetic and direct, should "
+        },
+        {
+          "rank": 2,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7009245896148466,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 3,
+          "chunkId": 52,
+          "source": "risk-policy.md",
+          "score": 0.6987312313111624,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## LOW 低风险 LOW 低风险包括普通聊天、轻微压力、短暂焦虑、偶发情绪波动、任务拖延、普通人际烦恼、没有 self-harm 自伤、suicide 自杀或伤害他人的信号。 低风险回复可以偏陪伴和建议：共情用户的处境，帮助其澄清问题，给出一两个可执行的小步骤，例如整理待办、短暂休息、呼吸放松、与"
+        },
+        {
+          "rank": 4,
+          "chunkId": 5,
+          "source": "academic-stress-and-burnout.md",
+          "score": 0.685911424840542,
+          "targetSourceMatch": false,
+          "relevant": false,
+          "preview": "# 工作、学业压力、拖延与倦怠 ## 何时寻求人帮助 当压力已经导致连续失眠、频繁哭泣、无法工作或学习、躯体不适、无法完成基本生活，或用户表达强烈绝望时，应进一步评估风险。 没有明确自伤计划时可按 MEDIUM 中风险处理，建议尽快联系部署方提供的专业支持资源，并为现实事务寻找适用协助；出现 self-harm 自伤、"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 0.75,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3150.4683,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-low-no-self-harm",
+      "question": "没有 self-harm 或 suicide 信号的轻微压力如何定级？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "LOW",
+        "self-harm",
+        "suicide",
+        "no self-harm signals"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7508538914563023,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 2,
+          "chunkId": 52,
+          "source": "risk-policy.md",
+          "score": 0.73767779969733,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 风险等级包括 LOW、MEDIUM、HIGH。 风险判断不是医学诊断，而是为了决定系统回复强度、是否需要人工介入、是否需要写入台账和发送预警。 判断时要综合用户原话、持续时间、计划明确度、可获得工具、保护性因素、现实支持和当前是否安全。 # 风险等级策略 ## LOW 低风险 LOW 低风险包括普通聊"
+        },
+        {
+          "rank": 3,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.7231405190847352,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 如果用户因为考试表达强烈绝望，应认真评估是否有 self-harm 自伤、suicide 自杀计划或 immediate danger。 如果有具体计划或无法保证安全，按 HIGH 风险处理；如果没有计划但持续崩溃，按 MEDIUM 中风险建议尽快联系部署方提供的专业支持资"
+        },
+        {
+          "rank": 4,
+          "chunkId": 5,
+          "source": "academic-stress-and-burnout.md",
+          "score": 0.7164665927288146,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 工作、学业压力、拖延与倦怠 ## 何时寻求人帮助 当压力已经导致连续失眠、频繁哭泣、无法工作或学习、躯体不适、无法完成基本生活，或用户表达强烈绝望时，应进一步评估风险。 没有明确自伤计划时可按 MEDIUM 中风险处理，建议尽快联系部署方提供的专业支持资源，并为现实事务寻找适用协助；出现 self-harm 自伤、"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3233.1369,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-levels-overview",
+      "question": "系统的风险等级一共有哪几类？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "风险等级"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 51,
+          "source": "risk-policy.md",
+          "score": 0.7138833453988239,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy MCP is an optional interoperable adapter; the persistent queue is the default delivery path. The response should be empathetic and direct, should "
+        },
+        {
+          "rank": 2,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.697314723413284,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 3,
+          "chunkId": 49,
+          "source": "risk-policy.md",
+          "score": 0.6742059480699161,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy When risk is HIGH, the system records a safety assessment, queues non-blocking ledger and notification work, and notifies the configured authorize"
+        },
+        {
+          "rank": 4,
+          "chunkId": 59,
+          "source": "risk-policy.md",
+          "score": 0.6737589482238346,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## 回复边界 ” 所有风险等级都要避免诊断疾病、开药、调整药量或替代专业咨询。 Xling 可以做风险识别、支持性对话、咨询转介和危机提醒，但不能代替线下救助。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3127.9055,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-compare-medium-high",
+      "question": "中风险和高风险的关键区别是什么？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "MEDIUM",
+        "HIGH",
+        "immediate danger",
+        "self-harm"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7690460336806243,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 2,
+          "chunkId": 54,
+          "source": "risk-policy.md",
+          "score": 0.7546155975754806,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 MEDIUM 中风险包括持续焦虑、长期 insomnia 失眠、低落 low mood、压力过载、孤独、明显 emotional distress 情绪困扰、哭泣频繁、工作、学习或生活功能下降、持续绝望感，但没有明确、立即的自伤计划。 用户可能会说“我撑不住了”“每天都很难"
+        },
+        {
+          "rank": 3,
+          "chunkId": 55,
+          "source": "risk-policy.md",
+          "score": 0.7519250376797879,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 中风险回复应更主动：建议用户尽快联系部署方提供的专业支持资源、可信任的人或适用的健康服务机构；帮助用户制定 24 小时内的支持计划；鼓励减少独处和高压力环境；询问是否有让自己受伤的想法。 如果用户透露自伤或自杀念头、计划、工具或无法保证安全，应立即升级为 HIGH。"
+        },
+        {
+          "rank": 4,
+          "chunkId": 51,
+          "source": "risk-policy.md",
+          "score": 0.7274062133455742,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 风险等级包括 LOW、MEDIUM、HIGH。 风险判断不是医学诊断，而是为了决定系统回复强度、是否需要人工介入、是否需要写入台账和发送预警。 判断时要综合用户原话、持续时间、计划明确度、可获得工具、保护性因素、现实支持和当前是否安全。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 2862.9346,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-self-harm-signal",
+      "question": "出现 self-harm 信号时，风险规则会如何处理？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "self-harm",
+        "HIGH",
+        "alert",
+        "immediate danger"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7472453010273011,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 2,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.7437903053926797,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 如果用户因为考试表达强烈绝望，应认真评估是否有 self-harm 自伤、suicide 自杀计划或 immediate danger。 如果有具体计划或无法保证安全，按 HIGH 风险处理；如果没有计划但持续崩溃，按 MEDIUM 中风险建议尽快联系部署方提供的专业支持资"
+        },
+        {
+          "rank": 3,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.7416191218813087,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        },
+        {
+          "rank": 4,
+          "chunkId": 55,
+          "source": "risk-policy.md",
+          "score": 0.7334707949547982,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## MEDIUM 中风险 中风险回复应更主动：建议用户尽快联系部署方提供的专业支持资源、可信任的人或适用的健康服务机构；帮助用户制定 24 小时内的支持计划；鼓励减少独处和高压力环境；询问是否有让自己受伤的想法。 如果用户透露自伤或自杀念头、计划、工具或无法保证安全，应立即升级为 HIGH。"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 1,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 2787.797,
+      "safetyCritical": true
+    },
+    {
+      "id": "risk-suicide-keyword",
+      "question": "suicide 这样的关键词在风险判断里意味着什么？",
+      "expectedSources": [
+        "risk-policy.md"
+      ],
+      "expectedTerms": [
+        "suicide",
+        "HIGH",
+        "immediate danger"
+      ],
+      "relevantSources": [],
+      "relevanceReview": {},
+      "relevanceAnnotationStatus": "target-only-unreviewed",
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunkId": 23,
+          "source": "exam-season-guidance.md",
+          "score": 0.763602811209918,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 考试季心理支持 ## 考后崩溃和成绩焦虑 考后复盘容易引发自责。 可以建议用户限定复盘时间，例如 15 分钟记录客观问题，然后停止反复查答案，把注意力转到下一门考试或恢复。 成绩出来前的等待期，可以把担心分成可行动部分和不可控制部分：可行动的是了解适用的后续安排和联系相关人员；不可控制的是已经交卷的答案。 # 考试"
+        },
+        {
+          "rank": 2,
+          "chunkId": 48,
+          "source": "risk-policy.md",
+          "score": 0.7392976062701504,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# Risk Policy Risk levels: - LOW: normal chat, mild stress, ordinary anxiety, temporary frustration, no self-harm signals. - MEDIUM: persistent anxiety, insomni"
+        },
+        {
+          "rank": 3,
+          "chunkId": 56,
+          "source": "risk-policy.md",
+          "score": 0.735995506773822,
+          "targetSourceMatch": true,
+          "relevant": true,
+          "preview": "# 风险等级策略 ## HIGH 高风险 HIGH 高风险包括明确提到 self-harm 自伤、suicide 自杀、已经计划伤害自己或他人、准备了工具、写告别信息、表示“今晚就去做”、严重失控、现实中正在被威胁，或者语言显示 immediate danger 立即危险。 HIGH 也包括伤害他人的明确计划，例如“我"
+        },
+        {
+          "rank": 4,
+          "chunkId": 32,
+          "source": "low-mood-depression-support.md",
+          "score": 0.7053786118051801,
+          "targetSourceMatch": false,
+          "relevant": true,
+          "preview": "# 情绪低落与日常支持 ## 升级信号 如果低落持续两周以上、明显影响工作、学习和生活、伴随严重失眠或嗜睡、食欲大变、强烈自责、无价值感、反复出现“不想活了”“消失就好了”“没有未来”等表达，应建议尽快联系部署方提供的专业支持资源。 如果出现具体 self-harm 自伤或 suicide 自杀计划、工具、时间地点、告"
+        }
+      ],
+      "hit": true,
+      "answerRelevanceHit": true,
+      "targetSourceHit": true,
+      "targetSourceFirstRank": 2,
+      "targetSourceRecallAtK": 1.0,
+      "firstRelevantRank": 1,
+      "recallAtK": 1.0,
+      "precisionAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "ndcgAtK": 1.0000000000000002,
+      "latencyMs": 3188.7958,
+      "safetyCritical": true
+    }
+  ],
+  "embeddingModel": "qwen3.7-text-embedding-flash",
+  "rerankerModel": "",
+  "indexSizeBytes": 0,
+  "corpusSizeBytes": 0,
+  "comparisonEligible": true,
+  "artifactVersion": {
+    "chatModel": "deepseek-v4-flash-vision-exp",
+    "classifierModel": "xling-general-cls-05b:quoted-f16",
+    "promptVersion": "ddc64c435fa41b9bea3e9ad3e03e6988d963561cf5a09c9274da736e1fce26c1",
+    "embeddingModel": "qwen3.7-text-embedding-flash",
+    "rerankerModel": "",
+    "indexVersion": "778218da40ff18fb6acacaabcb40b341617f61da9160dbee9eec8d42fef2979a",
+    "datasetVersion": "a19350f1ee45ca80d402fd8740763175095d48a398fd4dd7225df8b95e2aa774",
+    "calibrationVersion": "",
+    "codeRevision": "2f1b3b9abe2e8147c13702c7022694312fa295f0-dirty"
+  }
+}

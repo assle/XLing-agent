@@ -1,0 +1,165 @@
+{
+  "artifactVersion": {
+    "chatModel": "deepseek-v4-flash-vision-exp",
+    "classifierModel": "xling-general-cls-05b:quoted-f16",
+    "promptVersion": "2ed274ea674d88f8112c9a5c52515ed656c2f9366df33c40b22ef24a6364a6c7",
+    "embeddingModel": "qwen3.7-text-embedding-flash",
+    "rerankerModel": "",
+    "indexVersion": "778218da40ff18fb6acacaabcb40b341617f61da9160dbee9eec8d42fef2979a",
+    "datasetVersion": "0f0be8e433624e76a6e64b89e34128eff5b46d8739f1f16cdd21cb52f4fb4744",
+    "calibrationVersion": "",
+    "codeRevision": "2f1b3b9abe2e8147c13702c7022694312fa295f0-dirty"
+  },
+  "totalCases": 6,
+  "passedCases": 5,
+  "cases": [
+    {
+      "id": "ind-e2e-chat-01",
+      "category": "chat",
+      "sessionId": "2d8bd912fdd04af9ab6717a2b75f17d0",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-chat-05",
+      "category": "chat",
+      "sessionId": "7bb930f6db4f4cb6b6f6ab8d3c191914",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-support-low-03",
+      "category": "support",
+      "sessionId": "138047de3f304a11bf27feae093f8e56",
+      "intent": "CONSULT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "cbt",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK",
+        "RETRIEVE_KNOWLEDGE",
+        "ASK_CBT_QUESTION"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-support-medium-01",
+      "category": "support",
+      "sessionId": "d2122d4c8ed342cabaf1f2248dab8945",
+      "intent": "CONSULT",
+      "risk": "MEDIUM",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "cbt",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK",
+        "RETRIEVE_KNOWLEDGE",
+        "ASK_CBT_QUESTION"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-risk-01",
+      "category": "risk",
+      "sessionId": "930e6078ea7341eebc1cd2ac48acef4d",
+      "intent": "RISK",
+      "risk": "HIGH",
+      "reviewCreated": true,
+      "events": [
+        "meta",
+        "pending_review",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-knowledge-gap-01",
+      "category": "knowledge-gap",
+      "sessionId": "60c1ef7a17784039b17e2134aa00ae80",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "intent expected CONSULT, got CHAT",
+        "events expected ['meta', 'cbt', 'token', 'done'], got ['meta', 'token', 'done']",
+        "knowledge access allowed True, got False"
+      ]
+    }
+  ]
+}

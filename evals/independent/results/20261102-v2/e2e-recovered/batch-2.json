@@ -1,0 +1,162 @@
+{
+  "artifactVersion": {
+    "chatModel": "deepseek-v4-flash-vision-exp",
+    "classifierModel": "xling-general-cls-05b:quoted-f16",
+    "promptVersion": "7b6ae34b3276e7ebfb3c445ae4c2b94d3bb62d7bc274eb0f6575de6474054f17",
+    "embeddingModel": "qwen3.7-text-embedding-flash",
+    "rerankerModel": "",
+    "indexVersion": "778218da40ff18fb6acacaabcb40b341617f61da9160dbee9eec8d42fef2979a",
+    "datasetVersion": "803e0ade4368475efb90f3dbb19d576e9b44f5af995093b4b2be2235906611d7",
+    "calibrationVersion": "",
+    "codeRevision": "2f1b3b9abe2e8147c13702c7022694312fa295f0-dirty"
+  },
+  "totalCases": 6,
+  "passedCases": 6,
+  "cases": [
+    {
+      "id": "ind-e2e-chat-02",
+      "category": "chat",
+      "sessionId": "ab136317bad74ebabe0650cfa1679f7b",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-chat-06",
+      "category": "chat",
+      "sessionId": "cfb14a3cfb3d465eb2666216785f5c4d",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-support-low-04",
+      "category": "support",
+      "sessionId": "2c199d00adef4b59835f0ad69046d81c",
+      "intent": "CONSULT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "cbt",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK",
+        "RETRIEVE_KNOWLEDGE",
+        "ASK_CBT_QUESTION"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-support-medium-02",
+      "category": "support",
+      "sessionId": "5913b6a378a34aa69cc31597fc0b000e",
+      "intent": "CONSULT",
+      "risk": "MEDIUM",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "cbt",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK",
+        "RETRIEVE_KNOWLEDGE",
+        "ASK_CBT_QUESTION"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-risk-02",
+      "category": "risk",
+      "sessionId": "a340da42bd3941ff86458236359b8005",
+      "intent": "RISK",
+      "risk": "HIGH",
+      "reviewCreated": true,
+      "events": [
+        "meta",
+        "pending_review",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-knowledge-gap-02",
+      "category": "knowledge-gap",
+      "sessionId": "47a1186567f14640bd8112bc71d3128c",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "RETRIEVE_KNOWLEDGE",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    }
+  ]
+}

@@ -26,7 +26,7 @@ def test_e2e_eval_runs_the_production_chat_flow_and_records_versions(tmp_path):
             "category": "support",
             "messages": ["最近考研复习压力很大，我很担心，总是睡不着还会刷手机逃避"],
             "expectedIntent": "CONSULT",
-            "expectedRisk": "LOW",
+            "expectedRisk": "MEDIUM",
             "expectReview": False,
             "expectedEvents": ["meta", "cbt", "action_plan", "token", "done"],
         },

@@ -6,7 +6,13 @@ from dataclasses import dataclass
 from app.core import diagnostics
 from app.core.config import get_settings
 from app.core.enums import EmotionLabel, RiskLevel
-from app.services.ai import AiClient, has_high_risk_signal
+from app.services.ai import (
+    AiClient,
+    PromptTemplates,
+    has_high_risk_signal,
+    has_implicit_high_risk_review_signal,
+    has_non_self_high_risk_context,
+)
 from app.services.decision_classifier import DecisionPrediction, get_decision_classifier
 
 # ---------------------------------------------------------------------------
@@ -31,6 +37,32 @@ def safe_fallback_assessment() -> PsychologyAssessment:
     return PsychologyAssessment(
         EmotionLabel.ANXIETY, 2.5, RiskLevel.MEDIUM, 0.3,
         "模型评估不可用，已采用保守安全评估",
+    )
+
+
+_MODERATE_RISK_MARKERS = (
+    "连续几周", "持续", "每天", "长期", "半个月",
+    "睡不好", "失眠", "睡不着", "喘不过气", "只想躲",
+    "无法学习", "无法工作", "学不进去", "上不了班", "吃不下",
+    "没什么盼头", "没有盼头",
+)
+
+
+def has_moderate_risk_signal(text: str) -> bool:
+    """识别文本明确表达的持续性、身体负担或日常功能受损信号。"""
+    import re
+
+    return any(marker in text for marker in _MODERATE_RISK_MARKERS) or re.search(r"(?<!今)天天", text) is not None
+
+
+def with_moderate_severity(assessment: PsychologyAssessment, text: str) -> PsychologyAssessment:
+    """只把具有明确中等严重度信号的 LOW 提升为 MEDIUM，不降低任何结果。"""
+    if assessment.risk != RiskLevel.LOW or not has_moderate_risk_signal(text):
+        return assessment
+    return PsychologyAssessment(
+        assessment.emotion, 3.0, RiskLevel.MEDIUM, assessment.confidence,
+        f"{assessment.summary}；存在持续性或功能受损信号",
+        model_version=assessment.model_version,
     )
 
 
@@ -71,8 +103,8 @@ class PsychologicalAssessmentService:
             if has_high_risk_signal(text):
                 return PsychologyAssessment(EmotionLabel.HIGH_RISK, 4.0, RiskLevel.HIGH, 0.95, "检测到明确高风险表达")
             if self._backend_name() == "decision_head":
-                return self._assess_decision(text)
-            return self._assess_ollama(text)
+                return with_moderate_severity(self._assess_decision(text), text)
+            return with_moderate_severity(self._assess_ollama(text), text)
 
     async def aassess(self, text: str) -> PsychologyAssessment:
         """异步完成与同步入口相同的分类评估流程。
@@ -84,56 +116,73 @@ class PsychologicalAssessmentService:
                 return PsychologyAssessment(EmotionLabel.HIGH_RISK, 4.0, RiskLevel.HIGH, 0.95, "检测到明确高风险表达")
             if self._backend_name() == "decision_head":
                 settings = get_settings()
+                implicit_review = has_implicit_high_risk_review_signal(text)
+                non_self_review = has_non_self_high_risk_context(text)
                 try:
                     prediction = await asyncio.to_thread(self._decision().predict, text)
                 except Exception as exc:
                     diagnostics.degraded("assessment", "decision_head_unavailable", exc)
-                    return await self._assess_ollama_async(text)
+                    result = await self._assess_ollama_async(text, implicit_review=implicit_review)
+                    return with_moderate_severity(result, text)
                 direct = self._decision_direct(prediction, settings)
-                if direct is not None:
-                    return direct
+                context_high = non_self_review and prediction.high_risk_probability >= settings.classifier_high_risk_threshold
+                if direct is not None and (not implicit_review or direct.risk == RiskLevel.HIGH) and not context_high:
+                    return with_moderate_severity(direct, text)
                 try:
-                    fallback_label = await self.ai.aclassify(text)
+                    if context_high or implicit_review:
+                        fallback_label = await self.ai.acomplete(PromptTemplates.high_risk_context_prompt(text))
+                    else:
+                        fallback_label = await self.ai.aclassify(text)
                 except Exception as exc:
                     diagnostics.degraded("assessment", "classifier_unavailable", exc)
                     fallback_label = None
-                return self._decision_with_fallback(prediction, settings, fallback_label)
-            return await self._assess_ollama_async(text)
+                result = self._decision_with_fallback(
+                    prediction, settings, fallback_label,
+                    implicit_review=implicit_review, non_self_review=context_high,
+                )
+                return with_moderate_severity(result, text)
+            result = await self._assess_ollama_async(text)
+            return with_moderate_severity(result, text)
 
     # ------------------------------------------------------------------
     # 原生成式分类主路径；决策头不可用时也复用此路径。
     # ------------------------------------------------------------------
 
-    def _assess_ollama(self, text: str) -> PsychologyAssessment:
+    @staticmethod
+    def _implicit_review_unavailable() -> PsychologyAssessment:
+        """隐晦即时危险无法完成复核时保持高保护级别。"""
+        return PsychologyAssessment(
+            EmotionLabel.HIGH_RISK, 4.0, RiskLevel.HIGH, 0.4,
+            "隐晦即时危险复核不可用，按保守高风险处理",
+        )
+
+    def _classifier_label_result(self, label: str, implicit_review: bool) -> PsychologyAssessment:
+        """共享标签映射、未知标签诊断和保守回退，避免同步与异步规则漂移。"""
+        assessment = assessment_from_label(label)
+        if assessment is not None:
+            return assessment
+        diagnostics.degraded(
+            "assessment", "unknown_classifier_label",
+            status="empty_output" if not label.strip() else "non_label_output",
+        )
+        return self._implicit_review_unavailable() if implicit_review else safe_fallback_assessment()
+
+    def _assess_ollama(self, text: str, implicit_review: bool = False) -> PsychologyAssessment:
         """同步调用生成式分类器并映射标签，失败返回保守评估。"""
         try:
-            label = self.ai.classify(text)
-            assessment = assessment_from_label(label)
-            if assessment is not None:
-                return assessment
-            diagnostics.degraded(
-                "assessment", "unknown_classifier_label",
-                status="empty_output" if not label.strip() else "non_label_output",
-            )
+            return self._classifier_label_result(self.ai.classify(text), implicit_review)
         except Exception as exc:
             diagnostics.degraded("assessment", "classifier_unavailable", exc)
-        # 未知标签或调用失败都不能当作安全，返回明确带不确定性的保守评估。
-        return safe_fallback_assessment()
+        return self._implicit_review_unavailable() if implicit_review else safe_fallback_assessment()
 
-    async def _assess_ollama_async(self, text: str) -> PsychologyAssessment:
+    async def _assess_ollama_async(self, text: str, implicit_review: bool = False) -> PsychologyAssessment:
         """异步调用生成式分类器并映射标签，失败返回保守评估。"""
         try:
             label = await self.ai.aclassify(text)
-            assessment = assessment_from_label(label)
-            if assessment is not None:
-                return assessment
-            diagnostics.degraded(
-                "assessment", "unknown_classifier_label",
-                status="empty_output" if not label.strip() else "non_label_output",
-            )
+            return self._classifier_label_result(label, implicit_review)
         except Exception as exc:
             diagnostics.degraded("assessment", "classifier_unavailable", exc)
-        return safe_fallback_assessment()
+        return self._implicit_review_unavailable() if implicit_review else safe_fallback_assessment()
 
     # ------------------------------------------------------------------
     # 决策头分层安全策略：高风险双阈值 + 低置信度回退 + 分歧就高。
@@ -142,20 +191,29 @@ class PsychologicalAssessmentService:
     def _assess_decision(self, text: str) -> PsychologyAssessment:
         """同步执行决策头分层评估；模型加载或推理失败退回生成式主路径。"""
         settings = get_settings()
+        implicit_review = has_implicit_high_risk_review_signal(text)
+        non_self_review = has_non_self_high_risk_context(text)
         try:
             prediction = self._decision().predict(text)
         except Exception as exc:
             diagnostics.degraded("assessment", "decision_head_unavailable", exc)
-            return self._assess_ollama(text)
+            return self._assess_ollama(text, implicit_review=implicit_review)
         direct = self._decision_direct(prediction, settings)
-        if direct is not None:
+        context_high = non_self_review and prediction.high_risk_probability >= settings.classifier_high_risk_threshold
+        if direct is not None and (not implicit_review or direct.risk == RiskLevel.HIGH) and not context_high:
             return direct
         try:
-            fallback_label = self.ai.classify(text)
+            if context_high or implicit_review:
+                fallback_label = self.ai.complete(PromptTemplates.high_risk_context_prompt(text))
+            else:
+                fallback_label = self.ai.classify(text)
         except Exception as exc:
             diagnostics.degraded("assessment", "classifier_unavailable", exc)
             fallback_label = None
-        return self._decision_with_fallback(prediction, settings, fallback_label)
+        return self._decision_with_fallback(
+            prediction, settings, fallback_label,
+            implicit_review=implicit_review, non_self_review=context_high,
+        )
 
     def _decision_direct(self, prediction: DecisionPrediction, settings) -> PsychologyAssessment | None:
         """无需复核即可判定的分支：达到高风险阈值，或高置信且不在高风险灰区。
@@ -181,12 +239,9 @@ class PsychologicalAssessmentService:
 
     def _decision_with_fallback(
         self, prediction: DecisionPrediction, settings, fallback_label: str | None,
+        implicit_review: bool = False, non_self_review: bool = False,
     ) -> PsychologyAssessment:
-        """低置信或灰区样本的复核分支。
-
-        复核不可用：灰区按保守高风险处理，其余沿用保守中风险评估；
-        复核一致：采用决策头标签；复核分歧：按严重度就高，不把分歧解释为低风险。
-        """
+        """低置信、灰区、隐晦危险及非自身危险语境的复核分支。"""
         gray = prediction.high_risk_probability >= settings.classifier_high_risk_review_threshold
         if fallback_label is None or label_to_emotion(fallback_label) is None:
             if fallback_label is not None:
@@ -194,6 +249,13 @@ class PsychologicalAssessmentService:
                     "assessment", "unknown_classifier_label",
                     status="empty_output" if not fallback_label.strip() else "non_label_output",
                 )
+            if non_self_review:
+                return self._decision_result(
+                    "高风险", 0.4, prediction,
+                    "非自身危险语境复核不可用，保留保守高风险", fallback_used=True,
+                )
+            if implicit_review:
+                return self._implicit_review_unavailable()
             if gray:
                 return self._decision_result(
                     "高风险", 0.4, prediction,
@@ -201,10 +263,21 @@ class PsychologicalAssessmentService:
                 )
             return safe_fallback_assessment()
         fallback_label = fallback_label.strip()
+        if non_self_review:
+            reason = (
+                "完整语境复核确认当前用户自身高风险"
+                if fallback_label == "高风险"
+                else f"完整语境复核确认为非自身危险，采用复核标签{fallback_label}"
+            )
+            return self._decision_result(
+                fallback_label, min(prediction.confidence, 0.5), prediction,
+                reason, fallback_used=True,
+            )
         if fallback_label == prediction.label:
+            reason = "隐晦即时危险复核，与生成式复核一致" if implicit_review else "低置信回退，与生成式复核一致"
             return self._decision_result(
                 prediction.label, prediction.confidence, prediction,
-                "低置信回退，与生成式复核一致", fallback_used=True,
+                reason, fallback_used=True,
             )
         chosen = self._more_conservative(prediction.label, fallback_label)
         return self._decision_result(

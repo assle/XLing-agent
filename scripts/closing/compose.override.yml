@@ -22,8 +22,3 @@ services:
       ALERT_EMAIL_TO: closing-review@example.test
       SMTP_HOST: ""
       EXCEL_PATH: /app/data/closing-risk-ledger.xlsx
-      HTTP_PROXY: ""
-      HTTPS_PROXY: ""
-      ALL_PROXY: ""
-      http_proxy: ""
-      https_proxy: ""

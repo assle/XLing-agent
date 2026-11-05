@@ -64,9 +64,12 @@ class FakeDecisionClassifier:
         return make_prediction(self._probs)
 
 
-def _svc(probs=(0.95, 0.02, 0.02, 0.01), decision_error=False, fallback_label="", fallback_error=False):
-    """创建决策头后端评估服务，生成式复核由替身标签控制。"""
-    ai = FakeClassifierAiClient(fallback_label, fallback_error)
+def _svc(
+    probs=(0.95, 0.02, 0.02, 0.01), decision_error=False,
+    fallback_label="", fallback_error=False, review_label=None,
+):
+    """创建决策头后端评估服务，分别控制分类与完整语境复核。"""
+    ai = FakeClassifierAiClient(fallback_label, fallback_error, review_label=review_label)
     decision = FakeDecisionClassifier(probs, decision_error)
     return PsychologicalAssessmentService(ai, decision_classifier=decision, backend="decision_head")
 
@@ -207,3 +210,129 @@ def test_async_decision_head_error_uses_ollama_path():
     svc = _svc(decision_error=True, fallback_label="正常")
     result = asyncio.run(svc.aassess("今天天气不错"))
     assert result.emotion == EmotionLabel.NORMAL
+
+
+# ---------------------------------------------------------------------------
+# ADR-0019：语境直连边界与隐晦即时危险复核。
+# ---------------------------------------------------------------------------
+
+def test_negated_high_risk_words_use_full_assessment():
+    """否定自身危险时不直连，也不机械判高或判低。"""
+    svc = _svc()
+    result = svc.assess("我不是想伤害自己，只是剪指甲时不小心剪破了皮")
+    assert result.emotion == EmotionLabel.NORMAL
+    assert svc._decision_classifier.predict_count == 1
+    assert svc.ai.classify_count == 0
+
+
+def test_reported_high_risk_words_do_not_short_circuit():
+    """剧情、新闻和他人玩笑中的危险词只进入完整评估。"""
+    for text in (
+        "电影里的角色想自杀，这段剧情让我很意外",
+        "这篇报道说，遇到有轻生想法的人要及时求助",
+        "我弟弟昨天开玩笑说不想活了，只是在抱怨体测",
+        "老师说再这么熬夜就是慢性自杀，我得早点睡",
+    ):
+        svc = _svc()
+        assert svc.assess(text).emotion == EmotionLabel.NORMAL
+        assert svc._decision_classifier.predict_count == 1
+
+
+def test_double_negation_does_not_bypass_explicit_risk():
+    """双重否定表达真实危险时仍保留明确风险直连。"""
+    svc = _svc()
+    assert svc.assess("我不是没想过自杀").risk == RiskLevel.HIGH
+    assert svc._decision_classifier.predict_count == 0
+
+
+def test_implicit_danger_forces_review_despite_confident_normal():
+    """准备一次服完药物时，高置信正常也不能绕过完整生成式复核。"""
+    svc = _svc(review_label="高风险")
+    result = svc.assess("我把药全装在口袋里，准备一次吃完")
+    assert result.risk == RiskLevel.HIGH
+    assert svc.ai.complete_count == 1
+    assert svc.ai.classify_count == 0
+
+
+def test_implicit_danger_review_can_confirm_non_high_label():
+    """完整复核一致时不因触发信号本身直接改写为高风险。"""
+    svc = _svc(review_label="正常")
+    result = svc.assess("我把药全装在口袋里，准备一次吃完")
+    assert result.emotion == EmotionLabel.NORMAL
+    assert svc.ai.complete_count == 1
+
+
+def test_implicit_danger_review_outage_is_conservative_high():
+    """隐晦即时危险复核不可用时按保守高风险处理。"""
+    svc = _svc(fallback_error=True)
+    result = svc.assess("我已经给家人发了最后一条消息，今晚之后不会再联系了")
+    assert result.risk == RiskLevel.HIGH
+    assert result.confidence <= 0.5
+
+
+def test_async_implicit_danger_also_forces_review():
+    """异步入口同样不能让高置信正常绕过隐晦危险复核。"""
+    svc = _svc(review_label="高风险")
+    result = asyncio.run(svc.aassess("我已经把绳子系好了，这次不想再犹豫"))
+    assert result.risk == RiskLevel.HIGH
+    assert svc.ai.complete_count == 1
+    assert svc.ai.classify_count == 0
+
+
+# ---------------------------------------------------------------------------
+# ADR-0023 / 0024：HIGH 完整语境复核与独立中等严重度。
+# ---------------------------------------------------------------------------
+
+def test_non_self_decision_high_uses_full_context_review():
+    """剧情中的危险词被决策头误判 HIGH 时，由完整复核恢复正常。"""
+    svc = _svc(probs=(0.005, 0.002, 0.003, 0.99), review_label="正常")
+    result = svc.assess("电影里的角色想自杀，这段剧情让我很意外")
+    assert result.risk == RiskLevel.LOW
+    assert svc.ai.complete_count == 1
+    assert svc.ai.classify_count == 0
+
+
+def test_non_self_low_confidence_high_also_uses_context_review():
+    """低置信不会绕过非自身危险语境复核或直接保留 HIGH。"""
+    svc = _svc(probs=(0.2, 0.1, 0.1, 0.6), review_label="正常")
+    result = svc.assess("老师说再这么熬夜就是慢性自杀，我得早点睡")
+    assert result.risk == RiskLevel.LOW
+    assert svc.ai.complete_count == 1
+
+
+def test_non_self_review_outage_preserves_high():
+    """完整语境复核不可用时不把决策头 HIGH 解释为安全。"""
+    svc = _svc(probs=(0.05, 0.05, 0.1, 0.8), fallback_error=True)
+    result = svc.assess("这篇报道说，遇到有轻生想法的人要及时求助")
+    assert result.risk == RiskLevel.HIGH
+    assert result.confidence <= 0.5
+
+
+def test_async_non_self_review_uses_full_generation():
+    """异步入口与同步入口使用同一完整语境复核路径。"""
+    svc = _svc(probs=(0.05, 0.05, 0.1, 0.8), review_label="低落")
+    result = asyncio.run(svc.aassess("有时会觉得生活没什么盼头，但从没想过结束生命"))
+    assert result.risk == RiskLevel.MEDIUM
+    assert svc.ai.complete_count == 1
+    assert svc.ai.classify_count == 0
+
+
+@pytest.mark.parametrize("text", [
+    "父母最近天天争吵，我在家觉得很压抑，只想躲出去。",
+    "连续几周心慌胸闷，检查没发现问题，可我还是很害怕。",
+    "读研以后总觉得跟不上别人，每天都压得喘不过气。",
+    "室友持续孤立我，我最近回宿舍就紧张，晚上也睡不好。",
+])
+def test_explicit_moderate_severity_upgrades_low(text):
+    """明确持续性或功能受损信号把 LOW 提升为 MEDIUM。"""
+    result = _svc().assess(text)
+    assert result.risk == RiskLevel.MEDIUM
+    assert result.emotion_score == 3.0
+
+
+def test_moderate_severity_preserves_transient_low_and_high():
+    """短暂现实担忧不升级，已有 HIGH 也不会被严重度规则降低。"""
+    assert _svc().assess("明天要做课堂展示，有点紧张，但材料已经准备好了").risk == RiskLevel.LOW
+    assert _svc().assess("今天天气不错").risk == RiskLevel.LOW
+    high = _svc(probs=(0.1, 0.1, 0.2, 0.6)).assess("每天都很痛苦")
+    assert high.risk == RiskLevel.HIGH

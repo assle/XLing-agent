@@ -10,6 +10,7 @@ from app.core.config import Settings
 from app.models.entities import KnowledgeChunk
 
 PRIMARY_RETRIEVAL_LABEL = "Chroma dense + BM25 normalized fusion"
+DENSE_PRIMARY_RETRIEVAL_LABEL = "multi-query + Chroma dense primary (local hybrid fallback)"
 FALLBACK_RETRIEVAL_LABEL = "local hybrid_score"
 # DashScope 的同步兼容接口按模型限制为 10、20 或 25 条；10 条也适用于 OpenAI。
 _EMBEDDING_BATCH_SIZE = 10

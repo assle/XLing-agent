@@ -189,6 +189,51 @@ def test_evaluate_case_no_hit():
     assert result["ndcgAtK"] == 0.0
 
 
+def test_evaluate_case_separates_target_recall_from_reviewed_relevance():
+    """目标来源漏检与另一人工审核来源可回答可以同时成立。"""
+    results = [SearchResult(3, "privacy.md", "不诊断疾病，不开药", 0.1)]
+    case = {
+        "id": "dual",
+        "question": "助手能确诊开药吗",
+        "expectedSources": ["general.md"],
+        "expectedTerms": [],
+        "relevantSources": ["privacy.md"],
+        "relevanceReview": {"status": "approved", "reviewer": "human", "reason": "覆盖同一边界"},
+    }
+    result = evaluate_case(FakeKnowledgeService(results).retrieve, case, 4)
+    assert result["targetSourceHit"] is False
+    assert result["targetSourceRecallAtK"] == 0.0
+    assert result["answerRelevanceHit"] is True
+    assert result["hit"] is True
+    assert result["retrieved"][0]["targetSourceMatch"] is False
+    assert result["retrieved"][0]["relevant"] is True
+
+
+def test_evaluate_case_ignores_unreviewed_extra_sources():
+    """未经人工审核的来源不能由检索评测自行加入正确答案。"""
+    results = [SearchResult(3, "other.md", "可能相关", 0.1)]
+    case = {
+        "id": "unreviewed", "question": "q", "expectedSources": ["target.md"],
+        "expectedTerms": [], "relevantSources": ["other.md"],
+    }
+    result = evaluate_case(FakeKnowledgeService(results).retrieve, case, 4)
+    assert result["answerRelevanceHit"] is False
+    assert result["relevanceAnnotationStatus"] == "target-only-unreviewed"
+
+
+def test_evaluate_case_can_record_retrieval_stage_trace():
+    """诊断模式保存各阶段轨迹，但不改变原检索结果契约。"""
+    def retrieve(query, top_k, trace=None):
+        trace.update({"originalQuery": query, "queries": [{"query": query, "dense": [], "bm25": [], "fused": []}]})
+        return [SearchResult(1, "target.md", "evidence", 0.9)]
+
+    case = {"id": "trace", "question": "q", "expectedSources": ["target.md"], "expectedTerms": []}
+    result = evaluate_case(retrieve, case, 4, with_diagnostics=True)
+    assert result["diagnostics"]["originalQuery"] == "q"
+    assert result["diagnostics"]["queries"][0]["query"] == "q"
+    assert result["hit"] is True
+
+
 # ---------------------------------------------------------------------------
 # compute_report + build_eval_summary
 # ---------------------------------------------------------------------------
@@ -400,6 +445,13 @@ def test_strategy_label_multi_query():
     assert FALLBACK_RETRIEVAL_LABEL in label
 
 
+def test_strategy_label_dense_primary():
+    """dense 主检索报告不沿用旧 RRF 名称。"""
+    label = _strategy_label("dense-primary", PRIMARY_RETRIEVAL_LABEL)
+    assert "dense primary" in label
+    assert "hybrid-RRF" not in label
+
+
 def test_strategy_label_hybrid_rrf():
     """读取排名融合方案名称。
 
@@ -474,6 +526,19 @@ def test_rrf_fuse_chunk_in_both_lists_ranks_first():
     fused = KnowledgeService._rrf_fuse([list_a, list_b], top_k=3, k=60)
     assert fused[0].chunk_id == 2
     assert len(fused) == 3
+
+
+def test_rrf_fuse_best_single_channel_outranks_weak_dual_channel_agreement():
+    """最佳单路第一名不被 dense 第二名加较弱词法名次的累计票挤出。"""
+    from app.services.knowledge import KnowledgeService
+    target = SearchResult(1, "english.md", "target", 0.9)
+    other = SearchResult(2, "chinese.md", "other", 0.8)
+    filler = SearchResult(3, "filler.md", "filler", 0.7)
+    dense = [target, other]
+    sparse = [filler, SearchResult(2, "chinese.md", "other", 0.1)]
+    fused = KnowledgeService._rrf_fuse([dense, sparse], top_k=3, k=60)
+    scores = {row.chunk_id: row.score for row in fused}
+    assert scores[1] > scores[2]
 
 
 def test_rrf_fuse_empty_lists():
@@ -727,7 +792,7 @@ def _write_fake_summary(path: Path, metrics: dict) -> None:
 
 
 def test_build_comparison_all_strategies_present():
-    """准备六种方案的摘要和可手算指标。
+    """准备八种方案的摘要和可手算指标。
 
     检查全部可用、最佳方案及相对基线差值正确，并优先以融合方案为当前参照。
     """
@@ -737,6 +802,8 @@ def test_build_comparison_all_strategies_present():
         _write_fake_summary(tmp_path / "multi-query.json", {"recallAtK": 0.85, "precisionAtK": 0.55, "mrr": 0.75, "ndcgAtK": 0.65, "hitRate": 0.92})
         _write_fake_summary(tmp_path / "hybrid-rrf.json", {"recallAtK": 0.82, "precisionAtK": 0.52, "mrr": 0.72, "ndcgAtK": 0.62, "hitRate": 0.88})
         _write_fake_summary(tmp_path / "llm-rerank.json", {"recallAtK": 0.90, "precisionAtK": 0.60, "mrr": 0.80, "ndcgAtK": 0.70, "hitRate": 0.95})
+        _write_fake_summary(tmp_path / "hyde-multi-query.json", {"recallAtK": 0.86, "precisionAtK": 0.56, "mrr": 0.76, "ndcgAtK": 0.66, "hitRate": 0.93})
+        _write_fake_summary(tmp_path / "hyde-rerank.json", {"recallAtK": 0.84, "precisionAtK": 0.54, "mrr": 0.74, "ndcgAtK": 0.64, "hitRate": 0.91})
         _write_fake_summary(tmp_path / "bge.json", {"recallAtK": 0.88, "precisionAtK": 0.58, "mrr": 0.78, "ndcgAtK": 0.68, "hitRate": 0.94})
         _write_fake_summary(tmp_path / "bge-rerank.json", {"recallAtK": 0.92, "precisionAtK": 0.62, "mrr": 0.82, "ndcgAtK": 0.72, "hitRate": 0.96})
 
@@ -745,13 +812,15 @@ def test_build_comparison_all_strategies_present():
             "rag_eval_multi_query_output": str(tmp_path / "multi-query.json"),
             "rag_eval_hybrid_rrf_output": str(tmp_path / "hybrid-rrf.json"),
             "rag_eval_llm_rerank_output": str(tmp_path / "llm-rerank.json"),
+            "rag_eval_hyde_multi_query_output": str(tmp_path / "hyde-multi-query.json"),
+            "rag_eval_hyde_rerank_output": str(tmp_path / "hyde-rerank.json"),
             "rag_eval_bge_summary_output": str(tmp_path / "bge.json"),
             "rag_eval_bge_rerank_summary_output": str(tmp_path / "bge-rerank.json"),
         })
 
         comparison = build_comparison(settings)
 
-        assert len(comparison["strategies"]) == 6
+        assert len(comparison["strategies"]) == 8
         assert all(s["available"] for s in comparison["strategies"])
         assert comparison["strategies"][0]["name"] == "baseline"
         assert comparison["strategies"][0]["metrics"]["mrr"] == 0.70
@@ -774,6 +843,8 @@ def test_build_comparison_missing_strategy():
             "rag_eval_multi_query_output": str(tmp_path / "missing-mq.json"),
             "rag_eval_hybrid_rrf_output": str(tmp_path / "missing-rrf.json"),
             "rag_eval_llm_rerank_output": str(tmp_path / "missing-rerank.json"),
+            "rag_eval_hyde_multi_query_output": str(tmp_path / "missing-hyde-multi-query.json"),
+            "rag_eval_hyde_rerank_output": str(tmp_path / "missing-hyde-rerank.json"),
             "rag_eval_bge_summary_output": str(tmp_path / "missing-bge.json"),
             "rag_eval_bge_rerank_summary_output": str(tmp_path / "missing-bge-rerank.json"),
         })
@@ -802,6 +873,8 @@ def test_build_comparison_only_baseline_no_delta():
             "rag_eval_multi_query_output": str(tmp_path / "multi-query.json"),
             "rag_eval_hybrid_rrf_output": str(tmp_path / "missing.json"),
             "rag_eval_llm_rerank_output": str(tmp_path / "missing2.json"),
+            "rag_eval_hyde_multi_query_output": str(tmp_path / "missing-hyde-multi-query.json"),
+            "rag_eval_hyde_rerank_output": str(tmp_path / "missing-hyde-rerank.json"),
             "rag_eval_bge_summary_output": str(tmp_path / "missing-bge.json"),
             "rag_eval_bge_rerank_summary_output": str(tmp_path / "missing-bge-rerank.json"),
         })

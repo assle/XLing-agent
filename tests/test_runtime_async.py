@@ -62,6 +62,40 @@ def test_deployment_resource_question_does_not_bypass_distress_or_safety():
     assert danger.intent == IntentType.RISK and danger.pending_review
 
 
+def test_school_resource_queries_use_chat_and_skip_cbt():
+    """学校心理中心的事实查询不进入心理访谈，并可使用部署资源资料。"""
+    resource = SearchResult(1, "deployment-resources.md", "预约信息以部署方快照为准，TEST-ONLY。", .9)
+    runtime = build_runtime(
+        LangGraphAgentRuntimeService,
+        knowledge=FakeKnowledgeStore([resource]),
+        memory=FakeMemoryStore([AiMessage(role="user", content="你好")]),
+    )
+    for index, text in enumerate((
+        "我们学校心理中心这周六的具体预约电话是多少",
+        "今晚心理中心值班老师的姓名和办公室门牌号是什么",
+    )):
+        user, session = _user_session(f"school-resource-{index}")
+        result = asyncio.run(runtime.run(user, session, text))
+        assert result.intent == IntentType.CHAT
+        assert result.cbt_event is None and result.assessment is None
+        assert result.retrieved_knowledge == [resource]
+
+
+def test_general_task_word_cannot_short_circuit_distress():
+    """包含“项目”的心理困扰仍由完整模型分流，不提前判为日常任务。"""
+    runtime = _setup_runtime()
+    calls = []
+
+    async def semantic_consult(messages):
+        calls.append(messages)
+        return "CONSULT"
+
+    runtime.ai.acomplete = semantic_consult
+    intent = asyncio.run(runtime._classify("项目失败后我一直很消沉，以前喜欢的事也不想做了", []))
+    assert intent == IntentType.CONSULT
+    assert len(calls) == 1
+
+
 def test_nonkeyword_danger_in_resource_query_still_reaches_intent_model():
     runtime = _setup_runtime()
     calls = []
@@ -74,6 +108,18 @@ def test_nonkeyword_danger_in_resource_query_still_reaches_intent_model():
     intent = asyncio.run(runtime._classify("我已经吞了一整瓶安眠药，现在想联系机构热线。", []))
     assert intent == IntentType.RISK
     assert len(calls) == 1
+
+
+def test_action_plan_requires_explicit_thoughts():
+    """情绪词不能替代想法，维度不完整时不生成计划。"""
+    runtime = _setup_runtime()
+    user, session = _user_session("native-action-plan-missing-thought")
+    incomplete = asyncio.run(runtime.run(
+        user, session, "考驾照让我很紧张，晚上睡不着，我一直刷视频不去背题",
+    ))
+    assert incomplete.action_plan_event is None
+    assert incomplete.cbt_event is not None and not incomplete.cbt_event.complete
+    assert runtime.memory.load_cbt_state(session.public_id)["thoughts"] is None
 
 
 def test_langgraph_runtime_consult():

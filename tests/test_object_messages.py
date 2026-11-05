@@ -426,7 +426,8 @@ def test_ordinary_text_during_checkin_uses_existing_model_flow(object_api, monke
     original_stream = AiClient.stream
 
     async def observed_complete(self, *args, **kwargs):
-        calls.append("classify")
+        system = " ".join(message.content for message in args[0] if message.role == "system")
+        calls.append("classify" if "意图分类器" in system else "memory")
         return await original_complete(self, *args, **kwargs)
 
     async def observed_stream(self, *args, **kwargs):
@@ -439,7 +440,7 @@ def test_ordinary_text_during_checkin_uses_existing_model_flow(object_api, monke
     events = _chat(harness, headers, "Python 怎么读取 JSON？", session_id)
     assert events[-1][0] == "done"
     assert "请告诉我执行后" not in _reply(events)
-    assert calls == ["classify", "stream"]
+    assert calls == ["memory", "classify", "stream"]
     with harness.sessions() as db:
         assert db.query(CheckIn).count() == 0
         assert db.query(ReviewRequest).count() == 0

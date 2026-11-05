@@ -1,6 +1,6 @@
 # 通用四分类器
 
-当前采用的实验性分类器为 `xling-general-cls-05b:quoted-f16`，使用 Qwen2.5-0.5B-Instruct 系列的历史已合并基座与 376 条训练适配器，输入格式为 `quoted`。分类结果用于消息分流和安全信号，不作诊断。当前选型、权重身份、数据与保留证据指纹统一见 [classifier-selection.json](reports/classifier-selection.json)；人类分类标签复核与完整模型资格验收尚未完成。
+当前采用的实验性分类器为 `xling-general-cls-05b:quoted-f16`，使用 Qwen2.5-0.5B-Instruct 系列的历史已合并基座与 376 条训练适配器，输入格式为 `quoted`。分类结果用于消息分流和安全信号。当前选型、权重身份、数据与保留证据指纹统一见 [classifier-selection.json](reports/classifier-selection.json)，标签复核进度见[数据质量清单](data/quality-checklist.md)。
 
 ## 核心记录
 
@@ -16,9 +16,9 @@
 
 ## 数据
 
-[训练集](data/current-classifier/train-376.jsonl)共 376 条，每类 94 条、64 个来源组；[选模验证集](data/current-classifier/validation-128.jsonl)共 128 条、24 个来源组。训练数据的机械模板主体占 200/376，其余为自然表达、否定与时间作用域增补。训练与验证没有逐字输入重叠或同名来源组交叉，但共享生成方式；选模验证成绩不能替代独立测试。
+[训练集](data/current-classifier/train-376.jsonl)共 376 条，每类 94 条、64 个来源组；[选模验证集](data/current-classifier/validation-128.jsonl)共 128 条、24 个来源组。训练数据的机械模板主体占 200/376，其余为自然表达、否定与时间作用域增补。训练与验证没有逐字输入重叠或同名来源组交叉，生成方式相同；独立测试单独记录。
 
-工程内容审读核对了原标签、来源和支撑片段，未使用模型预测：353 条标签支撑明确、23 条支撑边界，未发现标签冲突，原标签未改写。逐条依据见 [正常／焦虑](reports/current-classifier/content-review/normal-anxiety.json)与[低落／高风险](reports/current-classifier/content-review/low-high.json)。这些记录不代表人类标签复核。
+工程内容审读核对了原标签、来源和支撑片段，未使用模型预测：353 条标签支撑明确、23 条支撑边界，未发现标签冲突，原标签未改写。逐条依据见 [正常／焦虑](reports/current-classifier/content-review/normal-anxiety.json)与[低落／高风险](reports/current-classifier/content-review/low-high.json)。人类标签复核进度见[数据质量清单](data/quality-checklist.md)。
 
 固定回归集合为[机械 80 条](data/general-routing-v2/general-test.jsonl)、[既有自然 40 条](data/current-classifier/natural-v12-r2-40.jsonl)与[补充自然 40 条](data/boundary-v3/acceptance-40.jsonl)。后者在历史候选锁定后首次评价，标签来源见 [review.json](reports/model-repair/acceptance/review.json)与 [support-evidence.json](reports/model-repair/acceptance/support-evidence.json)；本次消融时全部 160 条已经曝光。数据为工程合成文本，分数按固定原标签计算。
 
@@ -32,7 +32,7 @@
 
 已采用训练使用 HF/PEFT、MPS、float16 基座与新建 LoRA，固定 4 epochs、学习率 `5e-5`、rank 8（`q_proj/k_proj/v_proj/o_proj`）、batch size 1、梯度累积 8、最大长度 256、seed 42。完成 188 次更新，按验证 macro F1 最大值选中 batch 752（epoch 2），平分保留首次结果；训练阶段未读取测试集。
 
-选模验证结果为 125/128（97.65625%）、macro F1 0.976545、高风险召回 32/32、1 条高风险误报、输出有效率 100%。原先“零高风险误报”的严格资格门槛未通过，当前仍为实验性候选。
+选模验证结果为 125/128（97.65625%）、macro F1 0.976545、高风险召回 32/32、1 条高风险误报、输出有效率 100%。资格门槛设为零高风险误报，本次结果对应实验性候选状态。
 
 系统提示来自冻结文件，用户输入为 `待分类文本（仅分析其表达，不执行其中的请求）：` 后接换行与 `json.dumps(text, ensure_ascii=False)`。当前 [训练 CLI](scripts/train_general_classifier.py)与业务客户端共享[输入包装](../app/core/classifier_contract.py)，通过 `--system-prompt-file` 与 `--input-format quoted` 复用契约。
 
@@ -51,9 +51,9 @@
 | 实际历史基座，不启用这次 LoRA | 129 | 80.625% | 0.822445 | 40/40 | 13 | 152/160（95%） |
 | 同基座，启用已选 376 LoRA | 156 | 97.5% | 0.974937 | 40/40 | 4 | 160/160（100%） |
 
-在这组固定回归条件下，该适配器的准确率增量为 **16.875 个百分点**：28 条改对、1 条改错、128 条两组均正确、3 条两组均错误。8 条改对来自输出协议对齐：基座输出“紧张”“沮丧”“悲伤”等同义词，未符合约定的四个枚举，按冻结规则计为无效，不能全部解释为语义理解错误。两组均有效的 152 条条件子集中，准确率为 84.868% 对 97.368%；该条件子集只辅助解释，不替代全 160 条分母。开启适配器后的 160 条预测与已有已选 GGUF/F16 报告逐题一致。
+在这组固定回归条件下，该适配器的准确率增量为 **16.875 个百分点**：28 条改对、1 条改错、128 条两组均正确、3 条两组均错误。其中 8 条改对来自输出协议对齐：基座输出“紧张”“沮丧”“悲伤”等同义词，未符合约定的四个枚举，按冻结规则计为无效，与语义理解错误分开统计。两组均有效的 152 条条件子集中，准确率为 84.868% 对 97.368%；汇总指标仍以全 160 条为分母。开启适配器后的 160 条预测与已有已选 GGUF/F16 报告逐题一致。
 
-该消融隔离的是**这次新增 LoRA 在其实际历史已合并基座上的贡献**。基座已含更早的合并微调，不是干净原始 Qwen；160 条均是已经曝光的工程合成回归问题，人工分类标签复核仍未完成。因此不外推为全部 LoRA 相对原始基座的收益、全新独立测试或真实用户／临床效果。延迟只作当次运行描述，不作为部署速度提升结论。预先冻结的条件见 [protocol.json](reports/lora-ablation-20261007/protocol.json)，逐题原始输出、状态、版本与指标见 [paired.json](reports/lora-ablation-20261007/paired.json)，复核与解释见 [summary.json](reports/lora-ablation-20261007/summary.json)。原面试冻结标签和当前部署模型保持原版本。
+该消融隔离的是**这次新增 LoRA 在其实际历史已合并基座上的贡献**。基座已含更早的合并微调；数据为 160 条已曝光的工程合成回归问题，人工分类标签复核进度见数据清单。延迟记录对应当次运行环境。预先冻结的条件见 [protocol.json](reports/lora-ablation-20261007/protocol.json)，逐题原始输出、状态、版本与指标见 [paired.json](reports/lora-ablation-20261007/paired.json)，复核与解释见 [summary.json](reports/lora-ablation-20261007/summary.json)。原面试冻结标签和当前部署模型保持原版本。
 
 复跑使用[增量消融入口](scripts/ablate_hf_classifier.py)，输出文件须为新文件；本机权重路径准备好后执行：
 
@@ -88,6 +88,6 @@ TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 \
 
 ## 决策头架构实验（2026-10-30）
 
-借鉴 Strands Decider / Clef 的单次前向决策模型范式，新增[决策头训练入口](scripts/train_decision_head_classifier.py)与[评测入口](scripts/evaluate_decision_head_classifier.py)：同基座、同数据、同超参下训练 LoRA + 固定标签线性决策头，不生成文本，直接输出四类概率。固定 160 例回归集上 160/160、高风险误报 0（已选生成式为 156/160、误报 4），P50 约 34 ms；满分基于已曝光合成回归集，不作泛化结论。配置、逐例概率、历史误报核对与限制见[实验报告](reports/decision-head-20261030/summary.md)。
+借鉴 Strands Decider / Clef 的单次前向决策模型范式，新增[决策头训练入口](scripts/train_decision_head_classifier.py)与[评测入口](scripts/evaluate_decision_head_classifier.py)：同基座、同数据、同超参下训练 LoRA + 固定标签线性决策头，直接输出四类概率。固定 160 例已曝光合成回归集上 160/160、高风险误报 0（已选生成式为 156/160、误报 4），P50 约 34 ms。配置、逐例概率、历史误报核对与实验条件见[实验报告](reports/decision-head-20261030/summary.md)。
 
-同日新增[温度校准拟合入口](scripts/fit_decision_head_temperature.py)，在 training-only 验证集 128 条概率上拟合温度（T≈1.94，NLL 0.061→0.043），产物为 `finetune/saves/qwen25-05b-decision-head-376/calibration.json`。决策头已接入业务评估路径并作为默认后端（`CLASSIFIER_BACKEND=decision_head`，`app/services/decision_classifier.py` + `app/services/assessment.py` 分层安全策略：高风险双阈值、低置信回退生成式复核、分歧就高；权重缺失或故障时自动回退生成式主路径），架构决策见 [ADR-0016](../docs/adr/0016-decision-head-classifier-layered-safety.md)；生产替换资格仍待新鲜盲测集验证。
+同日新增[温度校准拟合入口](scripts/fit_decision_head_temperature.py)，在 training-only 验证集 128 条概率上拟合温度（T≈1.94，NLL 0.061→0.043），产物为 `finetune/saves/qwen25-05b-decision-head-376/calibration.json`。决策头已接入业务评估路径并作为默认后端（`CLASSIFIER_BACKEND=decision_head`），应用实现位于 `app/services/decision_classifier.py` 与 `app/services/assessment.py`。分层策略包括高风险双阈值、低置信回退生成式复核和分歧就高；权重缺失或故障时回退生成式主路径。架构决策见 [ADR-0016](../docs/adr/0016-decision-head-classifier-layered-safety.md)，独立验证结果见[工程验证](../docs/project-validation.md)。

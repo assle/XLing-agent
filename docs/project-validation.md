@@ -38,7 +38,7 @@ docker compose -p xling-closing -f docker-compose.yml \
 | 无记忆隔离 | `scripts/closing/browser-no-memory.mjs` | [无记忆](../assets/closing-videos/no-memory.webm) | 新无记忆会话不读确认卡片；当前会话历史保留；诊断日志无长期背景/卡片读取事件 |
 | 工具失败、重试与幂等 | `scripts/closing/browser-tool-verified.mjs` | [工具重试](../assets/closing-videos/tool-retry-idempotency.webm) | 本地 SMTP 首次 451；15 秒后自动成功；重复登记和调用后仍为两任务、一台账行、一成功通知 |
 
-脚本使用隔离测试身份；不得改为生产账号。复跑生成的视频及执行结果写入 `.scratch/closing-evidence/`。既有六段成功录屏以 [验证清单](../evals/reports/closing-runtime/manifest.json) 中的仓库相对路径及 SHA256 为准；其中 HIGH 录屏属于已退休的图恢复流程，不能作为当前人工支持验收证据。原始结果 JSON 的绝对路径保留拍摄时的执行上下文。脚本返回成功只是流程证据，不代表专业支持或治疗成功；提前反馈只验证保存和分流，不是实际等待 24 小时后的效果。
+脚本使用隔离测试身份，复跑生成的视频及执行结果写入 `.scratch/closing-evidence/`。既有六段成功录屏以 [验证清单](../evals/reports/closing-runtime/manifest.json) 中的仓库相对路径及 SHA256 为准；HIGH 录屏对应已退休的图恢复流程，当前人工支持使用新的测试入口。原始结果 JSON 的绝对路径保留拍摄时的执行上下文。提前反馈测试覆盖保存和分流，执行时间模拟反馈提交时刻。
 
 本机执行脚本的已验证形式为：
 
@@ -54,7 +54,7 @@ env PLAYWRIGHT_BROWSERS_PATH=/Users/assle/dev/mindbridge-py/.scratch/closing-run
 
 自动检查使用 README 的 Python、前端、Ruff、mypy 和独立 MySQL 事务入口。当前成功结果及实际运行配置见 [验证清单](../evals/reports/closing-runtime/manifest.json)。未配置测试数据库的本机 pytest 跳过 MySQL 用例，独立容器运行与这些跳过分开记录。
 
-本轮 40 条 RAG 与 12 对回答不替代原至少 100 条及全策略产品验收。分类器仍为合成固定数据上的实验性候选，已知四条焦虑误报和人审/临床资格限制保持有效。相关原产品任务只有全部现行要求被验证后才关闭，本轮不据此宣布完整产品或临床资格验收通过。
+本轮评测包含 40 条 RAG 与 12 对回答。分类器使用合成固定数据，已知四条焦虑误报；人工复核与验收进度按对应清单记录。
 
 ## 版本交付
 
@@ -73,7 +73,15 @@ git archive --format=tar.gz --prefix=xling/ \
 
 ## 2026-10-30 增量：决策头分类器与检索策略
 
-- 决策头分类器：同基座、数据与超参训练的单次前向模型，固定 160 例回归集 160/160、高风险误报 0、本机 P50 约 34 ms；报告与复跑入口见 [实验报告](../finetune/reports/decision-head-20261030/summary.md)。该集合为已曝光合成数据，原"实验性候选、人审未完成"的限制继续有效，生产替换资格待新鲜盲测集验证。
+- 决策头分类器：同基座、数据与超参训练的单次前向模型，固定 160 例已曝光合成回归集 160/160、高风险误报 0、本机 P50 约 34 ms；报告与复跑入口见 [实验报告](../finetune/reports/decision-head-20261030/summary.md)，人工复核进度见数据清单。
 - 业务接入：`CLASSIFIER_BACKEND=decision_head` 为默认后端，温度校准 T≈1.94，分层安全策略（高风险双阈值、低置信回退、分歧就高、失败保守）见 [ADR-0016](adr/0016-decision-head-classifier-layered-safety.md)；相关 135 个测试通过，真实模型端到端验证高置信直判与灰区保守路径。
-- 检索策略：线上默认切换为多查询＋混合 RRF（接受 P95 约 3.9 s），归一化加权保留为 `normalized_fusion` 可选，见 [ADR-0017](adr/0017-online-multi-query-hybrid-rrf.md)；检索相关 76 个、运行时 45 个测试通过。Docker 端 100 题线上口径复跑尚未执行。
-- 以上增量未重新录制业务流程录屏，不替代前述冻结版本的验收口径。
+- 检索策略：线上默认切换为多查询＋混合 RRF（接受 P95 约 3.9 s），归一化加权保留为 `normalized_fusion` 可选，见 [ADR-0017](adr/0017-online-multi-query-hybrid-rrf.md)；检索相关 76 个、运行时 45 个测试通过。该次未执行 Docker 端 100 题线上口径复跑。
+- 以上增量沿用前述冻结版本的录屏与验收口径。
+
+## 2026-11-02 增量：独立风险与 RAG 验证、实验入口收敛
+
+- 完整风险服务在冻结独立风险集上为 35/36，Accuracy 97.22%、Macro F1 97.22%，HIGH 召回与精确率均为 100%。决策头是默认单次前向主分类器；ADR-0019、ADR-0023 增加语境复核，ADR-0024 增加独立严重度判断。
+- 在线默认检索已由 ADR-0026 改为多查询＋Chroma dense 主检索，取代 ADR-0017 的默认混合 RRF。冻结 RAG 集目标来源 Recall@4 为 29/30（96.67%），方案确定后运行的 12 题 holdout 为 11/12（91.67%）。
+- 原 100 题 RAG 回归保留完整原始来源命中率 61.00%；其中 36 题引用已经删除的旧知识源。现行来源可判定的 64 题为 61/64（95.31%）。目标来源安全漏检为 `risk-professional-support` 1 题，其他现行资料命中了该题的预期答案词项。
+- 离线检索策略统一由 `KnowledgeService.retrieve_experiment` 分派；具体指标、旧来源口径、漏检和复现说明见 [优化验证报告](../evals/independent/results/20261102-v3/optimization-report.md)。完整非 MySQL 回归为 646 passed，MySQL 专项测试单独运行。
+- 冻结数据文件的 SHA256 与冻结清单一致，标签人工复核状态以冻结清单为准。

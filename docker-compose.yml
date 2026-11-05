@@ -19,6 +19,8 @@ services:
 
   mysql:
     image: mysql:8.0
+    ports:
+      - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-xling}
@@ -50,9 +52,8 @@ services:
   ollama:
     image: ${OLLAMA_IMAGE:-docker.1ms.run/ollama/ollama:0.1.48}
     profiles: [models]
-    environment:
-      NO_PROXY: localhost,127.0.0.1,::1,0.0.0.0,ollama
-      no_proxy: localhost,127.0.0.1,::1,0.0.0.0,ollama
+    ports:
+      - "127.0.0.1:11434:11434"
     volumes:
       - ollama-data:/root/.ollama
     healthcheck:
@@ -69,8 +70,6 @@ services:
       ollama:
         condition: service_healthy
     environment:
-      NO_PROXY: localhost,127.0.0.1,::1,0.0.0.0,ollama
-      no_proxy: localhost,127.0.0.1,::1,0.0.0.0,ollama
       OLLAMA_HOST: http://ollama:11434
       AI_PROVIDER: ${AI_PROVIDER:-ollama}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-xling-qwen2.5-7b-ft:latest}
@@ -130,51 +129,21 @@ services:
 
   app:
     build: .
+    env_file: .env
     depends_on:
       mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
     environment:
-      HTTP_PROXY: ${HTTP_PROXY:-http://host.docker.internal:7897}
-      HTTPS_PROXY: ${HTTPS_PROXY:-http://host.docker.internal:7897}
-      http_proxy: ${http_proxy:-http://host.docker.internal:7897}
-      https_proxy: ${https_proxy:-http://host.docker.internal:7897}
-      NO_PROXY: localhost,127.0.0.1,::1,0.0.0.0,ollama,mysql,redis,caddy,host.docker.internal
-      no_proxy: localhost,127.0.0.1,::1,0.0.0.0,ollama,mysql,redis,caddy,host.docker.internal
+      # 本机可变配置统一来自 .env；这里只保留容器网络、派生地址和必要校验。
       AI_PROVIDER: ${AI_PROVIDER:-mock}
-      AI_MAX_TOKENS: ${AI_MAX_TOKENS:-2048}
       OLLAMA_BASE_URL: http://ollama:11434
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-xling-qwen2.5-7b-ft:latest}
-      OLLAMA_CLASSIFIER_MODEL: ${OLLAMA_CLASSIFIER_MODEL:-xling-cls-3b-ft:latest}
-      CLASSIFIER_INPUT_FORMAT: ${CLASSIFIER_INPUT_FORMAT:-plain}
-      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
-      OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
-      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-}
-      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
       DATABASE_URL: mysql+pymysql://${MYSQL_USER:-xling}:${MYSQL_PASSWORD:-xling}@mysql:3306/${MYSQL_DATABASE:-xling}?charset=utf8mb4
       REDIS_URL: redis://redis:6379/0
-      KNOWLEDGE_VECTOR_ENABLED: ${KNOWLEDGE_VECTOR_ENABLED:-true}
-      KNOWLEDGE_VECTOR_REQUIRED: ${KNOWLEDGE_VECTOR_REQUIRED:-false}
       CHROMA_PERSIST_DIR: /app/data/chroma
-      CHROMA_COLLECTION_NAME: ${CHROMA_COLLECTION_NAME:-xling_knowledge}
-      TOOL_QUEUE_ENABLED: ${TOOL_QUEUE_ENABLED:-true}
-      TOOL_QUEUE_EXCEL_WORKERS: ${TOOL_QUEUE_EXCEL_WORKERS:-1}
-      TOOL_QUEUE_EMAIL_WORKERS: ${TOOL_QUEUE_EMAIL_WORKERS:-2}
-      ALERT_EMAIL_DELIVERY_MODE: ${ALERT_EMAIL_DELIVERY_MODE:-log}
-      ALERT_EMAIL_RATE_LIMIT_PER_MINUTE: ${ALERT_EMAIL_RATE_LIMIT_PER_MINUTE:-30}
       EXCEL_PATH: /app/data/xling-risk-ledger.xlsx
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:?JWT_SECRET_KEY is required}
-      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
-      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
-      SMTP_HOST: ${SMTP_HOST:-}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_USERNAME: ${SMTP_USERNAME:-}
-      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-      ALERT_EMAIL_FROM: ${ALERT_EMAIL_FROM:-}
-      ALERT_EMAIL_TO: ${ALERT_EMAIL_TO:-}
     volumes:
       - app-data:/app/data
     restart: unless-stopped

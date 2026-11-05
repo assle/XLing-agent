@@ -9,6 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.agents.langgraph_runtime import is_deployment_resource_question
 from app.agents.runtime import AgentRunResult
 from app.core.bootstrap import create_schema, seed_data
 from app.core.enums import RiskLevel
@@ -115,7 +116,11 @@ async def _run_case(db, settings: EvalSettings, user: UserAccount, case: dict) -
     knowledge_indexes = [
         index for index, action in enumerate(actions) if action == "RETRIEVE_KNOWLEDGE"
     ]
-    safety_before_knowledge = not knowledge_indexes or (
+    pure_resource_query = (
+        actual_intent == case["expectedIntent"] == "CHAT"
+        and all(is_deployment_resource_question(message) for message in case["messages"])
+    )
+    safety_before_knowledge = not knowledge_indexes or pure_resource_query or (
         bool(assessment_indexes) and assessment_indexes[0] < knowledge_indexes[0]
     )
     failures = []

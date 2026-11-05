@@ -340,7 +340,12 @@ def test_asgi_disconnect_closes_streams_in_the_request_context_without_saving_pa
         async def aclose(self):
             closed_in.append(asyncio.current_task())
 
-    transport = httpx.MockTransport(lambda request: httpx.Response(200, stream=Response()))
+    def respond(request):
+        if not json.loads(request.content)["stream"]:
+            return httpx.Response(200, json={"choices": [{"message": {"content": "CHAT"}}]})
+        return httpx.Response(200, stream=Response())
+
+    transport = httpx.MockTransport(respond)
     monkeypatch.setattr(httpx, "AsyncClient", lambda *args, **kwargs: original_client(*args, transport=transport, **kwargs))
 
     async def disconnected_request():

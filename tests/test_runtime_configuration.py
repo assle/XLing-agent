@@ -15,14 +15,13 @@ def test_default_reply_limit_is_large_enough_for_complete_support_responses():
     assert settings.ai_max_tokens >= 2048
 
 
-def test_container_receives_the_configured_reply_limit():
-    """读取容器配置文本。
-
-    核对回复上限由环境变量传入并保留默认值，不实际启动容器。
-    """
+def test_container_loads_local_settings_from_the_shared_env_file():
+    """应用容器统一读取本地配置，示例文件保留回复上限默认值。"""
     compose = (PROJECT_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
+    example = (PROJECT_ROOT / ".env.example").read_text(encoding="utf-8")
 
-    assert "AI_MAX_TOKENS: ${AI_MAX_TOKENS:-2048}" in compose
+    assert "env_file: .env" in compose
+    assert "AI_MAX_TOKENS=2048" in example
 
 
 def test_mysql_healthcheck_uses_the_configured_root_password():
@@ -34,3 +33,29 @@ def test_mysql_healthcheck_uses_the_configured_root_password():
 
     assert "-proot" not in compose
     assert '$${MYSQL_ROOT_PASSWORD}' in compose
+
+
+def test_mysql_is_available_to_local_database_tools_only_on_loopback():
+    """DBeaver 等本机工具使用可配置端口，数据库不绑定到公开网卡。"""
+    compose = (PROJECT_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
+    example = (PROJECT_ROOT / ".env.example").read_text(encoding="utf-8")
+
+    assert '"127.0.0.1:${MYSQL_PORT:-3306}:3306"' in compose
+    assert "MYSQL_PORT=3306" in example
+    assert "MYSQL_DATABASE=xling" in example
+    assert "MYSQL_USER=xling" in example
+    assert "MYSQL_PASSWORD=xling" in example
+
+
+def test_project_configuration_does_not_pin_proxy_settings():
+    """代理只允许通过单次命令临时提供，不写入项目配置文件。"""
+    paths = [
+        PROJECT_ROOT / ".env.example",
+        PROJECT_ROOT / "docker-compose.yml",
+        PROJECT_ROOT / "scripts/closing/compose.override.yml",
+    ]
+    for path in paths:
+        content = path.read_text(encoding="utf-8").lower()
+        for variable in ("http_proxy", "https_proxy", "all_proxy", "no_proxy"):
+            assert f"{variable}=" not in content
+            assert f"{variable}:" not in content

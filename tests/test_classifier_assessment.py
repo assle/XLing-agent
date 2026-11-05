@@ -22,13 +22,11 @@ from app.services.assessment import (
 class FakeClassifierAiClient:
     """Test double recording classifier and full-generation calls."""
 
-    def __init__(self, label: str = "", error: bool = False):
-        """保存预设分类标签和是否模拟故障。
-
-        分别记录分类调用与完整回复调用的次数。
-        """
+    def __init__(self, label: str = "", error: bool = False, review_label: str | None = None):
+        """保存预设分类标签、复核标签和是否模拟故障。"""
         self._label = label
         self._error = error
+        self._review_label = review_label
         self.classify_count = 0
         self.complete_count = 0
 
@@ -50,9 +48,11 @@ class FakeClassifierAiClient:
         return self.classify(text)
 
     def complete(self, messages):  # noqa: ANN001
-        """记录完整生成调用，确保分类评估不会使用该入口。"""
+        """记录完整生成调用，按配置返回语境复核标签。"""
         self.complete_count += 1
-        return "unexpected full-generation call"
+        if self._error:
+            raise RuntimeError("simulated classifier outage")
+        return self._review_label if self._review_label is not None else "unexpected full-generation call"
 
     async def acomplete(self, messages):  # noqa: ANN001
         """记录异步完整生成调用。"""

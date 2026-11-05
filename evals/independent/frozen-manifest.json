@@ -1,0 +1,108 @@
+{
+  "datasetId": "ind-20261102-v2",
+  "supersedes": "ind-20261102-v1",
+  "frozenAt": "2026-11-02T02:48:24.474481+00:00",
+  "status": "frozen-for-adr-implementation",
+  "labelProvenance": "agent-authored; resource-routing and action-plan oracle corrections approved in ADR-0021/0022; remaining labels pending human review; not medical gold",
+  "counts": {
+    "classifier": 48,
+    "risk": 36,
+    "rag": 30,
+    "quality": 20,
+    "e2e": 24
+  },
+  "totalCases": 158,
+  "files": [
+    {
+      "path": "evals/independent/data/classifier.jsonl",
+      "sha256": "04a988899b23c89006df98e541e4b63e4c8df2bb11554b1411ad5f99c90c2773",
+      "bytes": 17582
+    },
+    {
+      "path": "evals/independent/data/e2e.jsonl",
+      "sha256": "7e29e3a4781ed87be950b409e24d5c1d07581a16d890d966ede5b3d8ea3d008f",
+      "bytes": 5602
+    },
+    {
+      "path": "evals/independent/data/quality.json",
+      "sha256": "d175eb45a1563a283454048812100d47357bb9ee4dcaa331d86b9dc506a7151c",
+      "bytes": 3589
+    },
+    {
+      "path": "evals/independent/data/rag.jsonl",
+      "sha256": "f924778b516bd0d216b2a8798f5482dbff1fdcecb8a755e5060ad450b8cd4d0f",
+      "bytes": 7781
+    },
+    {
+      "path": "evals/independent/data/risk.json",
+      "sha256": "7d3d43e02aaf548d2d5bbb3ee864f753e84a2273c0327d8513f5d0ad90809a38",
+      "bytes": 6798
+    }
+  ],
+  "validation": {
+    "path": "evals/independent/data-validation.json",
+    "sha256": "8117e15a245df9f4a5779693ff02769888bf08d71239f13209b000d55ae29f8a",
+    "bytes": 13054
+  },
+  "code": {
+    "commit": "2f1b3b9abe2e8147c13702c7022694312fa295f0",
+    "statusPorcelain": [
+      " M evals/config.py",
+      " M evals/rag/README.md",
+      " M evals/rag/runner.py",
+      " M tests/test_hyde_retrieval.py",
+      " M tests/test_rag_eval.py",
+      "?? docs/adr/0019-contextual-high-risk-assessment.md",
+      "?? docs/adr/0020-rag-relevance-and-stage-diagnostics.md",
+      "?? docs/adr/0021-purpose-based-routing-and-resource-queries.md",
+      "?? docs/adr/0022-action-plan-requires-explicit-four-dimensions.md",
+      "?? evals/independent/"
+    ],
+    "trackedDiffSha256": "09736da2f981d4325d88dfd5ca023827acf70e79876142a2e9caec39125fe412"
+  },
+  "classifier": {
+    "backend": "decision_head",
+    "baseModelDir": ".scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate/recovered-merged-base",
+    "adapterDir": "finetune/saves/qwen25-05b-decision-head-376/adapter",
+    "inputFormat": "quoted",
+    "artifacts": [
+      {
+        "path": "finetune/saves/qwen25-05b-decision-head-376/head.pt",
+        "sha256": "a8391673d5c02169459c7ebd69b7bb5b962cd43114da15c2505b7fc0da3fd6ca",
+        "bytes": 16333
+      },
+      {
+        "path": "finetune/saves/qwen25-05b-decision-head-376/calibration.json",
+        "sha256": "1d6634ee04c76ee7945827d257859091e0cca8f9c7d4d9a6ff34bf0e0469616b",
+        "bytes": 589
+      },
+      {
+        "path": "finetune/saves/qwen25-05b-decision-head-376/adapter/adapter_config.json",
+        "sha256": "d9476b507426e8ae3570a86cff9fa1e949019223108060412143699a6a3f5332",
+        "bytes": 759
+      },
+      {
+        "path": "finetune/saves/qwen25-05b-decision-head-376/adapter/adapter_model.safetensors",
+        "sha256": "931ae154e7b7bd6136851b629495c9abcbb02d5454ac5aa90bf7b27bdc6dff52",
+        "bytes": 4350392
+      },
+      {
+        "path": ".scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate/recovered-merged-base/config.json",
+        "sha256": "d845f476552e40616e2e26d7b4a44a595d87fa39216dfa46d5795a0645f3cef5",
+        "bytes": 779
+      },
+      {
+        "path": "finetune/reports/current-classifier/training/system-prompt.txt",
+        "sha256": "a6d981d29f3cfe7f4edef11bb293a5c5ddf06a87d6205177746b5c4454d346ab",
+        "bytes": 372
+      }
+    ]
+  },
+  "scope": {
+    "classifier": "Raw default decision head with frozen adapter, head and calibration.",
+    "risk": "Full PsychologicalAssessmentService using the default decision head.",
+    "rag": "Answerable retrieval questions only; refusal and unanswerable-question behavior are out of scope.",
+    "quality": "Fixed CONSULT/LOW prompt path with real generation and model-based judging; not a human evaluation.",
+    "e2e": "Real chat flow with an in-memory database and vector retrieval disabled; not a RAG end-to-end test."
+  }
+}

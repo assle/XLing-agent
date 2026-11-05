@@ -11,7 +11,7 @@ Xling 是一个通用的心理健康支持与咨询辅助系统，帮助医院�
 - 专业支持与人工审核：高风险消息暂停常规自动支持并发送固定安全提示，进入医生或心理健康专业人员负责的处理路径；系统记录接手、人工回复、站外联系、持续关注、转介和完成处置，等待与处理中都允许用户继续补充情况。
 - 认知行为四维追问：使用 CBT（认知行为方法，通过事件、想法、身体反应和行为四方面梳理困扰）逐步理解用户当前处境。
 - 24 小时行动计划与次日反馈：四方面信息完整后生成可逐项执行的计划；次日反馈没有改善或情况恶化时可再次进入人工审核。
-- 知识增强回答：使用 RAG（先检索知识库，再让模型依据相关内容回答）提供心理健康支持信息；机构热线和预约资源可通过后台知识上传提供，回答保留测试标识及预约快照的适用限制。
+- 知识增强回答：使用 RAG（先检索知识库，再让模型依据相关内容回答）提供心理健康支持信息；机构热线和预约资源可通过后台知识上传提供，回答保留测试标识及预约快照日期。
 - 用户可控记忆：分别管理当前会话、用户主动填写的支持背景和用户确认的长期记忆卡片；无记忆会话不会读取或新增长期记忆。
 - 自愿量表筛查：提供 PHQ-9（抑郁相关筛查问卷）和 GAD-7（焦虑相关筛查问卷），结果只用于筛查与趋势参考，不作为诊断。
 - 管理后台：查看安全评估、人工审核、对话、知识库、任务执行记录和失败任务。
@@ -54,14 +54,14 @@ flowchart LR
 | `MemoryAgent` | 读取当前会话、支持背景和已确认记忆卡片，并生成简短记忆摘要 | 短期存储、业务数据库、模型摘要 |
 | `SupervisorAgent` | 把消息分为日常对话、心理支持或明确风险 | 规则优先，模型补充 |
 | `RiskGuardianAgent` | 判断低、中、高风险，并结合近期记录识别持续上升趋势 | 明确规则、分类模型、风险轨迹 |
-| `KnowledgeAgent` | 改写检索词并查找相关知识内容 | 多查询＋向量与 BM25 的 RRF 名次融合，可配置归一化加权，失败时使用本地混合检索 |
+| `KnowledgeAgent` | 改写检索词并查找相关知识内容 | 多查询＋Chroma dense 主检索，可配置归一化加权，向量不可用时使用本地混合检索 |
 | `CBTAgent` | 完成四维追问；信息完整后生成 24 小时行动计划 | 结构化状态与模型生成 |
 | `CompanionAgent` | 回答日常学习、编程和普通生活问题；回答经过既有分流的机构资源查询 | 通用对话模型；资源查询读取知识库 |
 | `CounselorAgent` | 为非高风险心理支持生成非诊断性回复；高风险轮次不进入该节点 | 检索知识、明确图状态和模型生成 |
 
 这些名称表示编排流程中的专职角色，不表示七个独立模型。回复模型、分类模型、数据库和知识库由这些角色按职责共享使用。
 
-开发和实际联调采用“远程回答模型 + 本地风险分类器”的分工：日常回答、心理支持回复和结构化内容由兼容 OpenAI 的远程接口生成；安全分流先检查既有风险词规则，未命中时默认由应用进程内的单次前向决策头分类器评估（`CLASSIFIER_BACKEND=decision_head`），本机 Ollama 生成式分类模型保留为低置信复核与故障回退。两者相互独立，远程回答接口不可替代本地风险分类器。`mock` 模式会同时模拟这两部分，只用于无外部依赖的演示和自动测试。
+开发和实际联调采用“远程回答与语境复核 + 本地决策头主分类”的分工：日常回答、心理支持回复和结构化内容由兼容 OpenAI 的远程接口生成；安全分流先检查既有风险词规则，未命中时默认由应用进程内的单次前向决策头分类器评估（`CLASSIFIER_BACKEND=decision_head`）。高置信且无需语境复核的样本直接采用决策头结果；灰区、低置信或 margin 不足的样本由本机 Ollama 生成式分类器复核，非自身危险语境与部分隐晦即时危险由远程模型结合完整文本复核。决策头不可用时回退 Ollama，持续性或功能受损信号还会独立影响 LOW／MEDIUM 严重度。`mock` 模式用于无外部依赖的演示和自动测试，输出由固定规则模拟。
 
 ## 编排流程
 
@@ -105,7 +105,7 @@ flowchart TD
 | LangGraph | 统一执行智能体流程并保存原生图状态；高风险轮次结束图执行后由独立人工支持服务承接 |
 | MySQL（关系型数据库） | 保存用户、会话、消息、筛查、计划、安全评估、审核和任务记录 |
 | Redis（高速缓存服务） | 保存有时限的短期对话记忆和四维追问进度；不可用时有进程内降级存储 |
-| Chroma（向量数据库） | 保存知识向量；在线默认经多查询改写后与 BM25 按 RRF 名次融合，可配置回 dense＋BM25 归一化加权；启动时核对并修复索引，向量不可用时回退到本地关键词与文本相似度检索 |
+| Chroma（向量数据库） | 保存知识向量；在线默认使用原查询与多查询改写的 dense 结果，不再叠加 BM25 名次；可配置 dense＋BM25 归一化加权，启动时核对并修复索引，向量不可用时回退到本地关键词与文本相似度检索 |
 | 兼容 OpenAI 的远程接口 | 提供回答模型；也可提供知识向量，或为知识向量单独配置另一服务商 |
 | Ollama（本地模型运行工具） | 运行生成式回退风险分类器（默认决策头分类器在应用进程内运行，不依赖 Ollama）；仅在显式选择本地回答模式时同时承担回答模型 |
 | 后台任务队列 | 非阻塞地生成表格台账、发送通知、重试失败任务并记录最终失败 |
@@ -114,7 +114,7 @@ flowchart TD
 
 知识入库保留 Markdown 标题层级，在完整句子之间依据真实句向量的相邻距离选择语义边界；片段上限为 512 字。无法调用向量服务且允许回退时，使用保留标题和句界的结构分块。来源正文、分块配置与实际片段的指纹随数据库事务保存，避免未变化的内置知识在每次启动时重新编码；缺失或改动的片段仍会重新入库。
 
-在线检索默认采用多查询＋混合 RRF：由回答模型生成 3 条改写查询，每条查询分别取向量与 BM25 各 Top-k 三倍候选，按 RRF（k=60）名次融合后合并去重；无模型客户端或改写失败时降级为单查询，向量不可用时回退本地混合评分。将 `KNOWLEDGE_RETRIEVAL_STRATEGY` 设为 `normalized_fusion` 可切回原 min-max 归一化加 0.98 向量权重的融合方式。BM25 词项贡献按语料内容缓存，查询只累加命中的倒排项；返回结果仍只扩展首位片段，总上下文不超过 3072 字。参数来自现有小样本对照，不表示跨语料普遍最优；多查询会增加一次远程改写延迟（实测 P95 约 3.9 秒），方法依据、实测收益及限制见 [RAG 评测](evals/rag/README.md)与 [ADR-0017](docs/adr/0017-online-multi-query-hybrid-rrf.md)。
+在线检索默认采用多查询＋Chroma dense 主检索：原查询与回答模型生成的最多 3 条改写查询全部参与，跨查询保留每个片段的最佳 dense 分数后合并去重；有效向量结果不再叠加 BM25 名次，无模型客户端或改写失败时保留原查询，向量不可用时回退本地混合评分。将 `KNOWLEDGE_RETRIEVAL_STRATEGY` 设为 `normalized_fusion` 可切回原 min-max 归一化加 0.98 向量权重的融合方式。BM25 词项贡献按语料内容缓存，查询只累加命中的倒排项；返回结果仍只扩展首位片段，总上下文不超过 3072 字。离线实验统一通过 `KnowledgeService.retrieve_experiment` 分派。参数来自小样本对照，多查询会增加一次远程改写调用；当前指标、延迟及运行条件见 [RAG 评测](evals/rag/README.md)、[ADR-0026](docs/adr/0026-multilingual-dense-primary-retrieval.md)与 [优化验证报告](evals/independent/results/20261102-v3/optimization-report.md)。
 
 ## 目录结构
 
@@ -223,7 +223,7 @@ CLASSIFIER_INPUT_FORMAT=quoted
 - `AI_MAX_TOKENS` 是单次回答允许生成的最大模型计量单位数，默认 2048；调高会增加响应时间和模型费用。
 - `OPENAI_BASE_URL`、`OPENAI_API_KEY` 和 `OPENAI_MODEL` 必须属于同一个远程服务。
 - `OLLAMA_BASE_URL` 是 Compose 网络中的模型服务地址。`OLLAMA_CLASSIFIER_MODEL` 必须与注册的分类器版本一致，`CLASSIFIER_INPUT_FORMAT` 与其训练输入契约对应；上面的 `quoted-f16` 使用 F16 权重及 `quoted` 输入。数据、输入包装与固定评测结果见 [finetune/README.md](finetune/README.md)，当前选择与配置证据见 [classifier-selection.json](finetune/reports/classifier-selection.json)。
-- 默认分类后端为应用内决策头（`CLASSIFIER_BACKEND=decision_head`），不依赖 Ollama 在线；`DECISION_HEAD_*` 权重为本机实验产物，未准备时自动回退到上述 Ollama 分类器。分层安全策略与阈值见 [ADR-0016](docs/adr/0016-decision-head-classifier-layered-safety.md)；线上默认检索为多查询＋混合 RRF，见 [ADR-0017](docs/adr/0017-online-multi-query-hybrid-rrf.md)。
+- 默认分类后端为应用内决策头（`CLASSIFIER_BACKEND=decision_head`），不依赖 Ollama 在线；`DECISION_HEAD_*` 权重为本机实验产物，未准备时自动回退到上述 Ollama 分类器。基础分层策略见 [ADR-0016](docs/adr/0016-decision-head-classifier-layered-safety.md)，语境复核见 [ADR-0023](docs/adr/0023-decision-head-high-risk-context-review.md)，独立严重度判断见 [ADR-0024](docs/adr/0024-risk-severity-beyond-emotion-label.md)；线上默认检索为多查询 dense 主检索，见 [ADR-0026](docs/adr/0026-multilingual-dense-primary-retrieval.md)。
 
 Docker Compose 已传递分类器输入格式。模型分数直接评价分类输出，实际客户端接入、既有风险词规则与完整业务流程分别验证；固定小样本的真实 RAG 对照及复跑入口见 [RAG 评测](evals/rag/README.md)。
 
@@ -241,7 +241,7 @@ OPENAI_EMBEDDING_MODEL=向量模型名称
 
 应用启动时会检查知识正文与向量索引是否一致；发现向量条目缺失时会自动补齐。`KNOWLEDGE_VECTOR_REQUIRED=false` 表示向量接口暂时不可用时允许回退到本地检索，避免阻塞应用启动。
 
-MySQL（关系型数据库）的管理员密码由 `MYSQL_ROOT_PASSWORD` 设置，容器健康检查会读取同一配置。修改默认密码时不需要同步修改 `docker-compose.yml`。
+本机可变配置统一在 `.env` 中维护，应用容器通过 `env_file` 读取。MySQL 使用 `MYSQL_DATABASE`、`MYSQL_USER`、`MYSQL_PASSWORD` 和 `MYSQL_ROOT_PASSWORD`，Compose 据此生成应用连接地址；管理员密码同时用于容器健康检查。`MYSQL_PORT` 控制仅绑定本机回环地址的 DBeaver 连接端口，默认 `127.0.0.1:3306`，详见 [Docker 操作指南](docs/docker-operations.md)。
 
 ### MySQL 事务集成测试
 

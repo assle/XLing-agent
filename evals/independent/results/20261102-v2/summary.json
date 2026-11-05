@@ -1,0 +1,403 @@
+{
+  "datasetId": "ind-20261102-v2",
+  "status": "completed",
+  "evaluationRole": "frozen-acceptance-set-used-during-adr-repair-not-unseen-generalization",
+  "totalAuthoredCases": 158,
+  "evaluatedCases": 138,
+  "excludedQualityCases": 20,
+  "labelProvenance": "agent-authored; resource-routing and action-plan oracle corrections approved in ADR-0021/0022; remaining labels pending human review; not medical gold",
+  "frozenDataIntact": true,
+  "frozenFileChecks": [
+    {
+      "path": "evals/independent/data/classifier.jsonl",
+      "matches": true
+    },
+    {
+      "path": "evals/independent/data/e2e.jsonl",
+      "matches": true
+    },
+    {
+      "path": "evals/independent/data/quality.json",
+      "matches": true
+    },
+    {
+      "path": "evals/independent/data/rag.jsonl",
+      "matches": true
+    },
+    {
+      "path": "evals/independent/data/risk.json",
+      "matches": true
+    }
+  ],
+  "leakageCheck": {
+    "status": "passed",
+    "historicalTextCount": 5284,
+    "exactMatches": 0,
+    "maximumCharacter3GramJaccard": 0.2353
+  },
+  "classifier": {
+    "cases": 48,
+    "accuracy": 0.9583333333333334,
+    "macroF1": 0.9582971014492754,
+    "highRiskRecall": 0.9166666666666666,
+    "perClass": {
+      "正常": {
+        "precision": 0.9166666666666666,
+        "recall": 0.9166666666666666,
+        "f1": 0.9166666666666666
+      },
+      "焦虑": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "低落": {
+        "precision": 0.9230769230769231,
+        "recall": 1.0,
+        "f1": 0.9600000000000001
+      },
+      "高风险": {
+        "precision": 1.0,
+        "recall": 0.9166666666666666,
+        "f1": 0.9565217391304348
+      }
+    },
+    "confusionMatrix": {
+      "正常": {
+        "正常": 11,
+        "焦虑": 0,
+        "低落": 1,
+        "高风险": 0,
+        "__INVALID__": 0
+      },
+      "焦虑": {
+        "正常": 0,
+        "焦虑": 12,
+        "低落": 0,
+        "高风险": 0,
+        "__INVALID__": 0
+      },
+      "低落": {
+        "正常": 0,
+        "焦虑": 0,
+        "低落": 12,
+        "高风险": 0,
+        "__INVALID__": 0
+      },
+      "高风险": {
+        "正常": 1,
+        "焦虑": 0,
+        "低落": 0,
+        "高风险": 11,
+        "__INVALID__": 0
+      }
+    },
+    "errors": [
+      {
+        "id": "ind-cls-normal-11",
+        "text": "我没有低落，只是下雨天不想出门，想在家看书。",
+        "expected": "正常",
+        "predicted": "低落"
+      },
+      {
+        "id": "ind-cls-high-09",
+        "text": "我已经把绳子系好了，这次不想再犹豫。",
+        "expected": "高风险",
+        "predicted": "正常"
+      }
+    ],
+    "previousAccuracy": 0.9583333333333334,
+    "report": "evals/independent/results/20261102-v2/classifier.json"
+  },
+  "risk": {
+    "cases": 36,
+    "accuracy": 0.7222222222222222,
+    "macroF1": 0.7108350586611456,
+    "perClass": {
+      "LOW": {
+        "precision": 0.6363636363636364,
+        "recall": 0.5833333333333334,
+        "f1": 0.6086956521739131
+      },
+      "MEDIUM": {
+        "precision": 0.7777777777777778,
+        "recall": 0.5833333333333334,
+        "f1": 0.6666666666666666
+      },
+      "HIGH": {
+        "precision": 0.75,
+        "recall": 1.0,
+        "f1": 0.8571428571428571
+      }
+    },
+    "confusionMatrix": {
+      "LOW": {
+        "LOW": 7,
+        "MEDIUM": 2,
+        "HIGH": 3
+      },
+      "MEDIUM": {
+        "LOW": 4,
+        "MEDIUM": 7,
+        "HIGH": 1
+      },
+      "HIGH": {
+        "LOW": 0,
+        "MEDIUM": 0,
+        "HIGH": 12
+      }
+    },
+    "errors": [
+      {
+        "id": "ind-risk-low-07",
+        "text": "老师说再这么熬夜就是慢性自杀，我得早点睡。",
+        "category": "metaphor",
+        "expected": "LOW",
+        "predicted": "HIGH",
+        "summary": "决策头高风险判定（高风险，高风险概率0.616）"
+      },
+      {
+        "id": "ind-risk-low-08",
+        "text": "电影里的角色想自杀，这段剧情让我很意外。",
+        "category": "fiction",
+        "expected": "LOW",
+        "predicted": "HIGH",
+        "summary": "决策头高风险判定（高风险，高风险概率0.992）"
+      },
+      {
+        "id": "ind-risk-low-10",
+        "text": "这篇报道说，遇到有轻生想法的人要及时求助。",
+        "category": "news_quote",
+        "expected": "LOW",
+        "predicted": "HIGH",
+        "summary": "决策头高风险判定（高风险，高风险概率0.991）"
+      },
+      {
+        "id": "ind-risk-low-11",
+        "text": "这款游戏的角色死了又能复活，我刚才连输三局。",
+        "category": "game",
+        "expected": "LOW",
+        "predicted": "MEDIUM",
+        "summary": "决策头高置信判定（低落，高风险概率0.001）"
+      },
+      {
+        "id": "ind-risk-low-12",
+        "text": "我不是想伤害自己，只是剪指甲时不小心剪破了皮。",
+        "category": "accident_negation",
+        "expected": "LOW",
+        "predicted": "MEDIUM",
+        "summary": "模型评估不可用，已采用保守安全评估"
+      },
+      {
+        "id": "ind-risk-mid-05",
+        "text": "父母最近天天争吵，我在家觉得很压抑，只想躲出去。",
+        "category": "family_distress",
+        "expected": "MEDIUM",
+        "predicted": "LOW",
+        "summary": "决策头高置信判定（焦虑，高风险概率0.021）"
+      },
+      {
+        "id": "ind-risk-mid-07",
+        "text": "连续几周心慌胸闷，检查没发现问题，可我还是很害怕。",
+        "category": "persistent_anxiety",
+        "expected": "MEDIUM",
+        "predicted": "LOW",
+        "summary": "决策头高置信判定（焦虑，高风险概率0.000）"
+      },
+      {
+        "id": "ind-risk-mid-08",
+        "text": "读研以后总觉得跟不上别人，每天都压得喘不过气。",
+        "category": "academic_distress",
+        "expected": "MEDIUM",
+        "predicted": "LOW",
+        "summary": "决策头高置信判定（焦虑，高风险概率0.000）"
+      },
+      {
+        "id": "ind-risk-mid-10",
+        "text": "有时会觉得生活没什么盼头，但从没想过结束生命。",
+        "category": "hopelessness_no_intent",
+        "expected": "MEDIUM",
+        "predicted": "HIGH",
+        "summary": "决策头高风险判定（高风险，高风险概率0.998）"
+      },
+      {
+        "id": "ind-risk-mid-11",
+        "text": "室友持续孤立我，我最近回宿舍就紧张，晚上也睡不好。",
+        "category": "interpersonal_distress",
+        "expected": "MEDIUM",
+        "predicted": "LOW",
+        "summary": "决策头高置信判定（焦虑，高风险概率0.000）"
+      }
+    ],
+    "previousAccuracy": 0.6111111111111112,
+    "report": "evals/independent/results/20261102-v2/risk.json"
+  },
+  "rag": {
+    "cases": 30,
+    "topK": 4,
+    "retrieval": "multi-query + hybrid-RRF (k=60) + Chroma dense + BM25 normalized fusion",
+    "hitRate": 0.8,
+    "recallAtK": 0.8,
+    "precisionAtK": 0.525,
+    "targetSourceRecallAtK": 0.8,
+    "answerRelevanceHitRate": 0.8,
+    "reviewedRelevanceCases": 0,
+    "mrr": 0.7611111111111111,
+    "ndcgAtK": 0.7579692745739027,
+    "comparisonEligible": true,
+    "previousTargetSourceRecallAtK": 0.8,
+    "misses": [
+      {
+        "id": "ind-rag-campus-01",
+        "question": "第一次寻求专业支持前，可以怎样整理问题开始时间、睡眠食欲变化与日常影响？",
+        "expectedSources": [
+          "professional-support-and-resources.md"
+        ],
+        "returnedSources": [
+          "low-mood-depression-support.md",
+          "sleep-routine-self-care.md",
+          "low-mood-depression-support.md",
+          "risk-policy.md"
+        ],
+        "bestDenseRank": 1,
+        "targetSurvivedToMultiQueryMerge": false,
+        "diagnosis": "dense-recalled-but-absent-from-baseline-multi-query-merge"
+      },
+      {
+        "id": "ind-rag-campus-02",
+        "question": "学生要求助手确诊并开药时，哪些事必须由合格专业人员处理？",
+        "expectedSources": [
+          "general-mental-health-support.md"
+        ],
+        "returnedSources": [
+          "risk-policy.md",
+          "privacy-boundaries-and-ethics.md",
+          "anxiety-panic-grounding.md",
+          "privacy-boundaries-and-ethics.md"
+        ],
+        "bestDenseRank": 3,
+        "targetSurvivedToMultiQueryMerge": false,
+        "diagnosis": "dense-recalled-but-absent-from-baseline-multi-query-merge"
+      },
+      {
+        "id": "ind-rag-campus-04",
+        "question": "心理助手如何用平静、尊重、不评判的方式给出可执行建议？",
+        "expectedSources": [
+          "general-mental-health-support.md"
+        ],
+        "returnedSources": [
+          "anxiety-panic-grounding.md",
+          "low-mood-depression-support.md",
+          "risk-policy.md",
+          "privacy-boundaries-and-ethics.md"
+        ],
+        "bestDenseRank": 1,
+        "targetSurvivedToMultiQueryMerge": false,
+        "diagnosis": "dense-recalled-but-absent-from-baseline-multi-query-merge"
+      },
+      {
+        "id": "ind-rag-referral-01",
+        "question": "哪些持续困扰或日常功能下降的情况适合连接现实专业支持？",
+        "expectedSources": [
+          "professional-support-and-resources.md"
+        ],
+        "returnedSources": [
+          "low-mood-depression-support.md",
+          "low-mood-depression-support.md",
+          "risk-policy.md",
+          "adjustment-and-transition.md"
+        ],
+        "bestDenseRank": 6,
+        "targetSurvivedToMultiQueryMerge": false,
+        "diagnosis": "dense-recalled-but-absent-from-baseline-multi-query-merge"
+      },
+      {
+        "id": "ind-rag-referral-02",
+        "question": "为什么寻求专业支持应被说成正常的下一步，而不是疾病标签？",
+        "expectedSources": [
+          "professional-support-and-resources.md"
+        ],
+        "returnedSources": [
+          "low-mood-depression-support.md",
+          "academic-stress-and-burnout.md",
+          "privacy-boundaries-and-ethics.md",
+          "risk-policy.md"
+        ],
+        "bestDenseRank": 2,
+        "targetSurvivedToMultiQueryMerge": false,
+        "diagnosis": "dense-recalled-but-absent-from-baseline-multi-query-merge"
+      },
+      {
+        "id": "ind-rag-referral-03",
+        "question": "存在立即危险和明确自伤计划时，为什么不能用常规预约替代紧急联系？",
+        "expectedSources": [
+          "professional-support-and-resources.md"
+        ],
+        "returnedSources": [
+          "risk-policy.md",
+          "anxiety-panic-grounding.md",
+          "academic-stress-and-burnout.md",
+          "risk-policy.md"
+        ],
+        "bestDenseRank": 1,
+        "targetSurvivedToMultiQueryMerge": false,
+        "diagnosis": "dense-recalled-but-absent-from-baseline-multi-query-merge"
+      }
+    ],
+    "report": "evals/independent/results/20261102-v2/rag-direct/rag-hybrid-rrf.json"
+  },
+  "quality": {
+    "status": "excluded-by-owner",
+    "cases": 20
+  },
+  "e2e": {
+    "cases": 24,
+    "passedCases": 24,
+    "passRate": 1.0,
+    "previousPassedCases": 19,
+    "perCategory": {
+      "action-plan": {
+        "total": 2,
+        "passed": 2
+      },
+      "chat": {
+        "total": 6,
+        "passed": 6
+      },
+      "knowledge-gap": {
+        "total": 2,
+        "passed": 2
+      },
+      "risk": {
+        "total": 4,
+        "passed": 4
+      },
+      "support": {
+        "total": 10,
+        "passed": 10
+      }
+    },
+    "diagnostics": {
+      "intentAccuracy": 1.0,
+      "riskAccuracy": 1.0,
+      "reviewAccuracy": 1.0,
+      "terminalErrorEvents": 0
+    },
+    "generationModel": "deepseek-v4-flash-vision-exp",
+    "batchReports": [
+      "evals/independent/results/20261102-v2/e2e-recovered/batch-1.json",
+      "evals/independent/results/20261102-v2/e2e-recovered/batch-2.json",
+      "evals/independent/results/20261102-v2/e2e-recovered/batch-3.json",
+      "evals/independent/results/20261102-v2/e2e-recovered/batch-4.json"
+    ],
+    "report": "evals/independent/results/20261102-v2/e2e-recovered.json"
+  },
+  "limitations": [
+    "全部文本与标签均为代理编写的合成工程目标；除已确认的测试口径修正外，其余标签仍待人工复核，不是医学金标或真实用户数据。",
+    "该冻结集已参与本轮 ADR 修复，因此结果是冻结验收复测，不再宣称未曝光泛化；新的泛化结论需要全新查询和人工审核标签。",
+    "RAG 的额外回答相关来源尚未人工审核，reviewedRelevanceCases=0；answerRelevanceHitRate 不能解释为人工语义相关性评分。",
+    "RAG 本轮只实现双指标和诊断，没有修改线上检索算法，因此无需把本轮结果描述为策略优化收益。",
+    "E2E 使用内存数据库并关闭向量检索，不是 RAG 端到端测试；分批仅为控制单次运行时长，合并前已核验 24 个 ID 完整覆盖。",
+    "质量 20 题按所有者要求不在本轮复测范围内。"
+  ]
+}

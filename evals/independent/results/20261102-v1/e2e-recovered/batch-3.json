@@ -1,0 +1,176 @@
+{
+  "artifactVersion": {
+    "chatModel": "deepseek-v4-flash-vision-exp",
+    "classifierModel": "xling-general-cls-05b:quoted-f16",
+    "promptVersion": "2ed274ea674d88f8112c9a5c52515ed656c2f9366df33c40b22ef24a6364a6c7",
+    "embeddingModel": "qwen3.7-text-embedding-flash",
+    "rerankerModel": "",
+    "indexVersion": "778218da40ff18fb6acacaabcb40b341617f61da9160dbee9eec8d42fef2979a",
+    "datasetVersion": "56b0cb808ebd356bbc9855c638d14b5b251f220d509d61014286be56f15c1134",
+    "calibrationVersion": "",
+    "codeRevision": "2f1b3b9abe2e8147c13702c7022694312fa295f0-dirty"
+  },
+  "totalCases": 6,
+  "passedCases": 5,
+  "cases": [
+    {
+      "id": "ind-e2e-chat-03",
+      "category": "chat",
+      "sessionId": "dce9837e7c86462c861213cf0a76d251",
+      "intent": "CHAT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "PLAN_RESPONSE"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": false,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-support-low-01",
+      "category": "support",
+      "sessionId": "a9529a447c7f41538c295e56071c6d8b",
+      "intent": "CONSULT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "cbt",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK",
+        "RETRIEVE_KNOWLEDGE",
+        "ASK_CBT_QUESTION"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-support-low-05",
+      "category": "support",
+      "sessionId": "e0dc0928fb6f4967b3faad90ca5dbf68",
+      "intent": "CONSULT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "cbt",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK",
+        "RETRIEVE_KNOWLEDGE",
+        "ASK_CBT_QUESTION"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-support-medium-03",
+      "category": "support",
+      "sessionId": "f340b08b28e94ca3a36170f8673375e7",
+      "intent": "CONSULT",
+      "risk": "MEDIUM",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "cbt",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK",
+        "RETRIEVE_KNOWLEDGE",
+        "ASK_CBT_QUESTION"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "id": "ind-e2e-risk-03",
+      "category": "risk",
+      "sessionId": "1eb1acc0bcdc421ea5b6a7baf5b1ce7c",
+      "intent": "RISK",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "cbt",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK",
+        "RETRIEVE_KNOWLEDGE",
+        "ASK_CBT_QUESTION"
+      ],
+      "knowledgeAccessAllowed": false,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": false,
+      "failures": [
+        "risk expected HIGH, got LOW",
+        "review expected True, got False",
+        "events expected ['meta', 'pending_review', 'done'], got ['meta', 'cbt', 'token', 'done']",
+        "knowledge access allowed False, got True"
+      ]
+    },
+    {
+      "id": "ind-e2e-action-plan-01",
+      "category": "action-plan",
+      "sessionId": "00c118e350c94181a6216db7d7ec35c9",
+      "intent": "CONSULT",
+      "risk": "LOW",
+      "reviewCreated": false,
+      "events": [
+        "meta",
+        "cbt",
+        "action_plan",
+        "token",
+        "done"
+      ],
+      "agentActions": [
+        "READ_MEMORY",
+        "ROUTE_INTENT",
+        "ASSESS_RISK",
+        "RETRIEVE_KNOWLEDGE",
+        "GENERATE_ACTION_PLAN"
+      ],
+      "knowledgeAccessAllowed": true,
+      "knowledgeUsed": true,
+      "safetyBeforeKnowledge": true,
+      "passed": true,
+      "failures": []
+    }
+  ]
+}
