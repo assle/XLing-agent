@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
@@ -6,6 +7,16 @@ from pydantic import Field, SecretStr, field_serializer, field_validator, model_
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import ArgumentError
+
+
+@dataclass(frozen=True)
+class DecisionHeadPaths:
+    bundle_dir: Path
+    base_dir: Path
+    adapter_dir: Path
+    head_path: Path
+    calibration_path: Path
+    system_prompt_path: Path
 
 
 class Settings(BaseSettings):
@@ -19,11 +30,7 @@ class Settings(BaseSettings):
     classifier_input_format: Literal["plain", "quoted"] = "quoted"
     # 单次前向决策头分类器为默认后端，ollama 生成式分类器保留为回退复核；测试经 conftest 固定为 ollama。
     classifier_backend: str = "decision_head"
-    decision_head_model_dir: str = ".scratch/user-simulation/20261002-022717-followup/goal-validation/training-candidate/recovered-merged-base"
-    decision_head_adapter_dir: str = "finetune/saves/qwen25-05b-decision-head-376/adapter"
-    decision_head_head_path: str = "finetune/saves/qwen25-05b-decision-head-376/head.pt"
-    decision_head_calibration_path: str = "finetune/saves/qwen25-05b-decision-head-376/calibration.json"
-    decision_head_system_prompt_file: str = "finetune/reports/current-classifier/training/system-prompt.txt"
+    decision_head_bundle_dir: str = "models/xling-decision-head"
     decision_head_device: str = ""
     decision_head_max_length: int = 256
     # 分层安全策略阈值（工程初始值，待新鲜盲测集校准）：高风险直接判定、灰区复核、低置信度与前两名概率差回退。
@@ -31,7 +38,6 @@ class Settings(BaseSettings):
     classifier_high_risk_review_threshold: float = Field(default=0.15, ge=0, le=1)
     classifier_low_confidence_threshold: float = Field(default=0.70, ge=0, le=1)
     classifier_margin_threshold: float = Field(default=0.30, ge=0, le=1)
-    finetuned_model_name: str = "xling-qwen2.5-7b-ft:latest"
     finetuned_model_dir: str = "models/xling-qwen2.5-7b-ft"
     finetuned_model_file: str = "xling-qwen2.5-7b-ft-q4_k_m.gguf"
     openai_base_url: str = "https://api.openai.com/v1"
@@ -178,6 +184,18 @@ class Settings(BaseSettings):
     def resolve_path(self, value: str | Path) -> Path:
         path = Path(value).expanduser()
         return path if path.is_absolute() else self.project_root / path
+
+    @property
+    def decision_head_paths(self) -> DecisionHeadPaths:
+        bundle_dir = self.resolve_path(self.decision_head_bundle_dir)
+        return DecisionHeadPaths(
+            bundle_dir=bundle_dir,
+            base_dir=bundle_dir / "base",
+            adapter_dir=bundle_dir / "adapter",
+            head_path=bundle_dir / "head.pt",
+            calibration_path=bundle_dir / "calibration.json",
+            system_prompt_path=bundle_dir / "system-prompt.txt",
+        )
 
     @property
     def project_root(self) -> Path:

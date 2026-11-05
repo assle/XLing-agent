@@ -34,13 +34,14 @@ def main() -> None:
         raise SystemExit("Dataset validation has not passed; refusing to freeze")
 
     settings = Settings()
+    paths = settings.decision_head_paths
     artifact_paths = [
-        settings.resolve_path(settings.decision_head_head_path),
-        settings.resolve_path(settings.decision_head_calibration_path),
-        settings.resolve_path(settings.decision_head_adapter_dir) / "adapter_config.json",
-        settings.resolve_path(settings.decision_head_adapter_dir) / "adapter_model.safetensors",
-        settings.resolve_path(settings.decision_head_model_dir) / "config.json",
-        settings.resolve_path(settings.decision_head_system_prompt_file),
+        paths.head_path,
+        paths.calibration_path,
+        paths.adapter_dir / "adapter_config.json",
+        paths.adapter_dir / "adapter_model.safetensors",
+        paths.base_dir / "config.json",
+        paths.system_prompt_path,
     ]
     missing = [str(path) for path in artifact_paths if not path.is_file()]
     if missing:
@@ -64,8 +65,7 @@ def main() -> None:
         },
         "classifier": {
             "backend": settings.classifier_backend,
-            "baseModelDir": str(settings.decision_head_model_dir),
-            "adapterDir": str(settings.decision_head_adapter_dir),
+            "bundleDir": str(settings.decision_head_bundle_dir),
             "inputFormat": "quoted",
             "artifacts": [file_record(path) for path in artifact_paths],
         },
