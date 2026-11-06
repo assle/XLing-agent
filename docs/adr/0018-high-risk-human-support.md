@@ -13,7 +13,7 @@ status: accepted
 ## 决策
 
 - 人工支持状态固定为 `pending → in_progress → monitoring / referred / completed`。高风险轮次保存安全评估和 `ReviewRequest`，发送固定确认后直接结束图执行，不再等待批准或拒绝，也不恢复 AI 回复。
-- `pending` 与 `in_progress` 都允许用户继续留言。留言关联同一审核记录，保存用户消息和固定确认，不调用模型。
+- `pending` 与 `in_progress` 都允许用户继续留言。`pending` 留言关联同一审核记录，保存用户消息和固定确认，不调用模型；`in_progress` 只保存用户留言并实时展示给后台，不再生成固定确认或调用模型，由已接手支持人员回复。
 - 管理接口复用 `/api/admin/reviews/{id}`，提供 `claim`、`reply`、`contact` 和 `decision`。只有已接手记录可以回复、记录站外联系或作出处置；重复接手和已推进记录上的重复操作返回冲突。
 - 人工回复使用 `SUPPORT` 角色，用户界面显示“支持人员”。回复与站外联系通过 `clientRequestId` 去重。
 - 处置只接受 `monitor`、`refer`、`complete`。持续关注必须记录负责人和时间；转介必须记录去向、下一步和负责人；完成必须记录处理记录与完成依据。处置、用户说明和审计在同一事务提交。
@@ -30,12 +30,14 @@ ADR-0003、ADR-0004 和 ADR-0005 中关于高风险中断、恢复与审核条�
 ## 验收
 
 - 接口与界面测试覆盖接手权限、重复操作、人工回复和站外联系去重、三类处置必填信息、用户继续留言及 `SUPPORT` 标识。
-- 事务测试覆盖用户补充消息成对保存或回滚，以及回复、站外联系、处置与审计的一致性。
+- 事务测试覆盖 `pending` 补充消息与固定确认成对保存或回滚、`in_progress` 仅保存用户留言，以及回复、站外联系、处置与审计的一致性。
 - 超时测试覆盖非终结升级、队列任务幂等、无用户兜底消息及备用接收方配置。
-- 浏览器界面覆盖 `pending` 只能接手、`in_progress` 可执行人工操作、终结状态只读。
+- 浏览器界面覆盖 `pending` 只能接手、`in_progress` 可执行人工操作、终结状态只读，以及接手后无自动确认和同一回复框连续发送多条人工消息。
+- 实时事件补充验证用户留言无需后台刷新、人工回复无需用户轮询、断线快照对齐和草稿保留；传输方式与单进程边界见 ADR-0027。
 
 ## 相关
 
+- [ADR-0027](0027-realtime-human-support-events.md)
 - [ADR-0003](0003-interrupt-node-splitting.md)
 - [ADR-0004](0004-resume-auto-degrade.md)
 - [ADR-0005](0005-conditional-edges-over-command.md)

@@ -84,7 +84,9 @@ const app = new SyntheticModule(["state", "api", "displayTime", "isAdmin", "load
   this.setExport("loadAgentStatus", async () => {});
 });
 const admin = new SourceTextModule(await readFile(new URL("../app/static/admin.js", import.meta.url), "utf8"));
-await admin.link(() => app);
+await admin.link(async (path) => path === "/sse.js"
+  ? new SourceTextModule(await readFile(new URL("../app/static/sse.js", import.meta.url), "utf8"))
+  : app);
 await admin.evaluate();
 admin.namespace.initAdmin();
 await admin.namespace.loadAdminDashboard();
@@ -197,4 +199,5 @@ assert.equal(elements.get("#adminView").hidden, false);
 assert.equal(elements.get("#studentView").hidden, true);
 assert.ok(requests.includes("/api/admin/tool-jobs"));
 assert.ok(requests.includes("/api/admin/dead-letters"));
+admin.namespace.stopAdminRealtime();
 console.log("admin task/deadletter rendering and role access regressions passed");

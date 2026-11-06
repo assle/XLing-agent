@@ -20,6 +20,7 @@ from app.services.action_plan import ActionPlanService
 from app.services.chat import ChatService, sse
 from app.services.checkin import CheckInService, submit_checkin_application
 from app.services.report import ReportService
+from app.services.support_events import support_events
 
 router = APIRouter()
 
@@ -79,6 +80,24 @@ def list_sessions(
     # 列出当前用户自己的历史会话。
     # 使用认证得到的用户编号查询，客户端不能通过参数指定其他用户。
     return ReportService(db).list_sessions(user.id)
+
+
+@router.get("/api/sessions/{session_id}/events")
+def session_events(
+    session_id: str,
+    user: Annotated[UserAccount, Depends(current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    conversation = ReportService(db).conversation_for_user(user.id, session_id)
+    if conversation is None:
+        raise HTTPException(404, "Session not found")
+
+    async def body():
+        subscription = support_events.subscribe(admin=False, session_id=session_id)
+        async for chunk in support_events.stream(subscription):
+            yield chunk
+
+    return ChatStreamingResponse(body(), media_type="text/event-stream")
 
 
 @router.get("/api/sessions/{session_id}")

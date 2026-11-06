@@ -60,7 +60,11 @@ const plans = new SyntheticModule(["handlePlanEvent", "resetPlanPanel", "loadAct
   this.setExport("bindActionPlanObjectSender", () => {});
 });
 const module = new SourceTextModule(await readFile(new URL("../app/static/chat.js", import.meta.url), "utf8"));
-await module.link((path) => path === "/app.js" ? app : plans);
+await module.link(async (path) => {
+  if (path === "/app.js") return app;
+  if (path === "/sse.js") return new SourceTextModule(await readFile(new URL("../app/static/sse.js", import.meta.url), "utf8"));
+  return plans;
+});
 await module.evaluate();
 module.namespace.initChat();
 
@@ -149,4 +153,5 @@ assert.equal(elements.get("#messageInput").disabled, false);
 elements.get("#messageInput").value = "等待期间继续补充";
 await elements.get("#chatForm").listeners.submit({ preventDefault() {} });
 assert.equal(lastChatBody.message, "等待期间继续补充");
+module.namespace.stopSessionRealtime();
 console.log("chat stream and action-plan object regressions passed");

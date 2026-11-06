@@ -4,7 +4,7 @@ import { state, api, isAdmin, loadAgentStatus } from "/app.js";
 import { loadSupportProfile } from "/profile.js";
 import { loadActionPlans, resetPlanPanel } from "/action-plan.js";
 import { loadSessionList } from "/chat.js";
-import { loadAdminDashboard, loadReviews } from "/admin.js";
+import { loadAdminDashboard, loadReviews, startAdminRealtime } from "/admin.js";
 
 const els = {};
 
@@ -71,6 +71,7 @@ async function afterLogin() {
   showApp();
   if (isAdmin(state.profile)) {
     await Promise.all([loadAdminDashboard(), loadReviews()]);
+    startAdminRealtime();
   } else {
     await Promise.all([loadSupportProfile(), loadActionPlans(), loadSessionList()]);
   }

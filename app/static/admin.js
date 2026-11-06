@@ -1,9 +1,34 @@
 // 管理后台：指标总览、报告列表、对话查看、知识库上传、人工审核队列。
 
 import { api, displayTime } from "/app.js";
+import { createRealtimeConnection } from "/sse.js";
 
 const els = {};
 const reportSessions = new Map();
+const reviewItems = new Map();
+let reviewsRealtime = null;
+
+const ACTION_DEFINITIONS = {
+  reply: [["content", "人工回复内容（必填）"]],
+  contact: [
+    ["contactMethod", "联系方式（必填）"],
+    ["contactedAt", "联系时间（必填）", "datetime-local"],
+    ["outcome", "联系结果（必填）"],
+    ["nextStep", "下一步（必填）"]
+  ],
+  monitor: [
+    ["followUpOwner", "跟进负责人（必填）"],
+    ["followUpAt", "跟进时间（必填）", "datetime-local"],
+    ["note", "处理记录（可选）"]
+  ],
+  refer: [
+    ["referralTarget", "转介去向（必填）"],
+    ["nextStep", "下一步（必填）"],
+    ["followUpOwner", "跟进负责人（必填）"],
+    ["note", "处理记录（可选）"]
+  ],
+  complete: [["note", "处理记录（必填）"], ["completionBasis", "完成依据（必填）"]]
+};
 
 const TASK_KIND_LABELS = { EXCEL_REPORT: "台账导出", RISK_ALERT: "预警通知", ESCALATION_ALERT: "超时升级通知" };
 const TASK_STATUS_LABELS = { PENDING: "待执行", RUNNING: "执行中", SUCCESS: "成功", DEAD: "失败留存" };
@@ -330,25 +355,79 @@ export async function loadReviews() {
   try {
     const includeAll = els.reviewShowAll.checked;
     const response = await api(`/api/admin/reviews${includeAll ? "?all=true" : ""}`);
-    renderReviews(await response.json());
+    replaceReviewItems(await response.json());
   } catch (error) {
     els.reviews.innerHTML = `<p class="hint">审核队列读取失败：${error.message}</p>`;
   }
 }
 
-/**
- * 清空旧队列并依次插入审核记录卡片。
- * 空列表使用统一提示，具体状态和可操作按钮由单条渲染处理。
- */
+export function stopAdminRealtime() {
+  reviewsRealtime?.close();
+  reviewsRealtime = null;
+}
+
+export function startAdminRealtime() {
+  stopAdminRealtime();
+  reviewsRealtime = createRealtimeConnection({
+    api,
+    path: "/api/admin/reviews/events",
+    loadSnapshot: async () => {
+      const response = await api(`/api/admin/reviews${els.reviewShowAll.checked ? "?all=true" : ""}`);
+      return response.json();
+    },
+    onSnapshot: replaceReviewItems,
+    onEvent: mergeReviewEvent,
+    onError: () => {}
+  });
+}
+
+function replaceReviewItems(items) {
+  reviewItems.clear();
+  for (const item of items) reviewItems.set(item.reviewId, item);
+  renderReviews(sortedReviewItems());
+}
+
+function sortedReviewItems() {
+  const risk = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+  return [...reviewItems.values()].sort((left, right) => {
+    const leftActive = ["pending", "in_progress"].includes(left.status) ? 1 : 0;
+    const rightActive = ["pending", "in_progress"].includes(right.status) ? 1 : 0;
+    if (leftActive !== rightActive) return rightActive - leftActive;
+    if (leftActive) return (risk[right.riskLevel] || 0) - (risk[left.riskLevel] || 0) || (right.waitSeconds || 0) - (left.waitSeconds || 0);
+    return String(right.reviewedAt || "").localeCompare(String(left.reviewedAt || ""));
+  });
+}
+
+function mergeReviewEvent(event) {
+  const previous = reviewItems.get(event.reviewId) || {};
+  const item = { ...previous, ...(event.review || {}), reviewId: event.reviewId, status: event.supportStatus };
+  const context = [...(item.recentContext || [])];
+  if (event.messageId && !context.some((message) => message.messageId === event.messageId)) {
+    context.push({
+      messageId: event.messageId,
+      role: event.role,
+      content: event.content,
+      createdAt: event.createdAt
+    });
+  }
+  item.recentContext = context.slice(-10);
+  if (event.type === "user_message") item.unread = true;
+  if (event.type !== "user_message" && event.type !== "review_created") item.unread = false;
+  const terminal = !["pending", "in_progress"].includes(item.status);
+  if (terminal && !els.reviewShowAll.checked) reviewItems.delete(event.reviewId);
+  else reviewItems.set(event.reviewId, item);
+  renderReviews(sortedReviewItems());
+}
+
 function renderReviews(items) {
+  const drafts = captureReviewDrafts();
   els.reviews.innerHTML = "";
   if (!items.length) {
     els.reviews.innerHTML = `<p class="hint">当前没有待审核的记录。</p>`;
     return;
   }
-  for (const item of items) {
-    els.reviews.append(renderReviewItem(item));
-  }
+  for (const item of items) els.reviews.append(renderReviewItem(item));
+  restoreReviewDrafts(drafts);
 }
 
 /**
@@ -359,6 +438,7 @@ function renderReviewItem(item) {
   const box = document.createElement("div");
   const terminal = ["referred", "monitoring", "completed"].includes(item.status);
   box.className = `review-item${terminal ? " decided" : ""}`;
+  box.dataset.reviewId = String(item.reviewId);
 
   const head = document.createElement("div");
   head.className = "review-item-head";
@@ -371,6 +451,12 @@ function renderReviewItem(item) {
   meta.textContent = `#${item.reviewId} · ${STATUS_LABELS[item.status] || item.status} · ${risk} · ${displayTime(item.createdAt)}`;
   head.append(reason, meta);
   box.append(head);
+  if (item.unread) {
+    const unread = document.createElement("span");
+    unread.className = "pill warn";
+    unread.textContent = "新留言";
+    box.append(unread);
+  }
 
   if (item.riskSummary) {
     const summary = document.createElement("p");
@@ -438,7 +524,6 @@ function renderReviewItem(item) {
       claim.disabled = true;
       try {
         await api(`/api/admin/reviews/${item.reviewId}/claim`, { method: "POST" });
-        await loadReviews();
       } catch (error) {
         claim.disabled = false;
         alert(`接手失败：${error.message}`);
@@ -446,32 +531,14 @@ function renderReviewItem(item) {
     });
     actions.append(claim);
   } else if (item.status === "in_progress") {
-    const definitions = [
-      ["reply", "发送人工回复", [["content", "人工回复内容（必填）"]]],
-      ["contact", "记录站外联系", [
-        ["contactMethod", "联系方式（必填）"],
-        ["contactedAt", "联系时间（必填）", "datetime-local"],
-        ["outcome", "联系结果（必填）"],
-        ["nextStep", "下一步（必填）"]
-      ]],
-      ["monitor", "持续关注", [
-        ["followUpOwner", "跟进负责人（必填）"],
-        ["followUpAt", "跟进时间（必填）", "datetime-local"],
-        ["note", "处理记录（可选）"]
-      ]],
-      ["refer", "转介", [
-        ["referralTarget", "转介去向（必填）"],
-        ["nextStep", "下一步（必填）"],
-        ["followUpOwner", "跟进负责人（必填）"],
-        ["note", "处理记录（可选）"]
-      ]],
-      ["complete", "完成处置", [["note", "处理记录（必填）"], ["completionBasis", "完成依据（必填）"]]]
-    ];
-    for (const [action, label, fields] of definitions) {
+    const labels = {
+      reply: "发送人工回复", contact: "记录站外联系", monitor: "持续关注", refer: "转介", complete: "完成处置"
+    };
+    for (const [action, fields] of Object.entries(ACTION_DEFINITIONS)) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = `decide-${action}`;
-      button.textContent = label;
+      button.textContent = labels[action];
       button.addEventListener("click", () => showActionRow(box, item.reviewId, action, fields));
       actions.append(button);
     }
@@ -480,20 +547,23 @@ function renderReviewItem(item) {
   return box;
 }
 
-/** 为当前人工操作生成表单；客户端请求编号在表单打开时创建，失败重试仍保持幂等。 */
-function showActionRow(box, reviewId, action, definitions) {
+/** 为当前人工操作生成表单；实时重绘后沿用原客户端请求编号。 */
+function showActionRow(box, reviewId, action, definitions, clientRequestId = crypto.randomUUID(), focus = true) {
   box.querySelector(".review-note-row")?.remove();
   const row = document.createElement("div");
   row.className = "review-note-row";
+  row.dataset.reviewId = String(reviewId);
+  row.dataset.action = action;
+  row.dataset.clientRequestId = clientRequestId;
   const fields = {};
   for (const [name, placeholder, type = "text"] of definitions) {
     const input = document.createElement("input");
     input.type = type;
     input.placeholder = placeholder;
+    input.dataset.fieldName = name;
     fields[name] = input;
     row.append(input);
   }
-  const clientRequestId = crypto.randomUUID();
   const confirm = document.createElement("button");
   confirm.type = "button";
   confirm.className = "primary";
@@ -505,7 +575,7 @@ function showActionRow(box, reviewId, action, definitions) {
       const value = fields[name].value;
       payload[name] = ["contactedAt", "followUpAt"].includes(name) && value ? new Date(value).toISOString() : value.trim();
     }
-    if (action === "reply" || action === "contact") payload.clientRequestId = clientRequestId;
+    if (action === "reply" || action === "contact") payload.clientRequestId = row.dataset.clientRequestId;
     else payload.decision = action;
     try {
       const endpoint = action === "reply" || action === "contact" ? action : "decision";
@@ -514,7 +584,16 @@ function showActionRow(box, reviewId, action, definitions) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      await loadReviews();
+      if (action === "reply") {
+        const currentBox = els.reviews.querySelector(`.review-item[data-review-id="${reviewId}"]`) || box;
+        const currentRow = currentBox.querySelector(".review-note-row") || row;
+        for (const input of currentRow.querySelectorAll("input")) input.value = "";
+        currentRow.dataset.clientRequestId = crypto.randomUUID();
+        currentRow.querySelector(".primary").disabled = false;
+        currentRow.querySelector("input")?.focus();
+      } else {
+        row.remove();
+      }
     } catch (error) {
       confirm.disabled = false;
       alert(`操作失败：${error.message}`);
@@ -522,5 +601,25 @@ function showActionRow(box, reviewId, action, definitions) {
   });
   row.append(confirm);
   box.append(row);
-  fields[definitions[0][0]].focus();
+  if (focus) fields[definitions[0][0]].focus();
+}
+
+function captureReviewDrafts() {
+  return [...els.reviews.querySelectorAll(".review-note-row")].map((row) => ({
+    reviewId: Number(row.dataset.reviewId),
+    action: row.dataset.action,
+    clientRequestId: row.dataset.clientRequestId,
+    values: Object.fromEntries([...row.querySelectorAll("input")].map((input) => [input.dataset.fieldName, input.value]))
+  }));
+}
+
+function restoreReviewDrafts(drafts) {
+  for (const draft of drafts) {
+    const box = els.reviews.querySelector(`.review-item[data-review-id="${draft.reviewId}"]`);
+    if (!box || !ACTION_DEFINITIONS[draft.action]) continue;
+    showActionRow(box, draft.reviewId, draft.action, ACTION_DEFINITIONS[draft.action], draft.clientRequestId, false);
+    for (const input of box.querySelectorAll(".review-note-row input")) {
+      input.value = draft.values[input.dataset.fieldName] || "";
+    }
+  }
 }

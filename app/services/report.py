@@ -178,6 +178,7 @@ class ReportService:
             messages=[ConversationMessageResponse(
                 role=row.role, content=row.content, createdAt=row.created_at,
                 senderLabel="支持人员" if row.role == "SUPPORT" else None,
+                messageId=row.id,
             ) for row in rows],
         )
 

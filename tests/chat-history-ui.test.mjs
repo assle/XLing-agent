@@ -34,7 +34,7 @@ globalThis.document = {
 
 const state = { auth: { token: "test-only" }, sending: false };
 const conversation = {
-  pendingReview: false, noMemory: false,
+  sessionId: "history", pendingReview: false, noMemory: false,
   messages: [
     { role: "USER", content: "虚构用户消息" },
     { role: "ASSISTANT", content: "虚构回复" },
@@ -59,7 +59,11 @@ const plans = new SyntheticModule(["handlePlanEvent", "resetPlanPanel", "loadAct
   this.setExport("bindActionPlanObjectSender", () => {});
 });
 const module = new SourceTextModule(await readFile(new URL("../app/static/chat.js", import.meta.url), "utf8"));
-await module.link((path) => path === "/app.js" ? app : plans);
+await module.link(async (path) => {
+  if (path === "/app.js") return app;
+  if (path === "/sse.js") return new SourceTextModule(await readFile(new URL("../app/static/sse.js", import.meta.url), "utf8"));
+  return plans;
+});
 await module.evaluate();
 module.namespace.initChat();
 
@@ -82,4 +86,5 @@ assert.equal(rows[2].bubble.textContent, "虚构人工回复");
 // The UTC instant crosses midnight in Shanghai, rather than displaying the stored UTC clock locally.
 await module.namespace.loadSessionList();
 assert.match(elements.get("#sessionList").html, /10\/2.*01:05/);
+module.namespace.stopSessionRealtime();
 console.log("chat history role and Shanghai time regressions passed");
