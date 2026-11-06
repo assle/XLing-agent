@@ -277,7 +277,11 @@ async function sendChatMessage(message, displayText) {
   setPill(els.sessionBadge, "THINKING", "warn");
   if (typeof message === "string") els.messageInput.value = "";
   addMessage("user", displayText);
-  const assistant = addMessage("assistant", "");
+  let assistant = null;
+  const ensureAssistant = () => {
+    if (!assistant) assistant = addMessage("assistant", "");
+    return assistant;
+  };
   let raw = "";
   let pendingReview = false;
 
@@ -300,22 +304,26 @@ async function sendChatMessage(message, displayText) {
       if (eventData.type === "action_plan") {
         handlePlanEvent(eventData);
       }
+      if (eventData.type === "user_message") {
+        pendingReview = true;
+        setReviewPending(false, eventData.supportStatus || "in_progress");
+      }
       if (eventData.type === "pending_review") {
         pendingReview = true;
         const supportStatus = eventData.supportStatus || "pending";
         setReviewPending(supportStatus === "pending", supportStatus);
         raw = eventData.content || "";
-        assistant.textContent = raw;
+        ensureAssistant().textContent = raw;
       }
       if (eventData.type === "token") {
         raw += eventData.content || "";
-        assistant.textContent = raw;
+        ensureAssistant().textContent = raw;
         els.messages.scrollTop = els.messages.scrollHeight;
       }
       if (eventData.type === "error") {
         streamFailed = true;
         const failure = eventData.message || "回复未完成，请稍后重试。";
-        assistant.textContent = raw.trim() ? `${raw}\n\n${failure}` : failure;
+        ensureAssistant().textContent = raw.trim() ? `${raw}\n\n${failure}` : failure;
         setPill(els.sessionBadge, "ERROR", "danger");
       }
     });
@@ -324,12 +332,12 @@ async function sendChatMessage(message, displayText) {
         setPill(els.sessionBadge, "DONE", "ok");
         await loadActionPlans();
       } else {
-        assistant.textContent = "回复生成未返回内容，请重试。";
+        ensureAssistant().textContent = "回复生成未返回内容，请重试。";
         setPill(els.sessionBadge, "ERROR", "danger");
       }
     }
   } catch (error) {
-    assistant.textContent = `发送失败：${error.message}`;
+    ensureAssistant().textContent = `发送失败：${error.message}`;
     setPill(els.sessionBadge, "ERROR", "danger");
   } finally {
     state.sending = false;

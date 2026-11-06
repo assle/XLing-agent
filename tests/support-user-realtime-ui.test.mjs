@@ -42,7 +42,13 @@ const streamResponse = {
         if (waitingRead) return waitingRead;
         return new Promise((resolve) => { waitingRead = resolve; });
       },
-      async cancel() {},
+      async cancel() {
+        if (waitingRead) {
+          const resolve = waitingRead;
+          waitingRead = null;
+          resolve({ done: true });
+        }
+      },
       releaseLock() {}
     })
   }
@@ -60,7 +66,27 @@ const conversation = {
   sessionId: "history", pendingReview: true, supportStatus: "in_progress", noMemory: false,
   messages: [{ messageId: 1, role: "USER", content: "用户留言" }]
 };
+let chatEvents = [];
 const api = async (path) => {
+  if (path === "/api/chat/stream") {
+    let read = false;
+    return {
+      body: {
+        getReader: () => ({
+          async read() {
+            if (read) return { done: true };
+            read = true;
+            return {
+              done: false,
+              value: encoder.encode(chatEvents.map((event) => `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`).join(""))
+            };
+          },
+          async cancel() {},
+          releaseLock() {}
+        })
+      }
+    };
+  }
   if (path === "/api/sessions/history/events") return streamResponse;
   if (path === "/api/sessions/history") return { json: async () => conversation };
   return { json: async () => [] };
@@ -104,5 +130,20 @@ const rows = elements.get("#messages").children;
 assert.equal(rows.length, 2);
 assert.equal(rows[1].className, "message support");
 assert.equal(rows[1].bubble.textContent, "支持人员的实时回复");
+
+module.namespace.stopSessionRealtime();
+state.auth.token = null;
+conversation.messages.push({ messageId: 100, role: "USER", content: "接手后补充的细节" });
+chatEvents = [
+  { type: "meta", sessionId: "history", noMemory: false },
+  { type: "user_message", sessionId: "history", messageId: 100, supportStatus: "in_progress" },
+  { type: "done", sessionId: "history" }
+];
+elements.get("#messageInput").value = "接手后补充的细节";
+await elements.get("#chatForm").listeners.submit({ preventDefault() {} });
+await new Promise((resolve) => setTimeout(resolve, 10));
+const afterFollowUp = elements.get("#messages").children;
+assert.equal(afterFollowUp.some((row) => row.className === "message assistant"), false);
+assert.equal(afterFollowUp.at(-1).bubble.textContent, "接手后补充的细节");
 module.namespace.stopSessionRealtime();
 console.log("user realtime support message regressions passed");

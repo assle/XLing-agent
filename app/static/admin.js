@@ -575,7 +575,7 @@ function showActionRow(box, reviewId, action, definitions, clientRequestId = cry
       const value = fields[name].value;
       payload[name] = ["contactedAt", "followUpAt"].includes(name) && value ? new Date(value).toISOString() : value.trim();
     }
-    if (action === "reply" || action === "contact") payload.clientRequestId = clientRequestId;
+    if (action === "reply" || action === "contact") payload.clientRequestId = row.dataset.clientRequestId;
     else payload.decision = action;
     try {
       const endpoint = action === "reply" || action === "contact" ? action : "decision";
@@ -584,7 +584,16 @@ function showActionRow(box, reviewId, action, definitions, clientRequestId = cry
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      row.remove();
+      if (action === "reply") {
+        const currentBox = els.reviews.querySelector(`.review-item[data-review-id="${reviewId}"]`) || box;
+        const currentRow = currentBox.querySelector(".review-note-row") || row;
+        for (const input of currentRow.querySelectorAll("input")) input.value = "";
+        currentRow.dataset.clientRequestId = crypto.randomUUID();
+        currentRow.querySelector(".primary").disabled = false;
+        currentRow.querySelector("input")?.focus();
+      } else {
+        row.remove();
+      }
     } catch (error) {
       confirm.disabled = false;
       alert(`操作失败：${error.message}`);

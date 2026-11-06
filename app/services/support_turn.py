@@ -182,9 +182,9 @@ class SupportTurnTransaction:
         session: ChatSession,
         review: ReviewRequest,
         content: str,
-        acknowledgment: str,
+        acknowledgment: str | None,
     ) -> ChatMessage:
-        """把等待或处理中的补充留言与固定确认作为同一事务保存。"""
+        """保存补充留言；待接手时可同时保存固定确认，接手后只保存用户留言。"""
         try:
             message = ChatMessage(
                 user_id=user.id,
@@ -193,15 +193,17 @@ class SupportTurnTransaction:
                 role=MessageRole.USER.value,
                 content=content,
             )
-            confirmation = ChatMessage(
-                user_id=user.id,
-                session_id=session.id,
-                review_id=review.id,
-                role=MessageRole.ASSISTANT.value,
-                content=acknowledgment,
-            )
+            rows = [message]
+            if acknowledgment is not None:
+                rows.append(ChatMessage(
+                    user_id=user.id,
+                    session_id=session.id,
+                    review_id=review.id,
+                    role=MessageRole.ASSISTANT.value,
+                    content=acknowledgment,
+                ))
             session.touch()
-            self.db.add_all([message, confirmation, session])
+            self.db.add_all([*rows, session])
             self.db.flush()
             self.fault_injector("human_support_follow_up")
             self.db.commit()

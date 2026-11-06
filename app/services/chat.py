@@ -42,6 +42,7 @@ class PreparedChat:
     direct_response: str | None = None
     support_status: str | None = None
     acknowledgment_saved: bool = False
+    user_message_id: int | None = None
 
 
 RuntimeFactory = Callable[[Session, Settings], AgentRuntime]
@@ -151,6 +152,13 @@ class ChatService:
                 ChatStreamEvent(type="meta", sessionId=session_id, noMemory=prepared.session.no_memory).model_dump(),
             )
             if prepared.pending_review:
+                if prepared.support_status == "in_progress":
+                    yield sse("user_message", ChatStreamEvent(
+                        type="user_message", sessionId=session_id, messageId=prepared.user_message_id,
+                        supportStatus=prepared.support_status,
+                    ).model_dump())
+                    yield sse("done", ChatStreamEvent(type="done", sessionId=session_id).model_dump())
+                    return
                 ack = prepared.direct_response or PromptTemplates.crisis_acknowledgment()
                 if not prepared.acknowledgment_saved:
                     self.save_message(user, prepared.session, MessageRole.ASSISTANT, ack)
@@ -223,17 +231,19 @@ class ChatService:
             self._active_session_id = session.public_id
         active_review = self.active_human_support(session.id)
         if active_review is not None:
-            ack = PromptTemplates.crisis_acknowledgment()
+            ack = PromptTemplates.crisis_acknowledgment() if active_review.status == "pending" else None
             with diagnostics.stage("support_turn.follow_up_save"):
-                self.turns.save_human_support_follow_up(
+                message = self.turns.save_human_support_follow_up(
                     user=user, session=session, review=active_review, content=text, acknowledgment=ack,
                 )
             self.memory.append(session.public_id, MessageRole.USER.value, text)
-            self.memory.append(session.public_id, MessageRole.ASSISTANT.value, ack)
+            if ack is not None:
+                self.memory.append(session.public_id, MessageRole.ASSISTANT.value, ack)
             return PreparedChat(
                 session=session, messages=[], report_id=None, risk_level=None, pending_review=True,
                 cbt_event=None, action_plan_event=None, direct_response=ack,
                 support_status=active_review.status, acknowledgment_saved=True,
+                user_message_id=message.id,
             )
         with diagnostics.stage("runtime.create"):
             runtime = self.runtime_factory(self.db, self.settings)

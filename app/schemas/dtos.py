@@ -25,6 +25,7 @@ class ChatRequest(BaseModel):
 
 class ChatStreamEvent(BaseModel):
     sessionId: Optional[str] = None
+    messageId: Optional[int] = None
     content: Optional[str] = None
     message: Optional[str] = None
     noMemory: Optional[bool] = None

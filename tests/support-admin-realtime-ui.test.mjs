@@ -39,6 +39,9 @@ class Element {
     if (reviewMatch) return all.filter((node) => node.dataset.reviewId === reviewMatch[1]);
     if (selector === ".review-decisions") return all.filter((node) => node.className === "review-decisions");
     if (selector === ".review-summary") return all.filter((node) => node.className === "review-summary");
+    if ([".primary", ".review-note-row .primary"].includes(selector)) {
+      return all.filter((node) => node.className === "primary");
+    }
     return [];
   }
 }
@@ -78,11 +81,22 @@ function pushEvent(event) {
 }
 
 let snapshotLoads = 0;
-const api = async (path) => {
+const replies = [];
+const api = async (path, options = {}) => {
   if (path === "/api/admin/reviews/events") return streamResponse;
   if (path === "/api/admin/reviews") {
     snapshotLoads += 1;
     return { json: async () => [] };
+  }
+  if (path === "/api/admin/reviews/7/reply") {
+    const payload = JSON.parse(options.body);
+    replies.push(payload);
+    pushEvent({
+      type: "support_message", reviewId: 7, sessionId: "session-7", supportStatus: "in_progress",
+      messageId: 100 + replies.length, role: "SUPPORT", content: payload.content
+    });
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    return { json: async () => ({ messageId: 100 + replies.length }) };
   }
   return { json: async () => [] };
 };
@@ -125,5 +139,17 @@ assert.equal(snapshotLoads, 1);
 assert.equal(reviews.querySelector(".review-note-row input").value, "正在输入的人工回复");
 assert.equal(reviews.querySelector(".review-note-row").dataset.clientRequestId, requestId);
 assert.equal(reviews.querySelector(".review-summary").textContent.includes("用户新的补充"), true);
+
+await reviews.querySelector(".review-note-row .primary").listeners.click();
+assert.equal(reviews.querySelector(".review-note-row input").value, "");
+assert.equal(reviews.querySelector(".review-note-row .primary").disabled, false);
+const secondRequestId = reviews.querySelector(".review-note-row").dataset.clientRequestId;
+assert.notEqual(secondRequestId, requestId);
+reviews.querySelector(".review-note-row input").value = "第二条人工回复";
+await reviews.querySelector(".review-note-row .primary").listeners.click();
+assert.equal(reviews.querySelector(".review-note-row input").value, "");
+assert.equal(replies.length, 2);
+assert.deepEqual(replies.map((reply) => reply.content), ["正在输入的人工回复", "第二条人工回复"]);
+assert.notEqual(replies[0].clientRequestId, replies[1].clientRequestId);
 admin.namespace.stopAdminRealtime();
 console.log("admin realtime merge and draft preservation regressions passed");
